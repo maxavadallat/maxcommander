@@ -154,6 +154,14 @@ void CustomPanel::setShowHiddenFiles(const bool& aShowHidden)
             // Set Show Hidden
             ui->fileList->setShowHiddenFiles(showHidden);
         }
+
+        // Check Settings
+        if (settings) {
+            // Set Group
+            settings->setGroup(QString(SETTINGS_GROUP_GENERAL));
+            // Set Show Hidden Files
+            settings->setValue(SETTIGNS_KEY_SHOW_HIDDEN_FILES, showHidden);
+        }
     }
 }
 
@@ -163,6 +171,34 @@ void CustomPanel::setShowHiddenFiles(const bool& aShowHidden)
 bool CustomPanel::getShowHiddenFiles()
 {
     return showHidden;
+}
+
+//==============================================================================
+// Get Current Index
+//==============================================================================
+int CustomPanel::getCurrentIndex()
+{
+    // Check UI
+    if (ui && ui->fileList) {
+        // Return Current File Index
+        return ui->fileList->getCurrentIndex();
+    }
+
+    return -1;
+}
+
+//==============================================================================
+// Get File Info
+//==============================================================================
+QFileInfo CustomPanel::getFileInfo(const int& aIndex)
+{
+    // Check UI
+    if (ui && ui->fileList) {
+        // Return Current File Index
+        return ui->fileList->getItemData(aIndex)->getFileInfo();
+    }
+
+    return QFileInfo();
 }
 
 //==============================================================================

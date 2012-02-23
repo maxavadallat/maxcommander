@@ -44,7 +44,8 @@ SOURCES += src/main.cpp\
     src/searchdialog.cpp \
     src/copyprogressdialog.cpp \
     src/deleteprogressdialog.cpp \
-    src/copydialog.cpp
+    src/copydialog.cpp \
+    src/viewerwindow.cpp
 
 # Headers
 HEADERS  += src/mainwindow.h \
@@ -68,7 +69,8 @@ HEADERS  += src/mainwindow.h \
     src/searchdialog.h \
     src/copyprogressdialog.h \
     src/deleteprogressdialog.h \
-    src/copydialog.h
+    src/copydialog.h \
+    src/viewerwindow.h
 
 # Forms
 FORMS    += ui/mainwindow.ui \
@@ -87,7 +89,8 @@ FORMS    += ui/mainwindow.ui \
     ui/searchdialog.ui \
     ui/copyprogressdialog.ui \
     ui/deleteprogressdialog.ui \
-    ui/copydialog.ui
+    ui/copydialog.ui \
+    ui/viewerwindow.ui
 
 macx: {
 LIBS += -framework CoreServices -framework ApplicationServices

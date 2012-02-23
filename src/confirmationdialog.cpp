@@ -1,6 +1,8 @@
 
 // INCLUDES
 
+#include <QPushButton>
+
 #include "confirmationdialog.h"
 #include "ui_confirmationdialog.h"
 
@@ -54,12 +56,19 @@ void ConfirmationDialog::setIcon(const QPixmap& aPixmap)
 //==============================================================================
 // Set Buttons
 //==============================================================================
-void ConfirmationDialog::setButtons(const QDialogButtonBox::StandardButtons& aButtons)
+void ConfirmationDialog::setButtons(const QDialogButtonBox::StandardButtons& aButtons, const QDialogButtonBox::StandardButton& aDefault)
 {
     // Check UI
     if (ui && ui->buttonBox) {
         // Set Buttons
         ui->buttonBox->setStandardButtons(aButtons);
+        // Get Button
+        QPushButton* button = ui->buttonBox->button(aDefault);
+        // Check Button
+        if (button) {
+            // Set Default
+            button->setDefault(true);
+        }
     }
 }
 

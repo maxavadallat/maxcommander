@@ -26,6 +26,7 @@ class SearchDialog;
 class CopyDialog;
 class CopyProgressDialog;
 class DeleteProgressDialog;
+class ViewerWindow;
 
 
 // DECLARATIONS
@@ -127,7 +128,7 @@ protected:
     //! @param aConfirmMsg Dialog Confirmation Text
     //! @param aButtons Dialog Buttons To Use
     //! @return Confirmation Index
-    int showConfirmation(const QString& aTitle, const QString& aConfirmMsg, const QDialogButtonBox::StandardButtons& aButtons);
+    int showConfirmation(const QString& aTitle, const QString& aConfirmMsg, const QDialogButtonBox::StandardButtons& aButtons, const QDialogButtonBox::StandardButton& aDefault = QDialogButtonBox::NoButton);
 
     //! @brief Show Create Dir Dialog
     //! @param aDirPath Initial Directory Path
@@ -220,6 +221,8 @@ protected: // Data
     QString             cPanelName;
     //! Settings
     Settings*           settings;
+    //! Viewer Window
+    ViewerWindow*       viewerWindow;
     //! Create Dir Dialog
     CreateDirDialog*    createDirDialog;
     //! Info Dialog

@@ -21,6 +21,7 @@
 #include "copydialog.h"
 #include "copyprogressdialog.h"
 #include "deleteprogressdialog.h"
+#include "viewerwindow.h"
 
 
 // IMPLEMENTATION
@@ -38,6 +39,7 @@ MainWindow::MainWindow(QWidget* aParent)
     , cPanelIndex(-1)
     , cPanelName("")
     , settings(NULL)
+    , viewerWindow(NULL)
     , createDirDialog(NULL)
     , infoDialog(NULL)
     , confirmDialog(NULL)
@@ -88,8 +90,37 @@ void MainWindow::showTree()
 //==============================================================================
 void MainWindow::viewFile()
 {
-    qDebug() << "MainWindow::viewFile";
+    // Check UI
+    if (!ui || !ui->mainPanel1 || !ui->mainPanel2) {
+        return;
+    }
 
+    // Check Viewer Window
+    if (!viewerWindow) {
+        // Create Viewer Window
+        viewerWindow = new ViewerWindow();
+    }
+
+    // Check Viewer Window
+    if (viewerWindow) {
+        // Init File Path
+        QString filePath = QString("");
+        // Check Current Panel
+        if (cPanelIndex == 0) {
+            // Set File Path
+            filePath = ui->mainPanel1->getFileInfo(ui->mainPanel1->getCurrentIndex()).absoluteFilePath();
+        } else {
+            // Set File Path
+            filePath = ui->mainPanel2->getFileInfo(ui->mainPanel2->getCurrentIndex()).absoluteFilePath();
+        }
+
+        // Load File
+        if (viewerWindow->loadFile(filePath)) {
+
+            qDebug() << "MainWindow::viewFile";
+
+        }
+    }
 }
 
 //==============================================================================
@@ -165,7 +196,67 @@ void MainWindow::launchDelete()
     if (!ui || !ui->mainPanel2)
         return;
 
+    // Init Selected Files Count
+    int sfCount = 0;
+    // Init Current File Name
+    QString currFileName = QString("");
+
+    // Get Current Panel Index
+    if (cPanelIndex == 0) {
+        // Get Selected Files Count
+        sfCount = ui->mainPanel1->getSelectedCount();
+        // Check Panel UI
+        if (ui->mainPanel1->ui && ui->mainPanel1->ui->fileList) {
+            // Get Current File Name
+            currFileName = ui->mainPanel1->ui->fileList->getItemData(ui->mainPanel1->ui->fileList->getCurrentIndex())->getFileInfo().fileName();
+        }
+    } else if (cPanelIndex == 1) {
+        // Get Selected Files Count
+        sfCount = ui->mainPanel2->getSelectedCount();
+        // Check Panel UI
+        if (ui->mainPanel2->ui && ui->mainPanel2->ui->fileList) {
+            // Get Current File Name
+            currFileName = ui->mainPanel2->ui->fileList->getItemData(ui->mainPanel2->ui->fileList->getCurrentIndex())->getFileInfo().fileName();
+        }
+    }
+
+    // Check Current File Name
+    if (currFileName == QString("..") || currFileName == QString(".")) {
+        return;
+    }
+
     qDebug() << "MainWindow::launchDelete";
+
+    // Init Confirm Title
+    QString confirmTitle = (sfCount > 1) ? QString(DEFAULT_DELETE_DIALOG_TITLE_TEXT_FILES) : QString(DEFAULT_DELETE_DIALOG_TITLE_TEXT_FILE);
+    // Init Confirm Text
+    QString confirmText = (sfCount > 1) ? QString(DEFAULT_DELETE_DIALOG_TEXT_FILES).arg(sfCount) : QString(DEFAULT_DELETE_DIALOG_TEXT_FILE).arg(currFileName);
+
+    // Show Confirmation
+    int result = showConfirmation(confirmTitle, confirmText, QDialogButtonBox::Yes | QDialogButtonBox::No, QDialogButtonBox::Yes);
+
+    // Check Result
+    if (result == QDialog::Accepted) {
+
+        // Build Delete Queue
+
+        // Exec/Process Delete Queue
+
+    }
+}
+
+//==============================================================================
+// Launch Copy
+//==============================================================================
+void MainWindow::launchCopy()
+{
+    // Check UI
+    if (!ui || !ui->mainPanel1)
+        return;
+
+    // Check UI
+    if (!ui || !ui->mainPanel2)
+        return;
 
     // Init Selected Files Count
     int sfCount = 0;
@@ -196,31 +287,60 @@ void MainWindow::launchDelete()
         return;
     }
 
-    // Init Confirm Title
-    QString confirmTitle = (sfCount > 1) ? QString(DEFAULT_DELETE_DIALOG_TITLE_TEXT_FILES) : QString(DEFAULT_DELETE_DIALOG_TITLE_TEXT_FILE);
-    // Init Confirm Text
-    QString confirmText = (sfCount > 1) ? QString(DEFAULT_DELETE_DIALOG_TEXT_FILES).arg(sfCount) : QString(DEFAULT_DELETE_DIALOG_TEXT_FILE).arg(currFileName);
-
-    // Show Confirmation
-    int result = showConfirmation(confirmTitle, confirmText, QDialogButtonBox::Yes | QDialogButtonBox::No);
-
-    // Check Result
-    if (result == QDialog::Accepted) {
-
-        // Build Delete Queue
-
-        // Exec Delete Queue
-
-    }
-}
-
-//==============================================================================
-// Launch Copy
-//==============================================================================
-void MainWindow::launchCopy()
-{
     qDebug() << "MainWindow::launchCopy";
 
+    // Check Copy Dialog
+    if (!copyDialog) {
+        // Create Copy Dialog
+        copyDialog = new CopyDialog();
+    }
+
+    // Check Copy Dialog
+    if (copyDialog) {
+
+        // Check Selected File Count
+        if (sfCount > 1) {
+            // Set Title
+            copyDialog->setTitle(QString(DEFAULT_COPY_DIALOG_TITLE_TEXT_FILES));
+            // Set Copy Msg
+            copyDialog->setCopyMsg(QString(DEFAULT_COPY_DIALOG_TEXT_TEMPLATE_FILES).arg(sfCount));
+        } else {
+            // Set Title
+            copyDialog->setTitle(QString(DEFAULT_COPY_DIALOG_TITLE_TEXT_FILE));
+            // Set Copy Msg
+            copyDialog->setCopyMsg(QString(DEFAULT_COPY_DIALOG_TEXT_TEMPLATE_FILE).arg(currFileName));
+        }
+
+        // Init Target Path
+        QString targetPath = QString("");
+
+        // Check Current Panel Index
+        if (cPanelIndex == 0) {
+            // Set Target Path
+            targetPath = ui->mainPanel2->ui->fileList->getCurrentDir();
+        } else {
+            // Set Target Path
+            targetPath = ui->mainPanel1->ui->fileList->getCurrentDir();
+        }
+
+        // Check Target Path
+        if (!targetPath.endsWith(QString("/")) && !targetPath.endsWith(QString("\\"))) {
+            // Add Slash
+            targetPath += QString("/");
+        }
+
+        // Set Initial Target Path
+        copyDialog->setTarget(targetPath);
+
+        // Exec Copy Dialog
+        if (copyDialog->exec()) {
+
+            // Build Copy Queue
+
+            // Exec/Processs Copy Queue
+
+        }
+    }
 }
 
 //==============================================================================
@@ -228,8 +348,97 @@ void MainWindow::launchCopy()
 //==============================================================================
 void MainWindow::launchMove()
 {
+    // Check UI
+    if (!ui || !ui->mainPanel1)
+        return;
+
+    // Check UI
+    if (!ui || !ui->mainPanel2)
+        return;
+
+    // Init Selected Files Count
+    int sfCount = 0;
+    // Init Current File Name
+    QString currFileName = QString("");
+
+    // Get Current Panel Index
+    if (cPanelIndex == 0) {
+        // Get Selected Files Count
+        sfCount = ui->mainPanel1->getSelectedCount();
+        // Check Panel UI
+        if (ui->mainPanel1->ui && ui->mainPanel1->ui->fileList) {
+            // Get Current File Name
+            currFileName = ui->mainPanel1->ui->fileList->getItemData(ui->mainPanel1->ui->fileList->getCurrentIndex())->getFileInfo().fileName();
+        }
+    } else if (cPanelIndex == 1) {
+        // Get Selected Files Count
+        sfCount = ui->mainPanel2->getSelectedCount();
+        // Check Panel UI
+        if (ui->mainPanel2->ui && ui->mainPanel2->ui->fileList) {
+            // Get Current File Name
+            currFileName = ui->mainPanel2->ui->fileList->getItemData(ui->mainPanel2->ui->fileList->getCurrentIndex())->getFileInfo().fileName();
+        }
+    }
+
+    // Check Current File Name
+    if (currFileName == QString("..") || currFileName == QString(".")) {
+        return;
+    }
+
     qDebug() << "MainWindow::launchMove";
 
+    // Check Copy Dialog
+    if (!copyDialog) {
+        // Create Copy Dialog
+        copyDialog = new CopyDialog();
+    }
+
+    // Check Copy Dialog
+    if (copyDialog) {
+
+        // Check Selected File Count
+        if (sfCount > 1) {
+            // Set Title
+            copyDialog->setTitle(QString(DEFAULT_MOVE_DIALOG_TITLE_TEXT_FILES));
+            // Set Copy Msg
+            copyDialog->setCopyMsg(QString(DEFAULT_MOVE_DIALOG_TEXT_TEMPLATE_FILES).arg(sfCount));
+        } else {
+            // Set Title
+            copyDialog->setTitle(QString(DEFAULT_MOVE_DIALOG_TITLE_TEXT_FILE));
+            // Set Copy Msg
+            copyDialog->setCopyMsg(QString(DEFAULT_MOVE_DIALOG_TEXT_TEMPLATE_FILE).arg(currFileName));
+        }
+
+        // Init Target Path
+        QString targetPath = QString("");
+
+        // Check Current Panel Index
+        if (cPanelIndex == 0) {
+            // Set Target Path
+            targetPath = ui->mainPanel2->ui->fileList->getCurrentDir();
+        } else {
+            // Set Target Path
+            targetPath = ui->mainPanel1->ui->fileList->getCurrentDir();
+        }
+
+        // Check Target Path
+        if (!targetPath.endsWith(QString("/")) && !targetPath.endsWith(QString("\\"))) {
+            // Add Slash
+            targetPath += QString("/");
+        }
+
+        // Set Initial Target Path
+        copyDialog->setTarget(targetPath);
+
+        // Exec Copy Dialog
+        if (copyDialog->exec()) {
+
+            // Build Copy Queue
+
+            // Exec/Processs Copy Queue
+
+        }
+    }
 }
 
 //==============================================================================
@@ -275,6 +484,9 @@ void MainWindow::launchOptions()
     sw.show();
     // Execute Event Loop
     eventLoop.exec(QEventLoop::DialogExec);
+
+    // Load Settings
+    loadSettings();
 }
 
 //==============================================================================
@@ -352,7 +564,7 @@ void MainWindow::showInfo(const QString& aTitle, const QString& aInfoMsg, const 
 //==============================================================================
 // Show Confirmation Dialog
 //==============================================================================
-int MainWindow::showConfirmation(const QString& aTitle, const QString& aConfirmMsg, const QDialogButtonBox::StandardButtons& aButtons)
+int MainWindow::showConfirmation(const QString& aTitle, const QString& aConfirmMsg, const QDialogButtonBox::StandardButtons& aButtons, const QDialogButtonBox::StandardButton& aDefault)
 {
     // Check Title, Message And Buttons
     if (!aTitle.isEmpty() && !aConfirmMsg.isEmpty() && aButtons) {
@@ -369,7 +581,7 @@ int MainWindow::showConfirmation(const QString& aTitle, const QString& aConfirmM
             // Set Confirm Dialog Text
             confirmDialog->setConfirmMsg(aConfirmMsg);
             // Set Buttons
-            confirmDialog->setButtons(aButtons);
+            confirmDialog->setButtons(aButtons, aDefault);
             // Exec Confirm Dialog
             return confirmDialog->exec();
         }
@@ -490,6 +702,10 @@ void MainWindow::loadSettings()
             // Switch To Panel
             switchToPanel(settings->getValue(SETTINGS_KEY_ACTIVE_PANEL, 0).toInt());
         }
+
+        // Reload
+        ui->mainPanel1->ui->fileList->reload();
+        ui->mainPanel2->ui->fileList->reload();
     }
 }
 

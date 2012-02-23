@@ -40,7 +40,8 @@ public:
 
     //! @brief Set Buttons
     //! @param aButtons Buttons
-    void setButtons(const QDialogButtonBox::StandardButtons& aButtons);
+    //! @param aButtons Default Button
+    void setButtons(const QDialogButtonBox::StandardButtons& aButtons, const QDialogButtonBox::StandardButton& aDefault);
 
     //! @brief Destructor
     //! @param none

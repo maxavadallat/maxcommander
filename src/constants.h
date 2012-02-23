@@ -159,6 +159,8 @@
 #define SETTINGS_GROUP_SEARCH                               "Search"
 // Settings Group Shortcuts
 #define SETTINGS_GROUP_SHORTCUTS                            "Shortcuts"
+// Settings Group Viewer
+#define SETTINGS_GROUP_VIEWER                               "Viewer"
 
 
 
@@ -290,6 +292,23 @@
 #define SETTINGS_KEY_SEARCH_WHOLE_WORD                      "WholeWord"
 
 
+
+// Viewer
+
+// Settings Key Font Family
+#define SETTINGS_KEY_VIEWER_FONTFAMILY                      "FontFamily"
+// Settings Key Font Size
+#define SETTINGS_KEY_VIEWER_FONTSIZE                        "FontSize"
+// Settings Key Font Bold
+#define SETTINGS_KEY_VIEWER_FONTBOLD                        "FontBold"
+// Settings Key Font Italic
+#define SETTINGS_KEY_VIEWER_FONTITALIC                      "FontItalic"
+// Settigns Key Case Sensitive Search
+#define SETTINGS_KEY_VIEWER_WORD_WRAP                       "WordWrap"
+// Settigns Key Case Sensitive Search
+#define SETTINGS_KEY_VIEWER_CASE_SENSITIVE                  "CaseSensitive"
+// Settigns Key Whole word Search
+#define SETTINGS_KEY_VIEWER_WHOLE_WORD                      "WholeWord"
 
 
 // Default Setting Values
@@ -432,5 +451,12 @@
 #define DEFAULT_DELETE_DIALOG_TEXT_FILES                    "Are you sure to delete %1 files?"
 // Delete File Dialog Text - Single Files
 #define DEFAULT_DELETE_DIALOG_TEXT_FILE                     "Are you sure to delete %1?"
+
+
+
+// File Viewer Max Size
+#define DEFAULT_VIEWER_MAX_FILE_SIZE                        ONE_MEGA
+
+
 
 #endif // CONSTANTS_H

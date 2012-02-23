@@ -30,7 +30,7 @@ public:
     explicit CreateDirDialog(QWidget* aParent = NULL);
 
     //! @brief Set Dir Text
-    //! @param aDirPath
+    //! @param aDirPath Directory Path
     void setDirText(const QString& aDirPath);
 
     //! @brief Get Dir Text

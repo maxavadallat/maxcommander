@@ -6,6 +6,7 @@
 #include <QFrame>
 #include <QMenu>
 #include <QAction>
+#include <QFileInfo>
 
 
 // FORWARD DECLARATIONS
@@ -55,6 +56,16 @@ public:
     //! @param none
     //! @return Show Hidden File State
     bool getShowHiddenFiles();
+
+    //! @brief Get Current Index
+    //! @param none
+    //! @return Current Index
+    int getCurrentIndex();
+
+    //! @brief Get File Info
+    //! @param aIndex File Item Index
+    //! @return File Info
+    QFileInfo getFileInfo(const int& aIndex);
 
     //! @brief Get Selected Files Count
     //! @param none

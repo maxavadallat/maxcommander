@@ -174,6 +174,10 @@ public:
     //! @return Needs Icon Update State
     bool getNeedsIconUpdate();
 
+    //! @brief Set Icon Size
+    //! @param aIconSize Icon Size
+    void setIconSize(const int& aIconSize);
+
     //! @brief Get Icon Size
     //! @param none
     //! @return Icon Size
@@ -359,6 +363,20 @@ public:
     //! @return Item Data Or NULL
     FileItemData* getItemData(const int& aIndex);
 
+    //! @brief Set Item Icon Size
+    //! @param aIconSize Icon Size
+    //! @param aRefresh Refresh
+    void setItemIconSize(const int& aIconSize, const bool& aRefresh = true);
+
+    //! @brief Get Item Icon Size
+    //! @param none
+    //! @return Icon Size
+    int getItemIconSize();
+
+    //! @brief Update Delegate Icon Size By Settings
+    //! @param aRefresh Refresh
+    void updateDelegateIconSize(const bool& aRefresh = true);
+
     //! @brief Update Icons
     //! @param none
     void updateIcons();
@@ -373,6 +391,10 @@ signals:
     //! @param aName List Box Panel Name
     //! @param aFocused List Box Focused State
     void listBoxFocusChanged(const QString& aPanelName, const bool& aFocused);
+
+    //! @brief Item Icon Size Changed Signal
+    //! @param aRefresh Refresh
+    void itemIconSizeChanged(const bool& aRefresh);
 
 protected: // From ListBox
 
@@ -416,6 +438,8 @@ protected: // Data
     QString         panelName;
     //! Got Focus
     bool            gotFocus;
+    //! Icon Size
+    int             iconSize;
     //! Icon Scanner
     IconScanner*    iconScanner;
     //! Previous First Cached Item
@@ -592,9 +616,26 @@ public:
     //! @param aActive Active State
     void setActive(const bool& aActive);
 
+    //! @brief Set Item Icon Size
+    //! @param aIconSize Icon Size
+    void setItemIconSize(const int& aIconSize);
+
+    //! @brief Get Item Icon Size
+    //! @param none
+    //! @return Icon Size
+    int getItemIconSize();
+
+    //! @brief Update Delegate Icon Size
+    //! @param aRefresh Refresh
+    void updateDelegateIconSize(const bool& aRefresh = true);
+
     //! @brief Reload Dir
     //! @param none
     void reload();
+
+    //! @brief Reload Dir
+    //! @param aBgColor Background Color
+    void setBackgroundColor(const int& aBgColor);
 
     //! @brief Destructor
     //! @param none
@@ -746,6 +787,10 @@ protected slots:
     //! @brief List Box Item Options Slot
     //! @param aIndex Item Index
     void listBoxItemOptions(const int& aIndex);
+
+    //! @brief Item Icon Size Changed Slot
+    //! @param aRefresh Refresh/Reload
+    void listBoxItemIconSizeChanged(const bool& aRefresh = true);
 
 protected: // Data
     friend class MainWindow;

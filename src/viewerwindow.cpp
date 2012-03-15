@@ -13,6 +13,70 @@
 
 // IMPLEMENTATION
 
+
+//==============================================================================
+// Constructor
+//==============================================================================
+CustomPlainTextEditor::CustomPlainTextEditor(QWidget* aParent)
+    : QPlainTextEdit(aParent)
+{
+    qDebug() << "Creating CustomPlainTextEditor...done";
+}
+
+//==============================================================================
+// Key Pressed
+//==============================================================================
+void CustomPlainTextEditor::keyPressEvent(QKeyEvent* aEvent)
+{
+    // Check Event
+    if (aEvent) {
+
+        qDebug() << "CustomPlainTextEditor::keyPressEvent - key: " << aEvent->key();
+
+        if (aEvent->key() == Qt::Key_Escape) {
+
+            // Do Nothing
+
+        } else {
+            QPlainTextEdit::keyPressEvent(aEvent);
+        }
+    }
+}
+
+//==============================================================================
+// Key Released
+//==============================================================================
+void CustomPlainTextEditor::keyReleaseEvent(QKeyEvent* aEvent)
+{
+    // Check Event
+    if (aEvent) {
+
+        qDebug() << "CustomPlainTextEditor::keyReleaseEvent - key: " << aEvent->key();
+
+        if (aEvent->key() == Qt::Key_Escape) {
+
+            // Emit Esc Key Pressed Signal
+            emit escPressed();
+
+        } else {
+            QPlainTextEdit::keyReleaseEvent(aEvent);
+        }
+    }
+}
+
+//==============================================================================
+// Destructor
+//==============================================================================
+CustomPlainTextEditor::~CustomPlainTextEditor()
+{
+    // ...
+}
+
+
+
+
+
+
 //==============================================================================
 // Constructor
 //==============================================================================
@@ -36,6 +100,9 @@ ViewerWindow::ViewerWindow(QWidget* aParent)
 
     // Load Settings
     loadSettings();
+
+    // Connect Signals
+    connect(ui->viewer, SIGNAL(escPressed()), this, SLOT(editorEscPressed()));
 
     qDebug() << "Creating ViewerWindow...done";
 }
@@ -341,6 +408,15 @@ void ViewerWindow::on_actionPrint_triggered()
 void ViewerWindow::on_actionClose_triggered()
 {
     qDebug() << "ViewerWindow::on_actionClose_triggered";
+    // Close Viewer
+    closeViewer();
+}
+
+//==============================================================================
+// Editor Esc Key Pressed Slot
+//==============================================================================
+void ViewerWindow::editorEscPressed()
+{
     // Close Viewer
     closeViewer();
 }

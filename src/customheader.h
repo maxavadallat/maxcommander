@@ -34,7 +34,8 @@ public:
 
     //! @brief Set Header Active
     //! @param aActive Active State
-    void setActive(const bool& aActive);
+    //! @param aRefresh Refresh
+    void setActive(const bool& aActive, const bool& aRefresh = true);
 
     //! @brief Set Sorting Order
     //! @param aIndex Header Item/Sorting Index

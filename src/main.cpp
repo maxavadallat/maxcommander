@@ -148,6 +148,7 @@ int main(int argc, char* argv[])
 
         hi.show();
 */
+
 /*
         CustomHeader ch;
 
@@ -163,6 +164,7 @@ int main(int argc, char* argv[])
             qDebug() << "/Users/Max - NULL ICON";
         }
 */
+
 /*
         CustomPanel cp;
 
@@ -172,6 +174,7 @@ int main(int argc, char* argv[])
 
         cp.loadSettings();
 */
+
 /*
         DirSizeScanner dsScanner;
 
@@ -187,6 +190,7 @@ int main(int argc, char* argv[])
 
         cfl.show();
 */
+
 /*
         QFileInfo fileInfo(QString("/Users/Max/Dev/MaxCommander/MaxCommander.app"));
         //QFileInfo fileInfo(QString("/Users/Max/Dev/MaxCommander"));

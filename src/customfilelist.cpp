@@ -839,6 +839,20 @@ bool FileListDelegate::getNeedsIconUpdate()
 }
 
 //==============================================================================
+// Set Icon Size
+//==============================================================================
+void FileListDelegate::setIconSize(const int& aIconSize)
+{
+    // Check Icon Size
+    if (iconSize != aIconSize) {
+        // Set Icn Size
+        iconSize = aIconSize;
+
+        // ...
+    }
+}
+
+//==============================================================================
 // Get Icon Size
 //==============================================================================
 int FileListDelegate::getIconSize()
@@ -1174,6 +1188,52 @@ qint64 FileListBox::getSelectedSize()
 FileItemData* FileListBox::getItemData(const int& aIndex)
 {
     return reinterpret_cast<FileItemData*>(ListBox::getData(aIndex));
+}
+
+//==============================================================================
+// Set Item Icon Size
+//==============================================================================
+void FileListBox::setItemIconSize(const int& aIconSize, const bool& aRefresh)
+{
+    // Check Icon Size
+    if (iconSize != aIconSize) {
+        qDebug() << "FileListBox::setItemIconSize - aIconSize: " << aIconSize;
+        // Set Icon Size
+        iconSize = aIconSize;
+        // Check Delegate
+        if (delegate) {
+            // Get File List Delegate
+            FileListDelegate* fileListDelegate = reinterpret_cast<FileListDelegate*>(delegate);
+            // Set Icon Size
+            fileListDelegate->setIconSize(iconSize);
+            // Emit Icon Size Changed Signel
+            emit itemIconSizeChanged(aRefresh);
+        }
+    }
+}
+
+//==============================================================================
+// Get Item Icon Size
+//==============================================================================
+int FileListBox::getItemIconSize()
+{
+    return iconSize;
+}
+
+//==============================================================================
+// Update Delegate Icon Size By Settings
+//==============================================================================
+void FileListBox::updateDelegateIconSize(const bool& aRefresh)
+{
+    // Check Delegate
+    if (delegate) {
+        // Get File List Delegate
+        FileListDelegate* fileListDelegate = reinterpret_cast<FileListDelegate*>(delegate);
+        // Update Icon Size
+        fileListDelegate->updateIconSize();
+        // Set Icon Size
+        setItemIconSize(fileListDelegate->getIconSize(), aRefresh);
+    }
 }
 
 //==============================================================================
@@ -1550,6 +1610,7 @@ CustomFilelist::CustomFilelist(QWidget* aParent)
         connect(ui->fileListBox, SIGNAL(itemSelected(int)), this, SLOT(listBoxItemSelected(int)));
         connect(ui->fileListBox, SIGNAL(itemOptions(int)), this, SLOT(listBoxItemOptions(int)));
         connect(ui->fileListBox, SIGNAL(listBoxFocusChanged(QString,bool)), this, SIGNAL(listBoxFocusChanged(QString,bool)));
+        connect(ui->fileListBox, SIGNAL(itemIconSizeChanged(bool)), this, SLOT(listBoxItemIconSizeChanged(bool)));
     }
 
     // Create File Utils
@@ -1849,6 +1910,43 @@ void CustomFilelist::setActive(const bool& aActive)
 }
 
 //==============================================================================
+// Set Icon Size
+//==============================================================================
+void CustomFilelist::setItemIconSize(const int& aIconSize)
+{
+    // Check UI
+    if (ui && ui->fileListBox) {
+        // Set Icon Size
+        ui->fileListBox->setItemIconSize(aIconSize);
+    }
+}
+
+//==============================================================================
+// Get Icon Size
+//==============================================================================
+int CustomFilelist::getItemIconSize()
+{
+    // Check UI
+    if (ui && ui->fileListBox) {
+        return ui->fileListBox->getItemIconSize();
+    }
+
+    return 0;
+}
+
+//==============================================================================
+// Update Delegate Icon Size
+//==============================================================================
+void CustomFilelist::updateDelegateIconSize(const bool& aRefresh)
+{
+    // Check UI
+    if (ui && ui->fileListBox) {
+        // Update Delegate Icon Size
+        ui->fileListBox->updateDelegateIconSize(aRefresh);
+    }
+}
+
+//==============================================================================
 // Reload Dir
 //==============================================================================
 void CustomFilelist::reload()
@@ -1860,6 +1958,26 @@ void CustomFilelist::reload()
     if (dirReader) {
         // Start Direcory Reader
         dirReader->readDir(currentDirPath, sortOrder, reverseOrder, showHidden, nameFilters);
+    }
+}
+
+//==============================================================================
+// Reload Dir
+//==============================================================================
+void CustomFilelist::setBackgroundColor(const int& aBgColor)
+{
+    qDebug() << "CustomFilelist::setBackgroundColor - aBgColor: " << aBgColor;
+
+    // Check UI
+    if (ui && ui->fileListBox) {
+        // Check Color
+        if (aBgColor != -1) {
+            // Set Style Sheet
+            ui->fileListBox->setStyleSheet(QString(STYLE_SHEET_BACKGROUND_COLOR_TEMPLATE).arg(QColor(aBgColor).name()));
+        } else {
+            // Reset Style Sheet
+            ui->fileListBox->setStyleSheet(QString(""));
+        }
     }
 }
 
@@ -2350,6 +2468,21 @@ void CustomFilelist::listBoxItemOptions(const int& aIndex)
     qDebug() << "CustomFilelist::listBoxItemOptions" << aIndex;
 
     // ...
+}
+
+//==============================================================================
+// Item Icon Size Changed Slot
+//==============================================================================
+void CustomFilelist::listBoxItemIconSizeChanged(const bool& aRefresh)
+{
+    qDebug() << "CustomFilelist::listBoxItemIconSizeChanged";
+    // Set Previous Index
+    prevFileIndex = getCurrentIndex();
+    // Check Refresh
+    if (aRefresh) {
+        // Reload
+        reload();
+    }
 }
 
 //==============================================================================

@@ -32,12 +32,16 @@ public:
 
     //! @brief Set Color
     //! @param aColor New Color
+    void setColor(const int& aColor);
+/*
+    //! @brief Set Color
+    //! @param aColor New Color
     void setColor(const QColor& aColor);
-
+*/
     //! @brief Get Color
     //! @param none
     //! @return Color
-    QColor getColor();
+    int getColor();
 
     //! @brief Destructor
     //! @param none
@@ -64,7 +68,7 @@ protected: // Data
     //! UI
     Ui::ColorPickerButton*  ui;
     //! Color
-    QColor                  color;
+    int                     color;
     //! Pressed
     bool                    pressed;
 };

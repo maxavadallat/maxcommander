@@ -52,7 +52,7 @@ CustomHeader::CustomHeader(QWidget *parent)
 //==============================================================================
 // Set Header Active
 //==============================================================================
-void CustomHeader::setActive(const bool& aActive)
+void CustomHeader::setActive(const bool& aActive, const bool& aRefresh)
 {
     // Check Active State
     if (active != aActive) {
@@ -63,7 +63,7 @@ void CustomHeader::setActive(const bool& aActive)
         // Got Thru Items
         for (int i=0; i<hiCount; i++) {
             // Set Item Active
-            itemList[i]->setActive(active);
+            itemList[i]->setActive(active, aRefresh);
         }
     }
 }
@@ -301,7 +301,6 @@ void CustomHeader::headerOrderChanged(const int& aIndex, const bool& aReversed, 
         index = aIndex;
         // Set Reversed State
         reverse = aReversed;
-
         // Check Activation
         if (aActivation) {
             // Set Active State

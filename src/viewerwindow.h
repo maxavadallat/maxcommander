@@ -5,6 +5,7 @@
 
 #include <QMainWindow>
 #include <QHideEvent>
+#include <QPlainTextEdit>
 
 
 // FORWARD DECLARATIONS
@@ -16,6 +17,43 @@ class ViewerWindow;
 class Settings;
 
 // DECLARATIONS
+
+
+//==============================================================================
+//! @class CustomPlainTextEditor Application File Viewer Custom Editor Class
+//==============================================================================
+class CustomPlainTextEditor : public QPlainTextEdit
+{
+    Q_OBJECT
+
+public:
+
+    //! @brief Constructor
+    //! @param aParent Parent
+    CustomPlainTextEditor(QWidget* aParent = NULL);
+
+    //! @brief Key Pressed
+    //! @param aEvent Key Event
+    virtual void keyPressEvent(QKeyEvent* aEvent);
+
+    //! @brief Key Released
+    //! @param aEvent Key Event
+    virtual void keyReleaseEvent(QKeyEvent* aEvent);
+
+    //! @brief Destructor
+    //! @param none
+    virtual ~CustomPlainTextEditor();
+
+signals:
+
+    //! @brief Esc Key Pressed Signal
+    //! @param none
+    void escPressed();
+
+protected: // Data
+
+};
+
 
 //==============================================================================
 //! @class ViewerWindow Application File Viewer Window Class
@@ -102,6 +140,10 @@ protected slots:
     //! @brief Action Close Triggered
     //! @param none
     void on_actionClose_triggered();
+
+    //! @brief Editor Esc Key Pressed Slot
+    //! @param none
+    void editorEscPressed();
 
 protected: // From QMainWindow
 

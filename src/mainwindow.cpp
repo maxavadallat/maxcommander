@@ -704,8 +704,8 @@ void MainWindow::loadSettings()
         }
 
         // Reload
-        ui->mainPanel1->ui->fileList->reload();
-        ui->mainPanel2->ui->fileList->reload();
+        //ui->mainPanel1->ui->fileList->reload();
+        //ui->mainPanel2->ui->fileList->reload();
     }
 }
 

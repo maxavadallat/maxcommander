@@ -22,9 +22,12 @@
      <number>0</number>
     </property>
     <item row="0" column="0">
-     <widget class="QPlainTextEdit" name="viewer">
+     <widget class="CustomPlainTextEditor" name="viewer">
       <property name="cursor" stdset="0">
        <cursorShape>IBeamCursor</cursorShape>
+      </property>
+      <property name="focusPolicy">
+       <enum>Qt::StrongFocus</enum>
       </property>
       <property name="readOnly">
        <bool>true</bool>
@@ -132,6 +135,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CustomPlainTextEditor</class>
+   <extends>QPlainTextEdit</extends>
+   <header location="global">src/viewerwindow.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

@@ -348,24 +348,26 @@ void Settings::updateWidgetStyleSheet(QWidget* aWidget, const QString& aFgColorK
         // Set Group
         setGroup(QString(SETTINGS_GROUP_APPEARANCE));
         // Init Foreground Color
-        QString fgColor;
+        int fgColor;
         // Check If Hidden
         if (aHidden &&
             aFgColorKey != QString(SETTINGS_KEY_SELECTED_TEXT_COLOR) &&
             aFgColorKey != QString(SETTINGS_KEY_CURRENT_SELECTED_TEXT_COLOR)) {
-            // set Foreground Color
-            fgColor = QColor(getValue(aFgColorKey).toInt() + QColor(Qt::gray).rgb()).name();
-            //qDebug() << "Settings::updateWidgetStyleSheet - HIDDEN fgColor: " << fgColor;
+            // Set Foreground Color
+            fgColor = getValue(aFgColorKey).toInt() + QColor(Qt::gray).rgb();
+            //qDebug() << "Settings::updateWidgetStyleSheet - HIDDEN fgColor: " << QColor(fgColor).name();
         } else {
             // Set Foreground Color
-            fgColor = QColor(getValue(aFgColorKey).toInt()).name();
-            //qDebug() << "Settings::updateWidgetStyleSheet - fgColor: " << fgColor;
+            fgColor = getValue(aFgColorKey).toInt();
+            //qDebug() << "Settings::updateWidgetStyleSheet - fgColor: " << QColor(fgColor).name();
         }
 
         // Get Background Color
-        QString bgColor = QColor(getValue(aBgColorKey).toInt()).name();
+        int bgColor = getValue(aBgColorKey).toInt();
+        //qDebug() << "Settings::updateWidgetStyleSheet - bgColor: " << QColor(bgColor).name();
         // Get Font Family
         QString fontFamily = getValue(SETTINGS_KEY_FONTFAMILY).toString();
+        //qDebug() << "Settings::updateWidgetStyleSheet - fontFamily: " << fontFamily;
         // Get Font Bold
         bool fontBold = getValue(SETTINGS_KEY_FONTBOLD).toBool();
         // Get Font Italic
@@ -373,13 +375,23 @@ void Settings::updateWidgetStyleSheet(QWidget* aWidget, const QString& aFgColorK
         // Get Font Size
         int fontSize = getValue(SETTINGS_KEY_FONTSIZE).toInt();
 
-        // Set Widget Style Sheet
-        aWidget->setStyleSheet(QString(STYLE_SHEET_ITEM_PREVIEW_TEMPLATE).arg(fgColor)
-                                                                         .arg(bgColor)
-                                                                         .arg(fontBold ? QString(STYLESHEET_VALUE_FONTBOLD) : QString(""))
-                                                                         .arg(fontItalic ? QString(STYLESHEET_VALUE_FONTITALIC) : QString(""))
-                                                                         .arg(fontSize)
-                                                                         .arg(fontFamily));
+        // Check Background Color
+        if (bgColor != -1) {
+            // Set Widget Style Sheet
+            aWidget->setStyleSheet(QString(STYLE_SHEET_ITEM_PREVIEW_TEMPLATE).arg(QColor(fgColor).name())
+                                                                             .arg(QColor(bgColor).name())
+                                                                             .arg(fontBold ? QString(STYLESHEET_VALUE_FONTBOLD) : QString(""))
+                                                                             .arg(fontItalic ? QString(STYLESHEET_VALUE_FONTITALIC) : QString(""))
+                                                                             .arg(fontSize)
+                                                                             .arg(fontFamily));
+        } else {
+            // Set Widget Style Sheet
+            aWidget->setStyleSheet(QString(STYLE_SHEET_ITEM_PREVIEW_NO_BACKGROUND_TEMPLATE).arg(QColor(fgColor).name())
+                                                                             .arg(fontBold ? QString(STYLESHEET_VALUE_FONTBOLD) : QString(""))
+                                                                             .arg(fontItalic ? QString(STYLESHEET_VALUE_FONTITALIC) : QString(""))
+                                                                             .arg(fontSize)
+                                                                             .arg(fontFamily));
+        }
     }
 }
 

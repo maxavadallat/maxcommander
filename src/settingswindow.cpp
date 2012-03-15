@@ -123,6 +123,31 @@ void SettingsWindow::loadSettings()
         // Set Example Text
         ui->changefontButton->setText(QString(CHANGE_FONT_BUTTON_EXAMPLE_TEXT_TEMPLATE).arg(font.family()).arg(font.pointSize()));
 
+        // Set Button Color
+        ui->normalColorButton->setColor(settings->getValue(QString(SETTINGS_KEY_NORMAL_TEXT_COLOR), SETTINGS_VALUE_NORMAL_TEXT_COLOR).toInt());
+        // Set Button Color
+        ui->normalBackgroundButton->setColor(settings->getValue(QString(SETTINGS_KEY_NORMAL_BACKGROUND_COLOR), SETTINGS_VALUE_NORMAL_BACKGROUND_COLOR).toInt());
+
+        // Set Button Color
+        ui->currentColorButton->setColor(settings->getValue(QString(SETTINGS_KEY_CURRENT_TEXT_COLOR), SETTINGS_VALUE_CURRENT_TEXT_COLOR).toInt());
+        // Set Button Color
+        ui->currentBackgroundButton->setColor(settings->getValue(QString(SETTINGS_KEY_CURRENT_BACKGROUND_COLOR), SETTINGS_VALUE_CURRENT_BACKGROUND_COLOR).toInt());
+
+        // Set Button Color
+        ui->selectedColorButton->setColor(settings->getValue(QString(SETTINGS_KEY_SELECTED_TEXT_COLOR), SETTINGS_VALUE_SELECTED_TEXT_COLOR).toInt());
+        // Set Button Color
+        ui->selectedBackgroundButton->setColor(settings->getValue(QString(SETTINGS_KEY_SELECTED_BACKGROUND_COLOR), SETTINGS_VALUE_SELECTED_BACKGROUND_COLOR).toInt());
+
+        // Set Button Color
+        ui->currentSelectedColorButton->setColor(settings->getValue(QString(SETTINGS_KEY_CURRENT_SELECTED_TEXT_COLOR), SETTINGS_VALUE_CURRENT_SELECTED_TEXT_COLOR).toInt());
+        // Set Button Color
+        ui->currentSelectedBackgroundButton->setColor(settings->getValue(QString(SETTINGS_KEY_CURRENT_SELECTED_BACKGROUND_COLOR), SETTINGS_VALUE_CURRENT_SELECTED_BACKGROUND_COLOR).toInt());
+
+        // Set Button Color
+        ui->linkColorButton->setColor(settings->getValue(QString(SETTINGS_KEY_LINK_TEXT_COLOR), SETTINGS_VALUE_LINK_TEXT_COLOR).toInt());
+        // Set Button Color
+        ui->linkBackgroundButton->setColor(settings->getValue(QString(SETTINGS_KEY_LINK_BACKGROUND_COLOR), SETTINGS_VALUE_LINK_BACKGROUND_COLOR).toInt());
+/*
         // Init RGB Color
         QRgb colorRgb;
         // Init Foreground Color
@@ -206,9 +231,9 @@ void SettingsWindow::loadSettings()
         // Set Button Color
         ui->linkBackgroundButton->setColor(bgColor);
 
+*/
         // Set Spacing Spin Box Value
         ui->spacingSpinBox->setValue(settings->getValue(QString(SETTINGS_KEY_ITEM_SPACING), SETTINGS_VALUE_DEFAULT_ITEM_SPACING).toInt());
-
 
         // Update Preview Frame
         updatePreviewFrame();
@@ -263,20 +288,16 @@ void SettingsWindow::saveSettings()
         settings->setGroup(QString(SETTINGS_GROUP_APPEARANCE));
 
         // Set Values
-        settings->setValue(QString(SETTINGS_KEY_NORMAL_TEXT_COLOR), ui->normalColorButton->getColor().rgba());
-        settings->setValue(QString(SETTINGS_KEY_NORMAL_BACKGROUND_COLOR), ui->normalBackgroundButton->getColor().rgba());
-
-        settings->setValue(QString(SETTINGS_KEY_CURRENT_TEXT_COLOR), ui->currentColorButton->getColor().rgba());
-        settings->setValue(QString(SETTINGS_KEY_CURRENT_BACKGROUND_COLOR), ui->currentBackgroundButton->getColor().rgba());
-
-        settings->setValue(QString(SETTINGS_KEY_SELECTED_TEXT_COLOR), ui->selectedColorButton->getColor().rgba());
-        settings->setValue(QString(SETTINGS_KEY_SELECTED_BACKGROUND_COLOR), ui->selectedBackgroundButton->getColor().rgba());
-
-        settings->setValue(QString(SETTINGS_KEY_CURRENT_SELECTED_TEXT_COLOR), ui->currentSelectedColorButton->getColor().rgba());
-        settings->setValue(QString(SETTINGS_KEY_CURRENT_SELECTED_BACKGROUND_COLOR), ui->currentSelectedBackgroundButton->getColor().rgba());
-
-        settings->setValue(QString(SETTINGS_KEY_LINK_TEXT_COLOR), ui->linkColorButton->getColor().rgba());
-        settings->setValue(QString(SETTINGS_KEY_LINK_BACKGROUND_COLOR), ui->linkBackgroundButton->getColor().rgba());
+        settings->setValue(QString(SETTINGS_KEY_NORMAL_TEXT_COLOR), ui->normalColorButton->getColor());
+        settings->setValue(QString(SETTINGS_KEY_NORMAL_BACKGROUND_COLOR), ui->normalBackgroundButton->getColor());
+        settings->setValue(QString(SETTINGS_KEY_CURRENT_TEXT_COLOR), ui->currentColorButton->getColor());
+        settings->setValue(QString(SETTINGS_KEY_CURRENT_BACKGROUND_COLOR), ui->currentBackgroundButton->getColor());
+        settings->setValue(QString(SETTINGS_KEY_SELECTED_TEXT_COLOR), ui->selectedColorButton->getColor());
+        settings->setValue(QString(SETTINGS_KEY_SELECTED_BACKGROUND_COLOR), ui->selectedBackgroundButton->getColor());
+        settings->setValue(QString(SETTINGS_KEY_CURRENT_SELECTED_TEXT_COLOR), ui->currentSelectedColorButton->getColor());
+        settings->setValue(QString(SETTINGS_KEY_CURRENT_SELECTED_BACKGROUND_COLOR), ui->currentSelectedBackgroundButton->getColor());
+        settings->setValue(QString(SETTINGS_KEY_LINK_TEXT_COLOR), ui->linkColorButton->getColor());
+        settings->setValue(QString(SETTINGS_KEY_LINK_BACKGROUND_COLOR), ui->linkBackgroundButton->getColor());
 
         // Icon Size
         settings->setValue(QString(SETTINGS_KEY_ICONSIZE), ui->iconSizeComboBox->currentIndex());
@@ -322,20 +343,21 @@ void SettingsWindow::colorButtonClicked(ColorPickerButton* aButton)
         colorDialog.setCurrentColor(aButton->getColor());
         // Execute Color Dialog
         if (colorDialog.exec()) {
-            // Set Color
-            aButton->setColor(colorDialog.currentColor());
 
             qDebug() << "SettingsWindow::colorButtonClicked - currentColor: " << QString("#%1").arg(colorDialog.currentColor().rgba(), 8, 16, QChar('0'));
+
+            // Set Color
+            aButton->setColor(colorDialog.currentColor().rgba());
 
             // Check Button
             if (aButton == ui->normalBackgroundButton) {
                 // Set Selected Background Color
-                ui->selectedBackgroundButton->setColor(colorDialog.currentColor());
+                ui->selectedBackgroundButton->setColor(colorDialog.currentColor().rgba());
                 // Set Link Background Color
-                ui->linkBackgroundButton->setColor(colorDialog.currentColor());
+                ui->linkBackgroundButton->setColor(colorDialog.currentColor().rgba());
             } else if (aButton == ui->currentBackgroundButton) {
                 // Set Current Selected Backgound Color
-                ui->currentSelectedBackgroundButton->setColor(colorDialog.currentColor());
+                ui->currentSelectedBackgroundButton->setColor(colorDialog.currentColor().rgba());
             }
         }
 
@@ -351,21 +373,38 @@ void SettingsWindow::updatePreviewFrame()
 {
     // Check UI
     if (ui) {
-        // Set Preview Label Style Sheet
-        ui->normalPreviewLabel->setStyleSheet(QString(STYLE_SHEET_ITEM_PREVIEW_TEMPLATE).arg(ui->normalColorButton->getColor().name())
-                                                                                        .arg(ui->normalBackgroundButton->getColor().name())
-                                                                                        .arg(font.bold() ? QString(STYLESHEET_VALUE_FONTBOLD) : QString(""))
-                                                                                        .arg(font.italic() ? QString(STYLESHEET_VALUE_FONTITALIC) : QString(""))
-                                                                                        .arg(font.pointSize())
-                                                                                        .arg(font.family()));
+        // Check Normal Item Background Color Button Color Value
+        if (ui->normalBackgroundButton->getColor() != -1) {
+            // Set Preview Label Style Sheet
+            ui->normalPreviewLabel->setStyleSheet(QString(STYLE_SHEET_ITEM_PREVIEW_TEMPLATE).arg(QColor(ui->normalColorButton->getColor()).name())
+                                                                                            .arg(QColor(ui->normalBackgroundButton->getColor()).name())
+                                                                                            .arg(font.bold() ? QString(STYLESHEET_VALUE_FONTBOLD) : QString(""))
+                                                                                            .arg(font.italic() ? QString(STYLESHEET_VALUE_FONTITALIC) : QString(""))
+                                                                                            .arg(font.pointSize())
+                                                                                            .arg(font.family()));
 
-        // Set Preview Icon Style Sheet
-        ui->normalPreviewIcon->setStyleSheet(QString(STYLE_SHEET_ITEM_PREVIEW_TEMPLATE).arg(ui->normalColorButton->getColor().name())
-                                                                                       .arg(ui->normalBackgroundButton->getColor().name())
-                                                                                       .arg(font.bold() ? QString(STYLESHEET_VALUE_FONTBOLD) : QString(""))
-                                                                                       .arg(font.italic() ? QString(STYLESHEET_VALUE_FONTITALIC) : QString(""))
-                                                                                       .arg(font.pointSize())
-                                                                                       .arg(font.family()));
+            // Set Preview Icon Style Sheet
+            ui->normalPreviewIcon->setStyleSheet(QString(STYLE_SHEET_ITEM_PREVIEW_TEMPLATE).arg(QColor(ui->normalColorButton->getColor()).name())
+                                                                                           .arg(QColor(ui->normalBackgroundButton->getColor()).name())
+                                                                                           .arg(font.bold() ? QString(STYLESHEET_VALUE_FONTBOLD) : QString(""))
+                                                                                           .arg(font.italic() ? QString(STYLESHEET_VALUE_FONTITALIC) : QString(""))
+                                                                                           .arg(font.pointSize())
+                                                                                           .arg(font.family()));
+        } else {
+            // Set Preview Label Style Sheet
+            ui->normalPreviewLabel->setStyleSheet(QString(STYLE_SHEET_ITEM_PREVIEW_NO_BACKGROUND_TEMPLATE).arg(QColor(ui->normalColorButton->getColor()).name())
+                                                                                            .arg(font.bold() ? QString(STYLESHEET_VALUE_FONTBOLD) : QString(""))
+                                                                                            .arg(font.italic() ? QString(STYLESHEET_VALUE_FONTITALIC) : QString(""))
+                                                                                            .arg(font.pointSize())
+                                                                                            .arg(font.family()));
+
+            // Set Preview Icon Style Sheet
+            ui->normalPreviewIcon->setStyleSheet(QString(STYLE_SHEET_ITEM_PREVIEW_NO_BACKGROUND_TEMPLATE).arg(QColor(ui->normalColorButton->getColor()).name())
+                                                                                           .arg(font.bold() ? QString(STYLESHEET_VALUE_FONTBOLD) : QString(""))
+                                                                                           .arg(font.italic() ? QString(STYLESHEET_VALUE_FONTITALIC) : QString(""))
+                                                                                           .arg(font.pointSize())
+                                                                                           .arg(font.family()));
+        }
 
         // Set Icon
         ui->normalPreviewIcon->setPixmap(defaultIcons[iconSize]);
@@ -373,78 +412,145 @@ void SettingsWindow::updatePreviewFrame()
         // Set Whole Preview Frame Style Sheet As Normal Item
         ui->previewFrame->setStyleSheet(ui->normalPreviewLabel->styleSheet());
 
-        // Set Preview Label Style Sheet
-        ui->currentPreviewLabel->setStyleSheet(QString(STYLE_SHEET_ITEM_PREVIEW_TEMPLATE).arg(ui->currentColorButton->getColor().name())
-                                                                                         .arg(ui->currentBackgroundButton->getColor().name())
-                                                                                         .arg(font.bold() ? QString(STYLESHEET_VALUE_FONTBOLD) : QString(""))
-                                                                                         .arg(font.italic() ? QString(STYLESHEET_VALUE_FONTITALIC) : QString(""))
-                                                                                         .arg(font.pointSize())
-                                                                                         .arg(font.family()));
+        if (ui->currentBackgroundButton->getColor() != -1) {
+            // Set Preview Label Style Sheet
+            ui->currentPreviewLabel->setStyleSheet(QString(STYLE_SHEET_ITEM_PREVIEW_TEMPLATE).arg(QColor(ui->currentColorButton->getColor()).name())
+                                                                                             .arg(QColor(ui->currentBackgroundButton->getColor()).name())
+                                                                                             .arg(font.bold() ? QString(STYLESHEET_VALUE_FONTBOLD) : QString(""))
+                                                                                             .arg(font.italic() ? QString(STYLESHEET_VALUE_FONTITALIC) : QString(""))
+                                                                                             .arg(font.pointSize())
+                                                                                             .arg(font.family()));
 
-        // Set Preview Icon Style Sheet
-        ui->currentPreviewIcon->setStyleSheet(QString(STYLE_SHEET_ITEM_PREVIEW_TEMPLATE).arg(ui->currentColorButton->getColor().name())
-                                                                                        .arg(ui->currentBackgroundButton->getColor().name())
-                                                                                        .arg(font.bold() ? QString(STYLESHEET_VALUE_FONTBOLD) : QString(""))
-                                                                                        .arg(font.italic() ? QString(STYLESHEET_VALUE_FONTITALIC) : QString(""))
-                                                                                        .arg(font.pointSize())
-                                                                                        .arg(font.family()));
+            // Set Preview Icon Style Sheet
+            ui->currentPreviewIcon->setStyleSheet(QString(STYLE_SHEET_ITEM_PREVIEW_TEMPLATE).arg(QColor(ui->currentColorButton->getColor()).name())
+                                                                                            .arg(QColor(ui->currentBackgroundButton->getColor()).name())
+                                                                                            .arg(font.bold() ? QString(STYLESHEET_VALUE_FONTBOLD) : QString(""))
+                                                                                            .arg(font.italic() ? QString(STYLESHEET_VALUE_FONTITALIC) : QString(""))
+                                                                                            .arg(font.pointSize())
+                                                                                            .arg(font.family()));
+        } else {
+            // Set Preview Label Style Sheet
+            ui->currentPreviewLabel->setStyleSheet(QString(STYLE_SHEET_ITEM_PREVIEW_NO_BACKGROUND_TEMPLATE).arg(QColor(ui->currentColorButton->getColor()).name())
+                                                                                             .arg(font.bold() ? QString(STYLESHEET_VALUE_FONTBOLD) : QString(""))
+                                                                                             .arg(font.italic() ? QString(STYLESHEET_VALUE_FONTITALIC) : QString(""))
+                                                                                             .arg(font.pointSize())
+                                                                                             .arg(font.family()));
+
+            // Set Preview Icon Style Sheet
+            ui->currentPreviewIcon->setStyleSheet(QString(STYLE_SHEET_ITEM_PREVIEW_NO_BACKGROUND_TEMPLATE).arg(QColor(ui->currentColorButton->getColor()).name())
+                                                                                            .arg(font.bold() ? QString(STYLESHEET_VALUE_FONTBOLD) : QString(""))
+                                                                                            .arg(font.italic() ? QString(STYLESHEET_VALUE_FONTITALIC) : QString(""))
+                                                                                            .arg(font.pointSize())
+                                                                                            .arg(font.family()));
+        }
 
         // Set Icon
         ui->currentPreviewIcon->setPixmap(defaultIcons[iconSize]);
 
-        // Set Preview Label Style Sheet
-        ui->selectedPreviewLabel->setStyleSheet(QString(STYLE_SHEET_ITEM_PREVIEW_TEMPLATE).arg(ui->selectedColorButton->getColor().name())
-                                                                                          .arg(ui->selectedBackgroundButton->getColor().name())
-                                                                                          .arg(font.bold() ? QString(STYLESHEET_VALUE_FONTBOLD) : QString(""))
-                                                                                          .arg(font.italic() ? QString(STYLESHEET_VALUE_FONTITALIC) : QString(""))
-                                                                                          .arg(font.pointSize())
-                                                                                          .arg(font.family()));
+        // Check Selected Background Color
+        if (ui->selectedBackgroundButton->getColor() != -1) {
+            // Set Preview Label Style Sheet
+            ui->selectedPreviewLabel->setStyleSheet(QString(STYLE_SHEET_ITEM_PREVIEW_TEMPLATE).arg(QColor(ui->selectedColorButton->getColor()).name())
+                                                                                              .arg(QColor(ui->selectedBackgroundButton->getColor()).name())
+                                                                                              .arg(font.bold() ? QString(STYLESHEET_VALUE_FONTBOLD) : QString(""))
+                                                                                              .arg(font.italic() ? QString(STYLESHEET_VALUE_FONTITALIC) : QString(""))
+                                                                                              .arg(font.pointSize())
+                                                                                              .arg(font.family()));
 
-        // Set Preview Icon Style Sheet
-        ui->selectedPreviewIcon->setStyleSheet(QString(STYLE_SHEET_ITEM_PREVIEW_TEMPLATE).arg(ui->selectedColorButton->getColor().name())
-                                                                                          .arg(ui->selectedBackgroundButton->getColor().name())
-                                                                                          .arg(font.bold() ? QString(STYLESHEET_VALUE_FONTBOLD) : QString(""))
-                                                                                          .arg(font.italic() ? QString(STYLESHEET_VALUE_FONTITALIC) : QString(""))
-                                                                                          .arg(font.pointSize())
-                                                                                          .arg(font.family()));
+            // Set Preview Icon Style Sheet
+            ui->selectedPreviewIcon->setStyleSheet(QString(STYLE_SHEET_ITEM_PREVIEW_TEMPLATE).arg(QColor(ui->selectedColorButton->getColor()).name())
+                                                                                             .arg(QColor(ui->selectedBackgroundButton->getColor()).name())
+                                                                                             .arg(font.bold() ? QString(STYLESHEET_VALUE_FONTBOLD) : QString(""))
+                                                                                             .arg(font.italic() ? QString(STYLESHEET_VALUE_FONTITALIC) : QString(""))
+                                                                                             .arg(font.pointSize())
+                                                                                             .arg(font.family()));
+        } else {
+            // Set Preview Label Style Sheet
+            ui->selectedPreviewLabel->setStyleSheet(QString(STYLE_SHEET_ITEM_PREVIEW_NO_BACKGROUND_TEMPLATE).arg(QColor(ui->selectedColorButton->getColor()).name())
+                                                                                              .arg(font.bold() ? QString(STYLESHEET_VALUE_FONTBOLD) : QString(""))
+                                                                                              .arg(font.italic() ? QString(STYLESHEET_VALUE_FONTITALIC) : QString(""))
+                                                                                              .arg(font.pointSize())
+                                                                                              .arg(font.family()));
+
+            // Set Preview Icon Style Sheet
+            ui->selectedPreviewIcon->setStyleSheet(QString(STYLE_SHEET_ITEM_PREVIEW_NO_BACKGROUND_TEMPLATE).arg(QColor(ui->selectedColorButton->getColor()).name())
+                                                                                             .arg(font.bold() ? QString(STYLESHEET_VALUE_FONTBOLD) : QString(""))
+                                                                                             .arg(font.italic() ? QString(STYLESHEET_VALUE_FONTITALIC) : QString(""))
+                                                                                             .arg(font.pointSize())
+                                                                                             .arg(font.family()));
+        }
 
         // Set Icon
         ui->selectedPreviewIcon->setPixmap(defaultIcons[iconSize]);
 
-        // Set Preview Label Style Sheet
-        ui->currentSelectedPreviewLabel->setStyleSheet(QString(STYLE_SHEET_ITEM_PREVIEW_TEMPLATE).arg(ui->currentSelectedColorButton->getColor().name())
-                                                                                                 .arg(ui->currentSelectedBackgroundButton->getColor().name())
-                                                                                                 .arg(font.bold() ? QString(STYLESHEET_VALUE_FONTBOLD) : QString(""))
-                                                                                                 .arg(font.italic() ? QString(STYLESHEET_VALUE_FONTITALIC) : QString(""))
-                                                                                                 .arg(font.pointSize())
-                                                                                                 .arg(font.family()));
+        // Check Current Selected Background
+        if (ui->currentSelectedBackgroundButton->getColor() != -1) {
+            // Set Preview Label Style Sheet
+            ui->currentSelectedPreviewLabel->setStyleSheet(QString(STYLE_SHEET_ITEM_PREVIEW_TEMPLATE).arg(QColor(ui->currentSelectedColorButton->getColor()).name())
+                                                                                                     .arg(QColor(ui->currentSelectedBackgroundButton->getColor()).name())
+                                                                                                     .arg(font.bold() ? QString(STYLESHEET_VALUE_FONTBOLD) : QString(""))
+                                                                                                     .arg(font.italic() ? QString(STYLESHEET_VALUE_FONTITALIC) : QString(""))
+                                                                                                     .arg(font.pointSize())
+                                                                                                     .arg(font.family()));
 
-        // Set Preview Icon Style Sheet
-        ui->currentSelectedPreviewIcon->setStyleSheet(QString(STYLE_SHEET_ITEM_PREVIEW_TEMPLATE).arg(ui->currentSelectedColorButton->getColor().name())
-                                                                                                .arg(ui->currentSelectedBackgroundButton->getColor().name())
-                                                                                                .arg(font.bold() ? QString(STYLESHEET_VALUE_FONTBOLD) : QString(""))
-                                                                                                .arg(font.italic() ? QString(STYLESHEET_VALUE_FONTITALIC) : QString(""))
-                                                                                                .arg(font.pointSize())
-                                                                                                .arg(font.family()));
+            // Set Preview Icon Style Sheet
+            ui->currentSelectedPreviewIcon->setStyleSheet(QString(STYLE_SHEET_ITEM_PREVIEW_TEMPLATE).arg(QColor(ui->currentSelectedColorButton->getColor()).name())
+                                                                                                    .arg(QColor(ui->currentSelectedBackgroundButton->getColor()).name())
+                                                                                                    .arg(font.bold() ? QString(STYLESHEET_VALUE_FONTBOLD) : QString(""))
+                                                                                                    .arg(font.italic() ? QString(STYLESHEET_VALUE_FONTITALIC) : QString(""))
+                                                                                                    .arg(font.pointSize())
+                                                                                                    .arg(font.family()));
+        } else {
+            // Set Preview Label Style Sheet
+            ui->currentSelectedPreviewLabel->setStyleSheet(QString(STYLE_SHEET_ITEM_PREVIEW_NO_BACKGROUND_TEMPLATE).arg(QColor(ui->currentSelectedColorButton->getColor()).name())
+                                                                                                     .arg(font.bold() ? QString(STYLESHEET_VALUE_FONTBOLD) : QString(""))
+                                                                                                     .arg(font.italic() ? QString(STYLESHEET_VALUE_FONTITALIC) : QString(""))
+                                                                                                     .arg(font.pointSize())
+                                                                                                     .arg(font.family()));
+
+            // Set Preview Icon Style Sheet
+            ui->currentSelectedPreviewIcon->setStyleSheet(QString(STYLE_SHEET_ITEM_PREVIEW_NO_BACKGROUND_TEMPLATE).arg(QColor(ui->currentSelectedColorButton->getColor()).name())
+                                                                                                    .arg(font.bold() ? QString(STYLESHEET_VALUE_FONTBOLD) : QString(""))
+                                                                                                    .arg(font.italic() ? QString(STYLESHEET_VALUE_FONTITALIC) : QString(""))
+                                                                                                    .arg(font.pointSize())
+                                                                                                    .arg(font.family()));
+        }
 
         // Set Icon
         ui->currentSelectedPreviewIcon->setPixmap(defaultIcons[iconSize]);
 
-        // Set Preview Label Style Sheet
-        ui->linkPreviewLabel->setStyleSheet(QString(STYLE_SHEET_ITEM_PREVIEW_TEMPLATE).arg(ui->linkColorButton->getColor().name())
-                                                                                      .arg(ui->linkBackgroundButton->getColor().name())
-                                                                                      .arg(font.bold() ? QString(STYLESHEET_VALUE_FONTBOLD) : QString(""))
-                                                                                      .arg(font.italic() ? QString(STYLESHEET_VALUE_FONTITALIC) : QString(""))
-                                                                                      .arg(font.pointSize())
-                                                                                      .arg(font.family()));
+        // Check Link Background Color
+        if (ui->linkBackgroundButton->getColor() != -1) {
+            // Set Preview Label Style Sheet
+            ui->linkPreviewLabel->setStyleSheet(QString(STYLE_SHEET_ITEM_PREVIEW_TEMPLATE).arg(QColor(ui->linkColorButton->getColor()).name())
+                                                                                          .arg(QColor(ui->linkBackgroundButton->getColor()).name())
+                                                                                          .arg(font.bold() ? QString(STYLESHEET_VALUE_FONTBOLD) : QString(""))
+                                                                                          .arg(font.italic() ? QString(STYLESHEET_VALUE_FONTITALIC) : QString(""))
+                                                                                          .arg(font.pointSize())
+                                                                                          .arg(font.family()));
 
-        // Set Preview Icon Style Sheet
-        ui->linkPreviewIcon->setStyleSheet(QString(STYLE_SHEET_ITEM_PREVIEW_TEMPLATE).arg(ui->linkColorButton->getColor().name())
-                                                                                     .arg(ui->linkBackgroundButton->getColor().name())
-                                                                                     .arg(font.bold() ? QString(STYLESHEET_VALUE_FONTBOLD) : QString(""))
-                                                                                     .arg(font.italic() ? QString(STYLESHEET_VALUE_FONTITALIC) : QString(""))
-                                                                                     .arg(font.pointSize())
-                                                                                     .arg(font.family()));
+            // Set Preview Icon Style Sheet
+            ui->linkPreviewIcon->setStyleSheet(QString(STYLE_SHEET_ITEM_PREVIEW_TEMPLATE).arg(QColor(ui->linkColorButton->getColor()).name())
+                                                                                         .arg(QColor(ui->linkBackgroundButton->getColor()).name())
+                                                                                         .arg(font.bold() ? QString(STYLESHEET_VALUE_FONTBOLD) : QString(""))
+                                                                                         .arg(font.italic() ? QString(STYLESHEET_VALUE_FONTITALIC) : QString(""))
+                                                                                         .arg(font.pointSize())
+                                                                                         .arg(font.family()));
+        } else {
+            // Set Preview Label Style Sheet
+            ui->linkPreviewLabel->setStyleSheet(QString(STYLE_SHEET_ITEM_PREVIEW_NO_BACKGROUND_TEMPLATE).arg(QColor(ui->linkColorButton->getColor()).name())
+                                                                                          .arg(font.bold() ? QString(STYLESHEET_VALUE_FONTBOLD) : QString(""))
+                                                                                          .arg(font.italic() ? QString(STYLESHEET_VALUE_FONTITALIC) : QString(""))
+                                                                                          .arg(font.pointSize())
+                                                                                          .arg(font.family()));
+
+            // Set Preview Icon Style Sheet
+            ui->linkPreviewIcon->setStyleSheet(QString(STYLE_SHEET_ITEM_PREVIEW_NO_BACKGROUND_TEMPLATE).arg(QColor(ui->linkColorButton->getColor()).name())
+                                                                                         .arg(font.bold() ? QString(STYLESHEET_VALUE_FONTBOLD) : QString(""))
+                                                                                         .arg(font.italic() ? QString(STYLESHEET_VALUE_FONTITALIC) : QString(""))
+                                                                                         .arg(font.pointSize())
+                                                                                         .arg(font.family()));
+        }
 
         // Set Icon
         ui->linkPreviewIcon->setPixmap(defaultIcons[iconSize]);
@@ -511,6 +617,9 @@ void SettingsWindow::on_defaultsButton_clicked()
 
     // Load Settings
     loadSettings();
+
+    // Save Settings
+    saveSettings();
 }
 
 //==============================================================================

@@ -609,8 +609,6 @@ void ListBox::clear()
 
     // Update Indexes
     updateIndexes();
-    // Reset Indexes
-    //resetIndexes();
 }
 
 //==============================================================================
@@ -674,6 +672,14 @@ void ListBox::setDelegate(ItemDelegate* aDelegate)
 }
 
 //==============================================================================
+// Get Delegate
+//==============================================================================
+ItemDelegate* ListBox::getDelegate()
+{
+    return delegate;
+}
+
+//==============================================================================
 // Set Item/Delegate Spacing
 //==============================================================================
 void ListBox::setSpacing(const int& aSpacing)
@@ -688,6 +694,14 @@ void ListBox::setSpacing(const int& aSpacing)
         // Rebuild Cache
         rebuildCache();
     }
+}
+
+//==============================================================================
+// Get Item/Delegate Spacing
+//==============================================================================
+int ListBox::getSpacing()
+{
+    return spacing;
 }
 
 //==============================================================================

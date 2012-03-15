@@ -264,9 +264,19 @@ public:
     //! @param aDelegate New Delegate
     void setDelegate(ItemDelegate* aDelegate);
 
+    //! @brief Get Delegate
+    //! @param none
+    //! @return Delegate
+    ItemDelegate* getDelegate();
+
     //! @brief Set Item/Delegate Spacing
     //! @param aSpacing Item/Delegate Spacing
     void setSpacing(const int& aSpacing);
+
+    //! @brief Get Item/Delegate Spacing
+    //! @param none
+    //! @return Item/Delegate Spacing
+    int getSpacing();
 
     //! @brief Set Item/Delegate Cahce Overhead
     //! @param aOverHead Cache Overhead

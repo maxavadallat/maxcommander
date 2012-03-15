@@ -235,6 +235,16 @@ void CustomPanel::loadSettings()
         // Check UI
         if (ui && ui->fileList) {
             // Set Group
+            settings->setGroup(QString(SETTINGS_GROUP_APPEARANCE));
+            // Get Normal Item Background Color
+            int bgColor = settings->getValue(QString(SETTINGS_KEY_NORMAL_BACKGROUND_COLOR), SETTINGS_VALUE_NORMAL_BACKGROUND_COLOR).toInt();
+            // Set Background Color
+            ui->fileList->setBackgroundColor(bgColor);
+
+            // Update Delegate Icon Size
+            ui->fileList->updateDelegateIconSize(false);
+
+            // Set Group
             settings->setGroup(panelName);
 
 #ifdef Q_OS_WIN
@@ -334,8 +344,9 @@ void CustomPanel::loadSettings()
             ui->header->setItemUseage(0, true);
             // Set Header Item Width
             ui->header->setItemWidth(0, ui->header->getItemMaxSize(0, false));
+
             // Set Sorting
-            ui->header->setSorting(settings->getValue(QString(SETTINGS_KEY_SORTTYPE), 0).toInt(), settings->getValue(QString(SETTINGS_KEY_REVERSE), false).toBool());
+            ui->header->setSorting(settings->getValue(QString(SETTINGS_KEY_SORTTYPE), 0).toInt(), settings->getValue(QString(SETTINGS_KEY_REVERSE), false).toBool(), false);
         }
 
         // Check UI

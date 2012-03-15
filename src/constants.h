@@ -128,12 +128,13 @@
 
 
 // Widget Style Sheet Text Template For Background Color
-#define STYLE_SHEET_BACKGROUND_COLOR_TEMPLATE               "background-color: rgb(%1, %2, %3);"
+#define STYLE_SHEET_BACKGROUND_COLOR_TEMPLATE               "background-color: %1"
 // Change font Button Example Text Template
 #define CHANGE_FONT_BUTTON_EXAMPLE_TEXT_TEMPLATE            "Font: %1, size: %2"
 // Preview Label Widget Style Sheet Template
-//#define STYLE_SHEET_ITEM_PREVIEW_TEMPLATE                   "color: rgb(%1, %2, %3); background-color: rgb(%4, %5, %6);"
 #define STYLE_SHEET_ITEM_PREVIEW_TEMPLATE                   "color: %1; background-color: %2; font: %3 %4 %5pt \"%6\";"
+// Preview Label Widget Style Sheet No Background Template
+#define STYLE_SHEET_ITEM_PREVIEW_NO_BACKGROUND_TEMPLATE     "color: %1; font: %2 %3 %4pt \"%5\";"
 
 // Default File List Panel Name1
 #define DEFAULT_FILELIST_PANEL_NAME1                        "Panel1"
@@ -315,19 +316,19 @@
 
 // Default Color Values
 #define SETTINGS_VALUE_NORMAL_TEXT_COLOR                    QColor(0x00, 0x00, 0x00).rgba()
-#define SETTINGS_VALUE_NORMAL_BACKGROUND_COLOR              QColor(0xFF, 0xFF, 0xFF).rgba()
+#define SETTINGS_VALUE_NORMAL_BACKGROUND_COLOR              -1
 
 #define SETTINGS_VALUE_CURRENT_TEXT_COLOR                   QColor(0x00, 0x00, 0x00).rgba()
 #define SETTINGS_VALUE_CURRENT_BACKGROUND_COLOR             QColor(0xCC, 0xCC, 0xCC).rgba()
 
 #define SETTINGS_VALUE_SELECTED_TEXT_COLOR                  QColor(0xFF, 0x66, 0x00).rgba()
-#define SETTINGS_VALUE_SELECTED_BACKGROUND_COLOR            QColor(0xFF, 0xFF, 0xFF).rgba()
+#define SETTINGS_VALUE_SELECTED_BACKGROUND_COLOR            -1
 
 #define SETTINGS_VALUE_CURRENT_SELECTED_TEXT_COLOR          QColor(0xFF, 0x66, 0x00).rgba()
 #define SETTINGS_VALUE_CURRENT_SELECTED_BACKGROUND_COLOR    QColor(0xCC, 0xCC, 0xCC).rgba()
 
 #define SETTINGS_VALUE_LINK_TEXT_COLOR                      QColor(0x66, 0x66, 0xCC).rgba()
-#define SETTINGS_VALUE_LINK_BACKGROUND_COLOR                QColor(0xFF, 0xFF, 0xFF).rgba()
+#define SETTINGS_VALUE_LINK_BACKGROUND_COLOR                -1
 
 // Default Icon Size Values
 #define SETTINGS_VALUE_ICONSIZE_16X16                       0

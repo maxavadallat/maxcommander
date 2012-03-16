@@ -905,7 +905,7 @@ void FileListDelegate::validateIcon(FileItemData* aFileData)
             // Set Needs Icon Update
             needsIconUpdate = true;
         } else {
-            qDebug() << "FileListDelegate::validateIcon - fileName: " << aFileData->info.fileName() << " - Same File, Same Size";
+            //qDebug() << "FileListDelegate::validateIcon - fileName: " << aFileData->info.fileName() << " - Same File, Same Size";
         }
     } else {
         qDebug() << "FileListDelegate::validateIcon - NO ITEM DATA!";

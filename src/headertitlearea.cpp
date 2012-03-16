@@ -65,7 +65,7 @@ void HeaderTitleArea::setTitleAlignment(const Qt::Alignment& aAlignment)
 //==============================================================================
 // Set Selected
 //==============================================================================
-void HeaderTitleArea::setSelected(const bool& aSelected, const bool& aActivation)
+void HeaderTitleArea::setSelected(const bool& aSelected, const bool& aActivation, const bool& aRefresh)
 {
     // Check Selected
     if (selected != aSelected) {
@@ -74,10 +74,13 @@ void HeaderTitleArea::setSelected(const bool& aSelected, const bool& aActivation
         selected = aSelected;
         // Update Elements
         updateElements();
-        // Update
-        update();
+        // Check Refresh
+        if (aRefresh) {
+            // Update
+            update();
+        }
         // Emit Selection Changed Signal
-        emit titleSelected(aActivation);
+        emit titleSelected(aActivation, aRefresh);
     }
 }
 
@@ -92,7 +95,7 @@ bool HeaderTitleArea::getSelected()
 //==============================================================================
 // Set Reversed
 //==============================================================================
-void HeaderTitleArea::setReversed(const bool& aReversed, const bool& aActivation, const bool& aUpdate)
+void HeaderTitleArea::setReversed(const bool& aReversed, const bool& aActivation, const bool& aRefresh)
 {
     // Check Selected State
     if (selected) {
@@ -104,12 +107,12 @@ void HeaderTitleArea::setReversed(const bool& aReversed, const bool& aActivation
             // Update Elements
             updateElements();
             // Check Update
-            if (aUpdate) {
+            if (aRefresh) {
                 // Update
                 update();
             }
             // Emit Order Changed Signal
-            emit orderChanged(aActivation);
+            emit orderChanged(aActivation, aRefresh);
         }
     }
 }

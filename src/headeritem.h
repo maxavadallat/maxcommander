@@ -128,13 +128,15 @@ signals:
     //! @param aIndex Index
     //! @param aSelected New Selection
     //! @param aActivation Activation
-    void selectionChanged(const int& aIndex, const bool& aSelected, const bool& aActivation);
+    //! @param aRefresh Refresh
+    void selectionChanged(const int& aIndex, const bool& aSelected, const bool& aActivation, const bool& aRefresh);
 
     //! @brief Order Changed Signal
     //! @param aIndex Index
     //! @param aReversed New Order
     //! @param aActivation Activation
-    void orderChanged(const int& aIndex, const bool& aReversed, const bool& aActivation);
+    //! @param aRefresh Refresh
+    void orderChanged(const int& aIndex, const bool& aReversed, const bool& aActivation, const bool& aRefresh);
 
     //! @brief Size Changed Signal
     //! @param aIndex Header Item Index
@@ -184,11 +186,13 @@ protected slots:
 
     //! @brief Title Selected Slot
     //! @param aActivation Activation
-    void titleAreaSelected(const bool& aActivation);
+    //! @param aRefresh Refresh
+    void titleAreaSelected(const bool& aActivation, const bool& aRefresh);
 
     //! @brief Order Changed Slot
     //! @param aActivation Activation
-    void titleAreaOrderChanged(const bool& aActivation);
+    //! @param aRefresh Refresh
+    void titleAreaOrderChanged(const bool& aActivation, const bool& aRefresh);
 
     //! @brief Title Area Right Clicked Slot
     //! @param aPos Mouse Position

@@ -112,7 +112,8 @@ protected slots:
     //! @brief Order Changed Slot
     //! @param aIndex Header Item Index
     //! @param aReversed Reverse Order
-    void headerOrderChanged(const int& aIndex, const bool& aReversed);
+    //! @param aRefresh Refresh
+    void headerOrderChanged(const int& aIndex, const bool& aReversed, const bool& aRefresh);
 
     //! @brief Header Options Launch Slot
     //! @param aPos Mosue Position

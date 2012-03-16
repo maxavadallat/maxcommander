@@ -249,7 +249,7 @@ bool CustomHeader::getItemUseage(const int& aIndex)
 //==============================================================================
 // Header Selection Changed Slot
 //==============================================================================
-void CustomHeader::headerSelectionChanged(const int& aIndex, const bool& aSelected, const bool& aActivation)
+void CustomHeader::headerSelectionChanged(const int& aIndex, const bool& aSelected, const bool& aActivation, const bool& aRefresh)
 {
     //qDebug() << "CustomHeader::headerSelectionChanged - aIndex: " << aIndex << " - aSelected: " << aSelected;
     // Get Header Items Count
@@ -270,8 +270,11 @@ void CustomHeader::headerSelectionChanged(const int& aIndex, const bool& aSelect
         if (aActivation) {
             // Set Active State
             setActive(true);
-            // Update
-            update();
+            // Check Refresh
+            if (aRefresh) {
+                // Update
+                update();
+            }
         }
         // Set Sorting Index
         index = aIndex;
@@ -279,7 +282,7 @@ void CustomHeader::headerSelectionChanged(const int& aIndex, const bool& aSelect
         reverse = itemList[aIndex]->getReversed();
         //qDebug() << "CustomHeader::headerSelectionChanged - orderChanged index: " << index << " - order: " << reverse;
         // Relay Item Selected Signal
-        emit orderChanged(index, reverse);
+        emit orderChanged(index, reverse, aRefresh);
     } else {
         // Reset previous Selected Index
         prevSelIndex = -1;
@@ -289,7 +292,7 @@ void CustomHeader::headerSelectionChanged(const int& aIndex, const bool& aSelect
 //==============================================================================
 // Header Order Changed Slot
 //==============================================================================
-void CustomHeader::headerOrderChanged(const int& aIndex, const bool& aReversed, const bool& aActivation)
+void CustomHeader::headerOrderChanged(const int& aIndex, const bool& aReversed, const bool& aActivation, const bool& aRefresh)
 {
     //qDebug() << "CustomHeader::headerOrderChanged - aIndex: " << aIndex << " - aReversed: " << aReversed;
     // Get Header Items Count
@@ -305,11 +308,14 @@ void CustomHeader::headerOrderChanged(const int& aIndex, const bool& aReversed, 
         if (aActivation) {
             // Set Active State
             setActive(true);
-            // Update
-            update();
+            // Check Refresh
+            if (aRefresh) {
+                // Update
+                update();
+            }
         }
         // Relay Item Selected Signal
-        emit orderChanged(index, reverse);
+        emit orderChanged(index, reverse, aRefresh);
     }
 }
 
@@ -581,8 +587,8 @@ void CustomHeader::appendItemToList(HeaderItem* aItem)
         aItem->setFocusPolicy(Qt::NoFocus);
 
         // Connect Signals
-        connect(aItem, SIGNAL(selectionChanged(int,bool,bool)), this, SLOT(headerSelectionChanged(int,bool,bool)));
-        connect(aItem, SIGNAL(orderChanged(int,bool,bool)), this, SLOT(headerOrderChanged(int,bool,bool)));
+        connect(aItem, SIGNAL(selectionChanged(int,bool,bool,bool)), this, SLOT(headerSelectionChanged(int,bool,bool,bool)));
+        connect(aItem, SIGNAL(orderChanged(int,bool,bool,bool)), this, SLOT(headerOrderChanged(int,bool,bool,bool)));
         connect(aItem, SIGNAL(sizeChanged(int,int,int)), this, SLOT(headerItemSizeChanged(int,int,int)));
         connect(aItem, SIGNAL(posChanged(int,int)), this, SLOT(headerItemPosChanged(int,int)));
 

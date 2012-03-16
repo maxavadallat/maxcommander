@@ -32,8 +32,8 @@ HeaderItem::HeaderItem(QWidget* aParent)
     connect(ui->resizeArea, SIGNAL(dragFinished()), this, SLOT(resizeAreaDragFinished()));
     connect(ui->resizeArea, SIGNAL(doubleClicked()), this, SLOT(resizeAreaDoubleClicked()));
 
-    connect(ui->title, SIGNAL(titleSelected(bool)), this, SLOT(titleAreaSelected(bool)));
-    connect(ui->title, SIGNAL(orderChanged(bool)), this, SLOT(titleAreaOrderChanged(bool)));
+    connect(ui->title, SIGNAL(titleSelected(bool, bool)), this, SLOT(titleAreaSelected(bool, bool)));
+    connect(ui->title, SIGNAL(orderChanged(bool, bool)), this, SLOT(titleAreaOrderChanged(bool, bool)));
     connect(ui->title, SIGNAL(rightButtonReleased(QPoint)), this, SLOT(titleAreaRightClicked(QPoint)));
 
     // ...
@@ -146,7 +146,7 @@ void HeaderItem::setSelected(const bool& aSelected, const bool& aRefresh)
         // Check title Area
         if (ui->title) {
             // Set Selected
-            ui->title->setSelected(selected);
+            ui->title->setSelected(selected, false, aRefresh);
         }
         // Check Refresh
         if (aRefresh) {
@@ -363,7 +363,7 @@ void HeaderItem::resizeAreaDoubleClicked()
 //==============================================================================
 // Title Selected Slot
 //==============================================================================
-void HeaderItem::titleAreaSelected(const bool& aActivation)
+void HeaderItem::titleAreaSelected(const bool& aActivation, const bool& aRefresh)
 {
     //qDebug() << "HeaderItem::titleAreaSelected";
 
@@ -374,20 +374,20 @@ void HeaderItem::titleAreaSelected(const bool& aActivation)
     }
 
     // Emit Item Selected Signal
-    emit selectionChanged(index, selected, aActivation);
+    emit selectionChanged(index, selected, aActivation, aRefresh);
 }
 
 //==============================================================================
 // Order Changed Slot
 //==============================================================================
-void HeaderItem::titleAreaOrderChanged(const bool& aActivation)
+void HeaderItem::titleAreaOrderChanged(const bool& aActivation, const bool& aRefresh)
 {
     //qDebug() << "HeaderItem::titleAreaOrderChanged";
 
     // Check Title Area
     if (ui->title) {
         // Emit Order Changed Signal
-        emit orderChanged(index, ui->title->getReversed(), aActivation);
+        emit orderChanged(index, ui->title->getReversed(), aActivation, aRefresh);
     }
 }
 

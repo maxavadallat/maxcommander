@@ -37,7 +37,8 @@ public:
     //! @brief Set Selected state
     //! @param aSelected Selected State
     //! @param aActivation Activation
-    void setSelected(const bool& aSelected, const bool& aActivation = false);
+    //! @param aRefresh Refresh
+    void setSelected(const bool& aSelected, const bool& aActivation = false, const bool& aRefresh = true);
 
     //! @brief Get Selected State
     //! @param none
@@ -47,8 +48,8 @@ public:
     //! @brief Set Reversed State
     //! @param aReversed Reversed State
     //! @param aActivation Activation
-    //! @param aUpdate Update
-    void setReversed(const bool& aReversed, const bool& aActivation = false, const bool& aUpdate = true);
+    //! @param aRefresh Refresh
+    void setReversed(const bool& aReversed, const bool& aActivation = false, const bool& aRefresh = true);
 
     //! @brief Get Reversed Order State
     //! @param none
@@ -63,11 +64,13 @@ signals:
 
     //! @brief Title Selected Signal
     //! @param aActivation Activation
-    void titleSelected(const bool& aActivation);
+    //! @param aRefresh Refresh
+    void titleSelected(const bool& aActivation, const bool& aRefresh);
 
     //! @brief Order Changed Signal
     //! @param aActivation Activation
-    void orderChanged(const bool& aActivation);
+    //! @param aRefresh Refresh
+    void orderChanged(const bool& aActivation, const bool& aRefresh);
 
     //! @brief Right Button Released
     //! @param aPos Mouse Position

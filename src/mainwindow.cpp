@@ -151,11 +151,11 @@ void MainWindow::moveFiles()
 }
 
 //==============================================================================
-// Rename Current File
+// Launch Rename Current File
 //==============================================================================
-void MainWindow::renameCurrentFile()
+void MainWindow::launchRenameCurrentFile()
 {
-    qDebug() << "MainWindow::renameCurrentFile";
+    qDebug() << "MainWindow::launchRenameCurrentFile";
 
 }
 
@@ -704,8 +704,8 @@ void MainWindow::loadSettings()
         }
 
         // Reload
-        //ui->mainPanel1->ui->fileList->reload();
-        //ui->mainPanel2->ui->fileList->reload();
+        ui->mainPanel1->ui->fileList->reload();
+        ui->mainPanel2->ui->fileList->reload();
     }
 }
 
@@ -735,30 +735,36 @@ void MainWindow::saveSettings()
 //==============================================================================
 void MainWindow::panelFocusChanged(const QString& aPanelName, const bool& aFocused)
 {
-    // Check Focused
-    if (aFocused && cPanelName != aPanelName) {
-        qDebug() << "MainWindow::panelFocusChanged - aPanelName: " << aPanelName << " - aFocused: " << aFocused;
+    //qDebug() << "MainWindow::panelFocusChanged - aPanelName: " << aPanelName << " - aFocused: " << aFocused;
 
+    // Check Current Panel Name
+    if (cPanelName != aPanelName && aFocused) {
         // Set Current Panel Name
         cPanelName = aPanelName;
+
         // Check Current Panel Name
         if (cPanelName == QString(DEFAULT_FILELIST_PANEL_NAME1)) {
             // Set Current Panel Index
             cPanelIndex = 0;
-            // Check UI
-            if (ui->mainPanel2) {
-                // Set Other Panel Inactive
-                ui->mainPanel2->setActive(false);
-            }
         } else if (cPanelName == QString(DEFAULT_FILELIST_PANEL_NAME2)) {
             // Set Current Panel Index
             cPanelIndex = 1;
-            // Check UI
-            if (ui->mainPanel1) {
-                // Set Other Panel Inactive
-                ui->mainPanel1->setActive(false);
-            }
         }
+    }
+
+    // Check Last Focused
+    if (!aFocused) {
+        // Reset Shift Key Pressed
+        shiftKeyPressed = false;
+        // Reset Alt Key Pressed
+        altKeyPressed = false;
+        // Reset Control Key Pressed
+        controlKeyPressed = false;
+        // Reset Meta Key Pressed
+        metaKeyPressed = false;
+
+        // Configure Function Keys
+        configureFunctionKeys();
     }
 }
 
@@ -767,24 +773,25 @@ void MainWindow::panelFocusChanged(const QString& aPanelName, const bool& aFocus
 //==============================================================================
 void MainWindow::panelKeyPressed(const QString& aPanelName, const int& aKey, const Qt::KeyboardModifiers& aModifiers)
 {
-    // Set Current Panel Name
-    cPanelName = aPanelName;
-    // Set Shift Key Pressed
-    shiftKeyPressed = aModifiers & Qt::ShiftModifier;
-    // Set Alt Key Pressed
-    altKeyPressed = aModifiers & Qt::AltModifier;
-    // Set Control Key Pressed
-    controlKeyPressed = aModifiers & Qt::ControlModifier;
-    // Set Meta Key Pressed
-    metaKeyPressed = aModifiers & Qt::MetaModifier;
+    // Check Current Panel Name
+    if (cPanelName == aPanelName) {
+        // Set Shift Key Pressed
+        shiftKeyPressed = aModifiers & Qt::ShiftModifier;
+        // Set Alt Key Pressed
+        altKeyPressed = aModifiers & Qt::AltModifier;
+        // Set Control Key Pressed
+        controlKeyPressed = aModifiers & Qt::ControlModifier;
+        // Set Meta Key Pressed
+        metaKeyPressed = aModifiers & Qt::MetaModifier;
 
-    // Configure Function Keys
-    configureFunctionKeys();
+        // Configure Function Keys
+        configureFunctionKeys();
 
-    // Switch Key
-    switch (aKey) {
-        default: {
-            //qDebug() << "MainWindow::panelKeyPressed - cPanelName: " << cPanelName << " - aKey: " << aKey;
+        // Switch Key
+        switch (aKey) {
+            default: {
+                //qDebug() << "MainWindow::panelKeyPressed - cPanelName: " << cPanelName << " - aKey: " << aKey;
+            }
         }
     }
 }
@@ -844,6 +851,15 @@ void MainWindow::panelKeyReleased(const QString& aPanelName, const int& aKey, co
         case Qt::Key_Delete: {
             // Launch Delete
             launchDelete();
+        } break;
+
+        case Qt::Key_Enter:
+        case Qt::Key_Return: {
+            // Check Modifier Keys
+            if (shiftKeyPressed && altKeyPressed) {
+                qDebug() << "MainWindow::panelKeyReleased - Scan All Dirs For Size...";
+
+            }
         } break;
 
         default: {
@@ -998,7 +1014,7 @@ void MainWindow::on_f6Button_clicked()
     // Check If Shift Key Pressed
     if (shiftKeyPressed) {
         // Rename Current File
-        renameCurrentFile();
+        launchRenameCurrentFile();
     // Check If Alt Key Pressed
     } else if (altKeyPressed) {
 
@@ -1025,8 +1041,7 @@ void MainWindow::on_f7Button_clicked()
 {
     // Check If Shift Key Pressed
     if (shiftKeyPressed) {
-        // Rename Current File
-        renameCurrentFile();
+
     // Check If Alt Key Pressed
     } else if (altKeyPressed) {
         // Launch Search

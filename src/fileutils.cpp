@@ -4,6 +4,7 @@
 #include <QProcess>
 #include <QFileIconProvider>
 #include <QTimer>
+#include <QPainter>
 
 #if defined(Q_OS_WIN)
 
@@ -950,13 +951,25 @@ QImage FileUtils::getFileIconImage(const QFileInfo& aInfo, const int& aWidth, co
     // Release Icon Ref
     ReleaseIconRef(iconRef);
 
+
 #elif defined(Q_OS_WIN)
 
+    // Init Painter
+    QPainter painter(&newImage);
+
+    newImage.fill(QColor(0, 0, 0, 0));
+
+    painter.drawImage(newImage.rect(), QImage(QString(":defaultIcon32x32")));
 
 
 #else // Q_OS_UNIX
 
+    // Init Painter
+    QPainter painter(&newImage);
 
+    newImage.fill(QColor(0, 0, 0, 0));
+
+    painter.drawImage(newImage.rect(), QImage(QString(":defaultIcon32x32")));
 
 #endif // Q_OS_UNIX
 

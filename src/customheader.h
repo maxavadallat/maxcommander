@@ -104,7 +104,8 @@ signals:
     //! @brief Order Changed Signal
     //! @param aIndex Header Item Index
     //! @param aReversed Reverse Order
-    void orderChanged(const int& aIndex, const bool& aReversed);
+    //! @param aRefresh Refresh
+    void orderChanged(const int& aIndex, const bool& aReversed, const bool& aRefresh);
 
     //! @brief Header Item Size Changed Signal
     //! @param aIndex Header Item Index
@@ -126,13 +127,15 @@ protected slots:
     //! @param aIndex Index
     //! @param aSelected New Selection
     //! @param aActivation Activation
-    void headerSelectionChanged(const int& aIndex, const bool& aSelected, const bool& aActivation);
+    //! @param aRefresh Refresh
+    void headerSelectionChanged(const int& aIndex, const bool& aSelected, const bool& aActivation, const bool& aRefresh);
 
     //! @brief Header Item Order Changed Slot
     //! @param aIndex Index
     //! @param aReversed New Order
     //! @param aActivation Activation
-    void headerOrderChanged(const int& aIndex, const bool& aReversed, const bool& aActivation);
+    //! @param aRefresh Refresh
+    void headerOrderChanged(const int& aIndex, const bool& aReversed, const bool& aActivation, const bool& aRefresh);
 
     //! @brief Header Item Size Changed Slot
     //! @param aIndex Index

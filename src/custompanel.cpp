@@ -45,10 +45,10 @@ CustomPanel::CustomPanel(QWidget* aParent)
 
     // Connect Signals
     connect(ui->header, SIGNAL(headerActivated()), this, SLOT(headerActivated()));
-    connect(ui->header, SIGNAL(orderChanged(int,bool)), this, SLOT(headerOrderChanged(int,bool)));
+    connect(ui->header, SIGNAL(orderChanged(int,bool,bool)), this, SLOT(headerOrderChanged(int,bool,bool)));
     connect(ui->header, SIGNAL(headerOptions(QPoint)), this, SLOT(headerOptionsLaunch(QPoint)));
 
-    connect(ui->fileList, SIGNAL(listBoxFocusChanged(QString,bool)), this, SLOT(fileListFocusChanged(QString, bool)));
+    connect(ui->fileList, SIGNAL(listBoxFocusChanged(QString,bool)), this, SLOT(fileListFocusChanged(QString,bool)));
     connect(ui->fileList, SIGNAL(currentDirChanged(QString)), this, SLOT(currentDirChanged(QString)));
     connect(ui->fileList, SIGNAL(currentDirReadFinished()), this, SLOT(currentDirReadFinished()));
     connect(ui->fileList, SIGNAL(fileSelected(FileItemData*)), this, SLOT(fileListFileSelected(FileItemData*)));
@@ -452,7 +452,7 @@ void CustomPanel::fileListFocusChanged(const QString& aPanelName, const bool& aF
 {
     // Check Active State
     if (active != aFocused && panelName == aPanelName) {
-        qDebug() << "CustomPanel::fileListFocusChanged - panelName: " << panelName << " - aFocused: " << aFocused;
+        //qDebug() << "CustomPanel::fileListFocusChanged - panelName: " << panelName << " - aFocused: " << aFocused;
 
         // Set Active State
         active = aFocused;
@@ -482,7 +482,7 @@ void CustomPanel::headerActivated()
 //==============================================================================
 // Header Order Changed Slot
 //==============================================================================
-void CustomPanel::headerOrderChanged(const int& aIndex, const bool& aReversed)
+void CustomPanel::headerOrderChanged(const int& aIndex, const bool& aReversed, const bool& aRefresh)
 {
     qDebug() << "CustomPanel::headerOrderChanged - aIndex: " << aIndex << " - aReversed: " << aReversed;
 
@@ -492,7 +492,7 @@ void CustomPanel::headerOrderChanged(const int& aIndex, const bool& aReversed)
     // Check UI
     if (ui && ui->fileList) {
         // Set Order
-        ui->fileList->setSorting((FileSortType)aIndex, aReversed);
+        ui->fileList->setSorting((FileSortType)aIndex, aReversed, aRefresh);
     }
 }
 

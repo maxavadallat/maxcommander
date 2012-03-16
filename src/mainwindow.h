@@ -67,9 +67,9 @@ public:
     //! @param none
     void moveFiles();
 
-    //! @brief Rename Current File
+    //! @brief Launch Rename Current File
     //! @param none
-    void renameCurrentFile();
+    void launchRenameCurrentFile();
 
     //! @brief Launch Create Dir
     //! @param none
@@ -201,6 +201,9 @@ protected slots:
     //! @brief Preferences Action Triggered Slot
     //! @param none
     void on_actionPreferences_triggered();
+
+protected: // From QMainWindow
+
 
 protected: // Data
 

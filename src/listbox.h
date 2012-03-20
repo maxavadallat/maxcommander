@@ -162,6 +162,7 @@ protected slots:
 
 protected: // Data
     friend class ListBox;
+    friend class FileListBox;
 
     //! Parent List Box
     ListBox*            parentList;

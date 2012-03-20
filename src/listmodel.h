@@ -69,6 +69,7 @@ protected: // Data
     friend class ListModel;
     friend class ItemDelegate;
     friend class ListBox;
+    friend class FileListBox;
     friend class FileListDelegate;
     friend class IconScanner;
 

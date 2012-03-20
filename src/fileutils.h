@@ -474,6 +474,10 @@ public:
     //! @return Dir Size
     qint64 getDirSize();
 
+    //! @brief Stop
+    //! @param none
+    virtual void stop();
+
     //! @brief Destructor
     //! @param none
     virtual ~DirSizeScanner();

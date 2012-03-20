@@ -45,7 +45,8 @@ SOURCES += src/main.cpp\
     src/copyprogressdialog.cpp \
     src/deleteprogressdialog.cpp \
     src/copydialog.cpp \
-    src/viewerwindow.cpp
+    src/viewerwindow.cpp \
+    src/filerenamer.cpp
 
 # Headers
 HEADERS  += src/mainwindow.h \
@@ -70,7 +71,8 @@ HEADERS  += src/mainwindow.h \
     src/copyprogressdialog.h \
     src/deleteprogressdialog.h \
     src/copydialog.h \
-    src/viewerwindow.h
+    src/viewerwindow.h \
+    src/filerenamer.h
 
 # Forms
 FORMS    += ui/mainwindow.ui \
@@ -90,7 +92,8 @@ FORMS    += ui/mainwindow.ui \
     ui/copyprogressdialog.ui \
     ui/deleteprogressdialog.ui \
     ui/copydialog.ui \
-    ui/viewerwindow.ui
+    ui/viewerwindow.ui \
+    ui/filerenamer.ui
 
 macx: {
 LIBS += -framework CoreServices -framework ApplicationServices

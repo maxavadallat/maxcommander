@@ -85,14 +85,28 @@ void FileItemData::startCalculatingDirSize()
     if (!dirSizeScanner && info.isDir()) {
         // Create Dir Size Scanner
         dirSizeScanner = new DirSizeScanner();
-        // Connect Signal
+        // Connect Signals
         connect(dirSizeScanner, SIGNAL(sizeUpdate(qint64)), this, SLOT(dirSizeUpdated(qint64)));
+        connect(dirSizeScanner, SIGNAL(opFinished()), this, SLOT(dirSizeScanfinished()));
+        connect(dirSizeScanner, SIGNAL(opStopped()), this, SLOT(dirSizeScanStopped()));
     }
 
     // Check Info
     if (dirSizeScanner && info.isDir()) {
         // Start Dir Size Calculator
         dirSizeScanner->scanDirSize(info.absoluteFilePath());
+    }
+}
+
+//==============================================================================
+// Stop Calclating Directory Size
+//==============================================================================
+void FileItemData::stopCalculatingDirSize()
+{
+    // Check Info
+    if (dirSizeScanner) {
+        // Stop Dir Size Scanner
+        dirSizeScanner->stop();
     }
 }
 
@@ -131,9 +145,31 @@ void FileItemData::dirSizeUpdated(const qint64& aSize)
 }
 
 //==============================================================================
-// Destructor
+// Directory Size Scan Stopped Slot
 //==============================================================================
-FileItemData::~FileItemData()
+void FileItemData::dirSizeScanStopped()
+{
+    // Emit Size Scan Finished Signal
+    emit sizeScanFinished(index);
+
+    // Delete Dir Size Scanner
+}
+
+//==============================================================================
+// Directory Size Scan Finished Slot
+//==============================================================================
+void FileItemData::dirSizeScanfinished()
+{
+    // Emit Size Scan Finished Signal
+    emit sizeScanFinished(index);
+
+    // Delete Dir Size Scanner
+}
+
+//==============================================================================
+// Delete Dir Size Scanner
+//==============================================================================
+void FileItemData::deleteDirSizeScanner()
 {
     // Check Dir Size Scanner
     if (dirSizeScanner) {
@@ -141,6 +177,15 @@ FileItemData::~FileItemData()
         delete dirSizeScanner;
         dirSizeScanner = NULL;
     }
+}
+
+//==============================================================================
+// Destructor
+//==============================================================================
+FileItemData::~FileItemData()
+{
+    // Delete Dir Size Scanner
+    deleteDirSizeScanner();
 }
 
 
@@ -804,6 +849,21 @@ void FileListDelegate::setData(ListModelItemData* aData, const bool& aUpdate)
     ItemDelegate::setData(aData, aUpdate);
 }
 
+//==============================================================================
+// Get File Info
+//==============================================================================
+QFileInfo FileListDelegate::getFileInfo()
+{
+    // Check Data
+    if (data) {
+        // Get File Item Data
+        FileItemData* fileItemData = reinterpret_cast<FileItemData*>(data);
+
+        return fileItemData->getFileInfo();
+    }
+
+    return QFileInfo();
+}
 
 //==============================================================================
 // Get Item Size
@@ -1257,6 +1317,54 @@ void FileListBox::updateIcons()
 }
 
 //==============================================================================
+// Select All Items
+//==============================================================================
+void FileListBox::selectAll()
+{
+    // Get Data Count
+    int dCount = model ? model->data.count() : 0;
+    // Go Thru Items
+    for (int i=0; i<dCount; i++) {
+        // Get File Item Data
+        FileItemData* fileItemData = reinterpret_cast<FileItemData*>(model->data[i]);
+        // Check File Item Data
+        if (fileItemData && fileItemData->getFileInfo().fileName() != QString("..")) {
+            // Toggle Selected
+            model->data[i]->toggleSelected();
+        }
+    }
+}
+
+//==============================================================================
+// Get File List Box Item
+//==============================================================================
+const FileListDelegate* FileListBox::getItem(const int& aIndex) const
+{
+    // Get Data Count
+    int dCount = model ? model->data.count() : 0;
+    // Check Index
+    if (aIndex >= 0 && aIndex < dCount) {
+        // Get Cached Item Count
+        int ciCount = cache.count();
+
+        // Check First And Last Cached Items
+        if (ciCount > 0 && cache[0]->data && aIndex >= cache[0]->data->index && cache[ciCount-1]->data && aIndex <= cache[ciCount-1]->data->index) {
+            // Go Through Cache
+            for (int i=0; i<ciCount; i++) {
+                // Get Cached Item Delegate
+                FileListDelegate* itemDelegate = reinterpret_cast<FileListDelegate*>(cache[i]);
+                // Check Delegate
+                if (itemDelegate && itemDelegate->data && itemDelegate->data->index == aIndex) {
+                    return (const FileListDelegate*)itemDelegate;
+                }
+            }
+        }
+    }
+
+    return NULL;
+}
+
+//==============================================================================
 // Connect Delegate Signals
 //==============================================================================
 void FileListBox::connectDelegateSignals(ItemDelegate* aItem)
@@ -1594,6 +1702,8 @@ CustomFilelist::CustomFilelist(QWidget* aParent)
     , reverseOrder(false)
     , showHidden(false)
     , needToClear(false)
+    , dirItemsSizeScanActive(false)
+    , sizeScanCurrent(-1)
 {
     qDebug() << "Creating CustomFilelist...";
 
@@ -1789,6 +1899,9 @@ qint64 CustomFilelist::getFileSize(const QString& aFilePath)
 //==============================================================================
 void CustomFilelist::setSorting(const FileSortType& aSorting, const bool& aReverse, const bool& aRefresh)
 {
+    // Stop All Items Size Scan
+    stopAllItemsSizeScan();
+
     // Check New Sorting
     if (sortOrder != aSorting || reverseOrder != aReverse) {
         qDebug() << "CustomFilelist::setSorting - aSorting: " << aSorting << " - aReverse: " << aReverse;
@@ -1825,6 +1938,9 @@ bool CustomFilelist::getSortDirection()
 //==============================================================================
 void CustomFilelist::setShowHiddenFiles(const bool& aShowHidden, const bool& aRefresh)
 {
+    // Stop All Items Size Scan
+    stopAllItemsSizeScan();
+
     // Check Show Hidden Files
     if (showHidden != aShowHidden) {
         // Set Show Hidden
@@ -1951,11 +2067,13 @@ void CustomFilelist::updateDelegateIconSize(const bool& aRefresh)
 //==============================================================================
 void CustomFilelist::reload()
 {
-    qDebug() << "CustomFilelist::reload";
+    // Stop All Items Size Scan
+    stopAllItemsSizeScan();
     // Set Needs Clear
     needToClear = true;
     // Check Dir Reader
     if (dirReader) {
+        qDebug() << "CustomFilelist::reload";
         // Start Direcory Reader
         dirReader->readDir(currentDirPath, sortOrder, reverseOrder, showHidden, nameFilters);
     }
@@ -1966,10 +2084,9 @@ void CustomFilelist::reload()
 //==============================================================================
 void CustomFilelist::setBackgroundColor(const int& aBgColor)
 {
-    qDebug() << "CustomFilelist::setBackgroundColor - aBgColor: " << aBgColor;
-
     // Check UI
     if (ui && ui->fileListBox) {
+        qDebug() << "CustomFilelist::setBackgroundColor - aBgColor: " << aBgColor;
         // Check Color
         if (aBgColor != -1) {
             // Set Style Sheet
@@ -1979,6 +2096,19 @@ void CustomFilelist::setBackgroundColor(const int& aBgColor)
             ui->fileListBox->setStyleSheet(QString(""));
         }
     }
+}
+
+//==============================================================================
+// Get File List Box
+//==============================================================================
+const FileListBox* CustomFilelist::listbox()
+{
+    // Check UI
+    if (ui) {
+        return (const FileListBox*)(ui->fileListBox);
+    }
+
+    return NULL;
 }
 
 //==============================================================================
@@ -2018,10 +2148,9 @@ void CustomFilelist::goUp()
 //==============================================================================
 void CustomFilelist::goForward()
 {
-    qDebug() << "CustomFilelist::goForward - currentDirPath: " << currentDirPath;
-
     // Check UI
     if (ui && ui->fileListBox) {
+        qDebug() << "CustomFilelist::goForward - currentDirPath: " << currentDirPath;
         // Get Current Item Data
         FileItemData* fileItemData = ui->fileListBox->getItemData(ui->fileListBox->getCurrentIndex());
         // Check File Item Data
@@ -2188,6 +2317,14 @@ void CustomFilelist::searchFiles(const QString& aSearchTerm, const QString& aCon
 }
 
 //==============================================================================
+// Delete Files
+//==============================================================================
+void CustomFilelist::scanAllDirsSize()
+{
+
+}
+
+//==============================================================================
 // Clear
 //==============================================================================
 void CustomFilelist::clear()
@@ -2223,6 +2360,79 @@ void CustomFilelist::startFileItemSizeScan(const int& aIndex)
             // Start Dir Size Scan
             fileItemData->startCalculatingDirSize();
         }
+    }
+}
+
+//==============================================================================
+// Stop File Item Size Scan
+//==============================================================================
+void CustomFilelist::stopFileItemSizeScan(const int& aIndex)
+{
+    // Check List Box
+    if (ui && ui->fileListBox) {
+        // Get File Item Data
+        FileItemData* fileItemData = ui->fileListBox->getItemData(aIndex);
+        // Check File Item Data
+        if (fileItemData) {
+            // Stop Dir Size Scan
+            fileItemData->stopCalculatingDirSize();
+        }
+    }
+}
+
+//==============================================================================
+// Start All Items Size Scan
+//==============================================================================
+void CustomFilelist::startAllItemsSizeScan()
+{
+    // Check List Box
+    if (ui && ui->fileListBox && !dirItemsSizeScanActive) {
+        qDebug() << "CustomFilelist::startAllItemsSizeScan";
+        // Set Size Scan Current Item Index
+        sizeScanCurrent = 0;
+
+        // Get File Item Data
+        FileItemData* fileItemData = ui->fileListBox->getItemData(sizeScanCurrent);
+
+        // Go To The First Dir Item
+        while (sizeScanCurrent < ui->fileListBox->count() && fileItemData && (!fileItemData->getFileInfo().isDir() || fileItemData->getFileInfo().fileName() == QString(".."))) {
+            // Inc Size Scan Current Index
+            sizeScanCurrent++;
+            // Get File Item Data
+            fileItemData = ui->fileListBox->getItemData(sizeScanCurrent);
+        }
+
+        // Check File Item Data
+        if (fileItemData && fileItemData->getFileInfo().isDir() && fileItemData->getFileInfo().fileName() != QString("..")) {
+            // Set Dir Items Size Scan Active
+            dirItemsSizeScanActive = true;
+            // Connect Signals
+            connect(fileItemData, SIGNAL(sizeScanFinished(int)), this, SLOT(itemSizeScanFinished(int)));
+            // Start Dir Size Scan
+            fileItemData->startCalculatingDirSize();
+        }
+    }
+}
+
+//==============================================================================
+// Stop All Items Size Scan
+//==============================================================================
+void CustomFilelist::stopAllItemsSizeScan()
+{
+    qDebug() << "CustomFilelist::stopAllItemsSizeScan";
+    // Reset Dir Items Size Scan Active
+    dirItemsSizeScanActive = false;
+    // Check Size Scan Currnt Index
+    if (sizeScanCurrent >= 0 && ui && ui->fileListBox) {
+        // Get File Item Data
+        FileItemData* fileItemData = ui->fileListBox->getItemData(sizeScanCurrent);
+        // Check File Item Data
+        if (fileItemData) {
+            // Stop Dir Size Scan
+            fileItemData->stopCalculatingDirSize();
+        }
+        // Reset Size Scan Current item Index
+        sizeScanCurrent = -1;
     }
 }
 
@@ -2365,9 +2575,10 @@ void CustomFilelist::listBoxKeyPressed(const int& aKey, const Qt::KeyboardModifi
 void CustomFilelist::listBoxKeyReleased(const int& aKey, const Qt::KeyboardModifiers& aModifiers)
 {
     // Get Shift Modifier
-    //bool shiftHold = aModifiers & Qt::ShiftModifier;
-    //bool altHold = aModifiers & Qt::AltModifier;
-    //bool ctrlHold = aModifiers & Qt::ControlModifier;
+    bool shiftPressed = aModifiers & Qt::ShiftModifier;
+    bool altPressed = aModifiers & Qt::AltModifier;
+    bool controlPressed = aModifiers & Qt::ControlModifier;
+    bool metaPressed = aModifiers & Qt::MetaModifier;
 
     // Switch Key
     switch (aKey) {
@@ -2404,7 +2615,7 @@ void CustomFilelist::listBoxKeyReleased(const int& aKey, const Qt::KeyboardModif
                     startFileItemSizeScan(ui->fileListBox->getCurrentIndex());
                 } else {
                     // Stop File Item Seize Scan
-
+                    stopFileItemSizeScan(ui->fileListBox->getCurrentIndex());
                 }
 
                 // Toggle File Item Selection
@@ -2413,8 +2624,13 @@ void CustomFilelist::listBoxKeyReleased(const int& aKey, const Qt::KeyboardModif
         } break;
 
         case Qt::Key_R: {
+#ifdef Q_OS_MAC
             // Check Modifiers
-            if (aModifiers & Qt::ControlModifier) {
+            if (metaPressed) {
+#else // Q_OS_MAC
+            // Check Modifiers
+            if (controlPressed) {
+#endif // Q_OS_MAC
                 // Check UI
                 if (ui && ui->fileListBox) {
                     //qDebug() << "CustomFilelist::listBoxKeyReleased - Ctrl + R";
@@ -2427,8 +2643,13 @@ void CustomFilelist::listBoxKeyReleased(const int& aKey, const Qt::KeyboardModif
         } break;
 
         case Qt::Key_A: {
+#ifdef Q_OS_MAC
             // Check Modifiers
-            if (aModifiers & Qt::ControlModifier) {
+            if (metaPressed) {
+#else // Q_OS_MAC
+            // Check Modifiers
+            if (controlPressed) {
+#endif // Q_OS_MAC
                 // Check UI
                 if (ui && ui->fileListBox) {
                     //qDebug() << "CustomFilelist::listBoxKeyReleased - Ctrl + A";
@@ -2436,6 +2657,26 @@ void CustomFilelist::listBoxKeyReleased(const int& aKey, const Qt::KeyboardModif
                 }
             }
         } break;
+
+        case Qt::Key_Escape: {
+            // Check If Items Size Scan Active
+            if (dirItemsSizeScanActive) {
+                // Stop All Items Size Scan
+                stopAllItemsSizeScan();
+            }
+        } break;
+
+        case Qt::Key_Enter:
+        case Qt::Key_Return: {
+            // Check Modifier Keys
+            if (shiftPressed && altPressed && !metaPressed && !controlPressed) {
+                qDebug() << "CustomFilelist::listBoxKeyReleased - Alt + Shift + Enter - Scan All Dirs For Size...";
+
+                // Start All Dir Items  Size Scan
+                startAllItemsSizeScan();
+            }
+        } break;
+
 
         default: {
             //qDebug() << "CustomFilelist::listBoxKeyReleased - aKey: " << QString("0x%1").arg(aKey, 8, 16, QChar('0'));
@@ -2482,6 +2723,53 @@ void CustomFilelist::listBoxItemIconSizeChanged(const bool& aRefresh)
     if (aRefresh) {
         // Reload
         reload();
+    }
+}
+
+//==============================================================================
+// Item Size Scan Finished Slot
+//==============================================================================
+void CustomFilelist::itemSizeScanFinished(const int& aIndex)
+{
+    // Check UI
+    if (ui && ui->fileListBox) {
+        qDebug() << "CustomFilelist::itemSizeScanFinished - aIndex: " << aIndex;
+
+        // Get File Item Data
+        FileItemData* fileItemData = ui->fileListBox->getItemData(sizeScanCurrent);
+
+        // Check Item Data
+        if (fileItemData) {
+            // Disconnect Signal
+            disconnect(fileItemData, SIGNAL(sizeScanFinished(int)), this, SLOT(itemSizeScanFinished(int)));
+        }
+
+        // Check Dir Items Size Scan Active
+        if (dirItemsSizeScanActive) {
+            // Set Size Scan Current Index
+            sizeScanCurrent = aIndex + 1;
+
+            // Get File Item Data
+            fileItemData = ui->fileListBox->getItemData(sizeScanCurrent);
+
+            // Go To The First Dir Item
+            while (sizeScanCurrent < ui->fileListBox->count() && fileItemData && (!fileItemData->getFileInfo().isDir() || fileItemData->getFileInfo().fileName() == QString(".."))) {
+                // Inc Size Scan Current Index
+                sizeScanCurrent++;
+                // Get File Item Data
+                fileItemData = ui->fileListBox->getItemData(sizeScanCurrent);
+            }
+
+            // Check File Item Data
+            if (fileItemData && fileItemData->getFileInfo().isDir() && fileItemData->getFileInfo().fileName() != QString("..")) {
+                // Set Dir Items Size Scan Active
+                //dirItemsSizeScanActive = true;
+                // Connect Signals
+                connect(fileItemData, SIGNAL(sizeScanFinished(int)), this, SLOT(itemSizeScanFinished(int)));
+                // Start Dir Size Scan
+                fileItemData->startCalculatingDirSize();
+            }
+        }
     }
 }
 

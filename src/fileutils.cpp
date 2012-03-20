@@ -459,6 +459,8 @@ qint64 FileUtils::getDirSize(const QString& aDirPath, qint64& aDirSize, bool& aA
                 // Add File Size To Total Size
                 aDirSize += infoList[i].size();
             }
+
+            //qDebug() << aDirSize;
         }
 /*
         if (fiCount) {
@@ -950,7 +952,6 @@ QImage FileUtils::getFileIconImage(const QFileInfo& aInfo, const int& aWidth, co
 
     // Release Icon Ref
     ReleaseIconRef(iconRef);
-
 
 #elif defined(Q_OS_WIN)
 
@@ -1670,6 +1671,18 @@ qint64 DirSizeScanner::getDirSize()
 }
 
 //==============================================================================
+// Stop
+//==============================================================================
+void DirSizeScanner::stop()
+{
+    // Stop Update Timer
+    stopUpdateTimer();
+
+    // Stop
+    FileUtilThreadBase::stop();
+}
+
+//==============================================================================
 // Start Update Timer
 //==============================================================================
 void DirSizeScanner::startUpdateTimer()
@@ -1679,7 +1692,7 @@ void DirSizeScanner::startUpdateTimer()
 
     // Check Timer ID
     if (updateTimerID == -1) {
-        qDebug() << "DirSizeScanner::startUpdateTimer";
+        //qDebug() << "DirSizeScanner::startUpdateTimer";
         // Start Timer
         updateTimerID = startTimer(DEFAULT_DIR_SIZE_SCANNER_UPDATE_TIMER_INTERVAL);
     }
@@ -1692,7 +1705,7 @@ void DirSizeScanner::stopUpdateTimer()
 {
     // Check Timer ID
     if (updateTimerID != -1) {
-        qDebug() << "DirSizeScanner::stopUpdateTimer";
+        //qDebug() << "DirSizeScanner::stopUpdateTimer";
         // Kill Tiemr
         killTimer(updateTimerID);
         // Reset Timer ID
@@ -1707,7 +1720,7 @@ void DirSizeScanner::notifySizeChanged()
 {
     // Check Prev Dir Size
     if (prevDirSize != dirSize) {
-        qDebug() << "DirSizeScanner::notifySizeChanged - dirSize: " << dirSize;
+        //qDebug() << "DirSizeScanner::notifySizeChanged - dirSize: " << dirSize;
         // Set Prev Dir Size
         prevDirSize = dirSize;
         // Emit Size Update Signal

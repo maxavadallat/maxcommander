@@ -9,5 +9,6 @@
         <file alias="help_black">resources/images/icons/help_black.png</file>
         <file alias="info_black">resources/images/icons/info_black.png</file>
         <file alias="warning_black">resources/images/icons/warning_black.png</file>
+        <file>resources/images/icons/delete.png</file>
     </qresource>
 </RCC>

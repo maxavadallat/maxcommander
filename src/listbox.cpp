@@ -1899,6 +1899,12 @@ void ListBox::handleKeyEvent(const int& aKey, const Qt::KeyboardModifiers& aModi
 {
     // Get Shift Pressed
     bool shiftPressed = aModifiers & Qt::ShiftModifier;
+    // Get Alt Key Pressed
+    bool altPressed = aModifiers & Qt::AltModifier;
+    // Get Control Key Pressed
+    bool controlPressed = aModifiers & Qt::ControlModifier;
+    // Get Meta Key Pressed
+    bool metaPressed = aModifiers & Qt::MetaModifier;
 
     // Switch Key
     switch (aKey) {
@@ -1918,7 +1924,13 @@ void ListBox::handleKeyEvent(const int& aKey, const Qt::KeyboardModifiers& aModi
         case Qt::Key_Insert: {      gotoNextItem(shiftPressed);         } break;
         // Enter Pressed
         case Qt::Key_Enter:
-        case Qt::Key_Return: {      emit itemSelected(currentIndex);    } break;
+        case Qt::Key_Return: {
+            // Check Modifiers
+            if (!shiftPressed && !altPressed && !controlPressed && !metaPressed) {
+                // Emit Item Selected Signal
+                emit itemSelected(currentIndex);
+            }
+        } break;
 
         default:
             //qDebug() << "ListBox::handleKeyEvent - aKey: " << QString("0x%1").arg(aKey, 8, 16, QChar('0'));

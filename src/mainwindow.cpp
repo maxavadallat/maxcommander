@@ -22,6 +22,7 @@
 #include "copyprogressdialog.h"
 #include "deleteprogressdialog.h"
 #include "viewerwindow.h"
+#include "filerenamer.h"
 
 
 // IMPLEMENTATION
@@ -155,8 +156,71 @@ void MainWindow::moveFiles()
 //==============================================================================
 void MainWindow::launchRenameCurrentFile()
 {
-    qDebug() << "MainWindow::launchRenameCurrentFile";
+    // Check UI
+    if (!ui || !ui->mainPanel1)
+        return;
 
+    // Check UI
+    if (!ui || !ui->mainPanel2)
+        return;
+
+    // Init Current File List Item Delegate
+    FileListDelegate* itemDelegate = NULL;
+    // Init Renamer Parent
+    FileListBox* renamerParent = NULL;
+
+    // Check Current Panel
+    if (cPanelIndex == 0) {
+        // Check Panel UI
+        if (ui->mainPanel1->ui && ui->mainPanel1->ui->fileList && ui->mainPanel1->ui->fileList->listbox()) {
+            // Set Renamer Parent
+            renamerParent = (FileListBox*)ui->mainPanel1->ui->fileList->listbox();
+            // Get Current File List Item Delegate
+            itemDelegate = (FileListDelegate*)renamerParent->getItem(ui->mainPanel1->ui->fileList->getCurrentIndex());
+        }
+    } else if (cPanelIndex == 1) {
+        // Check Panel UI
+        if (ui->mainPanel2->ui && ui->mainPanel2->ui->fileList && ui->mainPanel2->ui->fileList->listbox()) {
+            // Set Renamer Parent
+            renamerParent = (FileListBox*)ui->mainPanel2->ui->fileList->listbox();
+            // Get Current File List Item Delegate
+            itemDelegate = (FileListDelegate*)renamerParent->getItem(ui->mainPanel2->ui->fileList->getCurrentIndex());
+        }
+    }
+
+    // Check Current File List Item Delegate
+    if (itemDelegate && itemDelegate->getFileInfo().fileName() != QString("..") ) {
+
+        qDebug() << "MainWindow::launchRenameCurrentFile - src: " << itemDelegate->getFileInfo().fileName();
+
+        //qDebug() << "MainWindow::launchRenameCurrentFile - renamerParent: " << renamerParent->mapToGlobal(renamerParent->pos());
+
+        // Init Event Loop
+        QEventLoop eventLoop;
+
+        // Init File Renamer Window
+        FileRenamer fr(&eventLoop, renamerParent);
+
+        // Set Source/Initial File Name
+        fr.setFileName(itemDelegate->getFileInfo().fileName());
+
+        // Show File Renamer Window
+        fr.showRenamer(itemDelegate);
+
+        // Execute Event Loop
+        eventLoop.exec(QEventLoop::DialogExec);
+
+        // Check If Accepted
+        if (fr.getAccepted()) {
+            // Get Target Name
+            QString targetName = fr.getFileName();
+
+            qDebug() << "MainWindow::launchRenameCurrentFile - trg: " << targetName;
+
+            // Rename File
+
+        }
+    }
 }
 
 //==============================================================================
@@ -851,15 +915,6 @@ void MainWindow::panelKeyReleased(const QString& aPanelName, const int& aKey, co
         case Qt::Key_Delete: {
             // Launch Delete
             launchDelete();
-        } break;
-
-        case Qt::Key_Enter:
-        case Qt::Key_Return: {
-            // Check Modifier Keys
-            if (shiftKeyPressed && altKeyPressed) {
-                qDebug() << "MainWindow::panelKeyReleased - Scan All Dirs For Size...";
-
-            }
         } break;
 
         default: {

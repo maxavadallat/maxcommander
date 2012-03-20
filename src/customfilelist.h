@@ -66,6 +66,10 @@ public:
     //! @param none
     void startCalculatingDirSize();
 
+    //! @brief Stop Calclating Directory Size
+    //! @param none
+    void stopCalculatingDirSize();
+
     //! @brief Get Dir Size
     //! @param none
     //! @return Dir Size If Item Is Dir
@@ -79,15 +83,36 @@ public:
     //! @param none
     virtual ~FileItemData();
 
+signals:
+
+    //! @brief Size Scanning Finished Signal
+    //! @param aIndex Item Data Index
+    void sizeScanFinished(const int& aIndex);
+
 protected slots:
 
     //! @brief Dir Size Updated Slot
     //! @param aSize Dir Size
     void dirSizeUpdated(const qint64& aSize);
 
+    //! @brief Directory Size Scan Stopped Slot
+    //! @param none
+    void dirSizeScanStopped();
+
+    //! @brief Directory Size Scan Finished Slot
+    //! @param none
+    void dirSizeScanfinished();
+
+protected:
+
+    //! @brief Delete Dir Size Scanner
+    //! @param none
+    void deleteDirSizeScanner();
+
 protected: // Data
     friend class ListModel;
     friend class FileListDelegate;
+    friend class CustomFilelist;
 
     //! File Info
     QFileInfo       info;
@@ -163,6 +188,11 @@ public:
     //! @param aData Item Data
     //! @param aUpdate Update
     virtual void setData(ListModelItemData* aData, const bool& aUpdate = false);
+
+    //! @brief Get File Info
+    //! @param none
+    //! @return File Info
+    QFileInfo getFileInfo();
 
     //! @brief Get Item Size
     //! @param none
@@ -380,6 +410,15 @@ public:
     //! @brief Update Icons
     //! @param none
     void updateIcons();
+
+    //! @brief Select All Items
+    //! @param none
+    virtual void selectAll();
+
+    //! @brief Get File List Box Item
+    //! @param aIndex Item Index
+    //! @brief File List Box Item
+    const FileListDelegate* getItem(const int& aIndex) const;
 
     //! @brief Destructor
     //! @param none
@@ -637,6 +676,11 @@ public:
     //! @param aBgColor Background Color
     void setBackgroundColor(const int& aBgColor);
 
+    //! @brief Get File List Box
+    //! @param none
+    //! @brief File List Box
+    const FileListBox* listbox();
+
     //! @brief Destructor
     //! @param none
     virtual ~CustomFilelist();
@@ -698,6 +742,10 @@ public slots:
     //! @param aWhole Whole Word
     void searchFiles(const QString& aSearchTerm, const QString& aContent, const bool& aCase, const bool& aWhole);
 
+    //! @brief Delete Files
+    //! @param none
+    void scanAllDirsSize();
+
 signals:
 
     //! @brief Current Directory Changed Signal
@@ -748,6 +796,18 @@ protected:
     //! @param aIndex File Index
     void startFileItemSizeScan(const int& aIndex);
 
+    //! @brief Stop File Item Size Scan
+    //! @param aIndex File Index
+    void stopFileItemSizeScan(const int& aIndex);
+
+    //! @brief Start All Items Size Scan
+    //! @param none
+    void startAllItemsSizeScan();
+
+    //! @brief Stop All Items Size Scan
+    //! @param none
+    void stopAllItemsSizeScan();
+
 protected slots:
 
     //! @brief Dir Reader Entry Found Slot
@@ -792,6 +852,10 @@ protected slots:
     //! @param aRefresh Refresh/Reload
     void listBoxItemIconSizeChanged(const bool& aRefresh = true);
 
+    //! @brief Item Size Scan Finished Slot
+    //! @param aIndex Item Index
+    void itemSizeScanFinished(const int& aIndex);
+
 protected: // Data
     friend class MainWindow;
     friend class CustomPanel;
@@ -814,12 +878,10 @@ protected: // Data
     QString                 prevFileName;
     //! Previous File Index
     int                     prevFileIndex;
-
     //! Directory Reader
     DirReader*              dirReader;
 
     //! Icon Scanner
-
 
     //! Deleter
 
@@ -841,6 +903,10 @@ protected: // Data
     QStringList             nameFilters;
     //! Need To Clear Flag
     bool                    needToClear;
+    //! Dir Items Size Scan Active
+    bool                    dirItemsSizeScanActive;
+    //! Size Scan Current Item
+    int                     sizeScanCurrent;
 
     //! Operation Queue
     QStringList             opQueue;

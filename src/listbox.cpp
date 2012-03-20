@@ -660,12 +660,16 @@ void ListBox::setDelegate(ItemDelegate* aDelegate)
 
     // Check Delegate
     if (delegate) {
+/*
         // Get Delegate Size
         delegateSize = (orientation == LBOVertical) ? delegate->getItemSize().height() : delegate->getItemSize().width();
         // Set Full Item Size
         fullItemSize = delegateSize + spacing;
         // Rebuild Cache
         rebuildCache();
+*/
+        // Set Delegate Size
+        setDelegateSize((orientation == LBOVertical) ? delegate->getItemSize().height() : delegate->getItemSize().width());
 
         qDebug() << "ListBox::setDelegate - delegateSize: " << delegateSize;
     }
@@ -680,9 +684,36 @@ ItemDelegate* ListBox::getDelegate()
 }
 
 //==============================================================================
+// Set Delegate Size
+//==============================================================================
+void ListBox::setDelegateSize(const int& aSize, const bool& aRefresh)
+{
+    // Check Delegate Size
+    if (delegateSize != aSize) {
+        // Set Delegate Size
+        delegateSize = aSize;
+        // Set Full Item Size
+        fullItemSize = delegateSize + spacing;
+        // Check Refresh
+        if (aRefresh) {
+            // Rebuild Cache
+            rebuildCache();
+        }
+    }
+}
+
+//==============================================================================
+// Get Delegate Size
+//==============================================================================
+int ListBox::getDelegateSize()
+{
+    return delegateSize;
+}
+
+//==============================================================================
 // Set Item/Delegate Spacing
 //==============================================================================
-void ListBox::setSpacing(const int& aSpacing)
+void ListBox::setSpacing(const int& aSpacing, const bool& aRefresh)
 {
     // Check Spacing
     if (spacing != aSpacing) {
@@ -691,8 +722,11 @@ void ListBox::setSpacing(const int& aSpacing)
         spacing = aSpacing;
         // Set Full Item Size
         fullItemSize = delegateSize + spacing;
-        // Rebuild Cache
-        rebuildCache();
+        // Check Refresh
+        if (aRefresh) {
+            // Rebuild Cache
+            rebuildCache();
+        }
     }
 }
 
@@ -2381,6 +2415,19 @@ void ListBox::focusInEvent(QFocusEvent* aEvent)
     // Check Event
     if (aEvent) {
         qDebug() << "ListBox::focusInEvent";
+
+        // ...
+    }
+}
+
+//==============================================================================
+// Focus Out Event
+//==============================================================================
+void ListBox::focusOutEvent(QFocusEvent* aEvent)
+{
+    // Check Event
+    if (aEvent) {
+        qDebug() << "ListBox::focusOutEvent";
 
         // ...
     }

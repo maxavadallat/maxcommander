@@ -270,9 +270,20 @@ public:
     //! @return Delegate
     ItemDelegate* getDelegate();
 
+    //! @brief Set Delegate Size
+    //! @param aSize Delegate Size
+    //! @param aRefresh Refresh
+    void setDelegateSize(const int& aSize, const bool& aRefresh = true);
+
+    //! @brief Get Delegate Size
+    //! @param none
+    //! @return Delegate Size
+    int getDelegateSize();
+
     //! @brief Set Item/Delegate Spacing
     //! @param aSpacing Item/Delegate Spacing
-    void setSpacing(const int& aSpacing);
+    //! @param aRefresh Refresh
+    void setSpacing(const int& aSpacing, const bool& aRefresh = true);
 
     //! @brief Get Item/Delegate Spacing
     //! @param none
@@ -616,6 +627,10 @@ protected: // From QFrame
     //! @brief Focus In Event
     //! @param aEvent Focus Event
     virtual void focusInEvent(QFocusEvent* aEvent);
+
+    //! @brief Focus Out Event
+    //! @param aEvent Focus Event
+    virtual void focusOutEvent(QFocusEvent* aEvent);
 
 protected: // Data
 

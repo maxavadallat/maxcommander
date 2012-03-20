@@ -118,19 +118,6 @@ bool ViewerWindow::loadFile(const QString& aFilePath)
     if (fileInfo.exists() && !fileInfo.isDir() && fileInfo.size() <= DEFAULT_VIEWER_MAX_FILE_SIZE && fileName != aFilePath && ui && ui->viewer) {
         // Set File Name
         fileName = aFilePath;
-/*
-        // Check Document
-        if (ui->viewer->document()) {
-
-            // Set Document
-            ui->viewer->document()->setHtml(QUrl::fromLocalFile(fileName).toString());
-
-        } else {
-            qDebug() << "ViewerWindow::loadFile - NO VIEWER DOCUMENT";
-
-            return false;
-        }
-*/
         // Init Text File
         QFile textFile(fileName);
         // Open File
@@ -146,6 +133,8 @@ bool ViewerWindow::loadFile(const QString& aFilePath)
             // Return True
             return true;
         }
+    // Check If File Is A Dir
+    } else if (fileInfo.isDir()) {
 
     } else {
         qDebug() << "ViewerWindow::loadFile - The Shit Hit The Fan...";

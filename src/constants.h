@@ -38,7 +38,6 @@
 #define OPERATION_ID_DELETE                                 0x0005
 #define OPERATION_ID_SEARCH                                 0x0006
 
-
 // Icon Sizes
 #define DEFAULT_ICON_SIZE_SMALL                             16
 #define DEFAULT_ICON_SIZE_MEDIUM                            32
@@ -346,6 +345,11 @@
 #define SETTINGS_VALUE_DEFAULT_HEADER_ITEM_WIDTH            32
 // Default Item Spacing
 #define SETTINGS_VALUE_DEFAULT_ITEM_SPACING                 2
+
+#define DEFAULT_CONTENT_MARGIN_LEFT                         1
+#define DEFAULT_CONTENT_MARGIN_TOP                          1
+#define DEFAULT_CONTENT_MARGIN_RIGHT                        1
+#define DEFAULT_CONTENT_MARGIN_BOTTOM                       1
 
 // Status Panel Text Template
 #define DEFAULT_STATUS_PANEL_TEXT_TEMPLATE                  "%1 File(s) - %L2K of %L3K bytes free"

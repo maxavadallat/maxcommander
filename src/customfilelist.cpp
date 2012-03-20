@@ -408,7 +408,7 @@ void FileListDelegate::createNameLayout()
         // Set Spacing
         nameLayout->setSpacing(0);
         // Set Content Margins
-        nameLayout->setContentsMargins(DEFAULT_LISTBOX_ITEM_SPACING, 0, 0, 0);
+        nameLayout->setContentsMargins(DEFAULT_LISTBOX_ITEM_SPACING, DEFAULT_CONTENT_MARGIN_TOP, 0, 0);
         // Add Widget To Layout
         nameLayout->addWidget(iconLabel, 0, 0, 1, 1);
         // Add Widget To Layout
@@ -435,6 +435,8 @@ void FileListDelegate::createIconLabel()
         iconLabel = new FileListIcon(this);
         // Set Minimum size
         iconLabel->setMinimumSize(iconSize, iconSize);
+        // SET MARGIN
+        iconLabel->setContentsMargins(0, DEFAULT_CONTENT_MARGIN_TOP, 0, 0);
         // Init Size Policy
         QSizePolicy sizePolicy1(QSizePolicy::Minimum, QSizePolicy::Preferred);
         sizePolicy1.setHorizontalStretch(0);
@@ -460,7 +462,8 @@ void FileListDelegate::createNameLabel()
         // Set Minimum size
         nameLabel->setMinimumSize(DEFAULT_FILELIST_ITEM_HEIGHT, iconSize);
         // Set Margin
-        nameLabel->setMargin(DEFAULT_LISTBOX_ITEM_SPACING >> 1);
+        //nameLabel->setMargin(DEFAULT_LISTBOX_ITEM_SPACING >> 1);
+        nameLabel->setContentsMargins(DEFAULT_LISTBOX_ITEM_SPACING, DEFAULT_CONTENT_MARGIN_TOP, 0, 0);
         // Set Text Alignment
         nameLabel->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
         // Init Size Policy
@@ -486,7 +489,7 @@ void FileListDelegate::createExtLabel()
         extLabel->setMinimumSize(DEFAULT_FILELIST_ITEM_HEIGHT, iconSize);
         // Set Margin
         //extLabel->setMargin(DEFAULT_LISTBOX_ITEM_SPACING >> 1);
-        extLabel->setContentsMargins(0, 0, DEFAULT_LISTBOX_ITEM_SPACING, 0);
+        extLabel->setContentsMargins(0, DEFAULT_CONTENT_MARGIN_TOP, DEFAULT_LISTBOX_ITEM_SPACING, 0);
         // Set Text Alignment
         extLabel->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
         // Init Size Policy
@@ -512,7 +515,7 @@ void FileListDelegate::createSizeLabel()
         sizeLabel->setMinimumSize(0, iconSize);
         // Set Margin
         //sizeLabel->setMargin(DEFAULT_LISTBOX_ITEM_SPACING >> 1);
-        sizeLabel->setContentsMargins(0, 0, DEFAULT_LISTBOX_ITEM_SPACING, 0);
+        sizeLabel->setContentsMargins(0, DEFAULT_CONTENT_MARGIN_TOP, DEFAULT_LISTBOX_ITEM_SPACING, 0);
         // Set Text Alignment
         sizeLabel->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
         // Init Size Policy
@@ -537,7 +540,8 @@ void FileListDelegate::createDateLabel()
         // Set Minimum size
         dateLabel->setMinimumSize(0, iconSize);
         // Set Margin
-        dateLabel->setMargin(DEFAULT_LISTBOX_ITEM_SPACING >> 1);
+        //dateLabel->setMargin(DEFAULT_LISTBOX_ITEM_SPACING >> 1);
+        dateLabel->setContentsMargins(0, DEFAULT_CONTENT_MARGIN_TOP, 0, 0);
         // Set Text Alignment
         dateLabel->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
         // Init Size Policy
@@ -562,7 +566,8 @@ void FileListDelegate::createOwnrLabel()
         // Set Minimum size
         ownrLabel->setMinimumSize(0, iconSize);
         // Set Margin
-        ownrLabel->setMargin(DEFAULT_LISTBOX_ITEM_SPACING >> 1);
+        //ownrLabel->setMargin(DEFAULT_LISTBOX_ITEM_SPACING >> 1);
+        ownrLabel->setContentsMargins(0, DEFAULT_CONTENT_MARGIN_TOP, 0, 0);
         // Set Text Alignment
         ownrLabel->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
         // Init Size Policy
@@ -587,7 +592,8 @@ void FileListDelegate::createPermsLabel()
         // Set Minimum size
         permLabel->setMinimumSize(0, iconSize);
         // Set Margin
-        permLabel->setMargin(DEFAULT_LISTBOX_ITEM_SPACING >> 1);
+        //permLabel->setMargin(DEFAULT_LISTBOX_ITEM_SPACING >> 1);
+        permLabel->setContentsMargins(0, DEFAULT_CONTENT_MARGIN_TOP, 0, 0);
         // Set Text Alignment
         permLabel->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
         // Init Size Policy
@@ -1266,6 +1272,10 @@ void FileListBox::setItemIconSize(const int& aIconSize, const bool& aRefresh)
             FileListDelegate* fileListDelegate = reinterpret_cast<FileListDelegate*>(delegate);
             // Set Icon Size
             fileListDelegate->setIconSize(iconSize);
+
+            // Set Delegate Size
+            //setDelegateSize( , aRefresh);
+
             // Emit Icon Size Changed Signel
             emit itemIconSizeChanged(aRefresh);
         }
@@ -1293,6 +1303,15 @@ void FileListBox::updateDelegateIconSize(const bool& aRefresh)
         fileListDelegate->updateIconSize();
         // Set Icon Size
         setItemIconSize(fileListDelegate->getIconSize(), aRefresh);
+
+        // Check Orientation
+        if (orientation == LBOVertical) {
+            // Set Delegate Size
+            setDelegateSize(fileListDelegate->getItemSize().height(), aRefresh);
+        } else {
+            // Set Delegate Size
+            setDelegateSize(fileListDelegate->getItemSize().width(), aRefresh);
+        }
     }
 }
 
@@ -1463,13 +1482,13 @@ void FileListBox::focusInEvent(QFocusEvent* aEvent)
     if (aEvent) {
         // Check Focus
         if (!gotFocus) {
-            //qDebug() << "FileListBox::focusInEvent - panelName: " << panelName;
+            qDebug() << "FileListBox::focusInEvent - panelName: " << panelName;
             // Set Got Focus
             gotFocus = true;
             // Trigger Current Item Update
             triggerItemUpdate(currentIndex);
             // Grab Keyboard
-            grabKeyboard();
+            //grabKeyboard();
             // Emit List Box Focused Signal
             emit listBoxFocusChanged(panelName, gotFocus);
         }
@@ -1485,13 +1504,13 @@ void FileListBox::focusOutEvent(QFocusEvent* aEvent)
     if (aEvent) {
         // Check Focus
         if (gotFocus) {
-            //qDebug() << "FileListBox::focusOutEvent - panelName: " << panelName;
+            qDebug() << "FileListBox::focusOutEvent - panelName: " << panelName;
             // Reset Got Focus
             gotFocus = false;
             // Trigger Current Item Update
             triggerItemUpdate(currentIndex);
             // Release Keyboard
-            releaseKeyboard();
+            //releaseKeyboard();
             // Emit List Box Focused Signal
             emit listBoxFocusChanged(panelName, gotFocus);
         }
@@ -2028,12 +2047,12 @@ void CustomFilelist::setActive(const bool& aActive)
 //==============================================================================
 // Set Icon Size
 //==============================================================================
-void CustomFilelist::setItemIconSize(const int& aIconSize)
+void CustomFilelist::setItemIconSize(const int& aIconSize, const bool& aRefresh)
 {
     // Check UI
     if (ui && ui->fileListBox) {
         // Set Icon Size
-        ui->fileListBox->setItemIconSize(aIconSize);
+        ui->fileListBox->setItemIconSize(aIconSize, aRefresh);
     }
 }
 
@@ -2045,6 +2064,31 @@ int CustomFilelist::getItemIconSize()
     // Check UI
     if (ui && ui->fileListBox) {
         return ui->fileListBox->getItemIconSize();
+    }
+
+    return 0;
+}
+
+//==============================================================================
+// Set List Box Item/Delegate Spacing
+//==============================================================================
+void CustomFilelist::setItemSpacing(const int& aSpacing, const bool& aRefresh)
+{
+    // Check UI
+    if (ui && ui->fileListBox) {
+        // Set Spacing
+        ui->fileListBox->setSpacing(aSpacing, aRefresh);
+    }
+}
+
+//==============================================================================
+// Get List Box Item/Delegate Spacing
+//==============================================================================
+int CustomFilelist::getItemSpacing()
+{
+    // Check UI
+    if (ui && ui->fileListBox) {
+        return ui->fileListBox->getSpacing();
     }
 
     return 0;

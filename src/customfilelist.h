@@ -657,12 +657,23 @@ public:
 
     //! @brief Set Item Icon Size
     //! @param aIconSize Icon Size
-    void setItemIconSize(const int& aIconSize);
+    //! @param aRefresh Refresh
+    void setItemIconSize(const int& aIconSize, const bool& aRefresh = true);
 
     //! @brief Get Item Icon Size
     //! @param none
     //! @return Icon Size
     int getItemIconSize();
+
+    //! @brief Set List Box Item/Delegate Spacing
+    //! @param aSpacing List Box Item/Delegate Spacing
+    //! @param aRefresh Refresh
+    void setItemSpacing(const int& aSpacing, const bool& aRefresh = true);
+
+    //! @brief Get List Box Item/Delegate Spacing
+    //! @param none
+    //! @return Item/Delegate Spacing
+    int getItemSpacing();
 
     //! @brief Update Delegate Icon Size
     //! @param aRefresh Refresh

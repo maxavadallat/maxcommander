@@ -244,6 +244,9 @@ void CustomPanel::loadSettings()
             // Update Delegate Icon Size
             ui->fileList->updateDelegateIconSize(false);
 
+            // Set Spacing
+            ui->fileList->setItemSpacing(settings->getValue(QString(SETTINGS_KEY_ITEM_SPACING), SETTINGS_VALUE_DEFAULT_ITEM_SPACING).toInt(), false);
+
             // Set Group
             settings->setGroup(panelName);
 

@@ -571,7 +571,7 @@ void CustomPanel::fileListFileSelected(FileItemData* aFileItemData)
                 }
             }
         // Check File If Dir
-        } else if ((fileInfo.isDir() && !fileInfo.isBundle()) || (fileInfo.isBundle() && !execBundles)) {
+        } else if ((fileInfo.isDir() && !fileInfo.isBundle()) || (fileInfo.isBundle() && !execBundles) || (fileInfo.fileName() == QString(".."))) {
             // Check File Name
             if (fileInfo.fileName() == QString("..")) {
                 qDebug() << "CustomPanel::fileListFileSelected - cdup";

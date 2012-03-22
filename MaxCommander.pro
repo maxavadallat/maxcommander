@@ -9,7 +9,7 @@ VERSION = 0.0.1
 TEMPLATE = app
 
 # Qt Config
-QT += core gui
+QT += core gui webkit network
 
 macx: {
 # Icon
@@ -46,7 +46,10 @@ SOURCES += src/main.cpp\
     src/deleteprogressdialog.cpp \
     src/copydialog.cpp \
     src/viewerwindow.cpp \
-    src/filerenamer.cpp
+    src/filerenamer.cpp \
+    src/helpdialog.cpp \
+    src/treewindow.cpp \
+    src/aboutdialog.cpp
 
 # Headers
 HEADERS  += src/mainwindow.h \
@@ -72,7 +75,10 @@ HEADERS  += src/mainwindow.h \
     src/deleteprogressdialog.h \
     src/copydialog.h \
     src/viewerwindow.h \
-    src/filerenamer.h
+    src/filerenamer.h \
+    src/helpdialog.h \
+    src/treewindow.h \
+    src/aboutdialog.h
 
 # Forms
 FORMS    += ui/mainwindow.ui \
@@ -93,7 +99,10 @@ FORMS    += ui/mainwindow.ui \
     ui/deleteprogressdialog.ui \
     ui/copydialog.ui \
     ui/viewerwindow.ui \
-    ui/filerenamer.ui
+    ui/filerenamer.ui \
+    ui/helpdialog.ui \
+    ui/treewindow.ui \
+    ui/aboutdialog.ui
 
 macx: {
 LIBS += -framework CoreServices -framework ApplicationServices
@@ -103,6 +112,7 @@ LIBS += -framework CoreServices -framework ApplicationServices
 RESOURCES += \
     maxcommander.qrc
 
+# RC File
 RC_FILE = maxcommander.rc
 
 UI_DIR = ./obj
@@ -113,6 +123,14 @@ OBJECTS_DIR = ./obj
 
 RCC_DIR = ./obj
 
+macx: {
+# Help Files
+helpFiles.path  += Help
+helpFiles.files += resources/help/maxcommander.html
+# Add Help Files to Bundle
+QMAKE_BUNDLE_DATA += helpFiles
+}
 
-
+OTHER_FILES += \
+    resources/help/maxcommander.html
 

@@ -49,7 +49,7 @@ signals:
     void dialogClosed(const int& aButton);
 
 protected slots:
-
+/*
     //! @brief Ok Button Clicked Slot
     //! @param none
     void on_okButton_clicked();
@@ -57,7 +57,7 @@ protected slots:
     //! @brief Cancel Button Clicked Slot
     //! @param none
     void on_cancelButton_clicked();
-
+*/
 protected: // Data
 
     //! UI

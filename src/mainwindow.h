@@ -8,6 +8,7 @@
 #include <QMainWindow>
 #include <QDialogButtonBox>
 
+#include "constants.h"
 
 // FORWARD DECLARATIONS
 
@@ -27,7 +28,9 @@ class CopyDialog;
 class CopyProgressDialog;
 class DeleteProgressDialog;
 class ViewerWindow;
-
+class HelpDialog;
+class TreeWindow;
+class AboutDialog;
 
 // DECLARATIONS
 
@@ -39,9 +42,14 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    //! @brief Constructor
-    //! @param aParent Parent Widget
-    explicit MainWindow(QWidget* aParent = NULL);
+
+    //! @brief Get Main Window Instance - Static Constructor
+    //! @param none
+    static MainWindow* getInstance();
+
+    //! @brief Release Instance
+    //! @param none
+    void release();
 
     //! @brief Launch Help
     //! @param none
@@ -111,12 +119,6 @@ public:
     //! @param none
     void saveSettings();
 
-    //! @brief Destructor
-    //! @param none
-    virtual ~MainWindow();
-
-protected:
-
     //! @brief Show Info Dialog
     //! @param aTitle Dialog Title Text
     //! @param aInfoMsg Dialog Info Text
@@ -129,6 +131,25 @@ protected:
     //! @param aButtons Dialog Buttons To Use
     //! @return Confirmation Index
     int showConfirmation(const QString& aTitle, const QString& aConfirmMsg, const QDialogButtonBox::StandardButtons& aButtons, const QDialogButtonBox::StandardButton& aDefault = QDialogButtonBox::NoButton);
+
+    //! @brief Show Status Message
+    //! @param aMessage Message
+    //! @param aTimeOut Message Timeout
+    void showStatusMessage(const QString& aMessage, const int& aTimeOut = DEFAULT_STATUS_MESSAGE_TIMEOUT);
+
+    //! @brief Clear Status Message
+    //! @param none
+    void clearStatusMessage();
+
+protected:
+
+    //! @brief Constructor
+    //! @param aParent Parent Widget
+    MainWindow(QWidget* aParent = NULL);
+
+    //! @brief Destructor
+    //! @param none
+    virtual ~MainWindow();
 
     //! @brief Show Create Dir Dialog
     //! @param aDirPath Initial Directory Path
@@ -198,18 +219,44 @@ protected slots:
     //! @param none
     void on_f10Button_clicked();
 
-    //! @brief Preferences Action Triggered Slot
+    //! @brief Action Preferences Triggered Slot
     //! @param none
     void on_actionPreferences_triggered();
 
-protected: // From QMainWindow
+    //! @brief Action New Triggered Slot
+    //! @param none
+    void on_actionNew_triggered();
 
+    //! @brief Action Quit Triggered Slot
+    //! @param none
+    void on_actionQuit_triggered();
+
+    //! @brief Action Select All Triggered Slot
+    //! @param none
+    void on_actionSelectAll_triggered();
+
+    //! @brief Action Reload Panel Triggered Slot
+    //! @param none
+    void on_actionReloadPanel_triggered();
+
+    //! @brief Action Swap Panels Triggered Slot
+    //! @param none
+    void on_actionSwapPanels_triggered();
+
+    //! @brief Action Show Hidden Triggered Slot
+    //! @param none
+    void on_actionShowHidden_triggered();
+
+    //! @brief Action About Triggered Slot
+    //! @param none
+    void on_actionAbout_triggered();
 
 protected: // Data
 
+    // Reference Count
+    int                 refCount;
     //! UI
     Ui::MainWindow*     ui;
-
     //! Shift Key Pressed
     bool                shiftKeyPressed;
     //! Alt Key Pressed
@@ -236,6 +283,10 @@ protected: // Data
     SearchDialog*       searchDialog;
     //! Copy Dialog
     CopyDialog*         copyDialog;
+    //! Help Dialog
+    HelpDialog*         helpDialog;
+    //! Tree Window
+    TreeWindow*         treeWindow;
 };
 
 #endif // MAINWINDOW_H

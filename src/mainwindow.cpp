@@ -23,15 +23,55 @@
 #include "deleteprogressdialog.h"
 #include "viewerwindow.h"
 #include "filerenamer.h"
+#include "helpdialog.h"
+#include "treewindow.h"
+#include "aboutdialog.h"
+
+
+// Main Window Singleton
+static MainWindow* mainWindow = NULL;
 
 
 // IMPLEMENTATION
+
+//==============================================================================
+// Get Main Window Instance
+//==============================================================================
+MainWindow* MainWindow::getInstance()
+{
+    // Check Main Window
+    if (!mainWindow) {
+        // Create Main Window
+        mainWindow = new MainWindow();
+    } else {
+        // Increase Ref Count
+        mainWindow->refCount++;
+    }
+
+    return mainWindow;
+}
+
+//==============================================================================
+// Release Instance
+//==============================================================================
+void MainWindow::release()
+{
+    // Decrease Ref Count
+    refCount--;
+
+    // Check Ref Count
+    if (refCount <= 0) {
+        // Delete Main Window
+        delete this;
+    }
+}
 
 //==============================================================================
 // Constructor
 //==============================================================================
 MainWindow::MainWindow(QWidget* aParent)
     : QMainWindow(aParent)
+    , refCount(1)
     , ui(new Ui::MainWindow)
     , shiftKeyPressed(false)
     , altKeyPressed(false)
@@ -46,11 +86,16 @@ MainWindow::MainWindow(QWidget* aParent)
     , confirmDialog(NULL)
     , searchDialog(NULL)
     , copyDialog(NULL)
+    , helpDialog(NULL)
+    , treeWindow(NULL)
 {
     qDebug() << "Creating MainWindow...";
 
     // Setup UI
     ui->setupUi(this);
+
+    // Set Main Window Instance
+    mainWindow = this;
 
     // Load Settings
     loadSettings();
@@ -65,6 +110,9 @@ MainWindow::MainWindow(QWidget* aParent)
 
     // ...
 
+    // Show Status Message
+    showStatusMessage(tr("Ready."));
+
     qDebug() << "Creating MainWindow...done";
 }
 
@@ -75,6 +123,17 @@ void MainWindow::launchHelp()
 {
     qDebug() << "MainWindow::launchHelp";
 
+    // Check Help Dialog
+    if (!helpDialog) {
+        // Create Help Dialog
+        helpDialog = new HelpDialog();
+    }
+
+    // Check Help Dialog
+    if (helpDialog) {
+        // Show Help Dialog
+        helpDialog->show();
+    }
 }
 
 //==============================================================================
@@ -84,6 +143,19 @@ void MainWindow::showTree()
 {
     qDebug() << "MainWindow::showTree";
 
+    // Check Tree Window
+    if (!treeWindow) {
+        // Create Tree Window
+        treeWindow = new TreeWindow();
+    }
+
+    // Check Tree Window
+    if (treeWindow) {
+        // Set Root
+
+        // Show Tree Window
+        treeWindow->show();
+    }
 }
 
 //==============================================================================
@@ -540,6 +612,8 @@ void MainWindow::launchSearch()
 void MainWindow::launchOptions()
 {
     qDebug() << "MainWindow::launchOptions";
+    // Save Settings First
+    saveSettings();
     // Init Event Loop
     QEventLoop eventLoop;
     // Init Settigns Window
@@ -548,7 +622,6 @@ void MainWindow::launchOptions()
     sw.show();
     // Execute Event Loop
     eventLoop.exec(QEventLoop::DialogExec);
-
     // Load Settings
     loadSettings();
 }
@@ -1208,6 +1281,90 @@ void MainWindow::on_actionPreferences_triggered()
 }
 
 //==============================================================================
+// Show Status Message
+//==============================================================================
+void MainWindow::showStatusMessage(const QString& aMessage, const int& aTimeOut)
+{
+    // Check UI
+    if (ui && ui->statusBar) {
+        // Show Status Message
+        ui->statusBar->showMessage(aMessage, aTimeOut);
+    }
+}
+
+//==============================================================================
+// Clear Status Message
+//==============================================================================
+void MainWindow::clearStatusMessage()
+{
+    // Check UI
+    if (ui && ui->statusBar) {
+        // Clear Status Message
+        ui->statusBar->clearMessage();
+    }
+}
+
+//==============================================================================
+// On Action New Triggered Slot
+//==============================================================================
+void MainWindow::on_actionNew_triggered()
+{
+
+}
+
+//==============================================================================
+// On Action Quit Triggered Slot
+//==============================================================================
+void MainWindow::on_actionQuit_triggered()
+{
+    // Exit Application
+    exitApp();
+}
+
+//==============================================================================
+// On Action Select All Triggered Slot
+//==============================================================================
+void MainWindow::on_actionSelectAll_triggered()
+{
+
+}
+
+//==============================================================================
+// On Action Reload Panel Triggered Slot
+//==============================================================================
+void MainWindow::on_actionReloadPanel_triggered()
+{
+
+}
+
+//==============================================================================
+// On Action Swap Panels Triggered Slot
+//==============================================================================
+void MainWindow::on_actionSwapPanels_triggered()
+{
+
+}
+
+//==============================================================================
+// On Action Show Hidden Files Triggered Slot
+//==============================================================================
+void MainWindow::on_actionShowHidden_triggered()
+{
+
+}
+
+//==============================================================================
+// On Action About Triggered Slot
+//==============================================================================
+void MainWindow::on_actionAbout_triggered()
+{
+    // Init About Dialog
+    AboutDialog ad;
+    // Exec Dialog
+    ad.exec();
+}
+
+//==============================================================================
 // Destructor
 //==============================================================================
 MainWindow::~MainWindow()
@@ -1263,9 +1420,26 @@ MainWindow::~MainWindow()
         copyDialog = NULL;
     }
 
+    // Check Help Dialog
+    if (helpDialog) {
+        // Help Dialog
+        delete helpDialog;
+        helpDialog = NULL;
+    }
+
+    // Check Tree Window
+    if (treeWindow) {
+        // Delete Tree Window
+        delete treeWindow;
+        treeWindow = NULL;
+    }
+
     // Delete UI
     delete ui;
 
     qDebug() << "Deleting MainWindow...done";
 }
+
+
+
 

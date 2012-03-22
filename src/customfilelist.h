@@ -5,9 +5,8 @@
 
 #include <QFrame>
 #include <QImage>
-#include <QPixmap>
-#include <QIcon>
 #include <QFileInfo>
+#include <QFileSystemWatcher>
 #include <QDir>
 #include <QLabel>
 #include <QGridLayout>
@@ -435,6 +434,22 @@ signals:
     //! @param aRefresh Refresh
     void itemIconSizeChanged(const bool& aRefresh);
 
+protected:
+
+    //! @brief Start Icon Update Timer
+    //! @param none
+    void startIconUpdateTimer();
+
+    //! @brief Stop Icon Update Timer
+    //! @param none
+    void stopIconUpdateTimer();
+
+protected slots:
+
+    //! @brief Get Item Icons
+    //! @param none
+    void getItemIcons();
+
 protected: // From ListBox
 
     //! @brief Connect Delegate Signals
@@ -468,6 +483,10 @@ protected: // From QFrame
     //! @param aEvent Focus Event
     virtual void focusOutEvent(QFocusEvent* aEvent);
 
+    //! @brief Timer Event
+    //! @param aEvent Timer Event
+    virtual void timerEvent(QTimerEvent* aEvent);
+
 protected: // Data
     friend class FileListDelegate;
 
@@ -485,6 +504,8 @@ protected: // Data
     int             prevFCI;
     //! Previous Cache Count
     int             prevCC;
+    //! Icon Update Timer ID
+    int             iconUpdateTimerID;
 };
 
 
@@ -867,6 +888,10 @@ protected slots:
     //! @param aIndex Item Index
     void itemSizeScanFinished(const int& aIndex);
 
+    //! @brief File System Directory Changed Slot
+    //! @param aPath Directory Path
+    void fsDirectoryChanged(const QString& aPath);
+
 protected: // Data
     friend class MainWindow;
     friend class CustomPanel;
@@ -918,6 +943,9 @@ protected: // Data
     bool                    dirItemsSizeScanActive;
     //! Size Scan Current Item
     int                     sizeScanCurrent;
+
+    //! File System Watcher
+    QFileSystemWatcher*     fileSystemWatcher;
 
     //! Operation Queue
     QStringList             opQueue;

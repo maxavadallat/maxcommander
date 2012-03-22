@@ -31,7 +31,7 @@ void HeaderTitleArea::setTitle(const QString& aTitle)
 {
     // Check Title Label
     if (ui->titleLabel) {
-        qDebug() << "HeaderTitleArea::setTitle - aTitle: " << aTitle;
+        //qDebug() << "HeaderTitleArea::setTitle - aTitle: " << aTitle;
         // Set Text
         ui->titleLabel->setText(aTitle);
     }
@@ -69,7 +69,7 @@ void HeaderTitleArea::setSelected(const bool& aSelected, const bool& aActivation
 {
     // Check Selected
     if (selected != aSelected) {
-        qDebug() << "HeaderTitleArea::setSelected - aSelected: " << aSelected;
+        //qDebug() << "HeaderTitleArea::setSelected - aSelected: " << aSelected;
         // Set Selected
         selected = aSelected;
         // Update Elements

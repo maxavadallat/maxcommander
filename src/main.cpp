@@ -138,9 +138,9 @@ int main(int argc, char* argv[])
 
 
         // Init Main Window
-        MainWindow mw;
+        MainWindow* mw = MainWindow::getInstance();
         // Show Main Window
-        mw.show();
+        mw->show();
 
 
 /*
@@ -216,6 +216,11 @@ int main(int argc, char* argv[])
         int result = app.exec();
 
         //dsScanner.stop();
+        // Check Main Window Instance
+        if (mw) {
+            // Release
+            mw->release();
+        }
 
         return result;
     }

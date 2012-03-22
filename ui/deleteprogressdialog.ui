@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>320</width>
-    <height>253</height>
+    <height>229</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -20,6 +20,12 @@
    <string>Dialog</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
+   <property name="margin">
+    <number>8</number>
+   </property>
+   <property name="spacing">
+    <number>8</number>
+   </property>
    <item row="0" column="0">
     <layout class="QGridLayout" name="fileTitleLayout">
      <item row="0" column="0">

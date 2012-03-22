@@ -2,6 +2,7 @@
 // INCLUDES
 
 #include <QDebug>
+
 #include "listmodel.h"
 
 
@@ -97,6 +98,7 @@ ListModelItemData::~ListModelItemData()
 ListModel::ListModel(QObject* aParent)
     : QObject(aParent)
 {
+    qDebug() << "Creating ListModel...done";
 }
 
 //==============================================================================
@@ -246,7 +248,7 @@ void ListModel::removeItem(const int& aIndex, const bool& aUpdate)
 //==============================================================================
 void ListModel::clear()
 {
-    qDebug() << "ListModel::clear";
+    //qDebug() << "ListModel::clear";
     // Get Count
     int dCount = data.count();
     // Go Thru Items

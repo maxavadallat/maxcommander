@@ -52,6 +52,9 @@
        <height>64</height>
       </size>
      </property>
+     <property name="placeholderText">
+      <string>Enter file name...</string>
+     </property>
     </widget>
    </item>
    <item row="0" column="1">

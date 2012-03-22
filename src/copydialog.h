@@ -4,6 +4,12 @@
 // INCLUDES
 
 #include <QDialog>
+#include <QPushButton>
+
+
+// CONSTANTS
+
+#define DIALOG_RESULT_QUEUE         3
 
 
 // FORWARD DECLARATIONS
@@ -49,10 +55,20 @@ public:
     //! @param none
     virtual ~CopyDialog();
 
+protected slots:
+
+    //! @brief Queue Button Pressed
+    //! @param none
+    void queueButtonPressed();
+
 protected:
 
     //! UI
     Ui::CopyDialog*     ui;
+    // Cancel Button
+    QPushButton*        cancelButton;
+    // Queue Button
+    QPushButton*        queueButton;
 };
 
 #endif // COPYDIALOG_H

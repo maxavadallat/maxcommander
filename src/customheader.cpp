@@ -24,17 +24,17 @@ CustomHeader::CustomHeader(QWidget *parent)
     ui->setupUi(this);
 
     // Set Up Header Items
-    ui->filename->setTitle(QString("File name"));
+    ui->filename->setTitle(tr("File name"));
     ui->filename->setTitleAlignment(Qt::AlignVCenter | Qt::AlignLeft);
-    ui->extension->setTitle(QString("Ext"));
+    ui->extension->setTitle(tr("Ext"));
     ui->extension->setTitleAlignment(Qt::AlignVCenter | Qt::AlignLeft);
-    ui->size->setTitle(QString("Size"));
+    ui->size->setTitle(tr("Size"));
     ui->size->setTitleAlignment(Qt::AlignVCenter | Qt::AlignRight);
-    ui->date->setTitle(QString("Date"));
+    ui->date->setTitle(tr("Date"));
     ui->date->setTitleAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
-    ui->permissions->setTitle(QString("Perms"));
+    ui->permissions->setTitle(tr("Perms"));
     ui->permissions->setTitleAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
-    ui->ownership->setTitle(QString("Owner"));
+    ui->ownership->setTitle(tr("Owner"));
     ui->ownership->setTitleAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
 
     // Append Items To Item List
@@ -299,7 +299,7 @@ void CustomHeader::headerOrderChanged(const int& aIndex, const bool& aReversed, 
     int hiCount = itemList.count();
     // Check Index
     if (aIndex >= 0 && aIndex < hiCount && (index != aIndex || reverse != aReversed || aActivation)) {
-        qDebug() << "CustomHeader::headerOrderChanged - orderChanged index: " << aIndex << " - order: " << aReversed;
+        //qDebug() << "CustomHeader::headerOrderChanged - orderChanged index: " << aIndex << " - order: " << aReversed;
         // Set Order Index
         index = aIndex;
         // Set Reversed State
@@ -364,7 +364,7 @@ void CustomHeader::headerItemPosChanged(const int& aIndex, const int& aDelta)
 
             // Check Prev Item Right
             if (prevItemRight > currPosX) {
-                qDebug() << "CustomHeader::headerItemPosChanged - Previous Item Right is OFF!";
+                //qDebug() << "CustomHeader::headerItemPosChanged - Previous Item Right is OFF!";
                 // Adjust Prev Item Width
                 prevItem->setWidth(prevItem->width() - (prevItemRight - currPosX));
             }
@@ -449,7 +449,9 @@ void CustomHeader::headerItemResizeAreaDoubleClicked(const int& aIndex)
 //==============================================================================
 void CustomHeader::headerItemRightClicked(const int& aIndex, const QPoint& aPos)
 {
-    qDebug() << "CustomHeader::headerItemRightClicked - aIndex: " << aIndex;
+    Q_UNUSED(aIndex);
+
+    //qDebug() << "CustomHeader::headerItemRightClicked - aIndex: " << aIndex;
 /*
     if (aIndex == 0) {
         // Get Header Items Count
@@ -570,7 +572,7 @@ void CustomHeader::appendItemToList(HeaderItem* aItem)
 {
     // Check Item
     if (aItem) {
-        qDebug() << "CustomHeader::appendItemToList";
+        //qDebug() << "CustomHeader::appendItemToList";
         // Get Last Item
         HeaderItem* lastItem = (itemList.count() > 0) ? itemList[itemList.count()-1] : NULL;
         // Check Last Item

@@ -15,9 +15,18 @@
 CopyDialog::CopyDialog(QWidget* aParent)
     : QDialog(aParent)
     , ui(new Ui::CopyDialog)
+    , cancelButton(NULL)
+    , queueButton(NULL)
 {
     // Setup UI
     ui->setupUi(this);
+
+    // Add Buttons
+    cancelButton = ui->buttonBox->addButton(QString("Cancel"), QDialogButtonBox::RejectRole);
+    queueButton = ui->buttonBox->addButton(QString("Queue"), QDialogButtonBox::AcceptRole);
+
+    // Connect Signals
+    connect(queueButton, SIGNAL(clicked()), this, SLOT(queueButtonPressed()));
 
     qDebug() << "Creating CopyDialog...done";
 }
@@ -70,6 +79,17 @@ QString CopyDialog::getTarget()
     }
 
     return QString("");
+}
+
+//==============================================================================
+// Queue Button Pressed
+//==============================================================================
+void CopyDialog::queueButtonPressed()
+{
+    qDebug() << "CopyDialog::queueButtonPressed";
+
+    // Set Dialog Result
+    setResult(DIALOG_RESULT_QUEUE);
 }
 
 //==============================================================================

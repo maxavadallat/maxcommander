@@ -235,9 +235,9 @@ void FileListIcon::paintEvent(QPaintEvent* aEvent)
         QPainter painter(this);
 
         // Set Render Hint
-        painter.setRenderHint(QPainter::Antialiasing);
-        painter.setRenderHint(QPainter::HighQualityAntialiasing);
-        painter.setRenderHint(QPainter::SmoothPixmapTransform);
+        //painter.setRenderHint(QPainter::Antialiasing);
+        //painter.setRenderHint(QPainter::HighQualityAntialiasing);
+        //painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
         // Check Icon
         if (!icon.isNull()) {
@@ -659,13 +659,12 @@ void FileListDelegate::resetIcon(const bool& aUpdate)
         case DEFAULT_ICON_SIZE_LARGE:   icon = QImage(QString(":defaultIcon64x64")); break;
     }
 
-    qDebug() << "FileListDelegate::resetIcon - iconSize: " << iconSize;
+    //qDebug() << "FileListDelegate::resetIcon - iconSize: " << iconSize;
 
     // Check Icon Label
-    if (iconLabel && aUpdate) {
-        // Set Pixmap
-        //iconLabel->setPixmap(QPixmap::fromImage(icon));
-        iconLabel->setIcon(icon);
+    if (iconLabel) {
+        // Set Icon
+        iconLabel->setIcon(icon, aUpdate);
     }
 
     // Set Needs Icon Update
@@ -744,7 +743,7 @@ void FileListDelegate::updateUI()
             if (fileItemData->info.isSymLink()) {
                 // Set Name Label Text
                 nameLabel->setText(QString("%1 -> %2").arg(fileItemData->info.fileName()).arg(fileItemData->info.symLinkTarget()));
-            } else if (fileItemData->info.isBundle()) {
+            } else if (fileItemData->info.isBundle() && fileItemData->info.fileName() != QString("..")) {
                 // Set Name Label Text
                 nameLabel->setText(fileItemData->info.baseName());
             } else if (fileItemData->info.isDir()) {
@@ -1168,7 +1167,7 @@ FileListBox::FileListBox(QWidget* aParent)
 //==============================================================================
 void FileListBox::setHeader(CustomHeader* aHeader)
 {
-    qDebug() << "FileListBox::setHeader";
+    //qDebug() << "FileListBox::setHeader";
     // Set Header
     header = aHeader;
     // Check Delegate
@@ -1195,7 +1194,7 @@ CustomHeader* FileListBox::getHeader()
 //==============================================================================
 void FileListBox::setPanelName(const QString& aPanelName)
 {
-    qDebug() << "FileListBox::setPanelName - aPanelName: " << aPanelName;
+    //qDebug() << "FileListBox::setPanelName - aPanelName: " << aPanelName;
     // Set Panel Name
     panelName = aPanelName;
 
@@ -1263,7 +1262,7 @@ void FileListBox::setItemIconSize(const int& aIconSize, const bool& aRefresh)
 {
     // Check Icon Size
     if (iconSize != aIconSize) {
-        qDebug() << "FileListBox::setItemIconSize - aIconSize: " << aIconSize;
+        //qDebug() << "FileListBox::setItemIconSize - aIconSize: " << aIconSize;
         // Set Icon Size
         iconSize = aIconSize;
         // Check Delegate
@@ -1272,10 +1271,8 @@ void FileListBox::setItemIconSize(const int& aIconSize, const bool& aRefresh)
             FileListDelegate* fileListDelegate = reinterpret_cast<FileListDelegate*>(delegate);
             // Set Icon Size
             fileListDelegate->setIconSize(iconSize);
-
             // Set Delegate Size
             //setDelegateSize( , aRefresh);
-
             // Emit Icon Size Changed Signel
             emit itemIconSizeChanged(aRefresh);
         }
@@ -1436,8 +1433,13 @@ void FileListBox::updateCachedItemsData(const bool& aUpdateUI)
         //qDebug() << "==================================================================";
         //qDebug() << "FileListBox::updateCachedItemsData - Starting Icon Scanner...";
 
-        // Scan Icons
-        iconScanner->scanIcons(&cache, firstVisibleItem, (reinterpret_cast<FileListDelegate*>(delegate))->iconSize);
+        // Start Scan Icons
+        //iconScanner->scanIcons(&cache, firstVisibleItem, (reinterpret_cast<FileListDelegate*>(delegate))->iconSize);
+
+        //QTimer::singleShot(10, this, SLOT(getItemIcons()));
+        //getItemIcons();
+        // Start Icon Update Timer
+        startIconUpdateTimer();
 
         //qDebug() << "==================================================================";
     }
@@ -1449,6 +1451,12 @@ void FileListBox::updateCachedItemsData(const bool& aUpdateUI)
 //==============================================================================
 void FileListBox::clearCache()
 {
+    // Check Icon Scanner
+    if (iconScanner) {
+        // Stop Icon Scanner
+        iconScanner->stop();
+    }
+
     ListBox::clearCache();
 
     // Reset Previous First Cached Item
@@ -1474,6 +1482,44 @@ void FileListBox::handleKeyEvent(const int& aKey, const Qt::KeyboardModifiers& a
 }
 
 //==============================================================================
+// Start Icon Update Timer
+//==============================================================================
+void FileListBox::startIconUpdateTimer()
+{
+    // Stop Timer First
+    stopIconUpdateTimer();
+
+    // Check Timer ID
+    if (iconUpdateTimerID == -1) {
+        // Start Timer
+        iconUpdateTimerID = startTimer(DEFAULT_FILE_LIST_BOX_ICON_UPDATE_TIMEOUT);
+    }
+}
+
+//==============================================================================
+// Stop Icon Update Timer
+//==============================================================================
+void FileListBox::stopIconUpdateTimer()
+{
+    // Check Timer ID
+    if (iconUpdateTimerID != -1) {
+        // Kill Timer
+        killTimer(iconUpdateTimerID);
+        // Reset Timer ID
+        iconUpdateTimerID = -1;
+    }
+}
+
+//==============================================================================
+// Get Item Icons
+//==============================================================================
+void FileListBox::getItemIcons()
+{
+    // Scan Icons
+    iconScanner->scanIcons(&cache, firstVisibleItem, (reinterpret_cast<FileListDelegate*>(delegate))->iconSize);
+}
+
+//==============================================================================
 // Focus In Event
 //==============================================================================
 void FileListBox::focusInEvent(QFocusEvent* aEvent)
@@ -1482,7 +1528,7 @@ void FileListBox::focusInEvent(QFocusEvent* aEvent)
     if (aEvent) {
         // Check Focus
         if (!gotFocus) {
-            qDebug() << "FileListBox::focusInEvent - panelName: " << panelName;
+            //qDebug() << "FileListBox::focusInEvent - panelName: " << panelName;
             // Set Got Focus
             gotFocus = true;
             // Trigger Current Item Update
@@ -1504,7 +1550,7 @@ void FileListBox::focusOutEvent(QFocusEvent* aEvent)
     if (aEvent) {
         // Check Focus
         if (gotFocus) {
-            qDebug() << "FileListBox::focusOutEvent - panelName: " << panelName;
+            //qDebug() << "FileListBox::focusOutEvent - panelName: " << panelName;
             // Reset Got Focus
             gotFocus = false;
             // Trigger Current Item Update
@@ -1513,6 +1559,25 @@ void FileListBox::focusOutEvent(QFocusEvent* aEvent)
             //releaseKeyboard();
             // Emit List Box Focused Signal
             emit listBoxFocusChanged(panelName, gotFocus);
+        }
+    }
+}
+
+//==============================================================================
+// Timer Event
+//==============================================================================
+void FileListBox::timerEvent(QTimerEvent* aEvent)
+{
+    ListBox::timerEvent(aEvent);
+
+    // Check Event
+    if (aEvent) {
+        // Check Timer ID
+        if (aEvent->timerId() == iconUpdateTimerID) {
+            // Stop Icon Update Timer
+            stopIconUpdateTimer();
+            // Get Item Icons
+            getItemIcons();
         }
     }
 }
@@ -1572,19 +1637,27 @@ IconScanner::IconScanner(QObject* aParent)
 //==============================================================================
 void IconScanner::scanIcons(const CacheType* aCache, const int& aFVI, const int& aIconSize)
 {
-    qDebug() << "IconScanner::scanIcons - aIconSize: " << aIconSize;
+    //qDebug() << "IconScanner::scanIcons - aIconSize: " << aIconSize;
     // Lock
     mutex.lock();
+
     // Set Cache
     delegateCache = (CacheType*)aCache;
+
     // Set First Visible Index
     firstVisibleIndex = aFVI;
+
     // Set Icon Size
     iconSize = aIconSize;
+
     // Unlock
     mutex.unlock();
-    // Start New Operation
-    startOperation();
+
+    // Check Delegate Cache
+    if (delegateCache && delegateCache->count() > 0) {
+        // Start New Operation
+        startOperation();
+    }
 }
 
 //==============================================================================
@@ -1600,8 +1673,7 @@ void IconScanner::updateItemIcon(const int& aIndex)
         DEFAULT_THREAD_ABORT_CHECK;
         // Check If Needs Icon
         if (fileListDelegate && fileListDelegate->getNeedsIconUpdate()) {
-            DEFAULT_THREAD_ABORT_CHECK;
-            qDebug() << "IconScanner::updateItemIcon - fileName: " << reinterpret_cast<FileItemData*>(fileListDelegate->getData())->getFileInfo().fileName();
+            //qDebug() << "IconScanner::updateItemIcon - fileName: " << reinterpret_cast<FileItemData*>(fileListDelegate->getData())->getFileInfo().fileName();
             //qDebug() << "IconScanner::updateItemIcon - aIndex: " << aIndex;
             DEFAULT_THREAD_ABORT_CHECK;
             // Sleep
@@ -1630,7 +1702,7 @@ void IconScanner::doOperation()
     // Get Cached Items Count
     int ciCount = delegateCache ? delegateCache->count() : 0;
 
-    qDebug() << "IconScanner::doOperation - iconSize: " << iconSize << " - ciCount: " << ciCount;
+    //qDebug() << "IconScanner::doOperation - iconSize: " << iconSize << " - ciCount: " << ciCount;
 
     DEFAULT_THREAD_ABORT_CHECK;
 
@@ -1646,7 +1718,7 @@ void IconScanner::doOperation()
         startIndex++;
     }
 
-    qDebug() << "IconScanner::doOperation - fvi: " << firstVisibleIndex << " - si: " << startIndex;
+    //qDebug() << "IconScanner::doOperation - fvi: " << firstVisibleIndex << " - si: " << startIndex;
 
     DEFAULT_THREAD_ABORT_CHECK;
 
@@ -1670,7 +1742,7 @@ void IconScanner::doOperation()
 
     DEFAULT_THREAD_ABORT_CHECK;
 
-    qDebug() << "IconScanner::doOperation...done";
+    //qDebug() << "IconScanner::doOperation...done";
 }
 
 //==============================================================================
@@ -1723,6 +1795,7 @@ CustomFilelist::CustomFilelist(QWidget* aParent)
     , needToClear(false)
     , dirItemsSizeScanActive(false)
     , sizeScanCurrent(-1)
+    , fileSystemWatcher(NULL)
 {
     qDebug() << "Creating CustomFilelist...";
 
@@ -1757,6 +1830,12 @@ CustomFilelist::CustomFilelist(QWidget* aParent)
 
     // Get Settings Instance
     settings = Settings::getInstance();
+
+    // Create File System Watcher
+    fileSystemWatcher = new QFileSystemWatcher();
+
+    // Connect Signals
+    connect(fileSystemWatcher, SIGNAL(directoryChanged(QString)), this, SLOT(fsDirectoryChanged(QString)));
 
     qDebug() << "Creating CustomFilelist...done";
 }
@@ -2019,7 +2098,7 @@ void CustomFilelist::setFileListHeader(CustomHeader* aHeader)
 {
     // Check UI
     if (ui && ui->fileListBox) {
-        qDebug() << "CustomFilelist::setFileListHeader";
+        //qDebug() << "CustomFilelist::setFileListHeader";
         // Set Header
         ui->fileListBox->setHeader(aHeader);
     }
@@ -2032,7 +2111,7 @@ void CustomFilelist::setActive(const bool& aActive)
 {
     // Chek UI
     if (ui && ui->fileListBox) {
-        qDebug() << "CustomFilelist::setActive - panelName: " << panelName << " - aActive: " << aActive;
+        //qDebug() << "CustomFilelist::setActive - panelName: " << panelName << " - aActive: " << aActive;
         // Check Active
         if (aActive) {
             // Set Focus
@@ -2115,6 +2194,13 @@ void CustomFilelist::reload()
     stopAllItemsSizeScan();
     // Set Needs Clear
     needToClear = true;
+
+    // Check File system Watcher
+    if (fileSystemWatcher) {
+        // Add Path
+        fileSystemWatcher->removePaths(fileSystemWatcher->files() + fileSystemWatcher->directories());
+    }
+
     // Check Dir Reader
     if (dirReader) {
         qDebug() << "CustomFilelist::reload";
@@ -2130,7 +2216,7 @@ void CustomFilelist::setBackgroundColor(const int& aBgColor)
 {
     // Check UI
     if (ui && ui->fileListBox) {
-        qDebug() << "CustomFilelist::setBackgroundColor - aBgColor: " << aBgColor;
+        //qDebug() << "CustomFilelist::setBackgroundColor - aBgColor: " << aBgColor;
         // Check Color
         if (aBgColor != -1) {
             // Set Style Sheet
@@ -2160,7 +2246,7 @@ const FileListBox* CustomFilelist::listbox()
 //==============================================================================
 void CustomFilelist::gotoHome()
 {
-    qDebug() << "CustomFilelist::gotoHome";
+    //qDebug() << "CustomFilelist::gotoHome";
     // Set Current Dir
     setCurrentDir(QDir::homePath());
 }
@@ -2170,7 +2256,7 @@ void CustomFilelist::gotoHome()
 //==============================================================================
 void CustomFilelist::gotoRoot()
 {
-    qDebug() << "CustomFilelist::gotoRoot";
+    //qDebug() << "CustomFilelist::gotoRoot";
     // Set Current Dir
     setCurrentDir(QString("/"));
 }
@@ -2180,7 +2266,7 @@ void CustomFilelist::gotoRoot()
 //==============================================================================
 void CustomFilelist::goUp()
 {
-    qDebug() << "CustomFilelist::goUp - currentDirPath: " << currentDirPath;
+    //qDebug() << "CustomFilelist::goUp - currentDirPath: " << currentDirPath;
     // Get Prev Dir Name
     prevDirName = FileUtils::getDirName(getCurrentDir());
     // Set Current Dir
@@ -2194,7 +2280,7 @@ void CustomFilelist::goForward()
 {
     // Check UI
     if (ui && ui->fileListBox) {
-        qDebug() << "CustomFilelist::goForward - currentDirPath: " << currentDirPath;
+        //qDebug() << "CustomFilelist::goForward - currentDirPath: " << currentDirPath;
         // Get Current Item Data
         FileItemData* fileItemData = ui->fileListBox->getItemData(ui->fileListBox->getCurrentIndex());
         // Check File Item Data
@@ -2210,7 +2296,7 @@ void CustomFilelist::goForward()
 //==============================================================================
 void CustomFilelist::goBack()
 {
-    qDebug() << "CustomFilelist::goBack - currentDirPath: " << currentDirPath;
+    //qDebug() << "CustomFilelist::goBack - currentDirPath: " << currentDirPath;
     // Go Up - For Now
     goUp();
 }
@@ -2361,11 +2447,13 @@ void CustomFilelist::searchFiles(const QString& aSearchTerm, const QString& aCon
 }
 
 //==============================================================================
-// Delete Files
+// Scan All Dir Sizes Files
 //==============================================================================
 void CustomFilelist::scanAllDirsSize()
 {
+    qDebug() << "CustomFilelist::scanAllDirsSize";
 
+    // ...
 }
 
 //==============================================================================
@@ -2373,20 +2461,23 @@ void CustomFilelist::scanAllDirsSize()
 //==============================================================================
 void CustomFilelist::clear()
 {
+    // Init Mutex
     QMutex mutex;
-
+    // Lock Mutex
     mutex.lock();
-
-    qDebug() << "CustomFilelist::clear";
-
+    // Check File system Watcher
+    if (fileSystemWatcher) {
+        // Add Path
+        fileSystemWatcher->removePaths(fileSystemWatcher->files() + fileSystemWatcher->directories());
+    }
+    //qDebug() << "CustomFilelist::clear";
     // Check List Box
     if (ui && ui->fileListBox) {
         // Clear File List
         ui->fileListBox->clear();
     }
-
-    qDebug() << "CustomFilelist::clear...done";
-
+    //qDebug() << "CustomFilelist::clear...done";
+    // Unlock Mutex
     mutex.unlock();
 }
 
@@ -2431,7 +2522,7 @@ void CustomFilelist::startAllItemsSizeScan()
 {
     // Check List Box
     if (ui && ui->fileListBox && !dirItemsSizeScanActive) {
-        qDebug() << "CustomFilelist::startAllItemsSizeScan";
+        //qDebug() << "CustomFilelist::startAllItemsSizeScan";
         // Set Size Scan Current Item Index
         sizeScanCurrent = 0;
 
@@ -2463,7 +2554,7 @@ void CustomFilelist::startAllItemsSizeScan()
 //==============================================================================
 void CustomFilelist::stopAllItemsSizeScan()
 {
-    qDebug() << "CustomFilelist::stopAllItemsSizeScan";
+    //qDebug() << "CustomFilelist::stopAllItemsSizeScan";
     // Reset Dir Items Size Scan Active
     dirItemsSizeScanActive = false;
     // Check Size Scan Currnt Index
@@ -2489,7 +2580,7 @@ void CustomFilelist::dirReaderEntryFound(const QString& aFilePath)
 
     // Check Need To Clear Flag
     if (needToClear) {
-        qDebug() << "CustomFilelist::dirReaderEntryFound - needToClear: " << needToClear;
+        //qDebug() << "CustomFilelist::dirReaderEntryFound - needToClear: " << needToClear;
         // Reset Need To Clear Flag
         needToClear = false;
         // Clear
@@ -2541,7 +2632,7 @@ void CustomFilelist::dirReaderEntryFound(const QString& aFilePath)
 //==============================================================================
 void CustomFilelist::dirReaderStarted()
 {
-    qDebug() << "CustomFilelist::dirReaderStarted";
+    //qDebug() << "CustomFilelist::dirReaderStarted";
 
     // ...
 }
@@ -2551,7 +2642,7 @@ void CustomFilelist::dirReaderStarted()
 //==============================================================================
 void CustomFilelist::dirReaderStopped()
 {
-    qDebug() << "CustomFilelist::dirReaderStopped";
+    //qDebug() << "CustomFilelist::dirReaderStopped";
 
     // ...
 }
@@ -2561,7 +2652,7 @@ void CustomFilelist::dirReaderStopped()
 //==============================================================================
 void CustomFilelist::dirReaderFinished()
 {
-    qDebug() << "CustomFilelist::dirReaderFinished";
+    //qDebug() << "CustomFilelist::dirReaderFinished";
 
     // Stop Dir Reader
     if (dirReader) {
@@ -2573,6 +2664,14 @@ void CustomFilelist::dirReaderFinished()
     if (ui && ui->fileListBox) {
         // Repos
         ui->fileListBox->adjustScrollPos();
+        // Update Icons
+        ui->fileListBox->updateIcons();
+    }
+
+    // Check File system Watcher
+    if (fileSystemWatcher) {
+        // Add Path
+        fileSystemWatcher->addPath(currentDirPath);
     }
 
     // Emit Curren Dir Read Finished
@@ -2585,14 +2684,14 @@ void CustomFilelist::dirReaderFinished()
 void CustomFilelist::dirReaderThreadFinished()
 {
 
-    qDebug() << "CustomFilelist::dirReaderThreadFinished";
-
+    //qDebug() << "CustomFilelist::dirReaderThreadFinished";
+/*
     // Check File List Box
     if (ui && ui->fileListBox) {
         // Update Icons
         ui->fileListBox->updateIcons();
     }
-
+*/
 }
 
 //==============================================================================
@@ -2814,6 +2913,21 @@ void CustomFilelist::itemSizeScanFinished(const int& aIndex)
                 fileItemData->startCalculatingDirSize();
             }
         }
+    }
+}
+
+//==============================================================================
+// File System Directory Changed Slot
+//==============================================================================
+void CustomFilelist::fsDirectoryChanged(const QString& aPath)
+{
+    // Check UI
+    if (ui && ui->fileListBox) {
+        qDebug() << "CustomFilelist::fsDirectoryChanged - aPath: " << aPath;
+        // Set Prev File Index
+        prevFileIndex = ui->fileListBox->getCurrentIndex();
+        // Reload
+        reload();
     }
 }
 

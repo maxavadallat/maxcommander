@@ -30,17 +30,19 @@ void CustomPlainTextEditor::keyPressEvent(QKeyEvent* aEvent)
 {
     // Check Event
     if (aEvent) {
-
-        qDebug() << "CustomPlainTextEditor::keyPressEvent - key: " << aEvent->key();
-
+        //qDebug() << "CustomPlainTextEditor::keyPressEvent - key: " << aEvent->key();
+        // Check Key
         if (aEvent->key() == Qt::Key_Escape) {
 
             // Do Nothing
 
         } else {
-            QPlainTextEdit::keyPressEvent(aEvent);
+
         }
     }
+
+    // Relay Event To Super
+    QPlainTextEdit::keyPressEvent(aEvent);
 }
 
 //==============================================================================
@@ -50,18 +52,20 @@ void CustomPlainTextEditor::keyReleaseEvent(QKeyEvent* aEvent)
 {
     // Check Event
     if (aEvent) {
-
-        qDebug() << "CustomPlainTextEditor::keyReleaseEvent - key: " << aEvent->key();
-
+        //qDebug() << "CustomPlainTextEditor::keyReleaseEvent - key: " << aEvent->key();
+        // Check Key
         if (aEvent->key() == Qt::Key_Escape) {
 
             // Emit Esc Key Pressed Signal
             emit escPressed();
 
         } else {
-            QPlainTextEdit::keyReleaseEvent(aEvent);
+
         }
     }
+
+    // Relay Event To Super
+    QPlainTextEdit::keyReleaseEvent(aEvent);
 }
 
 //==============================================================================
@@ -69,7 +73,7 @@ void CustomPlainTextEditor::keyReleaseEvent(QKeyEvent* aEvent)
 //==============================================================================
 CustomPlainTextEditor::~CustomPlainTextEditor()
 {
-    // ...
+    qDebug() << "Deleting CustomPlainTextEditor...done";
 }
 
 
@@ -92,6 +96,8 @@ ViewerWindow::ViewerWindow(QWidget* aParent)
     , searchDirection(true)
     , searchWrapAround(true)
 {
+    qDebug() << "Creating ViewerWindow...";
+
     // Setup UI
     ui->setupUi(this);
 
@@ -118,6 +124,7 @@ bool ViewerWindow::loadFile(const QString& aFilePath)
     if (fileInfo.exists() && !fileInfo.isDir() && fileInfo.size() <= DEFAULT_VIEWER_MAX_FILE_SIZE && fileName != aFilePath && ui && ui->viewer) {
         // Set File Name
         fileName = aFilePath;
+
         // Init Text File
         QFile textFile(fileName);
         // Open File
@@ -135,6 +142,8 @@ bool ViewerWindow::loadFile(const QString& aFilePath)
         }
     // Check If File Is A Dir
     } else if (fileInfo.isDir()) {
+
+        // Quick Dir Info
 
     } else {
         qDebug() << "ViewerWindow::loadFile - The Shit Hit The Fan...";

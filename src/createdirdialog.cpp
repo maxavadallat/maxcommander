@@ -50,6 +50,7 @@ QString CreateDirDialog::getDirText()
     return QString("");
 }
 
+/*
 //==============================================================================
 // Ok Button Clicked Slot
 //==============================================================================
@@ -67,6 +68,7 @@ void CreateDirDialog::on_cancelButton_clicked()
     // Done
     done(DEFAULT_BUTTON_INDEX_CANCEL);
 }
+*/
 
 //==============================================================================
 // Destructor

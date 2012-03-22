@@ -29,7 +29,7 @@ Settings* Settings::getInstance()
 {
     // Check Settings Singleton
     if (!settingsSingleton) {
-        qDebug() << "Settings::getInstance - creating settings";
+        //qDebug() << "Settings::getInstance - creating settings";
         // Lock
         mutex.lock();
         // Create Settings Singleton
@@ -69,11 +69,10 @@ void Settings::setGroup(const QString& aGroup)
         //qDebug() << "Settings::setGroup - current group: " << settings.group();
         // Check Current Group
         if (settings.group() != aGroup || settings.group().isEmpty()) {
-            qDebug() << "Settings::setGroup - endGroup: " << settings.group();
+            //qDebug() << "Settings::setGroup - endGroup: " << settings.group();
             // Close Previous Group
             settings.endGroup();
-
-            qDebug() << "Settings::setGroup - aGroup: " << aGroup;
+            //qDebug() << "Settings::setGroup - aGroup: " << aGroup;
             // Set Group
             settings.beginGroup(aGroup);
         }

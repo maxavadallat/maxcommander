@@ -73,6 +73,11 @@
 // Default List Box Item Header Minimum Width
 #define DEFAULT_LISTBOX_ITEM_HEADER_MINIMUM_WIDTH           32
 
+// Default File List Box Icon Update Timer Timeout
+#define DEFAULT_FILE_LIST_BOX_ICON_UPDATE_TIMEOUT           10
+
+// Default Status Message Timeout
+#define DEFAULT_STATUS_MESSAGE_TIMEOUT                      5000
 
 // File Size Consts
 #define ONE_KILO                                            1024

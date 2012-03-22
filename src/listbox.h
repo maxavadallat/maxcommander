@@ -251,7 +251,7 @@ public:
 
     //! @brief Clear
     //! @param none
-    void clear();
+    virtual void clear();
 
     //! @brief Update List - Full List Update
     //! @param none

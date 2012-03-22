@@ -905,7 +905,7 @@ QImage FileUtils::getFileIconImage(const QFileInfo& aInfo, const int& aWidth, co
 
 #if defined(Q_OS_MAC)
 
-    qDebug() << "FileUtils::getFileIconImage MAC - size: " << newImage.size();
+    //qDebug() << "FileUtils::getFileIconImage MAC - size: " << newImage.size();
 
     // Init File System Reference
     FSRef macRef;
@@ -961,7 +961,6 @@ QImage FileUtils::getFileIconImage(const QFileInfo& aInfo, const int& aWidth, co
     newImage.fill(QColor(0, 0, 0, 0));
 
     painter.drawImage(newImage.rect(), QImage(QString(":defaultIcon32x32")));
-
 
 #else // Q_OS_UNIX
 
@@ -1400,7 +1399,7 @@ void FileUtilThreadBase::resume()
 //==============================================================================
 void FileUtilThreadBase::run()
 {
-    qDebug() << (metaObject() ? metaObject()->className() : "FileUtilThreadBase") << "::run";
+    //qDebug() << (metaObject() ? metaObject()->className() : "FileUtilThreadBase") << "::run";
 
     // 4 Ever Loop
     forever {
@@ -1466,7 +1465,7 @@ void FileUtilThreadBase::stop()
     if (isRunning()) {
         // Check Abort
         if (!abort) {
-            qDebug() << "FileUtilThreadBase::stop";
+            qDebug() << (metaObject() ? metaObject()->className() : "FileUtilThreadBase") << "::stop";
             // Emit Operatoin Stopped Signal
             emit opStopped();
             // Set Abort
@@ -1574,7 +1573,7 @@ void DirReader::readDir(const QString& aDirPath, const FileSortType& aSortType, 
 //==============================================================================
 void DirReader::doOperation()
 {
-    qDebug() << "DirReader::doOperation - dirPath: " << dirPath;
+    //qDebug() << "DirReader::doOperation - dirPath: " << dirPath;
     DEFAULT_THREAD_ABORT_CHECK;
     // Init File Util
     FileUtils fileUtil;
@@ -1593,8 +1592,7 @@ void DirReader::doOperation()
         emit entryFound(fileList[i].absoluteFilePath());
         DEFAULT_THREAD_ABORT_CHECK;
     }
-
-    qDebug() << "DirReader::doOperation - dirPath: " << dirPath << " done.";
+    //qDebug() << "DirReader::doOperation - dirPath: " << dirPath << " done.";
 }
 
 //==============================================================================

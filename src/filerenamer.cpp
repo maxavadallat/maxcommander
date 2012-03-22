@@ -38,8 +38,11 @@ void FileNameEditor::keyReleaseEvent(QKeyEvent* aEvent)
 
             case Qt::Key_Return:
             case Qt::Key_Enter:
-                // Emit Editor Finished Signal
-                emit editFinished(true);
+                // Check Text Length
+                if (text().length() > 0) {
+                    // Emit Editor Finished Signal
+                    emit editFinished(true);
+                }
             break;
         }
     }
@@ -112,7 +115,7 @@ void FileRenamer::showRenamer(FileListDelegate* aDelegate)
     // Check Delegate
     if (aDelegate && renamerParent) {
         // Set Geometry
-        setGeometry(QRect(renamerParent->mapToGlobal(renamerParent->pos()) + aDelegate->pos(), QSize(aDelegate->width(), aDelegate->height())));
+        setGeometry(QRect(renamerParent->mapToGlobal(renamerParent->pos()) + aDelegate->pos(), QSize(aDelegate->width(), aDelegate->height() + 2)));
     }
 
     // Show
@@ -120,6 +123,8 @@ void FileRenamer::showRenamer(FileListDelegate* aDelegate)
 
     // Check UI
     if (ui && ui->fileNameEdit) {
+        // Set Selection
+        ui->fileNameEdit->selectAll();
         // Set Focus
         ui->fileNameEdit->setFocus();
     }

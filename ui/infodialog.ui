@@ -6,13 +6,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>320</width>
+    <width>280</width>
     <height>128</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>320</width>
+    <width>280</width>
+    <height>128</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>280</width>
     <height>128</height>
    </size>
   </property>
@@ -20,11 +26,11 @@
    <string>Dialog</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <property name="bottomMargin">
-    <number>12</number>
+   <property name="margin">
+    <number>8</number>
    </property>
    <property name="spacing">
-    <number>0</number>
+    <number>8</number>
    </property>
    <item row="0" column="0">
     <widget class="QLabel" name="infoIcon">

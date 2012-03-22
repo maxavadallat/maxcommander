@@ -452,7 +452,7 @@ void ListBox::createModel()
 {
     // Check Model
     if (!model) {
-        qDebug() << "ListBox::createModel";
+        //qDebug() << "ListBox::createModel";
         // Create Model
         model = new ListModel();
 
@@ -470,7 +470,7 @@ void ListBox::destroyModel()
 {
     // Check Model
     if (model) {
-        qDebug() << "ListBox::destroyModel";
+        //qDebug() << "ListBox::destroyModel";
         // Disconnect Signals
         disconnect(model, SIGNAL(itemAdded(int)), this, SLOT(modelItemAdded(int)));
         disconnect(model, SIGNAL(itemRemoved(int)), this, SLOT(modelItemRemoved(int)));
@@ -596,11 +596,9 @@ int ListBox::getCurrentIndex()
 //==============================================================================
 void ListBox::clear()
 {
-    qDebug() << "ListBox::clear";
-
+    //qDebug() << "ListBox::clear";
     // Clear Cache
     clearCache();
-
     // Check Model
     if (model) {
         // Clear Model
@@ -616,7 +614,7 @@ void ListBox::clear()
 //==============================================================================
 void ListBox::updateList()
 {
-    qDebug() << "ListBox::updateList";
+    //qDebug() << "ListBox::updateList";
     // Rebuild Cache
     rebuildCache();
 }
@@ -628,7 +626,7 @@ void ListBox::setModel(ListModel* aModel)
 {
     // Destroy Model
     destroyModel();
-    qDebug() << "ListBox::setModel";
+    //qDebug() << "ListBox::setModel";
     // Set Model
     model = aModel;
     // Check Model
@@ -660,18 +658,9 @@ void ListBox::setDelegate(ItemDelegate* aDelegate)
 
     // Check Delegate
     if (delegate) {
-/*
-        // Get Delegate Size
-        delegateSize = (orientation == LBOVertical) ? delegate->getItemSize().height() : delegate->getItemSize().width();
-        // Set Full Item Size
-        fullItemSize = delegateSize + spacing;
-        // Rebuild Cache
-        rebuildCache();
-*/
         // Set Delegate Size
         setDelegateSize((orientation == LBOVertical) ? delegate->getItemSize().height() : delegate->getItemSize().width());
-
-        qDebug() << "ListBox::setDelegate - delegateSize: " << delegateSize;
+        //qDebug() << "ListBox::setDelegate - delegateSize: " << delegateSize;
     }
 }
 
@@ -717,7 +706,7 @@ void ListBox::setSpacing(const int& aSpacing, const bool& aRefresh)
 {
     // Check Spacing
     if (spacing != aSpacing) {
-        qDebug() << "ListBox::setSpacing - aSpacing: " << aSpacing;
+        //qDebug() << "ListBox::setSpacing - aSpacing: " << aSpacing;
         // Set Spacing
         spacing = aSpacing;
         // Set Full Item Size
@@ -745,7 +734,7 @@ void ListBox::setCacheOverhead(const int& aOverHead)
 {
     // Check Cache Overhead
     if (cacheOverhead != aOverHead) {
-        qDebug() << "ListBox::setCacheOverhead - aOverHead: " << aOverHead;
+        //qDebug() << "ListBox::setCacheOverhead - aOverHead: " << aOverHead;
         // Set Caching Overhead
         cacheOverhead = aOverHead;
         // Rebuild Cache
@@ -945,8 +934,7 @@ void ListBox::toggleItemSelected(const int& aIndex)
 //==============================================================================
 void ListBox::resetIndexes()
 {
-    qDebug() << "ListBox::resetIndexes";
-
+    //qDebug() << "ListBox::resetIndexes";
     // Reset Min Scroll Pos
     minScrollPos = 0;
     // Reset Scroll Pos
@@ -1397,7 +1385,7 @@ void ListBox::clearCache()
     // Get Cached Items Count
     int ciCount = cache.count();
 
-    qDebug() << "ListBox::clearCache - ciCount: " << ciCount;
+    //qDebug() << "ListBox::clearCache - ciCount: " << ciCount;
 
     // Go Thru Cache
     for (int i=ciCount-1; i>=0; i--) {
@@ -2156,7 +2144,8 @@ void ListBox::delegateDragFinished(const int& aIndex)
 //==============================================================================
 void ListBox::delegateSizeChanged(const int& aIndex, const QSize& aSize)
 {
-    qDebug() << "ListBox::delegateSizeChanged - aIndex: " << aIndex << " - size: " << aSize;
+    Q_UNUSED(aSize);
+    //qDebug() << "ListBox::delegateSizeChanged - aIndex: " << aIndex << " - size: " << aSize;
     // Check Index
     if (aIndex <= lastCachedItem) {
         // Update Cache
@@ -2267,7 +2256,7 @@ void ListBox::timerEvent(QTimerEvent* aEvent)
             // Reset Previous Pos
             prevScrollPos = scrollPos;
         } else if (aEvent->timerId() == wheelReposID) {
-            qDebug() << "ListBox::timerEvent - wheelReposID";
+            //qDebug() << "ListBox::timerEvent - wheelReposID";
             // Stop Timer
             stopWheelReposTimer();
             // Reset Previous Pos
@@ -2414,7 +2403,7 @@ void ListBox::focusInEvent(QFocusEvent* aEvent)
 {
     // Check Event
     if (aEvent) {
-        qDebug() << "ListBox::focusInEvent";
+        //qDebug() << "ListBox::focusInEvent";
 
         // ...
     }
@@ -2427,7 +2416,7 @@ void ListBox::focusOutEvent(QFocusEvent* aEvent)
 {
     // Check Event
     if (aEvent) {
-        qDebug() << "ListBox::focusOutEvent";
+        //qDebug() << "ListBox::focusOutEvent";
 
         // ...
     }

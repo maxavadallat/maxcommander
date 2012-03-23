@@ -18,6 +18,12 @@ CopyDialog::CopyDialog(QWidget* aParent)
     , cancelButton(NULL)
     , queueButton(NULL)
 {
+/*
+    // Set Attributes
+    setAttribute(Qt::WA_NoSystemBackground);
+    // Set Window Flags
+    setWindowFlags(Qt::Popup);
+*/
     // Setup UI
     ui->setupUi(this);
 

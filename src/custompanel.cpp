@@ -476,8 +476,7 @@ void CustomPanel::fileListFocusChanged(const QString& aPanelName, const bool& aF
 //==============================================================================
 void CustomPanel::headerActivated()
 {
-    qDebug() << "CustomPanel::headerActivated";
-
+    //qDebug() << "CustomPanel::headerActivated";
     // Set Active State
     setActive(true);
 }
@@ -487,11 +486,9 @@ void CustomPanel::headerActivated()
 //==============================================================================
 void CustomPanel::headerOrderChanged(const int& aIndex, const bool& aReversed, const bool& aRefresh)
 {
-    qDebug() << "CustomPanel::headerOrderChanged - aIndex: " << aIndex << " - aReversed: " << aReversed;
-
+    //qDebug() << "CustomPanel::headerOrderChanged - aIndex: " << aIndex << " - aReversed: " << aReversed;
     // Set Active State
     setActive(true);
-
     // Check UI
     if (ui && ui->fileList) {
         // Set Order
@@ -504,8 +501,7 @@ void CustomPanel::headerOrderChanged(const int& aIndex, const bool& aReversed, c
 //==============================================================================
 void CustomPanel::headerOptionsLaunch(const QPoint& aPos)
 {
-    qDebug() << "CustomPanel::headerOptionsLaunch";
-
+    //qDebug() << "CustomPanel::headerOptionsLaunch";
     // Check Header Popup
     if (headerPopup && ui && ui->header) {
         // Set Items Selected
@@ -527,7 +523,6 @@ void CustomPanel::currentDirChanged(const QString& aCurrDir)
 {
     // Update Current Dir Label Text
     updateCurrDirLabelText(aCurrDir);
-
     // Update Status Panel Text
     updateStatusPanelText();
 }
@@ -542,7 +537,6 @@ void CustomPanel::currentDirReadFinished()
         // Update Current Dir Label Text
         updateCurrDirLabelText(ui->fileList->getCurrentDir());
     }
-
     // Update Status Panel Text
     updateStatusPanelText();
 }
@@ -556,7 +550,6 @@ void CustomPanel::fileListFileSelected(FileItemData* aFileItemData)
     if (aFileItemData) {
         // Get File Info
         QFileInfo fileInfo = aFileItemData->getFileInfo();
-
         // Check File If Link
         if (fileInfo.isSymLink()) {
             qDebug() << "CustomPanel::fileListFileSelected - link";
@@ -652,8 +645,7 @@ void CustomPanel::resizeEvent(QResizeEvent* aEvent)
 //==============================================================================
 void CustomPanel::on_upDirButton_clicked()
 {
-    qDebug() << "CustomPanel::on_upDirButton_clicked - panelName: " << panelName;
-
+    //qDebug() << "CustomPanel::on_upDirButton_clicked - panelName: " << panelName;
     // Check UI
     if (ui && ui->fileList) {
         // Go Up
@@ -666,8 +658,7 @@ void CustomPanel::on_upDirButton_clicked()
 //==============================================================================
 void CustomPanel::on_homeButton_clicked()
 {
-    qDebug() << "CustomPanel::on_homeButton_clicked - panelName: " << panelName;
-
+    //qDebug() << "CustomPanel::on_homeButton_clicked - panelName: " << panelName;
     // Check UI
     if (ui && ui->fileList) {
         // Go To Home
@@ -680,8 +671,7 @@ void CustomPanel::on_homeButton_clicked()
 //==============================================================================
 void CustomPanel::on_rootButton_clicked()
 {
-    qDebug() << "CustomPanel::on_rootButton_clicked - panelName: " << panelName;
-
+    //qDebug() << "CustomPanel::on_rootButton_clicked - panelName: " << panelName;
     // Check UI
     if (ui && ui->fileList) {
         // Go To Root
@@ -694,8 +684,7 @@ void CustomPanel::on_rootButton_clicked()
 //==============================================================================
 void CustomPanel::headerPopupCloseButtonClicked()
 {
-    qDebug() << "CustomPanel::headerPopupCloseButtonClicked";
-
+    //qDebug() << "CustomPanel::headerPopupCloseButtonClicked";
     // Check UI
     if (ui && ui->header && headerPopup) {
         // Set Header Item Usage

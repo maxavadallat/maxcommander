@@ -192,11 +192,16 @@
 #define SETTIGNS_KEY_SAVE_ON_EXIT                           "SaveOnExit"
 // Settings Key Follow Links
 #define SETTIGNS_KEY_FOLLOW_LINKS                           "FollowLinks"
-// Treat Archves Like Dirs
+// Settings Key Treat Archves Like Dirs
 #define SETTINGS_KEY_ARCHIVES_AS_DIRS                       "ArchivesAsDirs"
-// Active Panel
+// Settings Key Active Panel
 #define SETTINGS_KEY_ACTIVE_PANEL                           "ActivePanel"
-
+// Settings Key Show Toolbar
+#define SETTINGS_KEY_SHOW_TOOLBAR                           "ShowToolbar"
+// Settings Key Show Function Keys
+#define SETTINGS_KEY_SHOW_BUTTONBAR                         "ShowButtonBar"
+// Settings Key Show Status Bar
+#define SETTINGS_KEY_SHOW_STATUSBAR                         "ShowStatusBar"
 
 // Appearance
 

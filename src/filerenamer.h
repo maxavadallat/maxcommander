@@ -7,6 +7,7 @@
 #include <QEventLoop>
 #include <QLineEdit>
 #include <QKeyEvent>
+#include <QPaintEvent>
 
 
 // FORWARD DECLARATIONS
@@ -95,6 +96,12 @@ protected slots:
     //! @brief On Close Button Clicked Slot
     //! @param none
     void on_closeButton_clicked();
+
+protected: // From QFrame
+
+    //! @brief Pant Event
+    //! @param aEvent Paint Event
+    virtual void paintEvent(QPaintEvent* aEvent);
 
 protected:
     //! UI

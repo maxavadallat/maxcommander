@@ -24,6 +24,7 @@ class CustomFilelist;
 class CustomHeader;
 class Settings;
 class IconScanner;
+class ListPopup;
 
 
 // DECLARATIONS
@@ -434,6 +435,10 @@ signals:
     //! @param aRefresh Refresh
     void itemIconSizeChanged(const bool& aRefresh);
 
+    //! @brief List Box Right Clicked Signal
+    //! @param aPos Right Click Global Position
+    void listBoxRightClicked(const QPoint& aPos);
+
 protected:
 
     //! @brief Start Icon Update Timer
@@ -486,6 +491,14 @@ protected: // From QFrame
     //! @brief Timer Event
     //! @param aEvent Timer Event
     virtual void timerEvent(QTimerEvent* aEvent);
+
+    //! @brief Mouse Press Event
+    //! @param aEvent Mouse Event
+    virtual void mousePressEvent(QMouseEvent* aEvent);
+
+    //! @brief Mouse Release Event
+    //! @param aEvent Mouse Event
+    virtual void mouseReleaseEvent(QMouseEvent* aEvent);
 
 protected: // Data
     friend class FileListDelegate;
@@ -878,7 +891,8 @@ protected slots:
 
     //! @brief List Box Item Options Slot
     //! @param aIndex Item Index
-    void listBoxItemOptions(const int& aIndex);
+    //! @param aPos Item Options Position
+    void listBoxItemOptions(const int& aIndex, const QPoint& aPos);
 
     //! @brief Item Icon Size Changed Slot
     //! @param aRefresh Refresh/Reload
@@ -946,6 +960,9 @@ protected: // Data
 
     //! File System Watcher
     QFileSystemWatcher*     fileSystemWatcher;
+
+    //! File List Popup
+    ListPopup*              popup;
 
     //! Operation Queue
     QStringList             opQueue;

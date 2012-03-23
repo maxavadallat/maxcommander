@@ -251,6 +251,70 @@ protected slots:
     //! @param none
     void on_actionAbout_triggered();
 
+    //! @brief Action Miniized Triggered Slot
+    //! @param none
+    void on_actionMinimize_triggered();
+
+    //! @brief Action Restore Triggered Slot
+    //! @param none
+    void on_actionRestore_triggered();
+
+    //! @brief Action Show Toolbar Triggered Slot
+    //! @param none
+    void on_actionShowToolbar_triggered();
+
+    //! @brief Action Show Button Bar Triggered Slot
+    //! @param none
+    void on_actionShowButtonBar_triggered();
+
+    //! @brief Action Show Status Bar Triggered Slot
+    //! @param none
+    void on_actionShowStatusBar_triggered();
+
+    //! @brief Action Zoom In Triggered Slot
+    //! @param none
+    void on_actionZoomIn_triggered();
+
+    //! @brief Action Zoom Out Triggered Slot
+    //! @param none
+    void on_actionZoomOut_triggered();
+
+    //! @brief Action Zoom To Normal Triggered Slot
+    //! @param none
+    void on_actionZoomToNormal_triggered();
+
+    //! @brief Action Help Triggered Slot
+    //! @param none
+    void on_actionHelp_triggered();
+
+    //! @brief Action Check Updates Triggered Slot
+    //! @param none
+    void on_actionCheckUpdates_triggered();
+
+    //! @brief Action Copy Triggered Slot
+    //! @param none
+    void on_actionCopy_triggered();
+
+    //! @brief Action Cut Triggered Slot
+    //! @param none
+    void on_actionCut_triggered();
+
+    //! @brief Action Paste Triggered Slot
+    //! @param none
+    void on_actionPaste_triggered();
+
+    //! @brief Action Comapre Triggered Slot
+    //! @param none
+    void on_actionCompare_triggered();
+
+    //! @brief Action Pack Triggered Slot
+    //! @param none
+    void on_actionPack_triggered();
+
+    //! @brief Action Unpack Triggered Slot
+    //! @param none
+    void on_actionUnpack_triggered();
+
 protected: // Data
 
     // Reference Count

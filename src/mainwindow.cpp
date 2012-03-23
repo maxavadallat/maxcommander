@@ -94,11 +94,11 @@ MainWindow::MainWindow(QWidget* aParent)
     // Setup UI
     ui->setupUi(this);
 
-    // Set Main Window Instance
-    mainWindow = this;
-
     // Load Settings
     loadSettings();
+
+    // Set Main Toolbar Visibility
+    //ui->mainToolbar->setVisible();
 
     connect(ui->mainPanel1->ui->fileList, SIGNAL(fileListKeyPressed(QString,int,Qt::KeyboardModifiers)), this, SLOT(panelKeyPressed(QString,int,Qt::KeyboardModifiers)));
     connect(ui->mainPanel1->ui->fileList, SIGNAL(fileListKeyReleased(QString,int,Qt::KeyboardModifiers)), this, SLOT(panelKeyReleased(QString,int,Qt::KeyboardModifiers)));
@@ -834,10 +834,28 @@ void MainWindow::loadSettings()
         if (settings) {
             // Set Group
             settings->setGroup(QString(SETTINGS_GROUP_GENERAL));
-            // Get Last Active Panel Index
-            //cPanelIndex = settings->getValue(SETTINGS_KEY_ACTIVE_PANEL, 0).toInt();
             // Switch To Panel
             switchToPanel(settings->getValue(SETTINGS_KEY_ACTIVE_PANEL, 0).toInt());
+            // Init On Off Setting Value
+            bool onOff = false;
+            // Get Setting
+            onOff = settings->getValue(SETTINGS_KEY_SHOW_TOOLBAR, true).toBool();
+            // Set Main Toolbar Visibility
+            ui->mainToolbar->setVisible(onOff);
+            // Set Menu Item Checked
+            ui->actionShowToolbar->setChecked(onOff);
+
+            onOff = settings->getValue(SETTINGS_KEY_SHOW_BUTTONBAR, true).toBool();
+            // Set Main Button Bar Visibility
+            ui->mainButtonbar->setVisible(onOff);
+            // Set Menu Item Checked
+            ui->actionShowButtonBar->setChecked(onOff);
+
+            onOff = settings->getValue(SETTINGS_KEY_SHOW_STATUSBAR, true).toBool();
+            // Set Status Bar Visibility
+            ui->statusBar->setVisible(onOff);
+            // Set Menu Item Checked
+            ui->actionShowStatusBar->setChecked(onOff);
         }
 
         // Reload
@@ -859,7 +877,13 @@ void MainWindow::saveSettings()
             // Set Group
             settings->setGroup(QString(SETTINGS_GROUP_GENERAL));
             // Set Last Active Panel Index
-            settings->setValue(SETTINGS_KEY_ACTIVE_PANEL, cPanelIndex);
+            settings->setValue(QString(SETTINGS_KEY_ACTIVE_PANEL), cPanelIndex);
+            // Save Show Tool Bar
+            settings->setValue(QString(SETTINGS_KEY_SHOW_TOOLBAR), ui->actionShowToolbar->isChecked());
+            // Save Show Button Bar
+            settings->setValue(QString(SETTINGS_KEY_SHOW_BUTTONBAR), ui->actionShowButtonBar->isChecked());
+            // Save Show Status Bar
+            settings->setValue(QString(SETTINGS_KEY_SHOW_STATUSBAR), ui->actionShowStatusBar->isChecked());
         }
         // Save Panel Settings
         ui->mainPanel1->saveSettings();
@@ -988,6 +1012,16 @@ void MainWindow::panelKeyReleased(const QString& aPanelName, const int& aKey, co
         case Qt::Key_Delete: {
             // Launch Delete
             launchDelete();
+        } break;
+
+        case Qt::Key_Escape: {
+            // Check If Shift Key Pressed
+            if (shiftKeyPressed) {
+                // Show Minimized
+                //showMinimized();
+                // Set Window State
+                setWindowState(Qt::WindowMinimized);
+            }
         } break;
 
         default: {
@@ -1365,6 +1399,151 @@ void MainWindow::on_actionAbout_triggered()
 }
 
 //==============================================================================
+// On Action Minimize Triggered Slot
+//==============================================================================
+void MainWindow::on_actionMinimize_triggered()
+{
+    // Show Minimized
+    //showMinimized();
+    // Set Window State
+    setWindowState(Qt::WindowMinimized);
+}
+
+//==============================================================================
+// On Action Restore Triggered Slot
+//==============================================================================
+void MainWindow::on_actionRestore_triggered()
+{
+    // Restore Window
+    showNormal();
+}
+
+//==============================================================================
+// On Action Show Tool Bar Triggered Slot
+//==============================================================================
+void MainWindow::on_actionShowToolbar_triggered()
+{
+    // Check UI & Tool Bar
+    if (ui && ui->actionShowToolbar && ui->mainToolbar) {
+        // Set Main Tool Bar Visibility
+        ui->mainToolbar->setVisible(ui->actionShowToolbar->isChecked());
+    }
+}
+
+//==============================================================================
+// On Action Show Button Bar Triggered Slot
+//==============================================================================
+void MainWindow::on_actionShowButtonBar_triggered()
+{
+    // Check UI & Button Bar
+    if (ui && ui->actionShowButtonBar && ui->mainButtonbar) {
+        // Set Main Button Bar Visibility
+        ui->mainButtonbar->setVisible(ui->actionShowButtonBar->isChecked());
+    }
+}
+
+//==============================================================================
+// On Action Show Status Bar Triggered Slot
+//==============================================================================
+void MainWindow::on_actionShowStatusBar_triggered()
+{
+    // Check UI & Status Bar
+    if (ui && ui->actionShowStatusBar && ui->statusBar) {
+        // Set Main Status Bar Visibility
+        ui->statusBar->setVisible(ui->actionShowStatusBar->isChecked());
+    }
+}
+
+//==============================================================================
+// On Action Zoom In Triggered Slot
+//==============================================================================
+void MainWindow::on_actionZoomIn_triggered()
+{
+
+}
+
+//==============================================================================
+// On Action Zoom Out Triggered Slot
+//==============================================================================
+void MainWindow::on_actionZoomOut_triggered()
+{
+
+}
+
+//==============================================================================
+// On Action Zoom to Normal Triggered Slot
+//==============================================================================
+void MainWindow::on_actionZoomToNormal_triggered()
+{
+
+}
+
+//==============================================================================
+// On Action Help Triggered Slot
+//==============================================================================
+void MainWindow::on_actionHelp_triggered()
+{
+    // Launch help
+    launchHelp();
+}
+
+//==============================================================================
+// On Action Check Updates Triggered Slot
+//==============================================================================
+void MainWindow::on_actionCheckUpdates_triggered()
+{
+
+}
+
+//==============================================================================
+// On Action Copy Triggered Slot
+//==============================================================================
+void MainWindow::on_actionCopy_triggered()
+{
+
+}
+
+//==============================================================================
+// On Action Cut Triggered Slot
+//==============================================================================
+void MainWindow::on_actionCut_triggered()
+{
+
+}
+
+//==============================================================================
+// On Action Paste Triggered Slot
+//==============================================================================
+void MainWindow::on_actionPaste_triggered()
+{
+
+}
+
+//==============================================================================
+// On Action Compare Triggered Slot
+//==============================================================================
+void MainWindow::on_actionCompare_triggered()
+{
+
+}
+
+//==============================================================================
+// On Action Pack Triggered Slot
+//==============================================================================
+void MainWindow::on_actionPack_triggered()
+{
+
+}
+
+//==============================================================================
+// On Action Unpack Triggered Slot
+//==============================================================================
+void MainWindow::on_actionUnpack_triggered()
+{
+
+}
+
+//==============================================================================
 // Destructor
 //==============================================================================
 MainWindow::~MainWindow()
@@ -1439,6 +1618,10 @@ MainWindow::~MainWindow()
 
     qDebug() << "Deleting MainWindow...done";
 }
+
+
+
+
 
 
 

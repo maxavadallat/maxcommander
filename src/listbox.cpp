@@ -272,7 +272,7 @@ void ItemDelegate::mouseReleaseEvent(QMouseEvent* aEvent)
             }
         } else if (aEvent->button() == Qt::RightButton) {
             // Emit Right Clicked Signal
-            emit itemRightClicked(data->index);
+            emit itemRightClicked(data->index, aEvent->globalPos());
 
             // ...
         }
@@ -1348,7 +1348,7 @@ void ListBox::connectDelegateSignals(ItemDelegate* aItem)
     if (aItem) {
         // Connect Signals
         connect(aItem, SIGNAL(itemLeftClicked(int)), this, SLOT(delegateLeftClicked(int)));
-        connect(aItem, SIGNAL(itemRightClicked(int)), this, SLOT(delegateRightClicked(int)));
+        connect(aItem, SIGNAL(itemRightClicked(int,QPoint)), this, SLOT(delegateRightClicked(int,QPoint)));
         connect(aItem, SIGNAL(itemDoubleClicked(int)), this, SLOT(delegateDoubleClicked(int)));
         connect(aItem, SIGNAL(itemDragStarted(int)), this, SLOT(delegateDragStarted(int)));
         connect(aItem, SIGNAL(itemDragged(int,QSize)), this, SLOT(delegateDragged(int,QSize)));
@@ -1367,7 +1367,7 @@ void ListBox::disconnectDelegateSignals(ItemDelegate* aItem)
     if (aItem) {
         // Disconnect Signals
         disconnect(aItem, SIGNAL(itemLeftClicked(int)), this, SLOT(delegateLeftClicked(int)));
-        disconnect(aItem, SIGNAL(itemRightClicked(int)), this, SLOT(delegateRightClicked(int)));
+        disconnect(aItem, SIGNAL(itemRightClicked(int,QPoint)), this, SLOT(delegateRightClicked(int,QPoint)));
         disconnect(aItem, SIGNAL(itemDoubleClicked(int)), this, SLOT(delegateDoubleClicked(int)));
         disconnect(aItem, SIGNAL(itemDragStarted(int)), this, SLOT(delegateDragStarted(int)));
         disconnect(aItem, SIGNAL(itemDragged(int,QSize)), this, SLOT(delegateDragged(int,QSize)));
@@ -2033,17 +2033,18 @@ void ListBox::delegateLeftClicked(const int& aIndex)
 //==============================================================================
 // Delegate Right Clicked Slot
 //==============================================================================
-void ListBox::delegateRightClicked(const int& aIndex)
+void ListBox::delegateRightClicked(const int& aIndex, const QPoint& aPos)
 {
     //qDebug() << "ListBox::delegateRightClicked - aIndex: " << aIndex;
     // Set Current Index
     setCurrentIndex(aIndex);
     // Check If has Focus
-    if (!hasFocus())
+    if (!hasFocus()) {
         // Set Focus
         setFocus();
+    }
     // Emit Item Options Signal For Launch Popup Menu
-    emit itemOptions(aIndex);
+    emit itemOptions(aIndex, aPos);
 }
 
 //==============================================================================

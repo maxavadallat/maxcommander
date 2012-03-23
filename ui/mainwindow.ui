@@ -27,15 +27,35 @@
     </property>
     <item row="0" column="0">
      <widget class="QFrame" name="mainToolbar">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>24</height>
+       </size>
+      </property>
       <property name="styleSheet">
        <string notr="true">background-color: rgb(255, 204, 153);</string>
       </property>
-      <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Raised</enum>
-      </property>
+      <widget class="QPushButton" name="newButton">
+       <property name="geometry">
+        <rect>
+         <x>4</x>
+         <y>2</y>
+         <width>20</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>../resources/images/icons/16x16/File-Types-Default-icon.png</normaloff>../resources/images/icons/16x16/File-Types-Default-icon.png</iconset>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+      </widget>
      </widget>
     </item>
     <item row="1" column="0">
@@ -443,10 +463,18 @@
     <addaction name="actionShowButtonBar"/>
     <addaction name="actionShowStatusBar"/>
    </widget>
+   <widget class="QMenu" name="menuWindow">
+    <property name="title">
+     <string>Window</string>
+    </property>
+    <addaction name="actionMinimize"/>
+    <addaction name="actionRestore"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuCommands"/>
    <addaction name="menuView"/>
+   <addaction name="menuWindow"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusBar">
@@ -488,7 +516,7 @@
   </action>
   <action name="actionZoomIn">
    <property name="text">
-    <string>Zoom In</string>
+    <string>Zoom &amp;In</string>
    </property>
    <property name="shortcut">
     <string>Ctrl++</string>
@@ -496,7 +524,7 @@
   </action>
   <action name="actionZoomOut">
    <property name="text">
-    <string>Zoom Out</string>
+    <string>Zoom &amp;Out</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+-</string>
@@ -504,7 +532,7 @@
   </action>
   <action name="actionZoomToNormal">
    <property name="text">
-    <string>Zoom To Normal</string>
+    <string>Zoom To &amp;Normal</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+0</string>
@@ -512,7 +540,7 @@
   </action>
   <action name="actionReloadPanel">
    <property name="text">
-    <string>Reload Panel</string>
+    <string>&amp;Reload Panel</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
@@ -520,7 +548,7 @@
   </action>
   <action name="actionSwapPanels">
    <property name="text">
-    <string>Swap Panels</string>
+    <string>&amp;Swap Panels</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+U</string>
@@ -528,22 +556,22 @@
   </action>
   <action name="actionHelp">
    <property name="text">
-    <string>Help</string>
+    <string>&amp;Help</string>
    </property>
   </action>
   <action name="actionAbout">
    <property name="text">
-    <string>About</string>
+    <string>&amp;About</string>
    </property>
   </action>
   <action name="actionCheckUpdates">
    <property name="text">
-    <string>Check For Updates</string>
+    <string>Check For &amp;Updates</string>
    </property>
   </action>
   <action name="actionCopy">
    <property name="text">
-    <string>Copy</string>
+    <string>&amp;Copy</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+C</string>
@@ -551,7 +579,7 @@
   </action>
   <action name="actionCut">
    <property name="text">
-    <string>Cut</string>
+    <string>Cu&amp;t</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+X</string>
@@ -559,7 +587,7 @@
   </action>
   <action name="actionPaste">
    <property name="text">
-    <string>Paste</string>
+    <string>&amp;Paste</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+V</string>
@@ -567,7 +595,7 @@
   </action>
   <action name="actionCompare">
    <property name="text">
-    <string>Compare Files</string>
+    <string>&amp;Compare Files</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+C</string>
@@ -594,10 +622,10 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Show/Hide Hidden Files</string>
+    <string>Show/Hide &amp;Hidden Files</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+H</string>
+    <string>Meta+H</string>
    </property>
   </action>
   <action name="actionShowToolbar">
@@ -605,7 +633,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Show/Hide Toolbar</string>
+    <string>Show/Hide &amp;Toolbar</string>
    </property>
   </action>
   <action name="actionShowButtonBar">
@@ -613,7 +641,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Show/Hide Button Bar</string>
+    <string>Show/Hide &amp;Button Bar</string>
    </property>
   </action>
   <action name="actionShowStatusBar">
@@ -621,7 +649,23 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Show/Hide Status Bar</string>
+    <string>Show/Hide &amp;Status Bar</string>
+   </property>
+  </action>
+  <action name="actionMinimize">
+   <property name="text">
+    <string>&amp;Minimize</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+M</string>
+   </property>
+  </action>
+  <action name="actionRestore">
+   <property name="text">
+    <string>&amp;Restore</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
    </property>
   </action>
  </widget>

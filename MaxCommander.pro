@@ -49,7 +49,8 @@ SOURCES += src/main.cpp\
     src/filerenamer.cpp \
     src/helpdialog.cpp \
     src/treewindow.cpp \
-    src/aboutdialog.cpp
+    src/aboutdialog.cpp \
+    src/listpopup.cpp
 
 # Headers
 HEADERS  += src/mainwindow.h \
@@ -78,7 +79,8 @@ HEADERS  += src/mainwindow.h \
     src/filerenamer.h \
     src/helpdialog.h \
     src/treewindow.h \
-    src/aboutdialog.h
+    src/aboutdialog.h \
+    src/listpopup.h
 
 # Forms
 FORMS    += ui/mainwindow.ui \

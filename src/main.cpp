@@ -136,6 +136,7 @@ int main(int argc, char* argv[])
         // Set Window Icon
         app.setWindowIcon(QIcon(":mainIcon"));
 
+        qDebug() << "System Locale: " << QLocale::system().name();
 
         // Init Main Window
         MainWindow* mw = MainWindow::getInstance();
@@ -210,7 +211,7 @@ int main(int argc, char* argv[])
         qDebug() << "Create Dir Dialog - result: " << result;
 */
 
-        qDebug() << "Starting MaxCommander...";
+        qDebug() << "Starting MaxCommander APPLICATION...";
 
         // Exec Application
         int result = app.exec();

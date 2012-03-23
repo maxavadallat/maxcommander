@@ -89,7 +89,8 @@ signals:
 
     //! @brief Item Right Clicked Signal
     //! @param aIndex Delegate Index
-    void itemRightClicked(const int& aIndex);
+    //! @param aPos Item Right Clicked Global Pos
+    void itemRightClicked(const int& aIndex, const QPoint& aPos);
 
     //! @brief Item Double Clicked Signal
     //! @param aIndex Delegate Index
@@ -383,7 +384,8 @@ signals:
 
     //! @brief List Box Item Options Signal
     //! @param aIndex Item Index
-    void itemOptions(const int& aIndex);
+    //! @param aPos Mouse Click Pos
+    void itemOptions(const int& aIndex, const QPoint& aPos);
 
 protected slots:
 
@@ -405,7 +407,8 @@ protected slots:
 
     //! @brief Delegate Right Clicked Slot
     //! @param aIndex Item Index
-    void delegateRightClicked(const int& aIndex);
+    //! @param aPos Item Clicked Pos
+    void delegateRightClicked(const int& aIndex, const QPoint& aPos);
 
     //! @brief Delegate Double Clicked Slot
     //! @param aIndex Item Index

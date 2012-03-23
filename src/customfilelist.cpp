@@ -12,6 +12,8 @@
 #include "settings.h"
 
 #include "settingswindow.h"
+#include "listpopup.h"
+#include "mainwindow.h"
 
 
 // IMPLEMENTATION
@@ -1583,6 +1585,51 @@ void FileListBox::timerEvent(QTimerEvent* aEvent)
 }
 
 //==============================================================================
+// Mouse Press Event
+//==============================================================================
+void FileListBox::mousePressEvent(QMouseEvent* aEvent)
+{
+    // Check Event & Data
+    if (aEvent) {
+        // Check Pressed State
+        if (!pressed) {
+            //qDebug() << "mousePressEvent::mouseReleaseEvent";
+            // Set Pressed State
+            pressed = true;
+
+            // Check If has Focus
+            if (!hasFocus())
+                // Set Focus
+                setFocus();
+
+            // ...
+        }
+    }
+}
+
+//==============================================================================
+// Mouse Release Event
+//==============================================================================
+void FileListBox::mouseReleaseEvent(QMouseEvent* aEvent)
+{
+    // Check Event & Data
+    if (aEvent) {
+        // Check Pressed
+        if (pressed) {
+            //qDebug() << "mousePressEvent::mouseReleaseEvent";
+            // Reset Pressed State
+            pressed = false;
+
+            // Check Button
+            if (aEvent->button() == Qt::RightButton) {
+                // Emit List Box Item Options Signal
+                emit itemOptions(-1, aEvent->globalPos());
+            }
+        }
+    }
+}
+
+//==============================================================================
 // Destructor
 //==============================================================================
 FileListBox::~FileListBox()
@@ -1593,8 +1640,6 @@ FileListBox::~FileListBox()
         delete iconScanner;
         iconScanner = NULL;
     }
-
-    // ...
 
     qDebug() << "Deleting FileListBox...done";
 }
@@ -1796,6 +1841,7 @@ CustomFilelist::CustomFilelist(QWidget* aParent)
     , dirItemsSizeScanActive(false)
     , sizeScanCurrent(-1)
     , fileSystemWatcher(NULL)
+    , popup(NULL)
 {
     qDebug() << "Creating CustomFilelist...";
 
@@ -1810,7 +1856,7 @@ CustomFilelist::CustomFilelist(QWidget* aParent)
         connect(ui->fileListBox, SIGNAL(listBoxKeyPressed(int,Qt::KeyboardModifiers)), this, SLOT(listBoxKeyPressed(int,Qt::KeyboardModifiers)));
         connect(ui->fileListBox, SIGNAL(listBoxKeyReleased(int,Qt::KeyboardModifiers)), this, SLOT(listBoxKeyReleased(int,Qt::KeyboardModifiers)));
         connect(ui->fileListBox, SIGNAL(itemSelected(int)), this, SLOT(listBoxItemSelected(int)));
-        connect(ui->fileListBox, SIGNAL(itemOptions(int)), this, SLOT(listBoxItemOptions(int)));
+        connect(ui->fileListBox, SIGNAL(itemOptions(int,QPoint)), this, SLOT(listBoxItemOptions(int,QPoint)));
         connect(ui->fileListBox, SIGNAL(listBoxFocusChanged(QString,bool)), this, SIGNAL(listBoxFocusChanged(QString,bool)));
         connect(ui->fileListBox, SIGNAL(itemIconSizeChanged(bool)), this, SLOT(listBoxItemIconSizeChanged(bool)));
     }
@@ -2847,11 +2893,69 @@ void CustomFilelist::listBoxItemSelected(const int& aIndex)
 //==============================================================================
 // List Box Item Options Slot
 //==============================================================================
-void CustomFilelist::listBoxItemOptions(const int& aIndex)
+void CustomFilelist::listBoxItemOptions(const int& aIndex, const QPoint& aPos)
 {
-    qDebug() << "CustomFilelist::listBoxItemOptions" << aIndex;
+    // Check List Box
+    if (ui && ui->fileListBox) {
+        qDebug() << "CustomFilelist::listBoxItemOptions - aIndex: " << aIndex << " - aPos: " << aPos;
+        // Check Popup
+        if (!popup) {
+            // Create Popup
+            popup = new ListPopup();
+        }
 
-    // ...
+        // Check Popup
+        if (popup) {
+            // Clear popup
+            popup->clear();
+        }
+
+        // Get File Item Data
+        FileItemData* fileItemData = ui->fileListBox->getItemData(aIndex);
+        // Check File Item Data
+        if (fileItemData) {
+            // Check Popup
+            if (popup) {
+                // Add Popup Items
+                popup->addAction(fileItemData->getFileInfo().fileName());
+
+                popup->addSeparator();
+
+                popup->addAction(tr("Copy"));
+                popup->addAction(tr("Cut"));
+                popup->addAction(tr("Paste"));
+
+                popup->addSeparator();
+
+                popup->addAction(tr("Pack"));
+
+                popup->addSeparator();
+
+                popup->addAction(tr("Compare"));
+
+                popup->addSeparator();
+
+                popup->addAction(tr("Delete"));
+
+            }
+        } else {
+            // Check Popup
+            if (popup) {
+
+                popup->addAction(tr("New Directory"));
+
+                popup->addSeparator();
+
+                popup->addAction(tr("Paste"));
+            }
+        }
+
+        // Check Popup
+        if (popup) {
+            // Launch Popup
+            popup->exec(aPos);
+        }
+    }
 }
 
 //==============================================================================
@@ -2960,6 +3064,13 @@ CustomFilelist::~CustomFilelist()
         // Release Instance
         settings->release();
         settings = NULL;
+    }
+
+    // Check Popup
+    if (popup) {
+        // Delete Popup
+        delete popup;
+        popup = NULL;
     }
 
     qDebug() << "Deleting CustomFilelist...done";

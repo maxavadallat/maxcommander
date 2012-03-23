@@ -1,6 +1,7 @@
 
 // INCLUDES
 
+#include <QPainter>
 #include <QDebug>
 
 #include "filerenamer.h"
@@ -67,10 +68,14 @@ FileRenamer::FileRenamer(QEventLoop* aEventLoop, QWidget* aParent)
     , mAccepted(false)
     , renamerParent(aParent)
 {
+    // Set Auto Fill Background
+    setAutoFillBackground(false);
     // Set Window Modality
     setWindowModality(Qt::ApplicationModal);
     // Set Window Flags
     setWindowFlags(Qt::Popup);
+    // Set Attributes
+    setAttribute(Qt::WA_NoSystemBackground);
 
     // Setup UI
     ui->setupUi(this);
@@ -113,9 +118,10 @@ QString FileRenamer::getFileName()
 void FileRenamer::showRenamer(FileListDelegate* aDelegate)
 {
     // Check Delegate
-    if (aDelegate && renamerParent) {
+    if (aDelegate && renamerParent && ui && ui->fileRenamerLayout) {
         // Set Geometry
-        setGeometry(QRect(renamerParent->mapToGlobal(renamerParent->pos()) + aDelegate->pos(), QSize(aDelegate->width(), aDelegate->height() + 2)));
+        setGeometry(QRect(renamerParent->mapToGlobal(renamerParent->pos()) + aDelegate->pos() + QPoint(0, -ui->fileRenamerLayout->contentsMargins().top()),
+                    QSize(aDelegate->width(), aDelegate->height() + ui->fileRenamerLayout->contentsMargins().top() + ui->fileRenamerLayout->contentsMargins().bottom())));
     }
 
     // Show
@@ -172,6 +178,27 @@ void FileRenamer::on_closeButton_clicked()
     // Hide Renamer
     hideRenamer();
 }
+
+//==============================================================================
+// Pant Event
+//==============================================================================
+void FileRenamer::paintEvent(QPaintEvent* aEvent)
+{
+    // Check Event
+    if (aEvent) {
+        // Get Painter
+        QPainter painter(this);
+        // Save Painter
+        painter.save();
+
+        // Fill Rect
+        //painter.fillRect(rect(), QColor::fromRgba(qRgba(0, 0, 0, 0)));
+
+        // Restore Painter
+        painter.restore();
+    }
+}
+
 //==============================================================================
 // Destructor
 //==============================================================================

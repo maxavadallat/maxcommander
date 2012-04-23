@@ -53,6 +53,14 @@
    </item>
    <item row="0" column="1">
     <widget class="QLabel" name="aboutInfoLabel">
+     <property name="font">
+      <font>
+       <pointsize>14</pointsize>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(255, 255, 255);</string>
+     </property>
      <property name="text">
       <string>This is a File Manager made by Max @2012</string>
      </property>

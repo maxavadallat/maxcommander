@@ -4,6 +4,8 @@
 // INCLUDES
 
 #include <QDialog>
+#include <QPaintEvent>
+#include <QColor>
 
 
 // FORWARD DECLARATIONS
@@ -32,10 +34,18 @@ public:
     //! @param none
     virtual ~AboutDialog();
 
+protected: // From QDialog
+
+    //! @brief Paint Eventr
+    //! @param aEvent Paint Event
+    virtual void paintEvent(QPaintEvent* aEvent);
+
 protected:
 
     //! UI
     Ui::AboutDialog*    ui;
+    //! Background Color
+    QColor              bgColor;
 };
 
 #endif // ABOUTDIALOG_H

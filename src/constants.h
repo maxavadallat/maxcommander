@@ -120,6 +120,16 @@
 
 
 
+// Default Dialog Background Color
+#define DEFAULT_DIALOG_BACKGROUND_COLOR                     0xE0000000
+// Default Dialog Background Color Alpha
+#define DEFAULT_DIALOG_BACKGROUND_ALPHA                     0xE0
+// Default Dialog Background Radius
+#define DEFAULT_DIALOG_BACKGROUND_RADIUS                    16
+// Default Dialog Border Width
+#define DEFAULT_DIALOG_BORDER_WIDTH                         4.0
+
+
 // Default File List Item Height
 #define DEFAULT_FILELIST_ITEM_HEIGHT                        DEFAULT_ICON_SIZE_MEDIUM
 // Default File List Item Radius
@@ -321,6 +331,12 @@
 #define SETTINGS_KEY_VIEWER_WHOLE_WORD                      "WholeWord"
 
 
+// Settings Key Copy Buffer Size
+#define SETTINGS_KEY_COPY_BUFFER_SIZE                       "CopyBufSize"
+
+
+
+
 // Default Setting Values
 
 // Default Color Values
@@ -438,6 +454,7 @@
 #define DEFAULT_FUNCTION_KEY_TEXT_F10_CONTROL               ""
 
 
+
 // Copy File Dialog Title Text - Multiple Files
 #define DEFAULT_COPY_DIALOG_TITLE_TEXT_FILES                "Copy Files"
 // Copy File Dialog Title Text - Single File
@@ -448,6 +465,7 @@
 #define DEFAULT_COPY_DIALOG_TEXT_TEMPLATE_FILE              "Copy %1 To"
 
 
+
 // Move File Dialog Title Text - Multiple Files
 #define DEFAULT_MOVE_DIALOG_TITLE_TEXT_FILES                "Move Files"
 // Move File Dialog Title Text - Single File
@@ -456,6 +474,7 @@
 #define DEFAULT_MOVE_DIALOG_TEXT_TEMPLATE_FILES             "Move %1 Files To"
 // Move File Dialog Text Template - Single Files
 #define DEFAULT_MOVE_DIALOG_TEXT_TEMPLATE_FILE              "Move %1 To"
+
 
 
 // Delete File Dialog Title Text - Multiple Files
@@ -471,6 +490,16 @@
 
 // File Viewer Max Size
 #define DEFAULT_VIEWER_MAX_FILE_SIZE                        ONE_MEGA
+
+
+
+// Default Copy Buffer Size
+#define DEFAULT_COPY_BUFFER_SIZE                            (8192 * 2 * 1024)
+
+
+
+
+
 
 
 

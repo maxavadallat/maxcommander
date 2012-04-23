@@ -410,6 +410,10 @@
      <string>&amp;File</string>
     </property>
     <addaction name="actionNew"/>
+    <addaction name="actionSetPermissions"/>
+    <addaction name="actionSetDates"/>
+    <addaction name="actionSetAttributes"/>
+    <addaction name="separator"/>
     <addaction name="actionCompare"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
@@ -666,6 +670,21 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+W</string>
+   </property>
+  </action>
+  <action name="actionSetPermissions">
+   <property name="text">
+    <string>Set &amp;Permissions</string>
+   </property>
+  </action>
+  <action name="actionSetDates">
+   <property name="text">
+    <string>Set &amp;Dates</string>
+   </property>
+  </action>
+  <action name="actionSetAttributes">
+   <property name="text">
+    <string>Set &amp;Attributes</string>
    </property>
   </action>
  </widget>

@@ -17,17 +17,44 @@
 #include <QTimerEvent>
 #include <QPixmap>
 
+#include <errno.h>
+
 
 // CONSTANTS/DEFINES
 
 //! Default Abort Check For Thread
-#define DEFAULT_THREAD_ABORT_CHECK              if (abort || restart) return
+#define DEFAULT_THREAD_ABORT_CHECK                  if (abort || restart) return
+
+
+//! File Delete Options - Delete Normal Files Without Confirmation
+#define FILE_DELETE_OPTION_DELETE_NORMAL            0x0001
+//! File Delete Options - Delete Read Only Files
+#define FILE_DELETE_OPTION_DELETE_READONLY          0x0003
+//! File Delete Options - Delete Read Only Files
+#define FILE_DELETE_OPTION_DELETE_NONEMPTY_DIR      0x0010
+
+
+//! File Copy Options - Overwrite Normal Files Without Confirmation
+#define FILE_COPY_OPTION_OVERWRITE_NORMAL           0x0001
+//! File Copy Options - Overwrite Read Only Files
+#define FILE_COPY_OPTION_OVERWRITE_READONLY         0x0003
+
+
+//! File Move Options - Overwrite Normal Files Without Confirmation
+#define FILE_MOVE_OPTION_OVERWRITE_NORMAL           0x0001
+//! File Move Options - Overwrite Read Only Files
+#define FILE_MOVE_OPTION_OVERWRITE_READONLY         0x0003
+
+//! File Move Options - Delete Read Only Source
+#define FILE_MOVE_OPTION_DELETE_READONLY_SOURCE     0x0003
+
+
 
 
 // DECLARATIONS
 
 
-//! @brief File Name In Case Sensitive Compare
+//! @brief File Name Case InSensitive Compare
 //! @param a File Name
 //! @param b File Name
 int fnstricmp(const QString& a, const QString& b);
@@ -58,7 +85,25 @@ enum DriveType
     DTFixed,
     DTRemote,
     DTCDRom,
-    DRRamDisk
+    DTRamDisk
+};
+
+
+//==============================================================================
+//! @enum FOORespType File Operation Observer Response Type Enum
+//==============================================================================
+enum FOORespType
+{
+    FOORTNo         = 0,
+    FOORTYes,
+    FOORTYesToAll,
+    FOORTNoToAll,
+    FOORTSkip,
+    FOORTSkipAll,
+    FOORTAbort,
+    FOORTCancel,
+    FOORTIgnore,
+    FOORTRetry
 };
 
 
@@ -66,6 +111,167 @@ enum DriveType
 //! @typedef SortingMethod File Sort Algo Function Type
 //==============================================================================
 typedef int (*SortingMethod)(const QFileInfo&, const QFileInfo&, const bool&);
+
+
+
+//==============================================================================
+//! @class DirCreatorObserver Dir Creator Observer Interface Class
+//==============================================================================
+class DirCreatorObserver
+{
+public:
+    //! @brief Create Dir Error Callback
+    //! @param aDirPath Directory Path
+    //! @param aErrorCode Error Code
+    //! @return Creation Error Response
+    virtual int createError(const QString& aDirPath, const int& aErrorCode) = 0;
+
+    //! @brief Create Dir Started
+    //! @param aDirPath Directory Path
+    virtual void createDirStarted(const QString& aDirPath) = 0;
+
+    //! @brief Creaet Dir Finished
+    //! @param aDirPath Directory Path
+    virtual void createDirFinished(const QString& aDirPath) = 0;
+};
+
+
+
+
+
+
+
+
+//==============================================================================
+//! @class FileDeleteObserver File Deletion Observer Interface Class
+//==============================================================================
+class FileDeleteObserver
+{
+public:
+
+    //! @brief Confirm Deletion Callback
+    //! @param aFilePath File Path
+    //! @param aReadOnly File Read Only
+    //! @param aNonEmpty Directory Empty
+    //! @return File Delete Observer Response
+    virtual int confirmDeletion(const QString& aFilePath, const bool& aReadOnly = false, const bool& aNonEmpty = false) = 0;
+
+    //! @brief Deletion Error Callback
+    //! @param aFilePath File Path
+    //! @param aErrorCode File Deletion Error Code
+    //! @return Deletion Error Code Response
+    virtual int deleteError(const QString& aFilePath, const int& aErrorCode) = 0;
+
+    //! @brief Delete File Started
+    //! @param aFilePath File Path
+    virtual void deleteFileStarted(const QString& aFilePath) = 0;
+
+    //! @brief Delete File Finished
+    //! @param aFilePath File Path
+    virtual void deleteFileFinished(const QString& aFilePath) = 0;
+};
+
+
+
+
+
+
+
+
+//==============================================================================
+//! @class FileCopyObserver File Copy Observer Interface Class
+//==============================================================================
+class FileCopyObserver
+{
+public:
+    //! @brief Confirm OverWrite Callback
+    //! @param aSource Source File Path
+    //! @param aTarget Target File Path
+    //! @param aReadOnly Target File Is Read Only
+    //! @return File Copy Observer Response
+    virtual int confirmOverWrite(const QString& aSource, const QString& aTarget, const bool& aReadOnly = false) = 0;
+
+    //! @brief Copy File Error Callback
+    //! @param aSource Source File Path
+    //! @param aTarget Target File Path
+    //! @param aErrorCode File Deletion Error Code
+    //! @return File Copy Error Code
+    virtual int copyError(const QString& aSource, const QString& aTarget, const int& aErrorCode) = 0;
+
+    //! @brief Copy File Started Callback
+    //! @param aSource Source File Path
+    //! @param aTarget Target File Path
+    virtual void copyStarted(const QString& aSource, const QString& aTarget) = 0;
+
+    //! @brief Copy File Progress Callback
+    //! @param aSource Source File Path
+    //! @param aTarget Target File Path
+    //! @param aCurrentSize Copy File Current Size/Progress
+    //! @param aFullSize Copy File Full Size
+    virtual void copyProgress(const QString& aSource, const QString& aTarget, const qint64& aCurrentSize, const qint64& aFullSize) = 0;
+
+    //! @brief Copy File Finished Callback
+    //! @param aSource Source File Path
+    //! @param aTarget Target File Path
+    virtual void copyFinished(const QString& aSource, const QString& aTarget) = 0;
+};
+
+
+
+
+
+
+//==============================================================================
+//! @class FileMoveObserver File Rename/Move Observer Interface Class
+//==============================================================================
+class FileMoveObserver
+{
+public:
+
+    //! @brief Confirm OverWrite Callback
+    //! @param aSource Source File Path
+    //! @param aTarget Target File Path
+    //! @param aReadOnly Target File Is Read Only
+    //! @return File Rename/Move Observer Response
+    virtual int confirmOverWrite(const QString& aSource, const QString& aTarget, const bool& aReadOnly = false) = 0;
+
+    //! @brief Confirm Source Deletion Callback
+    //! @param aSource Source File Path
+    //! @param aReadOnly Source File Is Read Only
+    //! @param aNonEmpty Source File Is A Non Empty Directory
+    //! @return File Rename/Move Observer Response
+    virtual int confirmDeletion(const QString& aSource, const bool& aReadOnly = false, const bool& aNonEmpty = false) = 0;
+
+    //! @brief Rename/Move File Error Callback
+    //! @param aSource Source File Path
+    //! @param aTarget Target File Path
+    //! @param aErrorCode File Deletion Error Code
+    //! @return File Rename/Move Error Code
+    virtual int moveError(const QString& aSource, const QString& aTarget, const int& aErrorCode) = 0;
+
+    //! @brief Rename/Move File Started Callback
+    //! @param aSource Source File Path
+    //! @param aTarget Target File Path
+    virtual void moveStarted(const QString& aSource, const QString& aTarget) = 0;
+
+    //! @brief Renamve/Move File Progress Callback
+    //! @param aSource Source File Path
+    //! @param aTarget Target File Path
+    //! @param aCurrentSize Move File Current Size/Progress
+    //! @param aFullSize Move File Full Size
+    virtual void moveProgress(const QString& aSource, const QString& aTarget, const qint64& aCurrentSize, const qint64& aFullSize) = 0;
+
+    //! @brief Rename/Move File Finished Callback
+    //! @param aSource Source File Path
+    //! @param aTarget Target File Path
+    virtual void moveFinished(const QString& aSource, const QString& aTarget) = 0;
+};
+
+
+
+
+
+
 
 
 //==============================================================================
@@ -101,31 +307,38 @@ public:
     //! @brief Create Directory
     //! @param aDirName Directory Path
     //! @return true If Successful
-    static bool createDir(const QString& aDirName);
+    static bool createDir(const QString& aDirName, DirCreatorObserver* aObserver = NULL);
 
     //! @brief Delete File
     //! @param aFileName File Name
-    //! @param aRecursive Recursive Flag
+    //! @param aOptions Options/Flags
+    //! @param aObserver Delete Observer Interface
     //! @return true If Successful
-    bool deleteFile(const QString& aFileName, const bool& aRecursive);
+    static bool deleteFile(const QString& aFileName, const int& aOptions = 0, FileDeleteObserver* aObserver = NULL);
 
     //! @brief Copy File
     //! @param aSource Source File Name
     //! @param aTarget Target File Name
+    //! @param aOptions Options/Flags
+    //! @param aObserver Delete Observer Interface
     //! @return true If Successful
-    bool copyFile(const QString& aSource, const QString& aTarget);
+    static bool copyFile(const QString& aSource, const QString& aTarget, const int& aOptions = 0, FileCopyObserver* aObserver = NULL);
 
     //! @brief Rename File
     //! @param aSource Source File Name
     //! @param aTarget Target File Name
+    //! @param aOptions Options/Flags
+    //! @param aObserver Delete Observer Interface
     //! @return true If Successful
-    bool renameFile(const QString& aSource, const QString& aTarget);
+    static bool renameFile(const QString& aSource, const QString& aTarget, const int& aOptions = 0, FileMoveObserver* aObserver = NULL);
 
     //! @brief Move File
     //! @param aSource Source File Name
     //! @param aTarget Target File Name
+    //! @param aOptions Options/Flags
+    //! @param aObserver Delete Observer Interface
     //! @return true If Successful
-    bool moveFile(const QString& aSource, const QString& aTarget);
+    static bool moveFile(const QString& aSource, const QString& aTarget, const int& aOptions = 0, FileMoveObserver* aObserver = NULL);
 
     //! @brief Set File Attributes
     //! @param aFilePath File Name
@@ -153,6 +366,12 @@ public:
     //! @param aFilePath File Name
     //! @return File Owner
     static QString getOwner(const QString& aFilePath);
+
+    //! @brief Set File Owner
+    //! @param aFilePath File Name
+    //! @param aOwner File Owner
+    //! @return true If Successfule, false Otherwise
+    static bool setOwner(const QString& aFilePath, const QString& aOwner);
 
     //! @brief Set File Last Modified Date
     //! @param aFilePath File Name
@@ -226,6 +445,11 @@ public:
     //! @return Dir Name
     static QString getDirName(const QString& aDirPath);
 
+    //! @brief Get File Directory/Path
+    //! @param aFilePath File Path
+    //! @return File Path
+    static QString getFilePath(const QString& aFilePath);
+
     //! @brief Format File Size
     //! @param aInfo File Info
     //! @return Formatted File Size
@@ -250,6 +474,11 @@ public:
     //! @param aDirPath Directory Path
     //! @return Free Space in Directory
     static qint64 getFreeSpace(const QString& aDirPath);
+
+    //! @brief Get Last Error
+    //! @param none
+    //! @return Last Error Code
+    static int getLastError();
 
     //! @brief Destructor
     //! @param none

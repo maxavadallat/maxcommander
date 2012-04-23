@@ -138,6 +138,12 @@ int main(int argc, char* argv[])
 
         qDebug() << "System Locale: " << QLocale::system().name();
 
+
+        //FileUtils::createDir(QString("/Users/Max/Testing/Creating/Directory////"));
+
+        //FileUtils::deleteFile(QString("/Users/Max/Testing/Creating/Directory////"));
+
+
         // Init Main Window
         MainWindow* mw = MainWindow::getInstance();
         // Show Main Window
@@ -186,6 +192,7 @@ int main(int argc, char* argv[])
 
         sw.show();
 */
+
 /*
         CustomFilelist cfl;
 

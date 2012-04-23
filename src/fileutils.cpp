@@ -15,7 +15,6 @@
 
 #include <CoreServices/CoreServices.h>
 #include <ApplicationServices/ApplicationServices.h>
-//#include <CoreFoundation/CoreFoundation.h>
 
 #include <sys/stat.h>
 #include <sys/statvfs.h>
@@ -23,12 +22,13 @@
 #elif defined(Q_OS_UNIX)
 
 #include <sys/stat.h>
-#include <sys/statvfs.h>
+#include <sys/statfs.h>
 
 #endif // Q_OS_UNIX
 
 #include "constants.h"
 #include "fileutils.h"
+#include "settings.h"
 
 
 // GLOBAL VARIABLES
@@ -421,8 +421,6 @@ qint64 FileUtils::getDirSize(const QString& aDirPath, qint64& aDirSize, bool& aA
 
     // Check If File Is A Dir
     if (fileInfo.isDir()) {
-        // Init Total Size
-        //qint64 totalSize = 0;
         // Init Dir
         QDir tempDir(aDirPath);
         // Init Filters
@@ -434,12 +432,7 @@ qint64 FileUtils::getDirSize(const QString& aDirPath, qint64& aDirSize, bool& aA
 
         // Get Info Count
         int fiCount = infoList.count();
-/*
-        if (fiCount) {
-            qDebug() << "====================================================";
-            qDebug() << "FileUtils::getDirSize - aDirPath: " << aDirPath;
-        }
-*/
+
         // Go Thru File Info List
         for (int i=0; i<fiCount; i++) {
 
@@ -462,11 +455,7 @@ qint64 FileUtils::getDirSize(const QString& aDirPath, qint64& aDirSize, bool& aA
 
             //qDebug() << aDirSize;
         }
-/*
-        if (fiCount) {
-            qDebug() << "====================================================";
-        }
-*/
+
         return aDirSize;
     }
 
@@ -476,69 +465,577 @@ qint64 FileUtils::getDirSize(const QString& aDirPath, qint64& aDirSize, bool& aA
 //==============================================================================
 // Create Directory
 //==============================================================================
-bool FileUtils::createDir(const QString& aDirName)
+bool FileUtils::createDir(const QString& aDirPath, DirCreatorObserver* aObserver)
 {
-    // Init Temp Dir
-    QDir tempDir(QDir::root());
+    // Init Dir Name
+    QString dirName = QDir::cleanPath(aDirPath);
+
+    // Check Observer
+    if (aObserver) {
+        // Notify
+        aObserver->createDirStarted(dirName);
+    }
+
+    // Init Observer Response
+    int observerResponse = 0;
+    // Make Dir Result
+    int mkdirResult = 0;
+    // Init Last Error
+    int lastError = 0;
+
+    // Create
+    for (int oldslash = -1, slash = 0; slash != -1; oldslash = slash) {
+        // Get Slash Position
+        slash = dirName.indexOf(QDir::separator(), oldslash + 1);
+
+        // Check Slash Position
+        if (slash == -1) {
+            // Set Old Slasp Pos
+            if (oldslash == dirName.length())
+                break;
+            // Set Slash Pos
+            slash = dirName.length();
+        }
+
+        // Check Slash Position
+        if (slash) {
+            // Get Chunk
+            QByteArray chunk = QFile::encodeName(dirName.left(slash));
+
+            qDebug() << "FileUtils::createDir - chunk: " << chunk;
+
+            do {
+#if defined (Q_OS_WIN)
+                // Create Directory
+                mkdirResult = CreateDirectory(chunk);
+#elif defined (Q_OS_MAC) || defined (Q_OS_UNIX)
+                // Try To make Path
+                mkdirResult = mkdir(chunk, 0777);
+#endif  // Q_OS_MAC || Q_OS_UNIX
+                // Get Last Error
+                lastError = getLastError();
+                // Check Result
+                if (mkdirResult != 0) {
+                    // Check Observer
+                    if (aObserver) {
+                        // Get Response
+                        observerResponse = aObserver->createError(dirName.left(slash), lastError);
+                    } else {
+#if defined (Q_OS_WIN)
+                        // Check Last Error
+                        if (lastError != ERROR_ALREADY_EXISTS) {
+#elif defined (Q_OS_MAC) || defined (Q_OS_UNIX)
+                        // Check Err No
+                        if (lastError != EEXIST) {
+#endif // Q_OS_MAC || Q_OS_UNIX
+                            qDebug() << "FileUtils::createDir - errno: " << lastError;
+                            return false;
+                        }
+                    }
+                }
+            } while (observerResponse == FOORTRetry);
+        }
+    }
+
+    // Chekc Observer
+    if (aObserver) {
+        // Notify
+        aObserver->createDirFinished(dirName);
+    }
+
     // Make Path
-    return tempDir.mkpath(aDirName);
+    return (lastError == 0);
 }
 
 //==============================================================================
 // Delete File
 //==============================================================================
-bool FileUtils::deleteFile(const QString& aFileName, const bool& aRecursive)
+bool FileUtils::deleteFile(const QString& aFileName, const int& aOptions, FileDeleteObserver* aObserver)
 {
-    // Init Temp Dir
-    QDir tempDir(QDir::root());
-    // Check If Is A Empty Dir
-    if (!isDirEmpty(aFileName) && aRecursive) {
-        // Delete Dir
+    // Init File Name
+    QString fileName = QDir::cleanPath(aFileName);
+    // Init File Info
+    QFileInfo fileInfo(fileName);
 
-        // ...
+    // Check Observer
+    if (aObserver) {
+        // Notify
+        aObserver->deleteFileStarted(fileName);
+    }
+
+    // Init Observer Response
+    int observerResponse = 0;
+    // Init Remove Result
+    int removeResult = 0;
+    // Init Last Error
+    int lastError = 0;
+
+    // Check Observer
+    if (aObserver) {
+
+        // Check Options, Observer Confirmation
+        if (!((aOptions & FILE_DELETE_OPTION_DELETE_NORMAL) || (aOptions & FILE_DELETE_OPTION_DELETE_READONLY)) && !aObserver->confirmDeletion(fileName) ) {
+            // Notify
+            aObserver->deleteFileFinished(fileName);
+
+            return false;
+        }
+
+    }
+
+    qDebug() << "FileUtils::deleteFile - fileName: " << fileName;
+
+    do {
+        // Check File Info
+        if (fileInfo.isDir()) {
+#if defined (Q_OS_WIN)
+            // Delete Directory
+            removeResult = !RemoveDirectory(QFile::encodeName(fileName));
+#elif defined (Q_OS_MAC) || defined (Q_OS_UNIX)
+            // Delete File
+            removeResult = rmdir(QFile::encodeName(fileName));
+#endif // Q_OS_MAC || Q_OS_UNIX
+        } else {
+#if defined (Q_OS_WIN)
+            // Delete File
+            removeResult = !DeleteFile(QFile::encodeName(fileName));
+#elif defined (Q_OS_MAC) || defined (Q_OS_UNIX)
+            // Delete File
+            removeResult = unlink(QFile::encodeName(fileName));
+#endif // Q_OS_MAC || Q_OS_UNIX
+        }
+
+        // Check Remove Result
+        if (removeResult && observerResponse != FOORTSkipAll) {
+#if defined (Q_OS_WIN)
+            // Get Last Error
+            lastError = GetLastError();
+#elif defined (Q_OS_MAC) || defined (Q_OS_UNIX)
+            // Get Last Error
+            lastError = errno;
+
+            // Check Last Error
+            if (lastError == EEXIST) {
+                // Reset Last Error
+                lastError = 0;
+            }
+#endif // Q_OS_MAC || Q_OS_UNIX
+            // Check Last Error
+            if (lastError) {
+                qDebug() << "FileUtils::deleteFile - lastError: " << lastError;
+                // Check Observer
+                if (aObserver) {
+                    // Get Observer Response
+                    observerResponse = aObserver->deleteError(fileName, lastError);
+                } else {
+                    return false;
+                }
+            }
+        }
+    } while (observerResponse == FOORTRetry);
+
+    // Check Observer
+    if (aObserver) {
+        // Notify
+        aObserver->deleteFileFinished(fileName);
     }
 
     // Remove File
-    return tempDir.remove(aFileName);
+    return (lastError == 0);
 }
 
 //==============================================================================
 // Copy File
 //==============================================================================
-bool FileUtils::copyFile(const QString& aSource, const QString& aTarget)
+bool FileUtils::copyFile(const QString& aSource, const QString& aTarget, const int& aOptions, FileCopyObserver* aObserver)
 {
-    // Check If Source Exists And Target Is Not Empty
-    if (QFile::exists(aSource) && !aTarget.isEmpty()) {
+    // Get Source Name
+    QString sourceName = QDir::cleanPath(aSource);
+    // Get Target Name
+    QString targetName = QDir::cleanPath(aTarget);
+    // Init Source File Info
+    QFileInfo sourceInfo(sourceName);
+    // Init Target File Info
+    QFileInfo targetInfo(targetName);
 
+    // Init Last Error
+    int lastError = 0;
+
+    // Check If File Exists
+    if (!QFile::exists(sourceName)) {
+        // Check Observer
+        if (aObserver) {
+#if defined (Q_OS_WIN)
+            // Set Last Error
+            lastError = ERROR_FILE_NOT_FOUND;
+#elif defined (Q_OS_MAC) || defined (Q_OS_UNIX)
+            // Set Last Error
+            lastError = ENOENT;
+#endif // Q_OS_MAC || Q_OS_UNIX
+            // Notify
+            aObserver->copyError(sourceName, targetName, lastError);
+        }
+
+        return false;
     }
 
-    return false;
+    // Init Observer Response
+    int observerResponse = 0;
+
+    // Check Target File
+    if (QFile::exists(targetName) && !targetInfo.isDir()) {
+        // Check Observer
+        if (!((aOptions & FILE_COPY_OPTION_OVERWRITE_NORMAL) || (aOptions & FILE_COPY_OPTION_OVERWRITE_NORMAL)) && aObserver) {
+            // Get Confirmation
+            observerResponse = aObserver->confirmOverWrite(sourceName, targetName);
+            // Check Observer Response
+            if (observerResponse == FOORTYes || observerResponse == FOORTYesToAll) {
+                do {
+                    // Delete File
+                    QFile::remove(targetName);
+                    // Get Last Error
+                    lastError = getLastError();
+                    // Check Last Error
+                    if (lastError) {
+                        // Error
+                        observerResponse = aObserver->copyError(sourceName, targetName, lastError);
+                    }
+                } while (observerResponse == FOORTRetry);
+            }
+        } else {
+            return false;
+        }
+    }
+
+    // Check Observer
+    if (aObserver) {
+        // Notify
+        aObserver->copyStarted(sourceName, targetName);
+    }
+
+    // Init Copy Result
+    //int copyResult = 0;
+    // Get Settings Instance
+    Settings* settings = Settings::getInstance();
+    // Get Copy Buffer Size
+    qint64 buffSize = settings ? settings->getValue(QString(SETTINGS_KEY_COPY_BUFFER_SIZE), DEFAULT_COPY_BUFFER_SIZE).toInt() : DEFAULT_COPY_BUFFER_SIZE;
+    // Alloc Buff
+    char* buf = (char*)malloc(buffSize);
+
+    // Init Source File
+    QFile sf(sourceName);
+    // Init Target File
+    QFile tf(targetName);
+
+    do {// OPEN SOURCE
+        // Open Source File
+        if (sf.open(QIODevice::ReadOnly)) {
+            do { // OPEN TARGET
+                // Open Target File
+                if (tf.open(QIODevice::WriteOnly)) {
+                    // Source File Pos
+                    qint64 spos = 0;
+                    // Source File Size
+                    qint64 ssize = sourceInfo.size();
+                    // Go Thru Source File
+                    while (!sf.atEnd()) {
+                        do { // READ SOURCE
+                            // Read File Into Buff
+                            qint64 byteRead = sf.read(buf, buffSize);
+                            // Check Byte Read
+                            if (byteRead < 0) {
+                                // Get Last Error
+                                lastError = getLastError();
+
+                                // Check Observer
+                                if (aObserver && lastError) {
+                                    // Copy Error
+                                    observerResponse = aObserver->copyError(sourceName, targetName, lastError);
+
+                                    // Check Observer Response
+                                    if (observerResponse == FOORTCancel) {
+                                        // Close Source File
+                                        sf.close();
+                                        // Close Target File
+                                        tf.close();
+                                        // Free Copy Buffer
+                                        free(buf);
+
+                                        return false;
+                                    }
+                                } else {
+                                    // Close Source File
+                                    sf.close();
+                                    // Close Target File
+                                    tf.close();
+                                    // Free Copy Buffer
+                                    free(buf);
+
+                                    return false;
+                                }
+                            } else {
+                                // Set Source Pos
+                                spos += byteRead;
+                                do { // WRITE TARGET
+                                    // Write To Target File
+                                    if (tf.write(buf, byteRead) < 0) {
+                                        // Get Last Error
+                                        lastError = getLastError();
+
+                                        // Check Observer
+                                        if (aObserver && lastError) {
+                                            // Copy Error
+                                            observerResponse = aObserver->copyError(sourceName, targetName, lastError);
+
+                                            // Check Observer Response
+                                            if (observerResponse == FOORTCancel) {
+                                                // Close Source File
+                                                sf.close();
+                                                // Close Target File
+                                                tf.close();
+                                                // Free Copy Buffer
+                                                free(buf);
+
+                                                return false;
+                                            }
+                                        } else {
+                                            // Close Source File
+                                            sf.close();
+                                            // Close Target File
+                                            tf.close();
+                                            // Free Copy Buffer
+                                            free(buf);
+
+                                            return false;
+                                        }
+                                    } else {
+                                        // Check Observer
+                                        if (aObserver) {
+                                            // Notify
+                                            aObserver->copyProgress(sourceName, targetName, spos, ssize);
+                                        }
+                                    }
+                                } while (observerResponse == FOORTRetry);
+                            }
+                        } while (observerResponse == FOORTRetry);
+                    }
+                    // Close Target File
+                    tf.close();
+                } else {
+                    // Get Last Error
+                    lastError = getLastError();
+                    // Check Observer
+                    if (aObserver && lastError) {
+                        // Copy Error
+                        observerResponse = aObserver->copyError(sourceName, targetName, lastError);
+                        // Check Observer Response
+
+                        // ...
+                    }
+                }
+            } while (observerResponse == FOORTRetry);
+
+            // Close Source File
+            sf.close();
+        } else {
+            // Get Last Error
+            lastError = getLastError();
+            // Check Observer
+            if (aObserver) {
+                // Copy Error
+                observerResponse = aObserver->copyError(sourceName, targetName, lastError);
+                // Check Observer Response
+                // ...
+            }
+        }
+    } while (observerResponse == FOORTRetry);
+
+    // Check Copy Buffer
+    if (buf) {
+        // Free Copy Buffer
+        free(buf);
+    }
+    // Check Observer
+    if (aObserver) {
+        // Notify
+        aObserver->copyFinished(sourceName, targetName);
+    }
+
+    return (getLastError() == 0);
 }
 
 //==============================================================================
 // Rename File
 //==============================================================================
-bool FileUtils::renameFile(const QString& aSource, const QString& aTarget)
+bool FileUtils::renameFile(const QString& aSource, const QString& aTarget, const int& aOptions, FileMoveObserver* aObserver)
 {
-    // Check If Source Exists And Target Is Not Empty
-    if (QFile::exists(aSource) && !aTarget.isEmpty()) {
+    // Get Source Name
+    QString sourceName = QDir::cleanPath(aSource);
+    // Get Target Name
+    QString targetName = QDir::cleanPath(aTarget);
+    // Init Source File Info
+    QFileInfo sourceInfo(sourceName);
+    // Init Target File Info
+    QFileInfo targetInfo(targetName);
 
+    // Init Last Error
+    int lastError = 0;
+
+    // Check If File Exists
+    if (!QFile::exists(sourceName)) {
+        // Check Observer
+        if (aObserver) {
+#if defined (Q_OS_WIN)
+            // Set Last Error
+            lastError = ERROR_FILE_NOT_FOUND;
+#elif defined (Q_OS_MAC) || defined (Q_OS_UNIX)
+            // Set Last Error
+            lastError = ENOENT;
+#endif // Q_OS_MAC || Q_OS_UNIX
+            // Notify
+            aObserver->moveError(sourceName, targetName, lastError);
+        }
+
+        return false;
     }
 
-    return false;
+    // Init Observer Response
+    int observerResponse = 0;
+
+    // Check Target File
+    if (QFile::exists(targetName) && !targetInfo.isDir()) {
+        // Check Observer
+        if (aObserver) {
+            // Get Confirmation
+            observerResponse = aObserver->confirmOverWrite(sourceName, targetName);
+            // Check Observer Response
+            if (observerResponse == FOORTYes || observerResponse == FOORTYesToAll) {
+                do {
+                    // Delete File
+                    QFile::remove(targetName);
+                    // Get Last Error
+                    lastError = getLastError();
+                    // Check Last Error
+                    if (lastError) {
+                        // Error
+                        observerResponse = aObserver->moveError(sourceName, targetName, lastError);
+                    }
+                } while (observerResponse == FOORTRetry);
+            }
+        } else {
+            return false;
+        }
+    }
+
+    // Check Observer
+    if (aObserver) {
+        // Notify
+        aObserver->moveStarted(sourceName, targetName);
+    }
+
+    do {
+        // Rename File
+        if (!QFile::rename(sourceName, targetName)) {
+            // Get Last Error
+            lastError = getLastError();
+            // Check Last Error
+            if (lastError) {
+                // Error
+                observerResponse = aObserver->moveError(sourceName, targetName, lastError);
+            }
+        }
+    } while (observerResponse == FOORTRetry);
+
+    // Check Observer
+    if (aObserver) {
+        // Notify
+        aObserver->moveFinished(sourceName, targetName);
+    }
+
+    return (getLastError() == 0);
 }
 
 //==============================================================================
 // Move File
 //==============================================================================
-bool FileUtils::moveFile(const QString& aSource, const QString& aTarget)
+bool FileUtils::moveFile(const QString& aSource, const QString& aTarget, const int& aOptions, FileMoveObserver* aObserver)
 {
-    // Check If Source Exists And Target Is Not Empty
-    if (QFile::exists(aSource) && !aTarget.isEmpty()) {
+    // Get Source Name
+    QString sourceName = QDir::cleanPath(aSource);
+    // Get Target Name
+    QString targetName = QDir::cleanPath(aTarget);
+    // Init Source File Info
+    QFileInfo sourceInfo(sourceName);
+    // Init Target File Info
+    QFileInfo targetInfo(targetName);
 
+    // Init Last Error
+    int lastError = 0;
+
+    // Check If File Exists
+    if (!QFile::exists(sourceName)) {
+        // Check Observer
+        if (aObserver) {
+#if defined (Q_OS_WIN)
+            // Set Last Error
+            lastError = ERROR_FILE_NOT_FOUND;
+#elif defined (Q_OS_MAC) || defined (Q_OS_UNIX)
+            // Set Last Error
+            lastError = ENOENT;
+#endif // Q_OS_MAC || Q_OS_UNIX
+            // Notify
+            aObserver->moveError(sourceName, targetName, lastError);
+        }
+
+        return false;
     }
 
-    return false;
+    // Init Observer Response
+    int observerResponse = 0;
+
+    // Check Target File
+    if (QFile::exists(targetName) && !targetInfo.isDir()) {
+        // Check Observer
+        if (aObserver) {
+            // Get Confirmation
+            observerResponse = aObserver->confirmOverWrite(sourceName, targetName);
+            // Check Observer Response
+            if (observerResponse == FOORTYes || observerResponse == FOORTYesToAll) {
+                do {
+                    // Delete File
+                    QFile::remove(targetName);
+                    // Get Last Error
+                    lastError = getLastError();
+                    // Check Last Error
+                    if (lastError) {
+                        // Error
+                        observerResponse = aObserver->moveError(sourceName, targetName, lastError);
+                    }
+                } while (observerResponse == FOORTRetry);
+            }
+        } else {
+            return false;
+        }
+    }
+
+    // Check Observer
+    if (aObserver) {
+        // Notify
+        aObserver->moveStarted(sourceName, targetName);
+    }
+
+    do {
+
+
+    } while (observerResponse == FOORTRetry);
+
+    // Check Observer
+    if (aObserver) {
+        // Notify
+        aObserver->moveFinished(sourceName, targetName);
+    }
+
+    return (getLastError() == 0);
 }
 
 //==============================================================================
@@ -602,6 +1099,21 @@ QString FileUtils::getOwner(const QString& aFilePath)
     QFileInfo fileInfo(aFilePath);
 
     return fileInfo.owner();
+}
+
+//==============================================================================
+// Set File Owner
+//==============================================================================
+bool FileUtils::setOwner(const QString& aFilePath, const QString& aOwner)
+{
+    // Check If File Exists & Date Is Valid
+    if (!QFile::exists(aFilePath) || aOwner.isEmpty())
+        return false;
+
+    qDebug() << "FileUtils::setOwner - aFilePath: " << aFilePath << " - aOwner: " << aOwner;
+
+
+    return false;
 }
 
 //==============================================================================
@@ -1070,6 +1582,21 @@ QString FileUtils::getDirName(const QString& aDirPath)
 }
 
 //==============================================================================
+// Get File Directory/Path
+//==============================================================================
+QString FileUtils::getFilePath(const QString& aFilePath)
+{
+    if (aFilePath == QString("/") || aFilePath == QString("\\")) {
+        return QString("/");
+    }
+
+    // Init File Info
+    QFileInfo fileInfo(aFilePath);
+
+    return fileInfo.path();
+}
+
+//==============================================================================
 // Format File Size
 //==============================================================================
 QString FileUtils::formatFileSize(const QFileInfo& aInfo)
@@ -1266,6 +1793,18 @@ qint64 FileUtils::getFreeSpace(const QString& aDirPath)
     }
 
     return 0;
+}
+
+//==============================================================================
+// Get Last Error
+//==============================================================================
+int FileUtils::getLastError()
+{
+#if defined(Q_OS_WIN)
+    return GetLastError();
+#elif defined(Q_OS_MAC) || defined(Q_OS_UNIX)
+    return errno;
+#endif // Q_OS_MAC || Q_OS_UNIX
 }
 
 //==============================================================================

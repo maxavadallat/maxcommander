@@ -26,3 +26,4 @@ TreeWindow::~TreeWindow()
     // Delete UI
     delete ui;
 }
+

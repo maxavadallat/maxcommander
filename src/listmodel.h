@@ -49,6 +49,11 @@ public:
     //! @param aSelected Selected Flag
     void toggleSelected();
 
+    //! @brief Get Selected State
+    //! @param none
+    //! @return Selected State
+    bool isSelected();
+
     //! @brief Destructor
     //! @param none
     virtual ~ListModelItemData();

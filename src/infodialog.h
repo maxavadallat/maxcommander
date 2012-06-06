@@ -44,6 +44,18 @@ public:
     //! @param none
     virtual ~InfoDialog();
 
+signals:
+
+    //! @brief Info Dialog Finished Signal
+    //! @param aDialog Dialog
+    void infoDialogFinished(QDialog* aDialog);
+
+protected slots:
+
+    //! @brief Dialog Finished Slot
+    //! @param aResult Dialog Result
+    void on_InfoDialog_finished(int aResult);
+
 protected:
 
     //! UI

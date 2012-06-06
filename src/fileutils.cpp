@@ -5,6 +5,8 @@
 #include <QFileIconProvider>
 #include <QTimer>
 #include <QPainter>
+#include <QRegExp>
+
 
 #if defined(Q_OS_WIN)
 
@@ -15,9 +17,38 @@
 
 #include <CoreServices/CoreServices.h>
 #include <ApplicationServices/ApplicationServices.h>
+#include <CoreFoundation/CoreFoundation.h>
 
 #include <sys/stat.h>
 #include <sys/statvfs.h>
+
+template <typename T>
+class Q_CORE_EXPORT QCFType
+{
+public:
+    inline QCFType(const T &t = 0) : type(t) {}
+    inline QCFType(const QCFType &helper) : type(helper.type) { if (type) CFRetain(type); }
+    inline ~QCFType() { if (type) CFRelease(type); }
+    inline operator T() { return type; }
+    inline QCFType operator =(const QCFType &helper)
+    {
+    if (helper.type)
+        CFRetain(helper.type);
+    CFTypeRef type2 = type;
+    type = helper.type;
+    if (type2)
+        CFRelease(type2);
+    return *this;
+    }
+    inline T *operator&() { return &type; }
+    static QCFType constructFromGet(const T &t)
+    {
+        CFRetain(t);
+        return QCFType<T>(t);
+    }
+protected:
+    T type;
+};
 
 #elif defined(Q_OS_UNIX)
 
@@ -470,6 +501,8 @@ bool FileUtils::createDir(const QString& aDirPath, DirCreatorObserver* aObserver
     // Init Dir Name
     QString dirName = QDir::cleanPath(aDirPath);
 
+    qDebug() << "FileUtils::createDir - aDirPath: " << aDirPath;
+
     // Check Observer
     if (aObserver) {
         // Notify
@@ -505,21 +538,29 @@ bool FileUtils::createDir(const QString& aDirPath, DirCreatorObserver* aObserver
             qDebug() << "FileUtils::createDir - chunk: " << chunk;
 
             do {
+                // Reset Make Dir Result
+                mkdirResult = 0;
+                // Reset Last Error
+                lastError = 0;
+                // Check If Dir Exists
+                if (!QFile::exists(QString(chunk))) {
 #if defined (Q_OS_WIN)
-                // Create Directory
-                mkdirResult = CreateDirectory(chunk);
+                    // Create Directory
+                    mkdirResult = CreateDirectory(chunk);
 #elif defined (Q_OS_MAC) || defined (Q_OS_UNIX)
-                // Try To make Path
-                mkdirResult = mkdir(chunk, 0777);
+                    // Try To make Path
+                    mkdirResult = mkdir(chunk, 0777);
 #endif  // Q_OS_MAC || Q_OS_UNIX
-                // Get Last Error
-                lastError = getLastError();
+                    // Get Last Error
+                    lastError = getLastError();
+                }
+
                 // Check Result
                 if (mkdirResult != 0) {
                     // Check Observer
                     if (aObserver) {
                         // Get Response
-                        observerResponse = aObserver->createError(dirName.left(slash), lastError);
+                        observerResponse = aObserver->createDirError(dirName.left(slash), lastError);
                     } else {
 #if defined (Q_OS_WIN)
                         // Check Last Error
@@ -532,6 +573,9 @@ bool FileUtils::createDir(const QString& aDirPath, DirCreatorObserver* aObserver
                             return false;
                         }
                     }
+                } else {
+                    // Reset Last Error
+                    lastError = 0;
                 }
             } while (observerResponse == FOORTRetry);
         }
@@ -550,12 +594,45 @@ bool FileUtils::createDir(const QString& aDirPath, DirCreatorObserver* aObserver
 //==============================================================================
 // Delete File
 //==============================================================================
-bool FileUtils::deleteFile(const QString& aFileName, const int& aOptions, FileDeleteObserver* aObserver)
+bool FileUtils::deleteFile(const QString& aFileName, int& aOptions, bool& aAbortSig, FileDeleteObserver* aObserver)
 {
     // Init File Name
     QString fileName = QDir::cleanPath(aFileName);
     // Init File Info
     QFileInfo fileInfo(fileName);
+
+    // Init Delete Files
+    bool deleteFiles = aOptions & FILE_DELETE_OPTION_DELETE_NORMAL;
+    // Init Delete All Read Only, System, Hidden Files
+    bool deleteReadOnlyFiles = aOptions & FILE_DELETE_OPTION_DELETE_READONLY;
+    // Init Skip Deleting All Normal Files
+    bool skipFiles = aOptions & FILE_DELETE_OPTION_DELETE_SKIP_NORMAL;
+    // Init Skip Deleting All Read Only  Files
+    bool skipReadOnlyFiles = aOptions & FILE_DELETE_OPTION_DELETE_SKIP_READONLY;
+
+    // Init Delete Non Empty Directories
+    //bool deleteNonEmpty = aOptions & FILE_DELETE_OPTION_DELETE_NON_EMPTY_DIR;
+
+    // Init Last Error
+    int lastError = 0;
+
+    // Check If File Exists
+    if (!fileInfo.exists()) {
+        // Check Observer
+        if (aObserver) {
+#if defined (Q_OS_WIN)
+            // Set Last Error
+            lastError = ERROR_FILE_NOT_FOUND;
+#elif defined (Q_OS_MAC) || defined (Q_OS_UNIX)
+            // Set Last Error
+            lastError = ENOENT;
+#endif // Q_OS_MAC || Q_OS_UNIX
+            // Notify
+            aObserver->deleteError(fileName, lastError);
+        }
+
+        return false;
+    }
 
     // Check Observer
     if (aObserver) {
@@ -567,25 +644,113 @@ bool FileUtils::deleteFile(const QString& aFileName, const int& aOptions, FileDe
     int observerResponse = 0;
     // Init Remove Result
     int removeResult = 0;
-    // Init Last Error
-    int lastError = 0;
+/*
+    // Get File Attributes
+    int attrib =  FileUtils::getFileAttributes(fileName);
+*/
+    bool fileReadOnly = false;
 
     // Check Observer
     if (aObserver) {
+        // Check Delete Read Only Files Option
+        if (fileReadOnly && !deleteReadOnlyFiles && !skipReadOnlyFiles) {
+            // Get Confirmation Result
+            observerResponse = aObserver->confirmDeletion(fileName, true);
 
-        // Check Options, Observer Confirmation
-        if (!((aOptions & FILE_DELETE_OPTION_DELETE_NORMAL) || (aOptions & FILE_DELETE_OPTION_DELETE_READONLY)) && !aObserver->confirmDeletion(fileName) ) {
-            // Notify
-            aObserver->deleteFileFinished(fileName);
+            // Evaluate Observer Result
+            if (observerResponse == FOORTSkipAll || observerResponse == FOORTNoToAll) {
+                // Add To Options
+                aOptions |= FILE_DELETE_OPTION_DELETE_SKIP_READONLY;
+
+                return false;
+
+            // Evaluate Observer Result
+            } else if (observerResponse == FOORTYesToAll) {
+                // Add To Options
+                aOptions |= FILE_DELETE_OPTION_DELETE_READONLY;
+                // Update Delete Read Only Files
+                deleteReadOnlyFiles = true;
+
+            // Evaluate Observer Result
+            } else if (observerResponse == FOORTAbort || observerResponse == FOORTCancel) {
+                // Set Abort Sig
+                aAbortSig = true;
+
+                return false;
+
+            // Evaluate Observer Result
+            } else if (observerResponse == FOORTSkip || observerResponse == FOORTNo) {
+
+                return false;
+
+            // Evaluate Observer Result
+            } else if (observerResponse == FOORTYes) {
+                // Update Delete Read Only Files
+                deleteReadOnlyFiles = true;
+            }
+
+        // Check Delete Normal Files Option
+        } else if (!deleteFiles && !skipFiles) {
+            // Get Confirmation Result
+            observerResponse = aObserver->confirmDeletion(fileName);
+            // Evaluate Observer Result
+            if (observerResponse == FOORTSkipAll || observerResponse == FOORTNoToAll) {
+                // Add To Options
+                aOptions |= FILE_DELETE_OPTION_DELETE_SKIP_NORMAL;
+
+                return false;
+
+            // Evaluate Observer Result
+            } else if (observerResponse == FOORTYesToAll) {
+                // Add To Options
+                aOptions |= FILE_DELETE_OPTION_DELETE_NORMAL;
+                // Update Delete File
+                deleteFiles = true;
+
+            // Evaluate Observer Result
+            } else if (observerResponse == FOORTAbort || observerResponse == FOORTCancel) {
+                // Set Abort Sig
+                aAbortSig = true;
+
+                return false;
+
+            // Evaluate Observer Result
+            } else if (observerResponse == FOORTSkip || observerResponse == FOORTNo) {
+
+                return false;
+
+            // Evaluate Observer Result
+            } else if (observerResponse == FOORTYes) {
+                // Update Delete Files
+                deleteFiles = true;
+            }
+
+        // Check Skip Read Only Files Option
+        } else if (fileReadOnly && skipReadOnlyFiles) {
+
+            return false;
+
+        // Check Skip Files Option
+        } else if (skipFiles) {
+
+            return false;
+
+        }
+    } else {
+        // Check Options
+        if ((fileReadOnly && skipReadOnlyFiles) || skipFiles || !deleteReadOnlyFiles && !deleteFiles) {
 
             return false;
         }
-
     }
 
     qDebug() << "FileUtils::deleteFile - fileName: " << fileName;
 
     do {
+        // Check Abort Signal
+        if (aAbortSig) {
+            return false;
+        }
         // Check File Info
         if (fileInfo.isDir()) {
 #if defined (Q_OS_WIN)
@@ -647,7 +812,7 @@ bool FileUtils::deleteFile(const QString& aFileName, const int& aOptions, FileDe
 //==============================================================================
 // Copy File
 //==============================================================================
-bool FileUtils::copyFile(const QString& aSource, const QString& aTarget, const int& aOptions, FileCopyObserver* aObserver)
+bool FileUtils::copyFile(const QString& aSource, const QString& aTarget, int& aOptions, bool& aAbortSig, FileCopyObserver* aObserver)
 {
     // Get Source Name
     QString sourceName = QDir::cleanPath(aSource);
@@ -660,6 +825,11 @@ bool FileUtils::copyFile(const QString& aSource, const QString& aTarget, const i
 
     // Init Last Error
     int lastError = 0;
+
+    // Check Abort Sig
+    if (aAbortSig) {
+        return false;
+    }
 
     // Check If File Exists
     if (!QFile::exists(sourceName)) {
@@ -681,6 +851,11 @@ bool FileUtils::copyFile(const QString& aSource, const QString& aTarget, const i
 
     // Init Observer Response
     int observerResponse = 0;
+
+    // Check Abort Sig
+    if (aAbortSig) {
+        return false;
+    }
 
     // Check Target File
     if (QFile::exists(targetName) && !targetInfo.isDir()) {
@@ -707,25 +882,42 @@ bool FileUtils::copyFile(const QString& aSource, const QString& aTarget, const i
         }
     }
 
+    // Check Abort Sig
+    if (aAbortSig) {
+        return false;
+    }
+
     // Check Observer
     if (aObserver) {
         // Notify
         aObserver->copyStarted(sourceName, targetName);
     }
 
-    // Init Copy Result
-    //int copyResult = 0;
+    // Check Abort Sig
+    if (aAbortSig) {
+        return false;
+    }
+
     // Get Settings Instance
     Settings* settings = Settings::getInstance();
     // Get Copy Buffer Size
     qint64 buffSize = settings ? settings->getValue(QString(SETTINGS_KEY_COPY_BUFFER_SIZE), DEFAULT_COPY_BUFFER_SIZE).toInt() : DEFAULT_COPY_BUFFER_SIZE;
-    // Alloc Buff
+
+    // Alloc Main Buffer For Copy File
     char* buf = (char*)malloc(buffSize);
 
     // Init Source File
     QFile sf(sourceName);
     // Init Target File
     QFile tf(targetName);
+
+    // Check Abort Sig
+    if (aAbortSig) {
+        // Free Copy Buffer
+        free(buf);
+
+        return false;
+    }
 
     do {// OPEN SOURCE
         // Open Source File
@@ -740,6 +932,19 @@ bool FileUtils::copyFile(const QString& aSource, const QString& aTarget, const i
                     // Go Thru Source File
                     while (!sf.atEnd()) {
                         do { // READ SOURCE
+
+                            // Check Abort Signal
+                            if (aAbortSig) {
+                                // Close Source File
+                                sf.close();
+                                // Close Target File
+                                tf.close();
+                                // Free Copy Buffer
+                                free(buf);
+
+                                return false;
+                            }
+
                             // Read File Into Buff
                             qint64 byteRead = sf.read(buf, buffSize);
                             // Check Byte Read
@@ -845,6 +1050,7 @@ bool FileUtils::copyFile(const QString& aSource, const QString& aTarget, const i
                 // Copy Error
                 observerResponse = aObserver->copyError(sourceName, targetName, lastError);
                 // Check Observer Response
+
                 // ...
             }
         }
@@ -867,12 +1073,20 @@ bool FileUtils::copyFile(const QString& aSource, const QString& aTarget, const i
 //==============================================================================
 // Rename File
 //==============================================================================
-bool FileUtils::renameFile(const QString& aSource, const QString& aTarget, const int& aOptions, FileMoveObserver* aObserver)
+bool FileUtils::renameFile(const QString& aSource, const QString& aTarget, int& aOptions, bool& aAbortSig, FileRenameObserver* aObserver)
 {
     // Get Source Name
     QString sourceName = QDir::cleanPath(aSource);
     // Get Target Name
     QString targetName = QDir::cleanPath(aTarget);
+
+    // Check Abort Sig
+    if (aAbortSig) {
+        return false;
+    }
+
+    qDebug() << "FileUtils::renameFile - sN: " << sourceName << " - tN: " << targetName << " - aOptions: " << aOptions << " - aObserver: " << aObserver;
+
     // Init Source File Info
     QFileInfo sourceInfo(sourceName);
     // Init Target File Info
@@ -881,8 +1095,12 @@ bool FileUtils::renameFile(const QString& aSource, const QString& aTarget, const
     // Init Last Error
     int lastError = 0;
 
-    // Check If File Exists
-    if (!QFile::exists(sourceName)) {
+    // Check Abort Sig
+    if (aAbortSig) {
+        return false;
+    }
+    // Check If Source File Exists
+    if (!sourceInfo.exists()) {
         // Check Observer
         if (aObserver) {
 #if defined (Q_OS_WIN)
@@ -893,7 +1111,7 @@ bool FileUtils::renameFile(const QString& aSource, const QString& aTarget, const
             lastError = ENOENT;
 #endif // Q_OS_MAC || Q_OS_UNIX
             // Notify
-            aObserver->moveError(sourceName, targetName, lastError);
+            aObserver->renameError(sourceName, targetName, lastError);
         }
 
         return false;
@@ -901,6 +1119,11 @@ bool FileUtils::renameFile(const QString& aSource, const QString& aTarget, const
 
     // Init Observer Response
     int observerResponse = 0;
+
+    // Check Abort Sig
+    if (aAbortSig) {
+        return false;
+    }
 
     // Check Target File
     if (QFile::exists(targetName) && !targetInfo.isDir()) {
@@ -918,7 +1141,7 @@ bool FileUtils::renameFile(const QString& aSource, const QString& aTarget, const
                     // Check Last Error
                     if (lastError) {
                         // Error
-                        observerResponse = aObserver->moveError(sourceName, targetName, lastError);
+                        observerResponse = aObserver->renameError(sourceName, targetName, lastError);
                     }
                 } while (observerResponse == FOORTRetry);
             }
@@ -927,13 +1150,22 @@ bool FileUtils::renameFile(const QString& aSource, const QString& aTarget, const
         }
     }
 
+    // Check Abort Sig
+    if (aAbortSig) {
+        return false;
+    }
+
     // Check Observer
     if (aObserver) {
         // Notify
-        aObserver->moveStarted(sourceName, targetName);
+        aObserver->renameStarted(sourceName, targetName);
     }
 
     do {
+        // Check Abort Sig
+        if (aAbortSig) {
+            return false;
+        }
         // Rename File
         if (!QFile::rename(sourceName, targetName)) {
             // Get Last Error
@@ -941,7 +1173,7 @@ bool FileUtils::renameFile(const QString& aSource, const QString& aTarget, const
             // Check Last Error
             if (lastError) {
                 // Error
-                observerResponse = aObserver->moveError(sourceName, targetName, lastError);
+                observerResponse = aObserver->renameError(sourceName, targetName, lastError);
             }
         }
     } while (observerResponse == FOORTRetry);
@@ -949,7 +1181,7 @@ bool FileUtils::renameFile(const QString& aSource, const QString& aTarget, const
     // Check Observer
     if (aObserver) {
         // Notify
-        aObserver->moveFinished(sourceName, targetName);
+        aObserver->renameFinished(sourceName, targetName);
     }
 
     return (getLastError() == 0);
@@ -958,12 +1190,20 @@ bool FileUtils::renameFile(const QString& aSource, const QString& aTarget, const
 //==============================================================================
 // Move File
 //==============================================================================
-bool FileUtils::moveFile(const QString& aSource, const QString& aTarget, const int& aOptions, FileMoveObserver* aObserver)
+bool FileUtils::moveFile(const QString& aSource, const QString& aTarget, int& aOptions, bool& aAbortSig, FileMoveObserver* aObserver)
 {
     // Get Source Name
     QString sourceName = QDir::cleanPath(aSource);
     // Get Target Name
     QString targetName = QDir::cleanPath(aTarget);
+
+    qDebug() << "FileUtils::moveFile - sN: " << sourceName << " - tN: " << targetName << " - aOptions: " << aOptions << " - aObserver: " << aObserver;
+
+    // Check Abort Sig
+    if (aAbortSig) {
+        return false;
+    }
+
     // Init Source File Info
     QFileInfo sourceInfo(sourceName);
     // Init Target File Info
@@ -972,8 +1212,13 @@ bool FileUtils::moveFile(const QString& aSource, const QString& aTarget, const i
     // Init Last Error
     int lastError = 0;
 
-    // Check If File Exists
-    if (!QFile::exists(sourceName)) {
+    // Check Abort Sig
+    if (aAbortSig) {
+        return false;
+    }
+
+    // Check If Source File Exists
+    if (!sourceInfo.exists()) {
         // Check Observer
         if (aObserver) {
 #if defined (Q_OS_WIN)
@@ -990,11 +1235,22 @@ bool FileUtils::moveFile(const QString& aSource, const QString& aTarget, const i
         return false;
     }
 
+    // Check Abort Sig
+    if (aAbortSig) {
+        return false;
+    }
+
     // Init Observer Response
     int observerResponse = 0;
 
     // Check Target File
     if (QFile::exists(targetName) && !targetInfo.isDir()) {
+
+        // Check Abort Sig
+        if (aAbortSig) {
+            return false;
+        }
+
         // Check Observer
         if (aObserver) {
             // Get Confirmation
@@ -1022,6 +1278,11 @@ bool FileUtils::moveFile(const QString& aSource, const QString& aTarget, const i
     if (aObserver) {
         // Notify
         aObserver->moveStarted(sourceName, targetName);
+    }
+
+    // Check Abort Sig
+    if (aAbortSig) {
+        return false;
     }
 
     do {
@@ -1366,7 +1627,7 @@ CGContextRef FileUtils::getMacCGContext(const QPaintDevice* aPaintDevice)
 //==============================================================================
 // Get/Convert Mac Icon To QImage
 //==============================================================================
-QImage FileUtils::convertMacIcon(const IconRef& aMacIconref, QImage& aIconImage)
+OSStatus FileUtils::convertMacIcon(const IconRef& aMacIconref, QImage& aIconImage)
 {
     // Fill Icon Image
     aIconImage.fill(QColor(0, 0, 0, 0));
@@ -1379,18 +1640,18 @@ QImage FileUtils::convertMacIcon(const IconRef& aMacIconref, QImage& aIconImage)
     // Reset Colors
     color.blue = color.green = color.red = 255 * 255;
     //color.blue = color.green = color.red = 0;
+
+    // Init Status
+    OSStatus status = noErr;
+
     // Plot Icon Ref In Context
-    OSStatus status = PlotIconRefInContext(ctx, &rect, kAlignNone, kTransformNone, &color, kPlotIconRefNormalFlags, aMacIconref);
-    // Doing Twice To Make Sure It Is Drawn
     status = PlotIconRefInContext(ctx, &rect, kAlignNone, kTransformNone, &color, kPlotIconRefNormalFlags, aMacIconref);
-    // Check Status
-    if (status != noErr) {
-        qDebug() << "#### convertMacIcon - PlotIconRefInContext: " << status;
-    }
+
     // Release Context
     CGContextRelease(ctx);
+
     // Return Icon Image
-    return aIconImage;
+    return status;
 }
 
 #elif defined(Q_OS_WIN)
@@ -1421,49 +1682,76 @@ QImage FileUtils::getFileIconImage(const QFileInfo& aInfo, const int& aWidth, co
 
     // Init File System Reference
     FSRef macRef;
-    // Get file System Reference
-    OSStatus status = FSPathMakeRef(reinterpret_cast<const UInt8*>(aInfo.canonicalFilePath().toUtf8().constData()), &macRef, 0);
 
-    // Check Status
-    if (status != noErr) {
-        qDebug() << "### FileUtils::getFileIconImage - FSPathMakeRef: " << status;
-        return QImage(0, 0, QImage::Format_ARGB32_Premultiplied);
-    }
+    // Init Status
+    OSStatus status = noErr;
 
-    // Init file System Catalog Info
-    FSCatalogInfo info;
+    do {
+        // Get file System Reference
+        status = FSPathMakeRef(reinterpret_cast<const UInt8*>(aInfo.canonicalFilePath().toUtf8().constData()), &macRef, 0);
 
-    // Init Mac Name
-    HFSUniStr255 macName;
+        // Check Status
+        if (status != noErr) {
+            qDebug() << "### FileUtils::getFileIconImage - FSPathMakeRef: " << status;
 
-    // Get Catalog Info
-    status = FSGetCatalogInfo(&macRef, kIconServicesCatalogInfoMask, &info, &macName, 0, 0);
+            //return QImage(0, 0, QImage::Format_ARGB32_Premultiplied);
+            continue;
+        }
 
-    // Check Status
-    if (status != noErr) {
-        qDebug() << "### FileUtils::getFileIconImage - FSGetCatalogInfo: " << status;
-        return QImage(0, 0, QImage::Format_ARGB32_Premultiplied);
-    }
+        // Init file System Catalog Info
+        FSCatalogInfo info;
 
-    // Init Icon Reference
-    IconRef iconRef;
-    // Init Icon Label
-    SInt16 iconLabel;
+        // Init Mac Name
+        HFSUniStr255 macName;
 
-    // Get Icon Reference
-    status = GetIconRefFromFileInfo(&macRef, macName.length, macName.unicode, kIconServicesCatalogInfoMask, &info, kIconServicesNormalUsageFlag, &iconRef, &iconLabel);
+        // Get Catalog Info
+        status = FSGetCatalogInfo(&macRef, kIconServicesCatalogInfoMask, &info, &macName, 0, 0);
 
-    // Check Status
-    if (status != noErr) {
-        qDebug() << "### FileUtils::getFileIconImage - GetIconRefFromFileInfo: " << status;
-        return QImage(0, 0, QImage::Format_ARGB32_Premultiplied);
-    }
+        // Check Status
+        if (status != noErr) {
+            qDebug() << "### FileUtils::getFileIconImage - FSGetCatalogInfo: " << status;
 
-    // Convert Mac Icon
-    convertMacIcon(iconRef, newImage);
+            //return QImage(0, 0, QImage::Format_ARGB32_Premultiplied);
+            continue;
+        }
 
-    // Release Icon Ref
-    ReleaseIconRef(iconRef);
+        // Init Icon Reference
+        IconRef iconRef;
+        // Init Icon Label
+        SInt16 iconLabel;
+
+        // Get Icon Reference
+        status = GetIconRefFromFileInfo(&macRef, macName.length, macName.unicode, kIconServicesCatalogInfoMask, &info, kIconServicesNormalUsageFlag, &iconRef, &iconLabel);
+
+        // Check Status
+        if (status != noErr) {
+            qDebug() << "### FileUtils::getFileIconImage - GetIconRefFromFileInfo: " << status;
+
+            // Release Icon Ref
+            ReleaseIconRef(iconRef);
+
+            //return QImage(0, 0, QImage::Format_ARGB32_Premultiplied);
+            continue;
+        }
+
+        // Convert Mac Icon
+        status = convertMacIcon(iconRef, newImage);
+
+        // Check Status
+        if (status != noErr) {
+            qDebug() << "### FileUtils::getFileIconImage - convertMacIcon: " << status;
+
+            // Release Icon Ref
+            //ReleaseIconRef(iconRef);
+
+            //return QImage(0, 0, QImage::Format_ARGB32_Premultiplied);
+            //continue;
+        }
+
+        // Release Icon Ref
+        ReleaseIconRef(iconRef);
+
+    } while (status != noErr);
 
 #elif defined(Q_OS_WIN)
 
@@ -1601,6 +1889,30 @@ QString FileUtils::getFilePath(const QString& aFilePath)
 //==============================================================================
 QString FileUtils::formatFileSize(const QFileInfo& aInfo)
 {
+    // Bundle Type
+    //const int BundleType = 0x00080000;
+/*
+    if (aInfo.exists() && aInfo.isDir()) {
+        // Get Path
+        QCFType<CFStringRef> path = CFStringCreateWithBytes(0,
+                (const UInt8*)aInfo.filePath().toAscii().data(), aInfo.filePath().length(), kCFStringEncodingUTF8, false);
+        // Get URL
+        QCFType<CFURLRef> url = CFURLCreateWithFileSystemPath(0, path, kCFURLPOSIXPathStyle, true);
+
+        char type[4], creator[4];
+
+        // Try To Get Bundle Package Info
+        if (CFBundleGetPackageInfoInDirectory(url, (UInt32*)&type, (UInt32*)&creator)) {
+            qDebug() << "FileUtils::formatFileSize - fileName: " << aInfo.fileName() << " - BUNDLE - type: " << QString(type).left(4);
+        }
+    }
+*/
+
+    // Check File Info
+    if (aInfo.fileName() == QString("..")) {
+        return QString(DEFAULT_FILE_SIZE_DIR);
+    }
+
     // Check File Info
     if (aInfo.isBundle()) {
         // Check File Info
@@ -1805,6 +2117,199 @@ int FileUtils::getLastError()
 #elif defined(Q_OS_MAC) || defined(Q_OS_UNIX)
     return errno;
 #endif // Q_OS_MAC || Q_OS_UNIX
+}
+
+//==============================================================================
+// Wild Card Matching
+//==============================================================================
+QString FileUtils::wildCardMatching(const QString& aSource, const QString& aPattern)
+{
+    qDebug() << "FileUtils::wildCardMatching - aSource: " << aSource << " - aPattern: " << aPattern;
+
+    // Init Target Temp
+    QString tTemp = QString("");
+    // Init Target Source Pattern Length
+    QString tsTemp = aPattern;
+
+    // Get Target Pattern Length
+    int tLength = tsTemp.length();
+    // Get Source Name Length
+    int sLength = aSource.length();
+
+    // Go Thru Target Pattern
+    for (int i=0, j=0; i<tLength && j<sLength; ++i) {
+        // Check Current Char
+        if (tsTemp[i] == '?') {
+            // Add Char From Source
+            tTemp += aSource[j];
+            // Inc Source Pos
+            j++;
+        // Check Current Char
+        } else if (tsTemp[i] == '*') {
+            // Check Target Pattern Char Index
+            if (i == tLength-1) {
+                // Check Source Dot Pos
+                int dPos = aSource.indexOf(QChar('.'), j);
+                // Check Dot Pos
+                if (dPos >= 0) {
+                    // Adding The Rest Of The Source
+                    tTemp += aSource.right(aSource.length()-dPos-1);
+                } else {
+                    // Adding The Rest Of The Source
+                    tTemp += aSource.right(aSource.length()-j);
+                }
+            // Check Target Pattern Char Index And Source Char Index
+            } else if (/*i == 0 &&*/ i<(tLength-1) && j<sLength) {
+                // Get Next Char
+                QChar nextChar = tsTemp[i+1];
+                // Check Dot Pos
+                int dPos = aSource.indexOf(QChar('.'), j);
+                // Check Next Char
+                if (nextChar == QChar('.') && dPos >= 0) {
+                    // Copy Source While Not Matching Dot
+                    while (aSource[j] != QChar('.') && j<sLength) {
+                        // Add Source Char
+                        tTemp += aSource[j];
+                        // Inc Source Index
+                        j++;
+                    }
+                } else {
+                    // Copy Source While Not Matching Next Char
+                    while (aSource[j] != nextChar && j<sLength) {
+                        // Add Source Char
+                        tTemp += aSource[j];
+                        // Inc Source Index
+                        j++;
+                    }
+                }
+            }
+        } else {
+            // Add Char From Target
+            tTemp += tsTemp[i];
+            // Inc Source Pos
+            j++;
+        }
+    }
+
+    return tTemp;
+}
+
+//==============================================================================
+// Parse Target File Name
+//==============================================================================
+QString FileUtils::parseTargetFileName(const QString& aSourceName, const QString& aTargetName)
+{
+    //qDebug() << "FileUtils::parseTargetFileName - aSN: " << aSourceName << " - aTN: " << aTargetName;
+
+    // Init Target Temp
+    QString tTemp = QString("");
+    // Init Target Source Temp
+    QString tsTemp = aTargetName;
+
+    // Get Slash Last Pos
+    int slp = aTargetName.lastIndexOf('/');
+    // Get Back Slash Last Pos
+    int bslp = aTargetName.lastIndexOf('\\');
+
+    // Check Last Slash Pos And Last Back Slash Pos
+    if (slp >= 0 || bslp >= 0) {
+        // Add Partial Target Name
+        tTemp += aTargetName.left(qMax(slp, bslp) + 1);
+        // Set Target Source Temp
+        tsTemp = aTargetName.right(aTargetName.length() - tTemp.length());
+    }
+
+    // Check Target Name
+    if (tsTemp.isEmpty() || tsTemp == QString("*.*") || tsTemp == QString("*")) {
+        // Add Source Name
+        tTemp += aSourceName;
+    // Check Target Name
+    } else if (!tsTemp.isEmpty() && !tsTemp.contains(QString("*")) && !tsTemp.contains(QString("?"))) {
+        // Add Target Name
+        tTemp += tsTemp;
+    } else {
+        // Add Wild Card Matching String To Target
+        tTemp += FileUtils::wildCardMatching(aSourceName, tsTemp);
+    }
+
+    return tTemp;
+}
+
+//==============================================================================
+// Create File Operation Entry
+//==============================================================================
+FileOperationEntry* FileUtils::createFileOperationEntry(const int& aOperation, const QString& aSourceDir, const QString& aSourceName, const QString& aTargetDir, const QString& aTargetName)
+{
+    if (!aSourceDir.isEmpty() && !aTargetDir.isEmpty()) {
+        //qDebug() << "FileUtils::createFileOperationEntry - aOperation: " << aOperation << " - aSD: " << aSourceDir << " - aSN: " << aSourceName << " - aTD: " << aTargetDir << " - aTN: " << aTargetName;
+        // Init Source Temp
+        QString sTemp = aSourceDir;
+
+        // Check Source Temp
+        if (!sTemp.endsWith(QDir::separator())) {
+            // Add Slash
+            sTemp += QDir::separator();
+        }
+
+        // Add Source Name
+        sTemp += aSourceName;
+
+        // Init Target Temp
+        QString tTemp = aTargetDir;
+
+        // Check Target Temp
+        if (!tTemp.endsWith(QDir::separator())) {
+            // Add Slash
+            tTemp += QDir::separator();
+        }
+
+        // Check If Target Name Is Relative
+        if (QDir::isAbsolutePath(aTargetName)) {
+            // Set Parsed Target Name
+            tTemp = FileUtils::parseTargetFileName(aSourceName, aTargetName);
+        } else {
+            // Add Parsed Target Name
+            tTemp += FileUtils::parseTargetFileName(aSourceName, aTargetName);
+        }
+
+        // Check Source And Target
+        if (!sTemp.isEmpty() && !tTemp.isEmpty()) {
+            // Create New File Operation Entry
+            return new FileOperationEntry(aOperation, sTemp, tTemp);
+        }
+    }
+
+    return NULL;
+}
+
+//==============================================================================
+// Is Full Path
+//==============================================================================
+bool FileUtils::isFullPath(const QString& aFilePath)
+{
+    // Check File Path
+    if (!aFilePath.isEmpty()) {
+
+#if defined (Q_OS_WIN)
+
+        // Check File Path
+        if (aFilePath.at(0).toLower().toAscii() >= 'a' && aFilePath.at(0).toLower().toAscii() <= 'z' &&
+            aFilePath.at(1).toAscii() == ':' && (aFilePath.at(2).toAscii() == '\\' || aFilePath.at(2).toAscii() == '/')) {
+
+            return true;
+        }
+
+        return false;
+
+#else // MAC || UNIX
+        // Check The Beginning
+        if (aFilePath.startsWith(QChar('/')) || aFilePath.startsWith(QChar('\\'))) {
+            return true;
+        }
+#endif // MAC || UNIX
+    }
+
+    return false;
 }
 
 //==============================================================================
@@ -2312,5 +2817,729 @@ DirSizeScanner::~DirSizeScanner()
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//==============================================================================
+// Constructor
+//==============================================================================
+FileOperationEntry::FileOperationEntry(const QString& aOpName, const QString& aSource, const QString& aTarget)
+    : QObject(NULL)
+    , opIndex(-1)
+    , opName(aOpName)
+    , source(aSource)
+    , target(aTarget)
+    , running(false)
+    , done(false)
+    , failed(false)
+    , processed(false)
+{
+    // Check Operation Name
+    if (opName == QString(PARAM_OPERATION_COPY)) {
+        // Set Operation Index
+        opIndex = OPERATION_ID_COPY;
+    } else if (opName == QString(PARAM_OPERATION_MOVE)) {
+        // Set Operation Index
+        opIndex = OPERATION_ID_MOVE;
+    } else if (opName == QString(PARAM_OPERATION_RENAME)) {
+        // Set Operation Index
+        opIndex = OPERATION_ID_RENAME;
+    } else if (opName == QString(PARAM_OPERATION_DELETE)) {
+        // Set Operation Index
+        opIndex = OPERATION_ID_DELETE;
+    } else if (opName == QString(PARAM_OPERATION_MAKEDIR)) {
+        // Set Operation Index
+        opIndex = OPERATION_ID_MAKEDIR;
+    } else {
+        // Set Operation Index
+        opIndex = OPERATION_ID_NOOP;
+    }
+
+    //qDebug() << "Creating FileOperationEntry...done";
+}
+
+//==============================================================================
+// Constructor
+//==============================================================================
+FileOperationEntry::FileOperationEntry(const QString& aOperation)
+    : QObject(NULL)
+    , opIndex(-1)
+    , opName(QString(""))
+    , source(QString(""))
+    , target(QString(""))
+    , running(false)
+    , done(false)
+    , failed(false)
+    , processed(false)
+{
+    //qDebug() << "Creating FileOperationEntry - aOperation: " << aOperation;
+
+    // Split Operation Token
+    QStringList opList = aOperation.split(QChar(FILE_OPERATIONS_TOKEN_SEPARATOR));
+
+    // Set Operation Name
+    opName = opList[0];
+
+    // Check Operation Name
+    if (opName == QString(PARAM_OPERATION_COPY)) {
+        // Set Operation Index
+        opIndex = OPERATION_ID_COPY;
+    } else if (opName == QString(PARAM_OPERATION_MOVE)) {
+        // Set Operation Index
+        opIndex = OPERATION_ID_MOVE;
+    } else if (opName == QString(PARAM_OPERATION_RENAME)) {
+        // Set Operation Index
+        opIndex = OPERATION_ID_RENAME;
+    } else if (opName == QString(PARAM_OPERATION_DELETE)) {
+        // Set Operation Index
+        opIndex = OPERATION_ID_DELETE;
+    } else if (opName == QString(PARAM_OPERATION_MAKEDIR)) {
+        // Set Operation Index
+        opIndex = OPERATION_ID_MAKEDIR;
+    } else {
+        // Set Operation Index
+        opIndex = OPERATION_ID_NOOP;
+    }
+
+    // Set Operation Source
+    source = opList[1];
+    // set Operation Target
+    target = opList[2];
+
+    //qDebug() << "Creating FileOperationEntry...done";
+}
+
+//==============================================================================
+// Constructor
+//==============================================================================
+FileOperationEntry::FileOperationEntry(const int& aOpIndex, const QString& aSource, const QString& aTarget)
+    : QObject(NULL)
+    , opIndex(aOpIndex)
+    , opName(QString(""))
+    , source(aSource)
+    , target(aTarget)
+    , running(false)
+    , done(false)
+    , failed(false)
+    , processed(false)
+{
+    // Switch Operation Index
+    switch (opIndex) {
+        default:
+        case OPERATION_ID_NOOP: opName = QString(PARAM_OPERATION_NOOP); break;
+        case OPERATION_ID_COPY: opName = QString(PARAM_OPERATION_COPY); break;
+        case OPERATION_ID_MOVE: opName = QString(PARAM_OPERATION_MOVE); break;
+        case OPERATION_ID_RENAME: opName = QString(PARAM_OPERATION_RENAME); break;
+        case OPERATION_ID_DELETE: opName = QString(PARAM_OPERATION_DELETE); break;
+        case OPERATION_ID_MAKEDIR: opName = QString(PARAM_OPERATION_MAKEDIR); break;
+    }
+
+    //qDebug() << "Creating FileOperationEntry...done";
+}
+
+//==============================================================================
+// Get Operation Index
+//==============================================================================
+int FileOperationEntry::getOperationIndex()
+{
+    return opIndex;
+}
+
+//==============================================================================
+// Get Operation Name
+//==============================================================================
+QString FileOperationEntry::getOperationName()
+{
+    return opName;
+}
+
+//==============================================================================
+// Get Operation Source
+//==============================================================================
+QString FileOperationEntry::getSource()
+{
+    return source;
+}
+
+//==============================================================================
+// Get Operation Target
+//==============================================================================
+QString FileOperationEntry::getTarget()
+{
+    return target;
+}
+
+//==============================================================================
+// Get Operation Token
+//==============================================================================
+QString FileOperationEntry::getOperation()
+{
+    return QString("%1%2%3%4%5").arg(opName).arg(FILE_OPERATIONS_TOKEN_SEPARATOR).arg(source).arg(FILE_OPERATIONS_TOKEN_SEPARATOR).arg(target);
+}
+
+//==============================================================================
+// Process Operation
+//==============================================================================
+bool FileOperationEntry::processOperation()
+{
+    qDebug() << "FileOperationEntry::processOperation";
+
+
+    qDebug() << "FileOperationEntry::processOperation...done";
+
+    return true;
+}
+
+//==============================================================================
+// Destructor
+//==============================================================================
+FileOperationEntry::~FileOperationEntry()
+{
+    // ...
+
+    qDebug() << "Deleting FileOperationEntry...done";
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//==============================================================================
+// Constructor
+//==============================================================================
+FileOperationQueue::FileOperationQueue(FileOperationQueueHandler* aOpHandler,
+                                       DirCreatorObserver* aDirCreatorObserver,
+                                       FileDeleteObserver* aDeleteObserver,
+                                       FileCopyObserver* aCopyObserver,
+                                       FileMoveObserver* aMoveObserver,
+                                       FileRenameObserver* aRenameObserver,
+                                       QObject* aParent)
+    : FileUtilThreadBase(aParent)
+    , opHandler(aOpHandler)
+    , dirCreatorObserver(aDirCreatorObserver)
+    , deleteObserver(aDeleteObserver)
+    , copyObserver(aCopyObserver)
+    , moveObserver(aMoveObserver)
+    , renameObserver(aRenameObserver)
+{
+    qDebug() << "Creating FileOperationQueue...";
+
+    qDebug() << "Creating FileOperationQueue...done";
+}
+
+//==============================================================================
+// Add Operation Entry
+//==============================================================================
+void FileOperationQueue::addOperation(FileOperationEntry* aEntry)
+{
+    // Check Entry
+    if (aEntry) {
+        qDebug() << "FileOperationQueue::addOperation - aEntry: " << aEntry->getSource();
+        // Add To Operations
+        operations << aEntry;
+
+        // Get Operations
+        int opCount = operations.count();
+
+        // Signal Operation Added
+        emit operationAdded(opCount-1, opCount);
+    }
+}
+
+//==============================================================================
+// Insert Operation Entry
+//==============================================================================
+void FileOperationQueue::insertOperation(FileOperationEntry* aEntry, const int& aIndex)
+{
+    // Check Entry
+    if (aEntry) {
+        // Get Entry Count
+        int oCount = operations.count();
+
+        // Init insertion Index
+        int insertedIndex = aIndex;
+
+        // Check Index
+        if (aIndex < 0) {
+            // Set Inserted Index
+            insertedIndex = 0;
+        }
+        // Check _Index
+        if (aIndex >= oCount) {
+            // Set Inserted Index
+            insertedIndex = oCount;
+        }
+
+        qDebug() << "FileOperationQueue::insertOperation - aEntry: " << aEntry->getSource() << " - insertedIndex: " << insertedIndex;
+
+        // Add To Operations
+        operations.insert(insertedIndex, aEntry);
+
+        // Signal Operation Added
+        emit operationAdded(insertedIndex, operations.count());
+
+        msleep(100);
+    }
+}
+
+//==============================================================================
+// Remove Operation
+//==============================================================================
+void FileOperationQueue::removeOperation(const int& aIndex)
+{
+    // Get Entry Count
+    int oCount = operations.count();
+    // Check Index
+    if (aIndex >= 0 && aIndex < oCount) {
+        qDebug() << "FileOperationQueue::removeOperation - aIndex: " << aIndex;
+        // Get Entry
+        FileOperationEntry* op = operations[aIndex];
+        // Check Entry
+        if (op) {
+            // Delete Operation
+            delete op;
+            op = NULL;
+        }
+
+        // Remove
+        operations.removeAt(aIndex);
+
+        // Emit Operation Removed
+        emit operationRemoved(aIndex, operations.count());
+    }
+}
+
+//==============================================================================
+// Process Queue
+//==============================================================================
+void FileOperationQueue::processQueue()
+{
+    qDebug() << "FileOperationQueue::processQueue";
+    // Start Operation
+    startOperation();
+}
+
+//==============================================================================
+// Get Operation Entry
+//==============================================================================
+FileOperationEntry* FileOperationQueue::getOperation(const int& aIndex)
+{
+    // Get Entry Count
+    int oCount = operations.count();
+    // Check Index
+    if (aIndex >= 0 && aIndex < oCount) {
+        return operations[aIndex];
+    }
+
+    return NULL;
+}
+
+//==============================================================================
+// Get Operations Count
+//==============================================================================
+int FileOperationQueue::count()
+{
+    return operations.count();
+}
+
+//==============================================================================
+// Clear
+//==============================================================================
+void FileOperationQueue::clear()
+{
+    qDebug() << "FileOperationQueue::clear";
+
+    // Get Entry Count
+    int oCount = operations.count();
+    // Go Thru Operations List
+    for (int i=oCount-1; i>=0; --i) {
+        // Get Entry
+        FileOperationEntry* op = operations[i];
+        // Check Entry
+        if (op) {
+            // Delete Operation
+            delete op;
+            op = NULL;
+        }
+    }
+
+    // Clear
+    operations.clear();
+}
+
+//==============================================================================
+// Export Operations List Into a String List
+//==============================================================================
+QStringList FileOperationQueue::exportList()
+{
+    qDebug() << "FileOperationQueue::exportList";
+    // Init Result List
+    QStringList result;
+    // Get Entry Count
+    int oCount = operations.count();
+    // Go Thru Operations List
+    for (int i=0; i<oCount; ++i) {
+        // Get Entry
+        FileOperationEntry* op = operations[i];
+        // Check Entry
+        if (op) {
+            // Add Entry To Result
+            result << op->getOperation();
+        }
+    }
+
+    return result;
+}
+
+//==============================================================================
+// Do Operation
+//==============================================================================
+void FileOperationQueue::doOperation()
+{
+    qDebug() << "FileOperationQueue::doOperation";
+
+    DEFAULT_THREAD_ABORT_CHECK;
+
+    // Get Operations Count
+    //int qCount = operations.count();
+
+    DEFAULT_THREAD_ABORT_CHECK;
+
+    // Go Through Operations List
+    for (int i=0; i<operations.count(); ) {
+
+        DEFAULT_THREAD_ABORT_CHECK;
+
+        // Set Current Operation Index
+        currOp = i;
+
+        // Get File Operation Entry
+        FileOperationEntry* entry = operations[i];
+
+        // Check File Operation Entry
+        if (entry && !entry->done) {
+            // Emit Operation Started Signal
+            emit operationStarted(currOp);
+
+            DEFAULT_THREAD_ABORT_CHECK;
+
+            // Process Entry
+            if (processEntry(entry, i)) {
+                // Emit Operation Completed
+                emit operationCompleted(currOp);
+                // Increase Loop counter
+                i++;
+            } else {
+                // Do Nothing - Directory Entry, Inserted Items
+            }
+
+            DEFAULT_THREAD_ABORT_CHECK;
+
+        } else {
+            // Increase Loop counter
+            i++;
+        }
+
+        DEFAULT_THREAD_ABORT_CHECK;
+
+        // Reset Current Operation Index
+        currOp = -1;
+
+        // Update Operation Count
+        //qCount = operations.count();
+    }
+
+    DEFAULT_THREAD_ABORT_CHECK;
+
+    qDebug() << "FileOperationQueue::doOperation...done";
+}
+
+//==============================================================================
+// Process Entry
+//==============================================================================
+bool FileOperationQueue::processEntry(FileOperationEntry* aEntry, const int& aIndex)
+{
+    // Init Result
+    bool result = false;
+
+    // Check Entry
+    if (aEntry) {
+        // Set Entry Running State
+        aEntry->running = true;
+        // Switch Entry Operation Index
+        switch (aEntry->opIndex) {
+            default:
+            case OPERATION_ID_NOOP:
+                qDebug() << "FileOperationQueue::processEntry - aEntry[" << aIndex << "]: " << aEntry->getSource() << " - NOOP";
+
+                // Do Nothing
+
+                // Set Result
+                result = true;
+            break;
+
+            case OPERATION_ID_MAKEDIR:
+                qDebug() << "FileOperationQueue::processEntry - aEntry[" << aIndex << "]: " << aEntry->getSource() << " - MAKEDIR";
+                // Create Dir
+                aEntry->failed = FileUtils::createDir(aEntry->source, dirCreatorObserver);
+                // Set Result
+                result = true;
+            break;
+
+            case OPERATION_ID_COPY: {
+                // Init Source Info
+                QFileInfo sourceInfo(aEntry->source);
+                // Check Source Info If It's a Dir
+                if (sourceInfo.isDir() && !FileUtils::isDirEmpty(aEntry->source) && !aEntry->processed) {
+                    // Process Dir Entry
+                    processDirEntry(aEntry, aIndex);
+                } else {
+                    qDebug() << "FileOperationQueue::processEntry - aEntry[" << aIndex << "]: " << aEntry->getSource() << " - COPY";
+                    // Copy File
+                    //aEntry->failed = FileUtils::copyFile(aEntry->source, aEntry->target, copyFlags, abort, copyObserver);
+                    // Set Result
+                    result = true;
+                }
+            } break;
+
+            case OPERATION_ID_MOVE: {
+                // Init Source Info
+                QFileInfo sourceInfo(aEntry->source);
+                // Check Source Info If It's a Dir
+                if (sourceInfo.isDir() && !FileUtils::isDirEmpty(aEntry->source) && !aEntry->processed) {
+                    // Process Dir Entry
+                    processDirEntry(aEntry, aIndex);
+                } else {
+                    qDebug() << "FileOperationQueue::processEntry - aEntry[" << aIndex << "]: " << aEntry->getSource() << " - MOVE";
+                    // Move File
+                    //aEntry->failed = FileUtils::moveFile(aEntry->source, aEntry->target, moveFlags, abort, moveObserver);
+                    // Set Result
+                    result = true;
+                }
+            } break;
+
+            case OPERATION_ID_RENAME: {
+                qDebug() << "FileOperationQueue::processEntry - aEntry[" << aIndex << "]: " << aEntry->getSource() << " - RENAME";
+                // Rename File
+                //aEntry->failed = FileUtils::renameFile(aEntry->source, aEntry->target, moveFlags, abort, renameObserver);
+
+                // Set Result
+                result = true;
+            } break;
+
+            case OPERATION_ID_DELETE: {
+                // Init Source Info
+                QFileInfo sourceInfo(aEntry->source);
+                // Check Source Info If It's a Dir
+                if (sourceInfo.isDir() && !FileUtils::isDirEmpty(aEntry->source) && !aEntry->processed) {
+                    // Process Dir Entry
+                    processDirEntry(aEntry, aIndex);
+                } else {
+                    qDebug() << "FileOperationQueue::processEntry - aEntry[" << aIndex << "]: " << aEntry->getSource() << " - DELETE";
+
+                    // Delete File
+                    aEntry->failed = !FileUtils::deleteFile(aEntry->source, deleteFlags, abort, deleteObserver);
+
+                    // Set Result
+                    result = true;
+                }
+            } break;
+        }
+
+        qDebug() << "FileOperationQueue::processEntry...done";
+
+        // Set Entry Running State
+        aEntry->running = false;
+        // Set Entry Done State
+        aEntry->done = result;
+    }
+
+    return result;
+}
+
+//==============================================================================
+// Process Directory Entry
+//==============================================================================
+void FileOperationQueue::processDirEntry(FileOperationEntry* aEntry, const int& aIndex)
+{
+    // Check Entry
+    if (aEntry) {
+        // Set Directory Entry Processed Flag
+        aEntry->processed = true;
+        // Switch Entry Operation Index
+        switch (aEntry->opIndex) {
+            default:
+            case OPERATION_ID_NOOP:
+                qDebug() << "FileOperationQueue::processDirEntry - aEntry[" << aIndex << "]: " << aEntry->getSource() << " - NOOP";
+
+                 // Do Nothing
+
+            break;
+
+            case OPERATION_ID_MAKEDIR:
+                qDebug() << "FileOperationQueue::processDirEntry - aEntry[" << aIndex << "]: " << aEntry->getSource() << " - MAKEDIR";
+
+                 // Do Nothing
+
+            break;
+
+            case OPERATION_ID_COPY: {
+                qDebug() << "FileOperationQueue::processDirEntry - aEntry[" << aIndex << "]: " << aEntry->getSource() << " - COPY";
+
+                // Init Source Dir To Read Entries
+                QDir sourceDir(aEntry->source);
+                // Init Source Dir Temp
+                QString sourceDirTemp = aEntry->source;
+                // Init Target Dir Temp
+                QString targetDirTemp = aEntry->target;
+
+                // Check Source Dir Temp Path
+                if (!sourceDirTemp.endsWith(QString("/")) && !sourceDirTemp.endsWith(QString("\\"))) {
+                    // Add Slash
+                    sourceDirTemp += QDir::separator();
+                }
+
+                // Check Target Dir Temp Path
+                if (!targetDirTemp.endsWith(QString("/")) && !targetDirTemp.endsWith(QString("\\"))) {
+                    // Add Slash
+                    targetDirTemp += QDir::separator();
+                }
+
+                // Get Entry Info List
+                QFileInfoList sourceEntryInfoList = sourceDir.entryInfoList(QDir::AllDirs | QDir::Files | QDir::Hidden | QDir::System | QDir::NoDotAndDotDot);
+
+                // Get Source Entry List Count
+                int seilCount = sourceEntryInfoList.count();
+
+                // Go Through Source Entry Info List
+                for (int i=0; i<seilCount; ++i) {
+                    // Create new Entry
+                    FileOperationEntry* newEntry = FileUtils::createFileOperationEntry(aEntry->opIndex, sourceDirTemp, sourceEntryInfoList[i].fileName(), targetDirTemp, sourceEntryInfoList[i].fileName());
+                    // Add Operation
+                    addOperation(newEntry);
+                }
+
+                // Create Target Dir
+                FileUtils::createDir(aEntry->target);
+            } break;
+
+            case OPERATION_ID_MOVE: {
+                qDebug() << "FileOperationQueue::processDirEntry - aEntry[" << aIndex << "]: " << aEntry->getSource() << " - MOVE";
+
+                // Init Source Dir To Read Entries
+                QDir sourceDir(aEntry->source);
+                // Init Source Dir Temp
+                QString sourceDirTemp = aEntry->source;
+                // Init Target Dir Temp
+                QString targetDirTemp = aEntry->target;
+
+                // Check Source Dir Temp Path
+                if (!sourceDirTemp.endsWith(QString("/")) && !sourceDirTemp.endsWith(QString("\\"))) {
+                    // Add Slash
+                    sourceDirTemp += QDir::separator();
+                }
+
+                // Check Target Dir Temp Path
+                if (!targetDirTemp.endsWith(QString("/")) && !targetDirTemp.endsWith(QString("\\"))) {
+                    // Add Slash
+                    targetDirTemp += QDir::separator();
+                }
+
+                // Get Entry Info List
+                QFileInfoList sourceEntryInfoList = sourceDir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot);
+
+                // Get Source Entry List Count
+                int seilCount = sourceEntryInfoList.count();
+
+                // Go Through Source Entry Info List
+                for (int i=0; i<seilCount; ++i) {
+                    // Create new Entry
+                    FileOperationEntry* newEntry = FileUtils::createFileOperationEntry(aEntry->opIndex, sourceDirTemp, sourceEntryInfoList[i].fileName(), targetDirTemp, sourceEntryInfoList[i].fileName());
+                    // Add Operation
+                    insertOperation(newEntry, aIndex + i);
+                }
+
+                // Create Target Dir
+                FileUtils::createDir(aEntry->target);
+            } break;
+
+            case OPERATION_ID_RENAME: {
+                qDebug() << "FileOperationQueue::processDirEntry - aEntry[" << aIndex << "]: " << aEntry->getSource() << " - RENAME";
+
+                // Do Nothing
+
+            } break;
+
+            case OPERATION_ID_DELETE: {
+
+                // Init Source Dir To Read Entries
+                QDir sourceDir(aEntry->source);
+                // Init Source Dir Temp
+                QString sourceDirTemp = aEntry->source;
+
+                // Check Source Dir Temp Path
+                if (!sourceDirTemp.endsWith(QString("/")) && !sourceDirTemp.endsWith(QString("\\"))) {
+                    // Add Slash
+                    sourceDirTemp += QDir::separator();
+                }
+
+                // Get Entry Info List
+                QFileInfoList sourceEntryInfoList = sourceDir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot);
+
+                // Get Source Entry List Count
+                int seilCount = sourceEntryInfoList.count();
+
+                qDebug() << "FileOperationQueue::processDirEntry - aEntry[" << aIndex << "]: " << aEntry->getSource() << " - DELETE" << " - seilCount: " << seilCount;
+
+                // Go Through Source Entry Info List
+                for (int i=0; i<seilCount; ++i) {
+                    // Create new Entry
+                    FileOperationEntry* newEntry = FileUtils::createFileOperationEntry(aEntry->opIndex, sourceDirTemp, sourceEntryInfoList[i].fileName(), sourceDirTemp, sourceEntryInfoList[i].fileName());
+
+                    qDebug() << "FileOperationQueue::processDirEntry - newEntry[" << i << "]: " << newEntry->getSource() << " - DELETE";
+
+                    // Add Operation
+                    insertOperation(newEntry, aIndex + i);
+                }
+            } break;
+        }
+
+        qDebug() << "FileOperationQueue::processDirEntry...done";
+    }
+}
+
+//==============================================================================
+// Destructor
+//==============================================================================
+FileOperationQueue::~FileOperationQueue()
+{
+    qDebug() << "Deleting FileOperationQueue...";
+
+    // Clear
+    clear();
+
+    qDebug() << "Deleting FileOperationQueue...done";
+}
 
 

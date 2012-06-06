@@ -5,6 +5,7 @@
 
 #include <QDialog>
 #include <QDialogButtonBox>
+#include <QButtonGroup>
 
 
 // FORWARD DECLARATIONS
@@ -16,6 +17,9 @@ class ConfirmationDialog;
 
 // DECLARATIONS
 
+//==============================================================================
+//! @class ConfirmationDialog Confirmation Dialog Class
+//==============================================================================
 class ConfirmationDialog : public QDialog
 {
     Q_OBJECT
@@ -43,14 +47,35 @@ public:
     //! @param aButtons Default Button
     void setButtons(const QDialogButtonBox::StandardButtons& aButtons, const QDialogButtonBox::StandardButton& aDefault);
 
+    //! @brief Add Button
+    //! @param aButtonText Button Text
+    //! @param aButtonRole Button Role
+    //! @param aID Button ID
+    void addButton(const QString& aButtonText, QDialogButtonBox::ButtonRole aButtonRole, const int& aID);
+
     //! @brief Destructor
     //! @param none
     virtual ~ConfirmationDialog();
 
+protected slots:
+
+    //! @brief Button Box Clicked Slot
+    //! @param aButton Button
+    void on_buttonBox_clicked(QAbstractButton* aButton);
+
 protected:
 
-    // UI
+    //! @brief Clear Custom Buttons
+    //! @param none
+    void clearCustomButtons();
+
+protected: // Data
+
+    //! UI
     Ui::ConfirmationDialog* ui;
+
+    //! Button Group For Custom Buttons
+    QButtonGroup*           buttonGroup;
 };
 
 #endif // CONFIRMATIONDIALOG_H

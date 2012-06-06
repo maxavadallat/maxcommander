@@ -16,10 +16,12 @@ CreateDirDialog::CreateDirDialog(QWidget* aParent)
     : QDialog(aParent)
     , ui(new Ui::CreateDirDialog)
 {
+/*7
     // Set Window Modality
     setWindowModality(Qt::ApplicationModal);
     // Set Window Flags
     setWindowFlags(Qt::Dialog);
+*/
     // Setup UI
     ui->setupUi(this);
 }
@@ -49,7 +51,6 @@ QString CreateDirDialog::getDirText()
 
     return QString("");
 }
-
 /*
 //==============================================================================
 // Ok Button Clicked Slot
@@ -69,6 +70,23 @@ void CreateDirDialog::on_cancelButton_clicked()
     done(DEFAULT_BUTTON_INDEX_CANCEL);
 }
 */
+//==============================================================================
+// Button Box Accepted Slot
+//==============================================================================
+void CreateDirDialog::on_buttonBox_accepted()
+{
+    // Done
+    done(DEFAULT_BUTTON_INDEX_OK);
+}
+
+//==============================================================================
+// Button Box Rejected Slot
+//==============================================================================
+void CreateDirDialog::on_buttonBox_rejected()
+{
+    // Done
+    done(DEFAULT_BUTTON_INDEX_CANCEL);
+}
 
 //==============================================================================
 // Destructor

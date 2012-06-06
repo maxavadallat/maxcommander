@@ -16,7 +16,7 @@
 #include <QDataStream>
 #include <QTimerEvent>
 #include <QPixmap>
-
+#include <QStringList>
 #include <errno.h>
 
 
@@ -24,35 +24,79 @@
 
 //! Default Abort Check For Thread
 #define DEFAULT_THREAD_ABORT_CHECK                  if (abort || restart) return
+//! Default Abort Check For Functions
+#define DEFAULT_FUNC_ABORT_CHECK                    if (aAbortSig) return
 
 
-//! File Delete Options - Delete Normal Files Without Confirmation
+//! File Delete Options - Delete All Normal Files Without Confirmation
 #define FILE_DELETE_OPTION_DELETE_NORMAL            0x0001
-//! File Delete Options - Delete Read Only Files
+//! File Delete Options - Delete All Read Only Files Without Any Further Confirmation
 #define FILE_DELETE_OPTION_DELETE_READONLY          0x0003
-//! File Delete Options - Delete Read Only Files
-#define FILE_DELETE_OPTION_DELETE_NONEMPTY_DIR      0x0010
+
+//! File Delete Options - Skip All Files
+#define FILE_DELETE_OPTION_DELETE_SKIP_NORMAL       0x0010
+//! File Delete Options - Delete Non Empty Directories Without Any Further Confirmation
+#define FILE_DELETE_OPTION_DELETE_SKIP_READONLY     0x0020
+
+//! File Delete Options - Ignore Deletion Error
+#define FILE_DELETE_OPTION_IGNORE_DELETE_ERROR      0x0100
+//! File Delete Options - Ignore All Deletion Error
+#define FILE_DELETE_OPTION_IGNORE_ALL_DELETE_ERROR  0x0300
+
+//! File Delete Options - Delete Non Empty Directories Without Any Further Confirmation
+#define FILE_DELETE_OPTION_DELETE_NON_EMPTY_DIR     0x1000
 
 
-//! File Copy Options - Overwrite Normal Files Without Confirmation
+
+//! File Copy Options - Overwrite All Normal Files Without Confirmation
 #define FILE_COPY_OPTION_OVERWRITE_NORMAL           0x0001
-//! File Copy Options - Overwrite Read Only Files
+//! File Copy Options - Overwrite All Read Only Files Without Any Further Confirmation
 #define FILE_COPY_OPTION_OVERWRITE_READONLY         0x0003
 
 
-//! File Move Options - Overwrite Normal Files Without Confirmation
+//! File Copy Options - Ignore Read Error
+#define FILE_COPY_OPTION_IGNORE_READ_ERROR          0x0010
+//! File Copy Options - Ignore All Read Errors
+#define FILE_COPY_OPTION_IGNORE_ALL_READ_ERROR      0x0030
+//! File Copy Options - Ignore Write Error
+#define FILE_COPY_OPTION_IGNORE_WRITE_ERROR         0x0100
+//! File Copy Options - Ignore All Write Errors
+#define FILE_COPY_OPTION_IGNORE_WRITE_ALL_ERROR     0x0300
+
+
+
+
+//! File Move Options - Overwrite All Normal Files Without Confirmation
 #define FILE_MOVE_OPTION_OVERWRITE_NORMAL           0x0001
-//! File Move Options - Overwrite Read Only Files
+//! File Move Options - Overwrite All Read Only Files Without Any Further Confirmation
 #define FILE_MOVE_OPTION_OVERWRITE_READONLY         0x0003
 
 //! File Move Options - Delete Read Only Source
-#define FILE_MOVE_OPTION_DELETE_READONLY_SOURCE     0x0003
+#define FILE_MOVE_OPTION_DELETE_READONLY_SOURCE     0x0004
 
+//! File Move Options - Ignore Read Error
+#define FILE_MOVE_OPTION_IGNORE_READ_ERROR          0x0010
+//! File Move Options - Ignore All Read Errors
+#define FILE_MOVE_OPTION_IGNORE_ALL_READ_ERROR      0x0030
+//! File Move Options - Ignore Write Error
+#define FILE_MOVE_OPTION_IGNORE_WRITE_ERROR         0x0100
+//! File Move Options - Ignore All Write Errors
+#define FILE_MOVE_OPTION_IGNORE_WRITE_ALL_ERROR     0x0300
+//! File Move Options - Ignore Delete Error
+#define FILE_MOVE_OPTION_IGNORE_DELETE_ERROR        0x1000
+//! File Move Options - Ignore All Delete Errors
+#define FILE_MOVE_OPTION_IGNORE_ALL_DELETE_ERROR    0x3000
+
+
+
+
+// FORWARD DECLARATIONS
+
+class FileOperationEntry;
 
 
 
 // DECLARATIONS
-
 
 //! @brief File Name Case InSensitive Compare
 //! @param a File Name
@@ -115,7 +159,7 @@ typedef int (*SortingMethod)(const QFileInfo&, const QFileInfo&, const bool&);
 
 
 //==============================================================================
-//! @class DirCreatorObserver Dir Creator Observer Interface Class
+//! @class DirCreatorObserver Dir Creator UI Observer Interface Class
 //==============================================================================
 class DirCreatorObserver
 {
@@ -124,7 +168,7 @@ public:
     //! @param aDirPath Directory Path
     //! @param aErrorCode Error Code
     //! @return Creation Error Response
-    virtual int createError(const QString& aDirPath, const int& aErrorCode) = 0;
+    virtual int createDirError(const QString& aDirPath, const int& aErrorCode) = 0;
 
     //! @brief Create Dir Started
     //! @param aDirPath Directory Path
@@ -141,19 +185,60 @@ public:
 
 
 
+//==============================================================================
+//! @class FileRenameObserver File Rename UI Observer Interface Class
+//==============================================================================
+class FileRenameObserver
+{
+public:
+    //! @brief Confirm OverWrite Callback
+    //! @param aSource Source File Path
+    //! @param aTarget Target File Path
+    //! @param aReadOnly Target File Is Read Only
+    //! @return File Rename Observer Response
+    virtual int confirmOverWrite(const QString& aSource, const QString& aTarget, const bool& aReadOnly = false) = 0;
+
+    //! @brief Confirm Source Deletion Callback
+    //! @param aSource Source File Path
+    //! @param aReadOnly Source File Is Read Only
+    //! @param aNonEmpty Source File Is A Non Empty Directory
+    //! @return File Rename Observer Response
+    virtual int confirmDeletion(const QString& aSource, const bool& aReadOnly = false, const bool& aNonEmpty = false) = 0;
+
+    //! @brief Rename File Error Callback
+    //! @param aSource Source File Path
+    //! @param aTarget Target File Path
+    //! @param aErrorCode File Deletion Error Code
+    //! @return File Rename Error Code
+    virtual int renameError(const QString& aSource, const QString& aTarget, const int& aErrorCode) = 0;
+
+    //! @brief Rename File Started Callback
+    //! @param aSource Source File Path
+    //! @param aTarget Target File Path
+    virtual void renameStarted(const QString& aSource, const QString& aTarget) = 0;
+
+    //! @brief Rename File Finished Callback
+    //! @param aSource Source File Path
+    //! @param aTarget Target File Path
+    virtual void renameFinished(const QString& aSource, const QString& aTarget) = 0;
+};
+
+
+
+
+
 
 //==============================================================================
-//! @class FileDeleteObserver File Deletion Observer Interface Class
+//! @class FileDeleteObserver File Deletion UI Observer Interface Class
 //==============================================================================
 class FileDeleteObserver
 {
 public:
-
     //! @brief Confirm Deletion Callback
     //! @param aFilePath File Path
     //! @param aReadOnly File Read Only
     //! @param aNonEmpty Directory Empty
-    //! @return File Delete Observer Response
+    //! @return File Delete Observer Delete Confirmation Response
     virtual int confirmDeletion(const QString& aFilePath, const bool& aReadOnly = false, const bool& aNonEmpty = false) = 0;
 
     //! @brief Deletion Error Callback
@@ -179,7 +264,7 @@ public:
 
 
 //==============================================================================
-//! @class FileCopyObserver File Copy Observer Interface Class
+//! @class FileCopyObserver File Copy UI Observer Interface Class
 //==============================================================================
 class FileCopyObserver
 {
@@ -221,8 +306,12 @@ public:
 
 
 
+
+
+
+
 //==============================================================================
-//! @class FileMoveObserver File Rename/Move Observer Interface Class
+//! @class FileMoveObserver File Rename/Move UI Observer Interface Class
 //==============================================================================
 class FileMoveObserver
 {
@@ -274,6 +363,13 @@ public:
 
 
 
+
+
+
+
+
+
+
 //==============================================================================
 //! @class FileUtils File Utils Class
 //==============================================================================
@@ -306,6 +402,7 @@ public:
 
     //! @brief Create Directory
     //! @param aDirName Directory Path
+    //! @param aObserver Directory Create Observer Interface
     //! @return true If Successful
     static bool createDir(const QString& aDirName, DirCreatorObserver* aObserver = NULL);
 
@@ -314,31 +411,31 @@ public:
     //! @param aOptions Options/Flags
     //! @param aObserver Delete Observer Interface
     //! @return true If Successful
-    static bool deleteFile(const QString& aFileName, const int& aOptions = 0, FileDeleteObserver* aObserver = NULL);
+    static bool deleteFile(const QString& aFileName, int& aOptions, bool& aAbortSig, FileDeleteObserver* aObserver = NULL);
 
     //! @brief Copy File
     //! @param aSource Source File Name
     //! @param aTarget Target File Name
     //! @param aOptions Options/Flags
-    //! @param aObserver Delete Observer Interface
+    //! @param aObserver Copy Observer Interface
     //! @return true If Successful
-    static bool copyFile(const QString& aSource, const QString& aTarget, const int& aOptions = 0, FileCopyObserver* aObserver = NULL);
+    static bool copyFile(const QString& aSource, const QString& aTarget, int& aOptions, bool& aAbortSig, FileCopyObserver* aObserver = NULL);
 
     //! @brief Rename File
     //! @param aSource Source File Name
     //! @param aTarget Target File Name
     //! @param aOptions Options/Flags
-    //! @param aObserver Delete Observer Interface
+    //! @param aObserver Rename Observer Interface
     //! @return true If Successful
-    static bool renameFile(const QString& aSource, const QString& aTarget, const int& aOptions = 0, FileMoveObserver* aObserver = NULL);
+    static bool renameFile(const QString& aSource, const QString& aTarget, int& aOptions, bool& aAbortSig, FileRenameObserver* aObserver = NULL);
 
     //! @brief Move File
     //! @param aSource Source File Name
     //! @param aTarget Target File Name
     //! @param aOptions Options/Flags
-    //! @param aObserver Delete Observer Interface
+    //! @param aObserver Move Observer Interface
     //! @return true If Successful
-    static bool moveFile(const QString& aSource, const QString& aTarget, const int& aOptions = 0, FileMoveObserver* aObserver = NULL);
+    static bool moveFile(const QString& aSource, const QString& aTarget, int& aOptions, bool& aAbortSig, FileMoveObserver* aObserver = NULL);
 
     //! @brief Set File Attributes
     //! @param aFilePath File Name
@@ -415,11 +512,11 @@ public:
     //! @param aMacIconref Mac Icon Ref
     //! @param aIconImage Image In/Out Param
     //! @return a QImage
-    static QImage convertMacIcon(const IconRef& aMacIconref, QImage& aIconImage);
+    static OSStatus convertMacIcon(const IconRef& aMacIconref, QImage& aIconImage);
 
 #elif defined(Q_OS_WIN)
 
-#else
+#else // Linux
 
 #endif
 
@@ -480,21 +577,35 @@ public:
     //! @return Last Error Code
     static int getLastError();
 
+    //! @brief Wild Card Matching
+    //! @param aSource Source String
+    //! @param aPattern Matching Pattern
+    //! @return Parsed Wild Card Matching String
+    static QString wildCardMatching(const QString& aSource, const QString& aPattern);
+
+    //! @brief Parse Target File Name
+    //! @param aSourceName Source Name
+    //! @param aTargetName Target Name/Pattern
+    //! @return Parsed File Name
+    static QString parseTargetFileName(const QString& aSourceName, const QString& aTargetName);
+
+    //! @brief Create File Operation Entry
+    //! @param aOperation Operation Index
+    //! @param aSourceDir Source Directory
+    //! @param aSourceName Source Name
+    //! @param aTargetDir Target Directory
+    //! @param aTargetName Target Name/Pattern
+    //! @return New File OperationEntry
+    static FileOperationEntry* createFileOperationEntry(const int& aOperation, const QString& aSourceDir, const QString& aSourceName, const QString& aTargetDir, const QString& aTargetName);
+
+    //! @brief Is Full Path
+    //! @param aFilePath File Path
+    //! @return true If It's A Full Path
+    static bool isFullPath(const QString& aFilePath);
+
     //! @brief Destructor
     //! @param none
     virtual ~FileUtils();
-
-signals:
-
-    //! @brief Copy File Progress Signal
-    //! @param aFilePath Target File Path
-    //! @param aFullSize Full Size
-    //! @param aCopied Copied Size
-    void copyFileProgress(const QString& aFilePath, const qint64& aFullSize, const qint64 aCopied);
-
-    //! @brief File Entry Found Signal
-    //! @param aInfo File Info
-    void fileEntryFound(const QFileInfo& aInfo);
 
 protected:
 
@@ -505,6 +616,9 @@ protected:
     void sortFileList(QFileInfoList& aFileList, const FileSortType& aSortType, const bool& aReverse);
 
 };
+
+
+
 
 
 
@@ -545,11 +659,11 @@ public:
 
     //! @brief Pause
     //! @param none
-    void pause();
+    virtual void pause();
 
     //! @brief Resume
     //! @param none
-    void resume();
+    virtual void resume();
 
     //! @brief Stop
     //! @param none
@@ -681,6 +795,10 @@ protected: // Data
 
 
 
+
+
+
+
 //==============================================================================
 //! @class DirSizeScanner Directory Size Scanner Thread
 //==============================================================================
@@ -756,6 +874,313 @@ protected: // Data
     //! File Util
     FileUtils       fileUtils;
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//==============================================================================
+//! @class FileOperationEntry File Operation Class For File Operation Queue
+//==============================================================================
+class FileOperationEntry : public QObject
+{
+public:
+
+    //! @brief Constructor
+    //! @param aOperation Composit Operation Token
+    FileOperationEntry(const QString& aOperation);
+
+    //! @brief Constructor
+    //! @param aOperation Operation Name
+    //! @param aSource Operation Source Name
+    //! @param aTarget Operation Target Name
+    FileOperationEntry(const QString& aOperation, const QString& aSource, const QString& aTarget);
+
+    //! @brief Constructor
+    //! @param aOperation Operation Index
+    //! @param aSource Operation Source Name
+    //! @param aTarget Operation Target Name
+    FileOperationEntry(const int& aOperation, const QString& aSource, const QString& aTarget);
+
+    //! @brief Get Operation Index
+    //! @param none
+    //! @return Operation Index
+    int getOperationIndex();
+
+    //! @brief Get Operation Name
+    //! @param none
+    //! @return Operation Name
+    QString getOperationName();
+
+    //! @brief Get Operation Source
+    //! @param none
+    //! @return Operation Source
+    QString getSource();
+
+    //! @brief Get Operation Target
+    //! @param none
+    //! @return Operation Target
+    QString getTarget();
+
+    //! @brief Get Operation Token
+    //! @param none
+    //! @return Operation Token
+    QString getOperation();
+
+    //! @brief Process Operation
+    //! @param none
+    bool processOperation();
+
+    //! @brief Destructor
+    //! @param none
+    virtual ~FileOperationEntry();
+
+protected: // Data
+    friend class FileOperationQueue;
+    friend class FileOperationQueueHandler;
+
+    //! Operation Index
+    int         opIndex;
+    //! Operation Name
+    QString     opName;
+    //! Operation Source
+    QString     source;
+    //! Operation Target
+    QString     target;
+
+    //! Running
+    bool        running;
+    //! Done
+    bool        done;
+    //! Failed
+    bool        failed;
+    //! Processed
+    bool        processed;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//==============================================================================
+//! @class FileOperationQueueHandler File Operation Queue Handler Interface Class
+//==============================================================================
+class FileOperationQueueHandler
+{
+public:
+
+    //! @brief Add Operation
+    //! @param aEntry Operation Entry
+    virtual void addOperationEntry(FileOperationEntry* aEntry) = 0;
+
+    //! @brief Remove Operation
+    //! @param aIndex Operation Index
+    virtual void removeOperationEntry(const int& aIndex) = 0;
+
+    //! @brief Get Operations Count
+    //! @param none
+    //! @return Operations Count
+    virtual int opEntryCount() = 0;
+
+    //! @brief Get Operation
+    //! @param aIndex Operation Index
+    //! @return Operation
+    virtual FileOperationEntry* getOperationEntry(const int& aIndex) = 0;
+
+    //! @brief Process Queue
+    //! @param none
+    virtual void processQueue() = 0;
+
+    //! @brief Show
+    //! @param none
+    virtual void show() = 0;
+
+    //! @brief Hide
+    //! @param none
+    virtual void hide() = 0;
+
+    //! @brief Set Modal
+    //! @param aModal Modal Setting
+    virtual void setModal(const bool& aModal) = 0;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//==============================================================================
+//! @class FileOperationQueue File Operation Queue Class
+//==============================================================================
+class FileOperationQueue : public FileUtilThreadBase
+{
+
+    Q_OBJECT
+
+public:
+
+    //! @brief Constructor
+    //! @param aOpHandler Handler
+    //! @param aParent Parent
+    FileOperationQueue(FileOperationQueueHandler* aOpHandler,
+                       DirCreatorObserver* aDirCreatorObserver = NULL,
+                       FileDeleteObserver* aDeleteObserver = NULL,
+                       FileCopyObserver* aCopyObserver = NULL,
+                       FileMoveObserver* aMoveObserver = NULL,
+                       FileRenameObserver* aRenameObserver = NULL,
+                       QObject* aParent = NULL);
+
+    //! @brief Add Operation Entry
+    //! @param aEntry Operation Entry
+    void addOperation(FileOperationEntry* aEntry);
+
+    //! @brief Insert Operation Entry
+    //! @param aEntry Operation Entry
+    //! @param aIndex Operation Entry Index
+    void insertOperation(FileOperationEntry* aEntry, const int& aIndex);
+
+    //! @brief Remove Operation
+    //! @param aIndex Operation Index
+    void removeOperation(const int& aIndex);
+
+    //! @brief Process Queue
+    //! @param none
+    void processQueue();
+
+    //! @brief Get Operation Entry
+    //! @param aIndex Operation Index
+    //! @return Operation Entry
+    FileOperationEntry* getOperation(const int& aIndex);
+
+    //! @brief Get Operations Count
+    //! @param none
+    //! @return Operations Count
+    int count();
+
+    //! @brief Clear
+    //! @param none
+    void clear();
+
+    //! @brief Export Operations List Into a String List
+    //! @param none
+    //! @return Operations List
+    QStringList exportList();
+
+    //! @brief Destructor
+    //! @param none
+    virtual ~FileOperationQueue();
+
+signals:
+
+    //! @brief Operation Added Signal
+    //! @param aIndex Operation Index
+    //! @param aCount Operations Count
+    void operationAdded(const int& aIndex, const int& aCount);
+
+    //! @brief Operation Removed Signal
+    //! @param aIndex Operation Index
+    //! @param aCount Operations Count
+    void operationRemoved(const int& aIndex, const int& aCount);
+
+    //! @brief Operation Started Signal
+    //! @param aIndex Operation Index
+    void operationStarted(const int& aIndex);
+
+    //! @brief Operation Stopped Signal
+    //! @param aIndex Operation Index
+    void operationStopped(const int& aIndex);
+
+    //! @brief Operation Completed Signal
+    //! @param aIndex Operation Index
+    void operationCompleted(const int& aIndex);
+
+protected: // From FileUtilThreadBase
+
+    //! @brief Do Operation
+    //! @param none
+    virtual void doOperation();
+
+    //! @brief Process Single Entry
+    //! @param aEntry File Operation Entry
+    //! @param aIndex File Operation Entry Index
+    //! @return true If Entry Is Processed, false Otherwise
+    virtual bool processEntry(FileOperationEntry* aEntry, const int& aIndex);
+
+    //! @brief Process Directory Entry
+    //! @param aEntry File Operation Entry
+    //! @param aIndex File Operation Entry Index
+    virtual void processDirEntry(FileOperationEntry* aEntry, const int& aIndex);
+
+protected: // Data
+
+    //! File Operations List
+    QList<FileOperationEntry*>  operations;
+    //! Operations Queue Handler
+    FileOperationQueueHandler*  opHandler;
+
+    //! Current Operation Index
+    int                         currOp;
+
+    //! Dir Creator Observer
+    DirCreatorObserver*         dirCreatorObserver;
+    //! Delete Observer
+    FileDeleteObserver*         deleteObserver;
+    //! Copy Observer
+    FileCopyObserver*           copyObserver;
+    //! Move Observer
+    FileMoveObserver*           moveObserver;
+    //! File Rename Observer
+    FileRenameObserver*         renameObserver;
+
+    //! Copy Flags
+    int                         copyFlags;
+    //! Move Flags
+    int                         moveFlags;
+    //! Delete Flags
+    int                         deleteFlags;
+};
+
+
+
 
 
 #endif // FILEUTILS_H

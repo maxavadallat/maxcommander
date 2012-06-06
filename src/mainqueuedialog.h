@@ -1,26 +1,25 @@
-#ifndef DELETEPROGRESSDIALOG_H
-#define DELETEPROGRESSDIALOG_H
+#ifndef MAINQUEUEDIALOG_H
+#define MAINQUEUEDIALOG_H
 
 // INCLUDES
 
 #include <QDialog>
-
 #include "fileutils.h"
 
 
 // FORWARD DECLARATIONS
 
 namespace Ui {
-class DeleteProgressDialog;
+class MainQueueDialog;
 }
 
 
 // DECLARATIONS
 
 //==============================================================================
-//! @class DeleteProgressDialog Delete Progress Dialog Class
+//! @class MainQueueDialog Main Queue Dialog Class
 //==============================================================================
-class DeleteProgressDialog : public QDialog, public FileOperationQueueHandler
+class MainQueueDialog : public QDialog, public FileOperationQueueHandler
 {
     Q_OBJECT
 
@@ -28,7 +27,7 @@ public:
 
     //! @brief Constructor
     //! @param aParent Parent Widget
-    explicit DeleteProgressDialog(QWidget* aParent = NULL);
+    explicit MainQueueDialog(QWidget* aParent = NULL);
 
     //! @brief Add File Operation Entry
     //! @param aEntry File Operation Entry
@@ -66,7 +65,7 @@ public:
 
     //! @brief Reset All Count & Progress
     //! @param none
-    void reset();
+    void resetProgress();
 
     //! @brief Set Progress
     //! @param aProgress Progress Value
@@ -96,31 +95,9 @@ public:
 
     //! @brief Destructor
     //! @param none
-    virtual ~DeleteProgressDialog();
-
-protected slots:
-
-    //! @brief On Show Details Button Clicked
-    //! @param none
-    void on_showDetailsButton_clicked();
-
-    //! @brief Pause Button Pressed
-    //! @param none
-    void pauseButtonPressed();
-
-    //! @brief Abort Button Pressed
-    //! @param none
-    void abortButtonPressed();
-
-    //! @brief Clear Button Pressed
-    //! @param none
-    void clearButtonPressed();
+    virtual ~MainQueueDialog();
 
 protected:
-
-    //! @brief Setup UI
-    //! @param none
-    void updateUI();
 
     //! @brief Abort
     //! @param none
@@ -138,26 +115,71 @@ protected:
     //! @param none
     void clear();
 
+protected slots:
+
+    //! @brief Pause Button Pressed Slot
+    //! @param none
+    void pauseButtonPressed();
+
+    //! @brief Abort Button Pressed Slot
+    //! @param none
+    void abortButtonPressed();
+
+    //! @brief Clear Button Pressed Slot
+    //! @param none
+    void clearButtonPressed();
+
+    //! @brief Operation Queue Processing Started Slot
+    //! @param none
+    void opQueueStarted();
+
+    //! @brief Operation Queue Processing Stopped Slot
+    //! @param none
+    void opQueueStopped();
+
+    //! @brief Operation Queue Processing Finished Slot
+    //! @param none
+    void opQueueFinished();
+
+    //! @brief Operation Added Slot
+    //! @param aIndex Operation Index
+    //! @param aCount New Operations Count
+    void operationAdded(const int& aIndex, const int& aCount);
+
+    //! @brief Operation Removed Slot
+    //! @param aIndex Operation Index
+    //! @param aCount Remaining Operations Count
+    void operationRemoved(const int& aIndex, const int& aCount);
+
+    //! @brief Operation Started Slot
+    //! @param aIndex Operation Index
+    void operationStarted(const int& aIndex);
+
+    //! @brief Operation Stopped Slot
+    //! @param aIndex Operation Index
+    void operationStopped(const int& aIndex);
+
+    //! @brief Operation Completed Slot
+    //! @param aIndex Operation Index
+    void operationCompleted(const int& aIndex);
+
 protected: // Data
 
     //! UI
-    Ui::DeleteProgressDialog*   ui;
-
-    //! Details Shown
-    bool                        detailsShown;
+    Ui::MainQueueDialog*    ui;
 
     //! Pause Button
-    QPushButton*                pauseButton;
+    QPushButton*            pauseButton;
     //! Abort Button
-    QPushButton*                abortButton;
+    QPushButton*            abortButton;
     //! Clear Button
-    QPushButton*                clearButton;
+    QPushButton*            clearButton;
 
     //! Paused
-    bool                        paused;
+    bool                    paused;
 
     //! Operation Queue
-    FileOperationQueue*         opQueue;
+    FileOperationQueue*     opQueue;
 };
 
-#endif // DELETEPROGRESSDIALOG_H
+#endif // MAINQUEUEDIALOG_H

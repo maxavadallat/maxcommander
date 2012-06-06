@@ -7,11 +7,6 @@
 #include <QPushButton>
 
 
-// CONSTANTS
-
-#define DIALOG_RESULT_QUEUE         3
-
-
 // FORWARD DECLARATIONS
 
 namespace Ui {
@@ -65,9 +60,9 @@ protected:
 
     //! UI
     Ui::CopyDialog*     ui;
-    // Cancel Button
+    //! Cancel Button
     QPushButton*        cancelButton;
-    // Queue Button
+    //! Queue Button
     QPushButton*        queueButton;
 };
 

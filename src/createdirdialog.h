@@ -58,6 +58,15 @@ protected slots:
     //! @param none
     void on_cancelButton_clicked();
 */
+
+    //! @brief Button Box Accepted Slot
+    //! @param none
+    void on_buttonBox_accepted();
+
+    //! @brief Button Box Rejected Slot
+    //! @param none
+    void on_buttonBox_rejected();
+
 protected: // Data
 
     //! UI

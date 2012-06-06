@@ -15,7 +15,9 @@
 #include "createdirdialog.h"
 #include "fileutils.h"
 
-
+#include "copyprogressdialog.h"
+#include "deleteprogressdialog.h"
+#include "mainqueuedialog.h"
 
 
 // IMPLEMENTATION
@@ -129,6 +131,21 @@ int main(int argc, char* argv[])
 
         return 0;
     } else {
+
+
+        //qDebug() << "\nDebugging MaxCommander...\n";
+
+        //qDebug() << "File Name Parse Test: " << FileUtils::parseTargetFileName(QString("whatever.txt"), QString("../*.bak"));
+        //qDebug() << "File Name Parse Test: " << FileUtils::parseTargetFileName(QString("whatever.txt"), QString("../cucc.*"));
+        //qDebug() << "File Name Parse Test: " << FileUtils::parseTargetFileName(QString("whatever.tar.gz"), QString("../cucc.*"));
+        //qDebug() << "File Name Parse Test: " << FileUtils::parseTargetFileName(QString("whatever.tar.gz"), QString("../cucc.tema.*"));
+        //qDebug() << "File Name Parse Test: " << FileUtils::parseTargetFileName(QString("sss333sss"), QString("sss*sss"));
+        //qDebug() << "File Name Parse Test: " << FileUtils::parseTargetFileName(QString("Temp"), QString("/Users/Max/Temp2"));
+
+        //qDebug() << "\nDebugging MaxCommander...\n";
+
+        //return 0;
+
         // Set Application Name
         app.setApplicationName(DEFAULT_APPLICATION_NAME);
         // Set Applicaiton Version
@@ -139,16 +156,10 @@ int main(int argc, char* argv[])
         qDebug() << "System Locale: " << QLocale::system().name();
 
 
-        //FileUtils::createDir(QString("/Users/Max/Testing/Creating/Directory////"));
-
-        //FileUtils::deleteFile(QString("/Users/Max/Testing/Creating/Directory////"));
-
-
         // Init Main Window
         MainWindow* mw = MainWindow::getInstance();
         // Show Main Window
         mw->show();
-
 
 /*
         HeaderItem hi;
@@ -218,12 +229,31 @@ int main(int argc, char* argv[])
         qDebug() << "Create Dir Dialog - result: " << result;
 */
 
+        //FileUtils::createDir(QString("/Users/Max/Testing/Creating/Directory////"));
+
+        //FileUtils::deleteFile(QString("/Users/Max/Testing/Creating/Directory////"));
+
+/*
+        CopyProgressDialog copyProgressDialog;
+
+        copyProgressDialog.show();
+
+
+        DeleteProgressDialog deleteProgressDialog;
+
+        deleteProgressDialog.show();
+
+
+        MainQueueDialog mainQueueDialog;
+
+        mainQueueDialog.show();
+*/
+
         qDebug() << "Starting MaxCommander APPLICATION...";
 
         // Exec Application
         int result = app.exec();
 
-        //dsScanner.stop();
         // Check Main Window Instance
         if (mw) {
             // Release

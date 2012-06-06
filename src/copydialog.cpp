@@ -5,6 +5,7 @@
 
 #include "copydialog.h"
 #include "ui_copydialog.h"
+#include "constants.h"
 
 
 // IMPLEMENTATION
@@ -18,6 +19,7 @@ CopyDialog::CopyDialog(QWidget* aParent)
     , cancelButton(NULL)
     , queueButton(NULL)
 {
+    qDebug() << "Creating CopyDialog...";
 /*
     // Set Attributes
     setAttribute(Qt::WA_NoSystemBackground);
@@ -28,8 +30,8 @@ CopyDialog::CopyDialog(QWidget* aParent)
     ui->setupUi(this);
 
     // Add Buttons
-    cancelButton = ui->buttonBox->addButton(QString("Cancel"), QDialogButtonBox::RejectRole);
-    queueButton = ui->buttonBox->addButton(QString("Queue"), QDialogButtonBox::AcceptRole);
+    cancelButton = ui->buttonBox->addButton(QString(DEFAULT_BUTTON_TEXT_CANCEL), QDialogButtonBox::RejectRole);
+    queueButton = ui->buttonBox->addButton(QString(DEFAULT_BUTTON_TEXT_QUEUE), QDialogButtonBox::AcceptRole);
 
     // Connect Signals
     connect(queueButton, SIGNAL(clicked()), this, SLOT(queueButtonPressed()));
@@ -95,7 +97,7 @@ void CopyDialog::queueButtonPressed()
     qDebug() << "CopyDialog::queueButtonPressed";
 
     // Set Dialog Result
-    setResult(DIALOG_RESULT_QUEUE);
+    setResult(DEFAULT_DIALOG_RESULT_QUEUE);
 }
 
 //==============================================================================

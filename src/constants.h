@@ -14,8 +14,12 @@
 #define PARAM_SERVER_MODE                                   "--server"
 // Exec Param Operation
 #define PARAM_OPERATION                                     "--operation="
+// Exec Param Operation No op
+#define PARAM_OPERATION_NOOP                                "noop"
 // Exec Param Operation Read Dir
 #define PARAM_OPERATION_READDIR                             "readdir"
+// Exec Param Operation Create Dir
+#define PARAM_OPERATION_MAKEDIR                             "makedir"
 // Exec Param Operation Size
 #define PARAM_OPERATION_SIZE                                "size"
 // Exec Param Operation Tree
@@ -24,19 +28,35 @@
 #define PARAM_OPERATION_COPY                                "copy"
 // Exec Param Operation Move
 #define PARAM_OPERATION_MOVE                                "move"
+// Exec Param Operation Rename
+#define PARAM_OPERATION_RENAME                              "rename"
 // Exec Param Operation Delete
 #define PARAM_OPERATION_DELETE                              "delete"
 // Exec Param Operation Search
 #define PARAM_OPERATION_SEARCH                              "search"
 
+// File Operations Token Separator
+#define FILE_OPERATIONS_TOKEN_SEPARATOR                     ';'
+// File Operation Done
+#define FILE_OPERATION_DONE                                 " ... done"
+
+// File Operation Queue Text Template - COPY, MOVE, RENAME
+#define FILE_OPERATION_QUEUE_TEXT_TEMPLATE_COPY             "%1:%2 - > %3"
+// File Operation Queue Text Template - DELETE
+#define FILE_OPERATION_QUEUE_TEXT_TEMPLATE_DELETE           "%1:%2"
+
 // Operation ID's
-#define OPERATION_ID_READDIR                                0x0000
-#define OPERATION_ID_SIZE                                   0x0001
-#define OPERATION_ID_TREE                                   0x0002
-#define OPERATION_ID_COPY                                   0x0003
-#define OPERATION_ID_MOVE                                   0x0004
-#define OPERATION_ID_DELETE                                 0x0005
-#define OPERATION_ID_SEARCH                                 0x0006
+#define OPERATION_ID_NOOP                                   0x0000
+
+#define OPERATION_ID_READDIR                                0x0001
+#define OPERATION_ID_MAKEDIR                                0x0002
+#define OPERATION_ID_SIZE                                   0x0003
+#define OPERATION_ID_TREE                                   0x0004
+#define OPERATION_ID_COPY                                   0x0005
+#define OPERATION_ID_MOVE                                   0x0006
+#define OPERATION_ID_RENAME                                 0x0007
+#define OPERATION_ID_DELETE                                 0x0008
+#define OPERATION_ID_SEARCH                                 0x0009
 
 // Icon Sizes
 #define DEFAULT_ICON_SIZE_SMALL                             16
@@ -400,6 +420,8 @@
 // Dir Size Scanner Update Timer Interval
 #define DEFAULT_DIR_SIZE_SCANNER_UPDATE_TIMER_INTERVAL      250
 
+// Default File System Watcher Filter Timer Interval
+#define DEFAULT_FILESYSTEM_WATCHER_FILTER_TIMER_INTERVAL    250
 
 // Bits Per Color Components
 #define DEFAULT_BITS_PER_COMPONENTS                         8
@@ -497,10 +519,35 @@
 #define DEFAULT_COPY_BUFFER_SIZE                            (8192 * 2 * 1024)
 
 
+// Default Dialog Result
+#define DEFAULT_DIALOG_RESULT_OK                            1
+// Default Dialog Result Queue
+#define DEFAULT_DIALOG_RESULT_QUEUE                         3
 
 
+// Default Copy Progress Dialog Details Shown Height
+#define DEFAULT_COPY_PROGRESS_DIALOG_DETAILSSHOWN_HEIGHT    310
+// Default Copy Progress Dialog Details Hidden Height
+#define DEFAULT_COPY_PROGRESS_DIALOG_DETAILSHIDDEN_HEIGHT   (310 - 128 - 22 - 1)
 
 
+// Default Delete Progress Dialog Details Shown Height
+#define DEFAULT_DELETE_PROGRESS_DIALOG_DETAILSSHOWN_HEIGHT  260
+// Default Delete Progress Dialog Details Hidden Height
+#define DEFAULT_DELETE_PROGRESS_DIALOG_DETAILSHIDDEN_HEIGHT (260 - 128 - 20 - 1)
+
+
+// Button Texts
+#define DEFAULT_BUTTON_TEXT_PAUSE                           "Pause"
+#define DEFAULT_BUTTON_TEXT_RESUME                          "Resume"
+#define DEFAULT_BUTTON_TEXT_ABORT                           "Abort"
+#define DEFAULT_BUTTON_TEXT_CLEAR                           "Clear"
+#define DEFAULT_BUTTON_TEXT_QUEUE                           "Queue"
+#define DEFAULT_BUTTON_TEXT_CANCEL                          "Cancel"
+
+
+#define DEFAULT_COPY_PROGRESS_DIALOG_TITLE                  "Copy progress..."
+#define DEFAULT_MOVE_PROGRESS_DIALOG_TITLE                  "Move progress..."
 
 
 #endif // CONSTANTS_H

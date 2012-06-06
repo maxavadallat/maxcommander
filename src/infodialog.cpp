@@ -1,6 +1,8 @@
 
 // INCLUDES
 
+#include <QDebug>
+
 #include "infodialog.h"
 #include "ui_infodialog.h"
 
@@ -52,9 +54,21 @@ void InfoDialog::setIcon(const QPixmap& aPixmap)
 }
 
 //==============================================================================
+// Info Dialog Finished
+//==============================================================================
+void InfoDialog::on_InfoDialog_finished(int aResult)
+{
+    qDebug() << "InfoDialog::on_InfoDialog_finished - aResult: " << aResult;
+
+    // Emit Info Dialog Finished Signal
+    emit infoDialogFinished(this);
+}
+
+//==============================================================================
 // Destructor
 //==============================================================================
 InfoDialog::~InfoDialog()
 {
     delete ui;
 }
+

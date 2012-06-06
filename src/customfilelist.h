@@ -613,14 +613,20 @@ public:
     //! @brief Set Current Directory
     //! @param aDirectory New Directory
     //! @param aRefresh Refresh
-    void setCurrentDir(const QString& aDirectory, const bool& aRefresh = true);
+    //! @param aResetIndex Reset Index
+    void setCurrentDir(const QString& aDirectory, const bool& aRefresh = false, const bool& aResetIndex = false);
 
     //! @brief Get Current Directory
     //! @param none
     //! @brief Current Directory
     QString getCurrentDir();
 
-    //! @brief Get Current Directory's Files Count
+    //! @brief Get Item Count
+    //! @param none
+    //! @brief Item Count
+    int getItemCount();
+
+    //! @brief Get Current Directory's Files Count WITHOUT COUNTINT '..'
     //! @param none
     //! @brief Current Directory's Files Count
     int getFilesCount();
@@ -714,8 +720,8 @@ public:
     void updateDelegateIconSize(const bool& aRefresh = true);
 
     //! @brief Reload Dir
-    //! @param none
-    void reload();
+    //! @param aResetIndex Reset File Listbox Index
+    void reload(const bool& aResetIndex = false);
 
     //! @brief Reload Dir
     //! @param aBgColor Background Color
@@ -725,6 +731,10 @@ public:
     //! @param none
     //! @brief File List Box
     const FileListBox* listbox();
+
+    //! @brief Feed Search Result To The List Box
+    //! @param none
+    void feedSearchResult();
 
     //! @brief Destructor
     //! @param none
@@ -753,7 +763,7 @@ public slots:
     void goBack();
 
     //! @brief Go To Drive
-    //! @param aIndex Drive index
+    //! @param aIndex Drive Index
     void gotoDrive(const int& aIndex);
 
     //! @brief Go To Next Item
@@ -764,6 +774,11 @@ public slots:
     //! @param aSelection Select Item
     void goPrevItem(const bool& aSelection = false);
 
+    //! @brief Go To Index
+    //! @param aIndex Item Index
+    //! @param aSelection Select Item
+    void gotoIndex(const int& aIndex, const bool& aSelection = false);
+/*
     //! @brief Make Directory
     //! @param aDirPath New Directory Name
     void makeDir(const QString& aDirPath);
@@ -790,7 +805,7 @@ public slots:
     //! @brief Delete Files
     //! @param none
     void scanAllDirsSize();
-
+*/
 signals:
 
     //! @brief Current Directory Changed Signal
@@ -853,6 +868,20 @@ protected:
     //! @param none
     void stopAllItemsSizeScan();
 
+    //! @brief Start File System Watcher Filter Timer
+    //! @param none
+    void startFSWFilterTimer();
+
+    //! @brief Stop File System Watcher Filter Timer
+    //! @param none
+    void stopFSWFilterTimer();
+
+protected: // From QObject
+
+    //! @brief Timer Event
+    //! @param aEvent Timer Event
+    virtual void timerEvent(QTimerEvent* aEvent);
+
 protected slots:
 
     //! @brief Dir Reader Entry Found Slot
@@ -905,6 +934,7 @@ protected slots:
     //! @brief File System Directory Changed Slot
     //! @param aPath Directory Path
     void fsDirectoryChanged(const QString& aPath);
+
 
 protected: // Data
     friend class MainWindow;
@@ -961,9 +991,11 @@ protected: // Data
     //! File System Watcher
     QFileSystemWatcher*     fileSystemWatcher;
 
+    //! File System Watcher Filter Timer ID
+    int                     fswTimerID;
+
     //! File List Popup
     ListPopup*              popup;
-
     //! Operation Queue
     QStringList             opQueue;
 };

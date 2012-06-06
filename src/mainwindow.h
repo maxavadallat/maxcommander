@@ -8,6 +8,7 @@
 #include <QMainWindow>
 #include <QDialogButtonBox>
 
+#include "fileutils.h"
 #include "constants.h"
 
 // FORWARD DECLARATIONS
@@ -31,13 +32,15 @@ class ViewerWindow;
 class HelpDialog;
 class TreeWindow;
 class AboutDialog;
+class MainQueueDialog;
+
 
 // DECLARATIONS
 
 //==============================================================================
 //! @class MainWindow Application Main Window Class
 //==============================================================================
-class MainWindow : public QMainWindow
+class MainWindow : public QMainWindow, public DirCreatorObserver
 {
     Q_OBJECT
 
@@ -130,7 +133,10 @@ public:
     //! @param aConfirmMsg Dialog Confirmation Text
     //! @param aButtons Dialog Buttons To Use
     //! @return Confirmation Index
-    int showConfirmation(const QString& aTitle, const QString& aConfirmMsg, const QDialogButtonBox::StandardButtons& aButtons, const QDialogButtonBox::StandardButton& aDefault = QDialogButtonBox::NoButton);
+    int showConfirmation(const QString& aTitle,
+                         const QString& aConfirmMsg,
+                         const QDialogButtonBox::StandardButtons& aButtons,
+                         const QDialogButtonBox::StandardButton& aDefault = QDialogButtonBox::NoButton);
 
     //! @brief Show Status Message
     //! @param aMessage Message
@@ -146,19 +152,51 @@ protected:
     //! @brief Constructor
     //! @param aParent Parent Widget
     MainWindow(QWidget* aParent = NULL);
-
-    //! @brief Destructor
-    //! @param none
-    virtual ~MainWindow();
-
+/*
     //! @brief Show Create Dir Dialog
     //! @param aDirPath Initial Directory Path
     //! @return true if Dir Creation Confirmed
     bool showCreateDirDialog();
-
+*/
     //! @brief Configure Function Keys
     //! @param none
     void configureFunctionKeys();
+
+    //! @brief Clear Progress Dialogs
+    //! @param none
+    void clearDialogs();
+
+    //! @brief Build And Add Queue
+    //! @param aOperation Operation Index
+    //! @param aQueueHandler Operation Queue Handler
+    //! @param aSourcePanelIndex Source Panel Index
+    //! @param aSelCount File Selection Count
+    //! @param aCurrFileName Current File Name In Source Panel
+    //! @param aTargetFileName Target File Name In Source Panel
+    void addItemsToQueue(const int& aOperation,
+                         FileOperationQueueHandler* aQueueHandler,
+                         const int& aSourcePanelIndex,
+                         const int& aSelCount = 0,
+                         const QString& aCurrFileName = QString(""),
+                         const QString& aTargetFileName = QString(""));
+
+    //! @brief Create Dir Error Callback
+    //! @param aDirPath Directory Path
+    //! @param aErrorCode Error Code
+    //! @return Creation Error Response
+    virtual int createDirError(const QString& aDirPath, const int& aErrorCode);
+
+    //! @brief Create Dir Started
+    //! @param aDirPath Directory Path
+    virtual void createDirStarted(const QString& aDirPath);
+
+    //! @brief Creaet Dir Finished
+    //! @param aDirPath Directory Path
+    virtual void createDirFinished(const QString& aDirPath);
+
+    //! @brief Destructor
+    //! @param none
+    virtual ~MainWindow();
 
 protected slots:
 
@@ -315,6 +353,10 @@ protected slots:
     //! @param none
     void on_actionUnpack_triggered();
 
+    //! @brief Info Dialog Finished Slot
+    //! @param aDialog Dialog
+    void infoDialogFinished(QDialog* aDialog);
+
 protected: // Data
 
     // Reference Count
@@ -340,9 +382,9 @@ protected: // Data
     //! Create Dir Dialog
     CreateDirDialog*    createDirDialog;
     //! Info Dialog
-    InfoDialog*         infoDialog;
+    //InfoDialog*         infoDialog;
     //! Confirm Dialog
-    ConfirmationDialog* confirmDialog;
+    //ConfirmationDialog* confirmDialog;
     //! Search Dialog
     SearchDialog*       searchDialog;
     //! Copy Dialog
@@ -351,6 +393,11 @@ protected: // Data
     HelpDialog*         helpDialog;
     //! Tree Window
     TreeWindow*         treeWindow;
+    //! Main Queue Dialog
+    MainQueueDialog*    mainQueueDialog;
+
+    //! Progress Dialogs List
+    QList<QDialog*>     dialogs;
 };
 
 #endif // MAINWINDOW_H

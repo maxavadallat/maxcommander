@@ -752,6 +752,7 @@ void FileListDelegate::updateUI()
                 // Set Name Label Text
                 nameLabel->setText(fileItemData->info.fileName());
             } else {
+                // Check Complete Base Name
                 if (fileItemData->info.completeBaseName().isEmpty()) {
                     // Set Name Label Text
                     nameLabel->setText(fileItemData->info.fileName());
@@ -1841,6 +1842,7 @@ CustomFilelist::CustomFilelist(QWidget* aParent)
     , dirItemsSizeScanActive(false)
     , sizeScanCurrent(-1)
     , fileSystemWatcher(NULL)
+    , fswTimerID(-1)
     , popup(NULL)
 {
     qDebug() << "Creating CustomFilelist...";
@@ -1906,7 +1908,7 @@ void CustomFilelist::setPanelName(const QString& aPanelName)
 //==============================================================================
 // Set Current Directory
 //==============================================================================
-void CustomFilelist::setCurrentDir(const QString& aDirectory, const bool& aRefresh)
+void CustomFilelist::setCurrentDir(const QString& aDirectory, const bool& aRefresh, const bool& aResetIndex)
 {
     // Check Current Dir
     if (QFile::exists(aDirectory)) {
@@ -1922,7 +1924,7 @@ void CustomFilelist::setCurrentDir(const QString& aDirectory, const bool& aRefre
             // Check Refresh
             if (aRefresh || forceRefresh) {
                 // Reload
-                reload();
+                reload(aResetIndex);
             }
             // Reset Force Refresh
             forceRefresh = false;
@@ -1939,7 +1941,20 @@ void CustomFilelist::setCurrentDir(const QString& aDirectory, const bool& aRefre
 //==============================================================================
 QString CustomFilelist::getCurrentDir()
 {
-    return currentDirPath;
+    return QDir::cleanPath(currentDirPath);
+}
+
+//==============================================================================
+// Get Item Count
+//==============================================================================
+int CustomFilelist::getItemCount()
+{
+    // Check UI
+    if (ui && ui->fileListBox) {
+        return ui->fileListBox->count();
+    }
+
+    return 0;
 }
 
 //==============================================================================
@@ -2234,7 +2249,7 @@ void CustomFilelist::updateDelegateIconSize(const bool& aRefresh)
 //==============================================================================
 // Reload Dir
 //==============================================================================
-void CustomFilelist::reload()
+void CustomFilelist::reload(const bool& aResetIndex)
 {
     // Stop All Items Size Scan
     stopAllItemsSizeScan();
@@ -2245,6 +2260,12 @@ void CustomFilelist::reload()
     if (fileSystemWatcher) {
         // Add Path
         fileSystemWatcher->removePaths(fileSystemWatcher->files() + fileSystemWatcher->directories());
+    }
+
+    // Check UI, List Box And Reset Index
+    if (ui && ui->fileListBox && !aResetIndex) {
+        // Set Last File Index
+        prevFileIndex = ui->fileListBox->getCurrentIndex();
     }
 
     // Check Dir Reader
@@ -2294,7 +2315,7 @@ void CustomFilelist::gotoHome()
 {
     //qDebug() << "CustomFilelist::gotoHome";
     // Set Current Dir
-    setCurrentDir(QDir::homePath());
+    setCurrentDir(QDir::homePath(), true, true);
 }
 
 //==============================================================================
@@ -2304,7 +2325,7 @@ void CustomFilelist::gotoRoot()
 {
     //qDebug() << "CustomFilelist::gotoRoot";
     // Set Current Dir
-    setCurrentDir(QString("/"));
+    setCurrentDir(QString("/"), true, true);
 }
 
 //==============================================================================
@@ -2316,7 +2337,7 @@ void CustomFilelist::goUp()
     // Get Prev Dir Name
     prevDirName = FileUtils::getDirName(getCurrentDir());
     // Set Current Dir
-    setCurrentDir(FileUtils::getParentDirPath(getCurrentDir()));
+    setCurrentDir(FileUtils::getParentDirPath(getCurrentDir()), true);
 }
 
 //==============================================================================
@@ -2332,7 +2353,7 @@ void CustomFilelist::goForward()
         // Check File Item Data
         if (fileItemData && fileItemData->getFileInfo().isDir() && fileItemData->getFileInfo().fileName() != QString("..")) {
             // Set Current Dir
-            setCurrentDir(fileItemData->getFileInfo().absoluteFilePath());
+            setCurrentDir(fileItemData->getFileInfo().absoluteFilePath(), true, true);
         }
     }
 }
@@ -2391,6 +2412,18 @@ void CustomFilelist::goPrevItem(const bool& aSelection)
     }
 }
 
+//==============================================================================
+// Go To Index
+//==============================================================================
+void CustomFilelist::gotoIndex(const int& aIndex, const bool& aSelection)
+{
+    // Check UI
+    if (ui && ui->fileListBox) {
+        // Go To Index
+        ui->fileListBox->gotoIndex(aIndex, aSelection);
+    }
+}
+/*
 //==============================================================================
 // Make Directory
 //==============================================================================
@@ -2501,7 +2534,7 @@ void CustomFilelist::scanAllDirsSize()
 
     // ...
 }
-
+*/
 //==============================================================================
 // Clear
 //==============================================================================
@@ -2618,6 +2651,65 @@ void CustomFilelist::stopAllItemsSizeScan()
 }
 
 //==============================================================================
+// Start File System Watcher Filter Timer
+//==============================================================================
+void CustomFilelist::startFSWFilterTimer()
+{
+    // Stop File System Watcher Filter Timer
+    stopFSWFilterTimer();
+
+    // Check Timer ID
+    if (fswTimerID == -1) {
+        qDebug() << "CustomFilelist::startFSWFilterTimer";
+        // Start Timer
+        fswTimerID = startTimer(DEFAULT_FILESYSTEM_WATCHER_FILTER_TIMER_INTERVAL);
+    }
+}
+
+//==============================================================================
+// Stop File System Watcher Filter Timer
+//==============================================================================
+void CustomFilelist::stopFSWFilterTimer()
+{
+    // Check Timer ID
+    if (fswTimerID != -1) {
+        qDebug() << "CustomFilelist::stopFSWFilterTimer";
+        // Kill Timer
+        killTimer(fswTimerID);
+        // Reset Timer ID
+        fswTimerID = -1;
+    }
+}
+
+//==============================================================================
+// Timer Event
+//==============================================================================
+void CustomFilelist::timerEvent(QTimerEvent* aEvent)
+{
+    // Check Event
+    if (aEvent) {
+        qDebug() << "CustomFilelist::timerEvent";
+        // Check Event Timer ID
+        if (aEvent->timerId() == fswTimerID) {
+            // Stop File System Watcher Filter Timer
+            stopFSWFilterTimer();
+/*
+            // Check UI
+            if (ui && ui->fileListBox) {
+                // Check Prev Dir Name
+                if (prevDirName.isEmpty()) {
+                    // Set Prev File Index
+                    prevFileIndex = ui->fileListBox->getCurrentIndex();
+                }
+            }
+*/
+            // Reload
+            reload();
+        }
+    }
+}
+
+//==============================================================================
 // Dir Reader Entry Found Slot
 //==============================================================================
 void CustomFilelist::dirReaderEntryFound(const QString& aFilePath)
@@ -2650,6 +2742,8 @@ void CustomFilelist::dirReaderEntryFound(const QString& aFilePath)
                 prevDirName = QString("");
                 // Go To Index
                 ui->fileListBox->gotoIndex(pdIndex, false, false);
+                // Reset Prev File Index
+                prevFileIndex = -1;
             }
         } else if (!prevFileName.isEmpty()) {
             // Get Prev File Index By Name
@@ -2660,6 +2754,8 @@ void CustomFilelist::dirReaderEntryFound(const QString& aFilePath)
                 prevFileName = QString("");
                 // Go To Index
                 ui->fileListBox->gotoIndex(pfIndex, false, false);
+                // Reset Prev File Index
+                prevFileIndex = -1;
             }
         } else if (prevFileIndex != -1) {
             // Check Prev File Index
@@ -2820,14 +2916,16 @@ void CustomFilelist::listBoxKeyReleased(const int& aKey, const Qt::KeyboardModif
             // Check Modifiers
             if (controlPressed) {
 #endif // Q_OS_MAC
+/*
                 // Check UI
                 if (ui && ui->fileListBox) {
                     //qDebug() << "CustomFilelist::listBoxKeyReleased - Ctrl + R";
                     // Set Prev File Index
                     prevFileIndex = ui->fileListBox->getCurrentIndex();
-                    // Reload
-                    reload();
                 }
+*/
+                // Reload
+                reload();
             }
         } break;
 
@@ -3025,14 +3123,23 @@ void CustomFilelist::itemSizeScanFinished(const int& aIndex)
 //==============================================================================
 void CustomFilelist::fsDirectoryChanged(const QString& aPath)
 {
-    // Check UI
-    if (ui && ui->fileListBox) {
-        qDebug() << "CustomFilelist::fsDirectoryChanged - aPath: " << aPath;
-        // Set Prev File Index
-        prevFileIndex = ui->fileListBox->getCurrentIndex();
-        // Reload
-        reload();
+    qDebug() << "CustomFilelist::fsDirectoryChanged - aPath: " << aPath;
+
+    // Check Current Dir
+    if (getCurrentDir() == aPath) {
+        // Start File System Watcher Filter Timer
+        startFSWFilterTimer();
     }
+}
+
+//==============================================================================
+// Feed Search Result To The List Box
+//==============================================================================
+void CustomFilelist::feedSearchResult()
+{
+    qDebug() << "CustomFilelist::feedSearchResult";
+
+    // ...
 }
 
 //==============================================================================

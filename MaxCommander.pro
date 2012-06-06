@@ -50,7 +50,8 @@ SOURCES += src/main.cpp\
     src/helpdialog.cpp \
     src/treewindow.cpp \
     src/aboutdialog.cpp \
-    src/listpopup.cpp
+    src/listpopup.cpp \
+    src/mainqueuedialog.cpp
 
 # Headers
 HEADERS  += src/mainwindow.h \
@@ -80,7 +81,8 @@ HEADERS  += src/mainwindow.h \
     src/helpdialog.h \
     src/treewindow.h \
     src/aboutdialog.h \
-    src/listpopup.h
+    src/listpopup.h \
+    src/mainqueuedialog.h
 
 # Forms
 FORMS    += ui/mainwindow.ui \
@@ -104,7 +106,8 @@ FORMS    += ui/mainwindow.ui \
     ui/filerenamer.ui \
     ui/helpdialog.ui \
     ui/treewindow.ui \
-    ui/aboutdialog.ui
+    ui/aboutdialog.ui \
+    ui/mainqueuedialog.ui
 
 macx: {
 LIBS += -framework CoreServices -framework ApplicationServices

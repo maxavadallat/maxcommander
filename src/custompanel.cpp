@@ -264,8 +264,6 @@ void CustomPanel::loadSettings()
 
             // Set Show Hidden Files
             ui->fileList->setShowHiddenFiles(showHidden, false);
-            // Set Sorting
-            //ui->fileList->setSorting(settings->getValue(SETTINGS_KEY_SORTTYPE, 0).toInt(), settings->getValue(SETTINGS_KEY_REVERSE, false).toBool(), false);
             // Set Current Dir
             ui->fileList->setCurrentDir(settings->getValue(QString(SETTINGS_KEY_LASTDIR), defaultDir).toString(), false);
         }
@@ -560,7 +558,7 @@ void CustomPanel::fileListFileSelected(FileItemData* aFileItemData)
                 // Check Follow Links
                 if (followLinks && ui && ui->fileList) {
                     // Set Current Dir
-                    ui->fileList->setCurrentDir(fileInfo.symLinkTarget());
+                    ui->fileList->setCurrentDir(fileInfo.symLinkTarget(), true, true);
                 }
             }
         // Check File If Dir
@@ -577,8 +575,9 @@ void CustomPanel::fileListFileSelected(FileItemData* aFileItemData)
                 qDebug() << "CustomPanel::fileListFileSelected - dir";
                 // Check UI
                 if (ui && ui->fileList) {
+                    // Reset Perv File Index
                     // Set Current Dir
-                    ui->fileList->setCurrentDir(fileInfo.absoluteFilePath());
+                    ui->fileList->setCurrentDir(fileInfo.absoluteFilePath(), true, true);
                 }
             }
         } else {

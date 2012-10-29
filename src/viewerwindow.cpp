@@ -116,7 +116,7 @@ ViewerWindow::ViewerWindow(QWidget* aParent)
 //==============================================================================
 // Load File
 //==============================================================================
-bool ViewerWindow::loadFile(const QString& aFilePath)
+bool ViewerWindow::loadFile(const QString& aFilePath, const bool& aReadOnly)
 {
     // Init File Info
     QFileInfo fileInfo(aFilePath);
@@ -124,6 +124,8 @@ bool ViewerWindow::loadFile(const QString& aFilePath)
     if (fileInfo.exists() && !fileInfo.isDir() && fileInfo.size() <= DEFAULT_VIEWER_MAX_FILE_SIZE && fileName != aFilePath && ui && ui->viewer) {
         // Set File Name
         fileName = aFilePath;
+        // Set Viewer Read Only
+        ui->viewer->setReadOnly(aReadOnly);
 
         // Init Text File
         QFile textFile(fileName);
@@ -255,6 +257,18 @@ void ViewerWindow::findNext()
 
         // Scroll To
 
+    }
+}
+
+//==============================================================================
+// Set Read Only
+//==============================================================================
+void ViewerWindow::setReadOnly(const bool& aReadOnly)
+{
+    // Check UI
+    if (ui && ui->viewer) {
+        // Set Read Only
+        ui->viewer->setReadOnly(aReadOnly);
     }
 }
 

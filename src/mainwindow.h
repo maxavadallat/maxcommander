@@ -7,6 +7,7 @@
 #include <QDebug>
 #include <QMainWindow>
 #include <QDialogButtonBox>
+#include <QEventLoop>
 
 #include "fileutils.h"
 #include "constants.h"
@@ -33,6 +34,9 @@ class HelpDialog;
 class TreeWindow;
 class AboutDialog;
 class MainQueueDialog;
+class AdminPassDialog;
+class FileUtilsClient;
+class AdminPassQueryProvider;
 
 
 // DECLARATIONS
@@ -40,7 +44,7 @@ class MainQueueDialog;
 //==============================================================================
 //! @class MainWindow Application Main Window Class
 //==============================================================================
-class MainWindow : public QMainWindow, public DirCreatorObserver
+class MainWindow : public QMainWindow, public DirCreatorObserver, public AdminPassQueryProvider
 {
     Q_OBJECT
 
@@ -54,110 +58,124 @@ public:
     //! @param none
     void release();
 
-    //! @brief Launch Help
+public slots:
+
+    //! @brief Launch Help Slot
     //! @param none
     void launchHelp();
 
-    //! @brief Show tree
+    //! @brief Show Tree Slot
     //! @param none
     void showTree();
 
-    //! @brief View File
+    //! @brief View File Slot
     //! @param none
     void viewFile();
 
-    //! @brief Edit File
+    //! @brief Edit File Slot
     //! @param none
     void editFile();
 
-    //! @brief Copy Files
+    //! @brief Copy Files Slot
     //! @param none
     void copyFiles();
 
-    //! @brief Move Files
+    //! @brief Move Files Slot
     //! @param none
     void moveFiles();
 
-    //! @brief Launch Rename Current File
+    //! @brief Launch Rename Current File Slot
     //! @param none
     void launchRenameCurrentFile();
 
-    //! @brief Launch Create Dir
+    //! @brief Launch Create Dir Slot
     //! @param none
     void launchCreateDir();
 
-    //! @brief Launch Delete Files
+    //! @brief Launch Delete Files Slot
     //! @param none
     void launchDelete();
 
-    //! @brief Launch Copy
+    //! @brief Launch Copy Slot
     //! @param none
     void launchCopy();
 
-    //! @brief Launch Move
+    //! @brief Launch Move Slot
     //! @param none
     void launchMove();
 
-    //! @brief Launch Search
+    //! @brief Launch Search Slot
     //! @param none
     void launchSearch();
 
-    //! @brief Launch Options
+    //! @brief Launch Options Slot
     //! @param none
     void launchOptions();
 
-    //! @brief Exit Application
+    //! @brief Exit Application Slot
     //! @param none
     void exitApp();
 
-    //! @brief Switch To Panel
+    //! @brief Switch To Panel Slot
     //! @param aIndex Panel Index
     void switchToPanel(const int& aIndex);
 
-    //! @brief Load Settings
+    //! @brief Load Settings Slot
     //! @param none
     void loadSettings();
 
-    //! @brief Save Settings
+    //! @brief Save Settings Slot
     //! @param none
     void saveSettings();
 
-    //! @brief Show Info Dialog
+    //! @brief Show Info Dialog Slot
     //! @param aTitle Dialog Title Text
     //! @param aInfoMsg Dialog Info Text
     //! @param aModal Dialog Modal State
     void showInfo(const QString& aTitle, const QString& aInfoMsg, const bool& aModal = false);
 
-    //! @brief Show Confirmation Dialog
+    //! @brief Show Confirmation Dialog Slot
     //! @param aTitle Dialog Title Text
     //! @param aConfirmMsg Dialog Confirmation Text
     //! @param aButtons Dialog Buttons To Use
-    //! @return Confirmation Index
+    //! @return Confirmation Code
     int showConfirmation(const QString& aTitle,
                          const QString& aConfirmMsg,
                          const QDialogButtonBox::StandardButtons& aButtons,
                          const QDialogButtonBox::StandardButton& aDefault = QDialogButtonBox::NoButton);
 
-    //! @brief Show Status Message
+    //! @brief Show Confirmation Dialog Slot
+    //! @param aDialogProvider Confirm Dialog Provider
+    //! @param aType Confirmation Type
+    //! @param aEventLoop Blocking Event Loop
+    void showConfirmation(ConfirmDialogProvider* aDialogProvider, const int& aType, QEventLoop* aEventLoop = NULL);
+
+    //! @brief Show Error Dialog Slot
+    //! @param aDialogProvider Error Dialog Provider
+    //! @param aErrorCode Error Code
+    //! @param aEventLoop Blocking Event Loop
+    void showError(ErrorDialogProvider* aDialogProvider, const int& aErrorCode, QEventLoop* aEventLoop = NULL);
+
+    //! @brief Show Status Message Slot
     //! @param aMessage Message
     //! @param aTimeOut Message Timeout
     void showStatusMessage(const QString& aMessage, const int& aTimeOut = DEFAULT_STATUS_MESSAGE_TIMEOUT);
 
-    //! @brief Clear Status Message
+    //! @brief Clear Status Message Slot
     //! @param none
     void clearStatusMessage();
+
+    //! @brief Launch Admin Password Query Dialog
+    //! @param none
+    //! @return Admin Password
+    virtual QString launchAdminPassQuery();
 
 protected:
 
     //! @brief Constructor
     //! @param aParent Parent Widget
     MainWindow(QWidget* aParent = NULL);
-/*
-    //! @brief Show Create Dir Dialog
-    //! @param aDirPath Initial Directory Path
-    //! @return true if Dir Creation Confirmed
-    bool showCreateDirDialog();
-*/
+
     //! @brief Configure Function Keys
     //! @param none
     void configureFunctionKeys();
@@ -192,7 +210,18 @@ protected:
 
     //! @brief Creaet Dir Finished
     //! @param aDirPath Directory Path
-    virtual void createDirFinished(const QString& aDirPath);
+    //! @param aErrorCode Directory Creation Error Code
+    virtual void createDirFinished(const QString& aDirPath, const int& aErrorCode);
+
+    //! @brief Get Admin Password Query Provider
+    //! @param none
+    //! @return Admin Password Query Provider
+    virtual AdminPassQueryProvider* passQueryProvider();
+
+    //! @brief Get File Utils Client
+    //! @param aAdminPass Admin Password
+    //! @return File Utils Client
+    virtual FileUtilsClient* getUtilsClient(const QString& aAdminPass);
 
     //! @brief Destructor
     //! @param none
@@ -371,6 +400,8 @@ protected: // Data
     bool                controlKeyPressed;
     //! Meta Key Pressed
     bool                metaKeyPressed;
+    //! Admin Mode
+    bool                adminMode;
     //! Current Panel Index
     int                 cPanelIndex;
     //! Current Panel Name
@@ -381,10 +412,16 @@ protected: // Data
     ViewerWindow*       viewerWindow;
     //! Create Dir Dialog
     CreateDirDialog*    createDirDialog;
+
     //! Info Dialog
-    //InfoDialog*         infoDialog;
+    InfoDialog*         infoDialog;
     //! Confirm Dialog
-    //ConfirmationDialog* confirmDialog;
+    ConfirmationDialog* confirmDialog;
+    //! Error Dialog
+    ConfirmationDialog* errorDialog;
+
+    //! Confirmation Dialog Mutex Lock
+    QMutex              confirmMutex;
     //! Search Dialog
     SearchDialog*       searchDialog;
     //! Copy Dialog
@@ -395,9 +432,14 @@ protected: // Data
     TreeWindow*         treeWindow;
     //! Main Queue Dialog
     MainQueueDialog*    mainQueueDialog;
+    //! Admin Pass Query Dialog
+    AdminPassDialog*    adminPassDialog;
 
     //! Progress Dialogs List
     QList<QDialog*>     dialogs;
+
+    //! File Util Client For Remote Worker Process
+    FileUtilsClient*    fileUtilsClient;
 };
 
 #endif // MAINWINDOW_H

@@ -25,6 +25,7 @@ class CustomHeader;
 class Settings;
 class IconScanner;
 class ListPopup;
+class FileUtilsClient;
 
 
 // DECLARATIONS
@@ -578,8 +579,6 @@ protected: // Data
     CacheType*  delegateCache;
     //! File List Box First Visible Index
     int         firstVisibleIndex;
-    //! File Utils
-    FileUtils   fileUtils;
 };
 
 
@@ -958,6 +957,7 @@ protected: // Data
     QString                 prevFileName;
     //! Previous File Index
     int                     prevFileIndex;
+
     //! Directory Reader
     DirReader*              dirReader;
 
@@ -973,6 +973,10 @@ protected: // Data
 
     //! File Utils
     FileUtils*              fileUtils;
+
+    //! File Utils Client
+    FileUtilsClient*        fileUtilsClient;
+
     //! Sort Order
     FileSortType            sortOrder;
     //! Reverse Order
@@ -996,8 +1000,9 @@ protected: // Data
 
     //! File List Popup
     ListPopup*              popup;
+
     //! Operation Queue
-    QStringList             opQueue;
+    //QStringList             opQueue;
 };
 
 #endif // CUSTOMFILELIST_H

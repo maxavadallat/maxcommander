@@ -14,6 +14,7 @@
 #include "settingswindow.h"
 #include "listpopup.h"
 #include "mainwindow.h"
+#include "fileutilsclient.h"
 
 
 // IMPLEMENTATION
@@ -1716,18 +1717,25 @@ void IconScanner::updateItemIcon(const int& aIndex)
     if (delegateCache) {
         // Get Cahced Item
         FileListDelegate* fileListDelegate = reinterpret_cast<FileListDelegate*>((*delegateCache)[aIndex]);
+
         DEFAULT_THREAD_ABORT_CHECK;
+
         // Check If Needs Icon
         if (fileListDelegate && fileListDelegate->getNeedsIconUpdate()) {
             //qDebug() << "IconScanner::updateItemIcon - fileName: " << reinterpret_cast<FileItemData*>(fileListDelegate->getData())->getFileInfo().fileName();
             //qDebug() << "IconScanner::updateItemIcon - aIndex: " << aIndex;
             DEFAULT_THREAD_ABORT_CHECK;
+
             // Sleep
-            msleep(1);
+            msleep(2);
+
             DEFAULT_THREAD_ABORT_CHECK;
+
             // Get File Item Data
             FileItemData* fileItemData = reinterpret_cast<FileItemData*>(fileListDelegate->getData());
+
             DEFAULT_THREAD_ABORT_CHECK;
+
             // Lock Mutex
             mutex.lock();
             // Set Icon
@@ -1912,24 +1920,37 @@ void CustomFilelist::setCurrentDir(const QString& aDirectory, const bool& aRefre
 {
     // Check Current Dir
     if (QFile::exists(aDirectory)) {
-        // Check Current Dir
-        if (currentDirPath != QDir::cleanPath(aDirectory) || forceRefresh) {
-            qDebug() << "CustomFilelist::setCurrentDir - panelName: " << panelName << " - aDirectory: " << aDirectory;
-            // Set Current Dir Path
-            currentDirPath = QDir::cleanPath(aDirectory);
-            // Set Current Dir
-            currentDir.setCurrent(currentDirPath);
-            // Emit Current dir Changed
-            emit currentDirChanged(currentDirPath);
-            // Check Refresh
-            if (aRefresh || forceRefresh) {
-                // Reload
-                reload(aResetIndex);
+        // Check Dir Reader And If Dir Readable
+        if (dirReader && dirReader->isReadable(aDirectory) && FileUtils::isDirReadable(aDirectory)) {
+            // Check Current Dir
+            if (currentDirPath != QDir::cleanPath(aDirectory) || forceRefresh) {
+                qDebug() << "CustomFilelist::setCurrentDir - panelName: " << panelName << " - aDirectory: " << aDirectory;
+                // Set Current Dir Path
+                currentDirPath = QDir::cleanPath(aDirectory);
+                // Set Current Dir
+                currentDir.setCurrent(currentDirPath);
+                // Emit Current dir Changed
+                emit currentDirChanged(currentDirPath);
+                // Check Refresh
+                if (aRefresh || forceRefresh) {
+                    // Reload
+                    reload(aResetIndex);
+                }
+                // Reset Force Refresh
+                forceRefresh = false;
+            } else {
+                //qDebug() << "CustomFilelist::setCurrentDir - panelName: " << panelName << " - currentDirPath: " << currentDir.currentPath();
             }
-            // Reset Force Refresh
-            forceRefresh = false;
         } else {
-            //qDebug() << "CustomFilelist::setCurrentDir - panelName: " << panelName << " - currentDirPath: " << currentDir.currentPath();
+            qDebug() << "CustomFilelist::setCurrentDir - DIR IS NOT READABLE";
+
+            // ...
+
+            // Check Permissions
+
+            // Switch To Admin Mode if Needed
+
+            // ...
         }
     } else {
         qDebug() << "CustomFilelist::setCurrentDir - DIR DOESN'T EXIST";
@@ -2113,6 +2134,12 @@ void CustomFilelist::setShowHiddenFiles(const bool& aShowHidden, const bool& aRe
             dirReader->readDir(currentDir.currentPath(), sortOrder, reverseOrder, showHidden, nameFilters);
         }
 */
+        // Get Current Item Data
+        FileItemData* itemData = getItemData(getCurrentIndex());
+
+        // Get Prev File Name
+        prevFileName = itemData ? itemData->info.fileName() : QString("");
+
         // Check Refresh
         if (aRefresh) {
             // Reload
@@ -2269,10 +2296,13 @@ void CustomFilelist::reload(const bool& aResetIndex)
     }
 
     // Check Dir Reader
-    if (dirReader) {
-        qDebug() << "CustomFilelist::reload";
+    if (dirReader && dirReader->isReadable(currentDirPath)) {
+        qDebug() << "CustomFilelist::reload - dirReader";
         // Start Direcory Reader
         dirReader->readDir(currentDirPath, sortOrder, reverseOrder, showHidden, nameFilters);
+    } else {
+
+
     }
 }
 

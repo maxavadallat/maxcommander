@@ -4,6 +4,8 @@
 // INCLUDES
 
 #include <QDialog>
+#include <QEventLoop>
+
 #include "fileutils.h"
 
 
@@ -13,13 +15,22 @@ namespace Ui {
 class MainQueueDialog;
 }
 
+class InfoDialog;
+class ConfirmationDialog;
+
 
 // DECLARATIONS
 
 //==============================================================================
 //! @class MainQueueDialog Main Queue Dialog Class
 //==============================================================================
-class MainQueueDialog : public QDialog, public FileOperationQueueHandler
+class MainQueueDialog : public QDialog,
+                        public FileOperationQueueHandler,
+                        public FileDeleteObserver,
+                        public FileCopyObserver,
+                        public FileMoveObserver,
+                        public FileRenameObserver,
+                        public ConfirmDialogProvider
 {
     Q_OBJECT
 
@@ -63,6 +74,11 @@ public:
     //! @param aModal Modal Setting
     virtual void setModal(const bool& aModal);
 
+    //! @brief Operation Added Callback - SIGNALS DON't WORK
+    //! @param aIndex Inserted Index
+    //! @param aCount Current Count
+    virtual void operationEntryAdded(const int& aIndex, const int& aCount);
+
     //! @brief Reset All Count & Progress
     //! @param none
     void resetProgress();
@@ -97,6 +113,20 @@ public:
     //! @param none
     virtual ~MainQueueDialog();
 
+signals:
+
+    //! @brief Show Info Signal
+    //! @param aTitle Info Title
+    //! @param aInfoMsg Info Message
+    //! @param aModal Modal Flag
+    void showInfo(const QString& aTitle, const QString& aInfoMsg, const bool& aModal);
+
+    //! @brief Show Confirmation Signal
+    //! @param aProvider Confrimation Dialog Provider
+    //! @param aType Confirmation Type
+    //! @param aLoop Blocking Event Loop
+    void showConfirmation(ConfirmDialogProvider* aProvider, const int& aType, QEventLoop* aLoop);
+
 protected:
 
     //! @brief Abort
@@ -114,6 +144,155 @@ protected:
     //! @brief Clear
     //! @param none
     void clear();
+
+    //! @brief Clear
+    //! @param none
+    void configureButtons();
+
+protected: // From FileDeleteObserver
+
+    //! @brief Confirm Deletion Callback
+    //! @param aFilePath File Path
+    //! @param aReadOnly File Read Only
+    //! @param aNonEmpty Directory Empty
+    //! @return File Delete Observer Delete Confirmation Response
+    virtual int confirmDeletion(const QString& aFilePath, const bool& aReadOnly, const bool& aNonEmpty);
+
+    //! @brief Deletion Error Callback
+    //! @param aFilePath File Path
+    //! @param aErrorCode File Deletion Error Code
+    //! @return Deletion Error Code Response
+    virtual int deleteError(const QString& aFilePath, const int& aErrorCode);
+
+    //! @brief Delete File Started Notification Callback
+    //! @param aFilePath File Path
+    virtual void deleteFileStarted(const QString& aFilePath);
+
+    //! @brief Delete File Finished Notification Callback
+    //! @param aFilePath File Path
+    //! @param aErrorCode File Deletion Error Code
+    virtual void deleteFileFinished(const QString& aFilePath, const int& aErrorCode);
+
+protected: // From FileCopyObserver
+
+    //! @brief Confirm OverWrite Callback
+    //! @param aSource Source File Path
+    //! @param aTarget Target File Path
+    //! @param aReadOnly Target File Is Read Only
+    //! @return File Copy Observer Response
+    virtual int confirmCopyOverWrite(const QString& aSource, const QString& aTarget, const bool& aReadOnly);
+
+    //! @brief Copy File Error Callback
+    //! @param aSource Source File Path
+    //! @param aTarget Target File Path
+    //! @param aErrorCode File Deletion Error Code
+    //! @return File Copy Error Code
+    virtual int copyError(const QString& aSource, const QString& aTarget, const int& aErrorCode);
+
+    //! @brief Copy File Started Callback
+    //! @param aSource Source File Path
+    //! @param aTarget Target File Path
+    virtual void copyStarted(const QString& aSource, const QString& aTarget);
+
+    //! @brief Copy File Progress Callback
+    //! @param aSource Source File Path
+    //! @param aTarget Target File Path
+    //! @param aCurrentSize Copy File Current Size/Progress
+    //! @param aFullSize Copy File Full Size
+    virtual void copyProgress(const QString& aSource, const QString& aTarget, const qint64& aCurrentSize, const qint64& aFullSize);
+
+    //! @brief Copy File Finished Callback
+    //! @param aSource Source File Path
+    //! @param aTarget Target File Path
+    //! @param aErrorCode File Copy Error Code
+    virtual void copyFinished(const QString& aSource, const QString& aTarget, const int& aErrorCode);
+
+protected: // From FileMoveObserver
+
+    //! @brief Confirm OverWrite Callback
+    //! @param aSource Source File Path
+    //! @param aTarget Target File Path
+    //! @param aReadOnly Target File Is Read Only
+    //! @return File Rename/Move Observer Response
+    virtual int confirmMoveOverWrite(const QString& aSource, const QString& aTarget, const bool& aReadOnly);
+
+    //! @brief Confirm Source Deletion Callback
+    //! @param aSource Source File Path
+    //! @param aReadOnly Source File Is Read Only
+    //! @param aNonEmpty Source File Is A Non Empty Directory
+    //! @return File Rename/Move Observer Response
+    virtual int confirmMoveDeletion(const QString& aSource, const bool& aReadOnly, const bool& aNonEmpty);
+
+    //! @brief Rename/Move File Error Callback
+    //! @param aSource Source File Path
+    //! @param aTarget Target File Path
+    //! @param aErrorCode File Deletion Error Code
+    //! @return File Rename/Move Error Code
+    virtual int moveError(const QString& aSource, const QString& aTarget, const int& aErrorCode);
+
+    //! @brief Rename/Move File Started Callback
+    //! @param aSource Source File Path
+    //! @param aTarget Target File Path
+    virtual void moveStarted(const QString& aSource, const QString& aTarget);
+
+    //! @brief Renamve/Move File Progress Callback
+    //! @param aSource Source File Path
+    //! @param aTarget Target File Path
+    //! @param aCurrentSize Move File Current Size/Progress
+    //! @param aFullSize Move File Full Size
+    virtual void moveProgress(const QString& aSource, const QString& aTarget, const qint64& aCurrentSize, const qint64& aFullSize);
+
+    //! @brief Rename/Move File Finished Callback
+    //! @param aSource Source File Path
+    //! @param aTarget Target File Path
+    //! @param aErrorCode File Move Error Code
+    virtual void moveFinished(const QString& aSource, const QString& aTarget, const int& aErrorCode);
+
+protected: // From FileRenameObserver
+
+    //! @brief Confirm OverWrite Callback
+    //! @param aSource Source File Path
+    //! @param aTarget Target File Path
+    //! @param aReadOnly Target File Is Read Only
+    //! @return File Rename Observer Response
+    virtual int confirmRenameOverWrite(const QString& aSource, const QString& aTarget, const bool& aReadOnly);
+
+    //! @brief Confirm Source Deletion Callback
+    //! @param aSource Source File Path
+    //! @param aReadOnly Source File Is Read Only
+    //! @param aNonEmpty Source File Is A Non Empty Directory
+    //! @return File Rename Observer Response
+    virtual int confirmRenameDeletion(const QString& aSource, const bool& aReadOnly, const bool& aNonEmpty);
+
+    //! @brief Rename File Error Callback
+    //! @param aSource Source File Path
+    //! @param aTarget Target File Path
+    //! @param aErrorCode File Deletion Error Code
+    //! @return File Rename Error Code
+    virtual int renameError(const QString& aSource, const QString& aTarget, const int& aErrorCode);
+
+    //! @brief Rename File Started Callback
+    //! @param aSource Source File Path
+    //! @param aTarget Target File Path
+    virtual void renameStarted(const QString& aSource, const QString& aTarget);
+
+    //! @brief Rename File Finished Callback
+    //! @param aSource Source File Path
+    //! @param aTarget Target File Path
+    //! @param aErrorCode File Rename Error Code
+    virtual void renameFinished(const QString& aSource, const QString& aTarget, const int& aErrorCode);
+
+protected: // From ConfirmDialogProvider
+
+    //! @brief Launch Confirmation Dialog - MUST BE CALLED FROM GUI THREAD CONTEXT
+    //! @param aType Confirmation Type
+    //! @return Dialog Result
+    virtual int launchConfirm(const int& aType);
+
+    //! @brief Exit Confirmation Dialog
+    //! @param aEventLoop Event Loop Blocking Confirm Dialog Provider
+    //! @param aResult Dialog Result
+    virtual void exitConfirm(QEventLoop* aEventLoop, const int& aResult);
 
 protected slots:
 
@@ -177,9 +356,24 @@ protected: // Data
 
     //! Paused
     bool                    paused;
+    //! Finished
+    bool                    qFinished;
 
     //! Operation Queue
     FileOperationQueue*     opQueue;
+
+    //! Confirmation Event Loop
+    //QEventLoop              confirmEventLoop;
+
+    //! Info Dialog
+    InfoDialog*             infoDialog;
+    //! Delete Confirmation Dialog
+    ConfirmationDialog*     deleteConfirmDialog;
+    //! OverWrite Confirmation Dialog
+    ConfirmationDialog*     overWriteConfirmDialog;
+    //! Error Dialog
+    ConfirmationDialog*     errorDialog;
+
 };
 
 #endif // MAINQUEUEDIALOG_H

@@ -139,7 +139,7 @@
   <customwidget>
    <class>CustomPlainTextEditor</class>
    <extends>QPlainTextEdit</extends>
-   <header location="global">src/viewerwindow.h</header>
+   <header>../src/viewerwindow.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

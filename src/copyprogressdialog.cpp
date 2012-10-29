@@ -7,6 +7,7 @@
 #include "copyprogressdialog.h"
 #include "ui_copyprogressdialog.h"
 #include "constants.h"
+#include "fileoperations.h"
 
 
 // IMPLEMENTATION
@@ -164,6 +165,16 @@ void CopyProgressDialog::setModal(const bool& aModal)
         // Reset Window Modality
         setWindowModality(Qt::NonModal);
     }
+}
+
+//==============================================================================
+// Operation Entry Added Callback - SIGNALS DON't WORK
+//==============================================================================
+void CopyProgressDialog::operationEntryAdded(const int& aIndex, const int& aCount)
+{
+    qDebug() << "CopyProgressDialog::operationEntryAdded - aIndex: " << aIndex << " - aCount: " << aCount;
+
+
 }
 
 //==============================================================================

@@ -54,6 +54,8 @@ Settings::Settings(QObject* aParent)
     , refCount(1)
     , settings(QSettings::IniFormat, QSettings::UserScope, DEFAULT_ORGANIZATION_NAME, DEFAULT_APPLICATION_NAME)
 {
+    qDebug() << "Creating Settings..." << settings.fileName();
+
     qDebug() << "Creating Settings...done";
 }
 
@@ -362,17 +364,17 @@ void Settings::updateWidgetStyleSheet(QWidget* aWidget, const QString& aFgColorK
         }
 
         // Get Background Color
-        int bgColor = getValue(aBgColorKey).toInt();
+        int bgColor = getValue(aBgColorKey, -1).toInt();
         //qDebug() << "Settings::updateWidgetStyleSheet - bgColor: " << QColor(bgColor).name();
         // Get Font Family
-        QString fontFamily = getValue(SETTINGS_KEY_FONTFAMILY).toString();
+        QString fontFamily = getValue(SETTINGS_KEY_FONTFAMILY, SETTINGS_VALUE_FONTFAMILY).toString();
         //qDebug() << "Settings::updateWidgetStyleSheet - fontFamily: " << fontFamily;
         // Get Font Bold
         bool fontBold = getValue(SETTINGS_KEY_FONTBOLD).toBool();
         // Get Font Italic
         bool fontItalic = getValue(SETTINGS_KEY_FONTITALIC).toBool();
         // Get Font Size
-        int fontSize = getValue(SETTINGS_KEY_FONTSIZE).toInt();
+        int fontSize = getValue(SETTINGS_KEY_FONTSIZE, SETTINGS_VALUE_FONTSIZE).toInt();
 
         // Check Background Color
         if (bgColor != -1) {

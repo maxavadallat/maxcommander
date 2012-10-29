@@ -3,6 +3,15 @@
 
 #include <QApplication>
 #include <QEventLoop>
+#include <QProcess>
+
+#if defined(Q_OS_WIN)
+
+#include <Windows.h>
+#include <Winbase.h>
+#include <Shellapi.h>
+
+#endif // Q_OS_WIN
 
 #include "constants.h"
 #include "mainwindow.h"
@@ -27,6 +36,8 @@
 #include "treewindow.h"
 #include "aboutdialog.h"
 #include "mainqueuedialog.h"
+#include "fileutilsclient.h"
+#include "adminpassdialog.h"
 
 
 // Main Window Singleton
@@ -78,18 +89,22 @@ MainWindow::MainWindow(QWidget* aParent)
     , altKeyPressed(false)
     , controlKeyPressed(false)
     , metaKeyPressed(false)
+    , adminMode(false)
     , cPanelIndex(-1)
     , cPanelName("")
     , settings(NULL)
     , viewerWindow(NULL)
     , createDirDialog(NULL)
-    //, infoDialog(NULL)
-    //, confirmDialog(NULL)
+    , infoDialog(NULL)
+    , confirmDialog(NULL)
+    , errorDialog(NULL)
     , searchDialog(NULL)
     , copyDialog(NULL)
     , helpDialog(NULL)
     , treeWindow(NULL)
     , mainQueueDialog(NULL)
+    , adminPassDialog(NULL)
+    , fileUtilsClient(NULL)
 {
     qDebug() << "Creating MainWindow...";
 
@@ -153,10 +168,42 @@ void MainWindow::showTree()
 
     // Check Tree Window
     if (treeWindow) {
-        // Set Root
+        // Init Dir Path
+        QString dirPath = QString("");
+        // Init File Info
+        QFileInfo fileInfo;
 
-        // Show Tree Window
-        treeWindow->show();
+        // Check Current Panel
+        if (cPanelIndex == 0) {
+            // Get File Info
+            fileInfo = ui->mainPanel1->getFileInfo(ui->mainPanel1->getCurrentIndex());
+        } else {
+            // Get File Info
+            fileInfo = ui->mainPanel2->getFileInfo(ui->mainPanel2->getCurrentIndex());
+        }
+
+        // Check File Info
+        if (fileInfo.isDir()) {
+            // Set Dir Path
+            dirPath = fileInfo.absoluteFilePath();
+        } else {
+            // Check Current Panel
+            if (cPanelIndex == 0) {
+                // Set Dir Path
+                dirPath = ui->mainPanel1->ui->fileList->getCurrentDir();
+            } else {
+                // Set Dir Path
+                dirPath = ui->mainPanel2->ui->fileList->getCurrentDir();
+            }
+        }
+
+        // Check Dir Path
+        if (!dirPath.isEmpty()) {
+            // Set Root
+            treeWindow->setRoot(dirPath);
+            // Show Tree Window
+            treeWindow->show();
+        }
     }
 }
 
@@ -176,25 +223,22 @@ void MainWindow::viewFile()
         viewerWindow = new ViewerWindow();
     }
 
-    // Check Viewer Window
-    if (viewerWindow) {
-        // Init File Path
-        QString filePath = QString("");
-        // Check Current Panel
-        if (cPanelIndex == 0) {
-            // Set File Path
-            filePath = ui->mainPanel1->getFileInfo(ui->mainPanel1->getCurrentIndex()).absoluteFilePath();
-        } else {
-            // Set File Path
-            filePath = ui->mainPanel2->getFileInfo(ui->mainPanel2->getCurrentIndex()).absoluteFilePath();
-        }
+    // Init File Path
+    QString filePath = QString("");
+    // Check Current Panel
+    if (cPanelIndex == 0) {
+        // Get File Path
+        filePath = ui->mainPanel1->getFileInfo(ui->mainPanel1->getCurrentIndex()).absoluteFilePath();
+    } else {
+        // Get File Path
+        filePath = ui->mainPanel2->getFileInfo(ui->mainPanel2->getCurrentIndex()).absoluteFilePath();
+    }
 
-        // Load File
-        if (viewerWindow->loadFile(filePath)) {
+    // Check File Path & Load File
+    if (!filePath.isEmpty() && viewerWindow && viewerWindow->loadFile(filePath)) {
 
-            qDebug() << "MainWindow::viewFile";
+        qDebug() << "MainWindow::viewFile";
 
-        }
     }
 }
 
@@ -203,8 +247,41 @@ void MainWindow::viewFile()
 //==============================================================================
 void MainWindow::editFile()
 {
-    qDebug() << "MainWindow::editFile";
+    // Check UI
+    if (!ui || !ui->mainPanel1 || !ui->mainPanel2) {
+        return;
+    }
 
+    // Check Editor Window
+
+    // Create Editor Window
+
+
+    // Init File Path
+    QString filePath = QString("");
+    // Init File Info
+    QFileInfo fileInfo;
+    // Check Current Panel
+    if (cPanelIndex == 0) {
+        // Get File Info
+        fileInfo = ui->mainPanel1->getFileInfo(ui->mainPanel1->getCurrentIndex());
+    } else {
+        // Get File Info
+        fileInfo = ui->mainPanel2->getFileInfo(ui->mainPanel2->getCurrentIndex());
+    }
+
+    // Check File Info
+    if (!fileInfo.isDir()) {
+        // Set File Path
+        filePath = fileInfo.absoluteFilePath();
+    }
+
+    // Check File Path
+    if (!filePath.isEmpty()) {
+
+        qDebug() << "MainWindow::editFile";
+
+    }
 }
 
 //==============================================================================
@@ -375,8 +452,17 @@ void MainWindow::launchCreateDir()
             // Set Prev Dir Name To Go To After File List Reload
             currentFileList->prevDirName = createDirDialog->getDirText();
 
+            // Get Dir Name Temp
+            QString dirNameTemp = currentDir + createDirDialog->getDirText();
+
+            // Init Options
+            int createDirOptions = 0;
+
+            // Init Abort Signal
+            bool abortSig = false;
+
             // Create Dir
-            if (FileUtils::createDir(currentDir + createDirDialog->getDirText(), this)) {
+            if (FileUtils::createDir(dirNameTemp, createDirOptions, abortSig, this)) {
 
                 // ...
 
@@ -441,8 +527,11 @@ void MainWindow::launchDelete()
     // Init Confirm Text
     QString confirmText = (sfCount > 1) ? QString(DEFAULT_DELETE_DIALOG_TEXT_FILES).arg(sfCount) : QString(DEFAULT_DELETE_DIALOG_TEXT_FILE).arg(currFileName);
 
-    // Create New Confirmation Dialog
-    ConfirmationDialog* confirmDialog = new ConfirmationDialog();
+    // Check Confirmation Dialog
+    if (!confirmDialog) {
+        // Create Confirmation Dialog
+        confirmDialog = new ConfirmationDialog();
+    }
 
     // Check Confirmation Dialog
     if (confirmDialog) {
@@ -496,10 +585,6 @@ void MainWindow::launchDelete()
                 opQueueHandler->processQueue();
             }
         }
-
-        // Delete Confirmation Dialog
-        delete confirmDialog;
-        confirmDialog = NULL;
     }
 }
 
@@ -873,15 +958,14 @@ void MainWindow::showInfo(const QString& aTitle, const QString& aInfoMsg, const 
 {
     // Check Title And Info Message
     if (!aTitle.isEmpty() && !aInfoMsg.isEmpty()) {
-/*
+
         // Check Info Dialog
         if (!infoDialog) {
             // Create Info Dialog
             infoDialog = new InfoDialog();
+            // Connect Signal
+            connect(infoDialog, SIGNAL(infoDialogFinished(QDialog*)), this, SLOT(infoDialogFinished(QDialog*)));
         }
-*/
-        // Create Info Dialog
-        InfoDialog* infoDialog = new InfoDialog();
 
         // Check Info Dialog
         if (infoDialog) {
@@ -893,17 +977,7 @@ void MainWindow::showInfo(const QString& aTitle, const QString& aInfoMsg, const 
             if (aModal) {
                 // Exec
                 infoDialog->exec();
-
-                // Delete Info Dialog
-                delete infoDialog;
-                infoDialog = NULL;
             } else {
-                // Add To Dialogs
-                dialogs << infoDialog;
-
-                // Connect Signal
-                connect(infoDialog, SIGNAL(infoDialogFinished(QDialog*)), this, SLOT(infoDialogFinished(QDialog*)));
-
                 // Center
                 infoDialog->move((width() - infoDialog->width()) / 2, (height() - infoDialog->height()) / 2);
                 // Show
@@ -923,15 +997,12 @@ int MainWindow::showConfirmation(const QString& aTitle,
 {
     // Check Title, Message And Buttons
     if (!aTitle.isEmpty() && !aConfirmMsg.isEmpty()) {
-/*
+
         // Check Confirmation Dialog
         if (!confirmDialog) {
             // Create Confirmation Dialog
             confirmDialog = new ConfirmationDialog();
         }
-*/
-        // Create Confirmation Dialog
-        ConfirmationDialog* confirmDialog = new ConfirmationDialog();
 
         // Check Confirmation Dialog
         if (confirmDialog) {
@@ -948,15 +1019,39 @@ int MainWindow::showConfirmation(const QString& aTitle,
             // Exec Confirm Dialog
             int result = confirmDialog->exec();
 
-            // Delete Confirmation Dialog
-            delete confirmDialog;
-            confirmDialog = NULL;
-
             return result;
         }
     }
 
     return 0;
+}
+
+//==============================================================================
+// Show Confirmation Dialog Slot
+//==============================================================================
+void MainWindow::showConfirmation(ConfirmDialogProvider* aDialogProvider, const int& aType, QEventLoop* aEventLoop)
+{
+    // Check Dialog Provider
+    if (aDialogProvider) {
+        // Launch Confirmation
+        int result = aDialogProvider->launchConfirm(aType);
+        // Exit Confirmation
+        aDialogProvider->exitConfirm(aEventLoop, result);
+    }
+}
+
+//==============================================================================
+// Show Error Dialog Slot
+//==============================================================================
+void MainWindow::showError(ErrorDialogProvider* aDialogProvider, const int& aErrorCode, QEventLoop* aEventLoop)
+{
+    // Check Dialog Provider
+    if (aDialogProvider) {
+        // Launch Error Dialog
+        int result = aDialogProvider->launchError(aErrorCode);
+        // Exit Error
+        aDialogProvider->exitError(aEventLoop, result);
+    }
 }
 
 //==============================================================================
@@ -975,18 +1070,11 @@ void MainWindow::infoDialogFinished(QDialog* aDialog)
         delete aDialog;
         aDialog = NULL;
     }
-}
-/*
-//==============================================================================
-// Show Create Dir Dialog
-//==============================================================================
-bool MainWindow::showCreateDirDialog()
-{
-    // ...
 
-    return false;
+    // Reset Info Dialog
+    infoDialog = NULL;
 }
-*/
+
 //==============================================================================
 // Configure Function Keys
 //==============================================================================
@@ -1242,7 +1330,7 @@ void MainWindow::panelKeyReleased(const QString& aPanelName, const int& aKey, co
         case Qt::Key_F8:    on_f8Button_clicked();  break;
         case Qt::Key_F9:    on_f9Button_clicked();  break;
         case Qt::Key_F10:   on_f10Button_clicked(); break;
-
+/*
         case Qt::Key_H: {
 #ifdef Q_OS_MAC
             if (metaKeyPressed)
@@ -1258,7 +1346,7 @@ void MainWindow::panelKeyReleased(const QString& aPanelName, const int& aKey, co
                 }
             }
         } break;
-
+*/
         case Qt::Key_Delete: {
             // Launch Delete
             launchDelete();
@@ -1589,11 +1677,34 @@ void MainWindow::clearStatusMessage()
 }
 
 //==============================================================================
+// Launch Admin Password Query Dialog
+//==============================================================================
+QString MainWindow::launchAdminPassQuery()
+{
+    // Init Result
+    QString result = QString("");
+
+    // Create Admin Pass Query Dialog
+    AdminPassDialog* adminPassDialog = new AdminPassDialog();
+
+    // Get Admin Password
+    if (adminPassDialog && adminPassDialog->exec()) {
+        // Set Result
+        result = adminPassDialog->getPassword();
+    }
+
+    // Delete Admin Pass Dialog
+    delete adminPassDialog;
+    adminPassDialog = NULL;
+
+    return result;
+}
+
+//==============================================================================
 // On Action New Triggered Slot
 //==============================================================================
 void MainWindow::on_actionNew_triggered()
 {
-
 }
 
 //==============================================================================
@@ -1610,7 +1721,6 @@ void MainWindow::on_actionQuit_triggered()
 //==============================================================================
 void MainWindow::on_actionSelectAll_triggered()
 {
-
 }
 
 //==============================================================================
@@ -1618,7 +1728,6 @@ void MainWindow::on_actionSelectAll_triggered()
 //==============================================================================
 void MainWindow::on_actionReloadPanel_triggered()
 {
-
 }
 
 //==============================================================================
@@ -1626,7 +1735,6 @@ void MainWindow::on_actionReloadPanel_triggered()
 //==============================================================================
 void MainWindow::on_actionSwapPanels_triggered()
 {
-
 }
 
 //==============================================================================
@@ -1634,7 +1742,12 @@ void MainWindow::on_actionSwapPanels_triggered()
 //==============================================================================
 void MainWindow::on_actionShowHidden_triggered()
 {
-
+    // Check UI & Panels
+    if (ui && ui->actionShowHidden && ui->mainPanel1 && ui->mainPanel2) {
+        // Set Show Hidden Files
+        ui->mainPanel1->setShowHiddenFiles(ui->actionShowHidden->isChecked());
+        ui->mainPanel2->setShowHiddenFiles(ui->actionShowHidden->isChecked());
+    }
 }
 
 //==============================================================================
@@ -1917,9 +2030,73 @@ int MainWindow::createDirError(const QString& aDirPath, const int& aErrorCode)
 {
     qDebug() << "MainWindow::createDirError - aDirPath: " << aDirPath << " - aErrorCode: " << aErrorCode;
 
-    // ...
+    // Check Error Dialog
+    if (!errorDialog) {
+        // Create Error Dialog
+        errorDialog = new ConfirmationDialog();
+        // Set Error Dialog Title
+        errorDialog->setTitle(QString(DEFUALT_DIALOG_TITLE_DIRCREATE_ERROR));
+        // Clear Buttons
+        errorDialog->clearButtons();
+    }
 
-    return 0;
+    // Get Dir Name
+    QString dirName = FileUtils::getDirName(aDirPath);
+
+#if defined (Q_OS_WIN)
+
+
+#elif defined (Q_OS_UNIX)
+
+    switch (aErrorCode) {
+        case EEXIST: {
+            // Check Error Dialog
+            if (errorDialog) {
+                // Add Buttons
+                errorDialog->addButton(QString(DEFAULT_BUTTON_TEXT_RETRY), QDialogButtonBox::ActionRole, (int)FOORTRetry, true);
+                errorDialog->addButton(QString(DEFAULT_BUTTON_TEXT_IGNORE), QDialogButtonBox::ActionRole, (int)FOORTIgnore);
+                errorDialog->addButton(QString(DEFAULT_BUTTON_TEXT_ABORT), QDialogButtonBox::ActionRole, (int)FOORTAbort);
+                // Set Error Message
+                errorDialog->setConfirmMsg(QString(DEFAULT_DIALOG_TEXT_DIRCREATE_ERROR_ALREADYEXISTS).arg(dirName));
+            }
+        } break;
+
+        case EACCES: {
+            // Check Error Dialog
+            if (errorDialog) {
+                // Add Buttons
+                errorDialog->addButton(QString(DEFAULT_BUTTON_TEXT_RETRY), QDialogButtonBox::ActionRole, (int)FOORTRetry, true);
+                errorDialog->addButton(QString(DEFAULT_BUTTON_TEXT_ASADMIN), QDialogButtonBox::ActionRole, (int)FOORTAsRoot);
+                errorDialog->addButton(QString(DEFAULT_BUTTON_TEXT_IGNORE), QDialogButtonBox::ActionRole, (int)FOORTIgnore);
+                errorDialog->addButton(QString(DEFAULT_BUTTON_TEXT_ABORT), QDialogButtonBox::ActionRole, (int)FOORTAbort);
+                // Set Error Message
+                errorDialog->setConfirmMsg(QString(DEFAULT_DIALOG_TEXT_DIRCREATE_ERROR_ACCESSDENIED).arg(dirName));
+            }
+        } break;
+
+        // ...
+
+        default: {
+            // Check Error Dialog
+            if (errorDialog) {
+                // Set Error Message
+                errorDialog->setConfirmMsg(QString(DEFAULT_DIALOG_TEXT_DEFAULT_ERROR).arg(aErrorCode));
+            }
+        } break;
+    }
+
+#endif // Q_OS_MAC || Q_OS_UNIX
+
+    // Init result
+    int result = (int)FOORTIgnore;
+
+    // Check Error Dialog
+    if (errorDialog) {
+        // Execute Error Dialog
+        result = errorDialog->exec();
+    }
+
+    return result;
 }
 
 //==============================================================================
@@ -1935,11 +2112,77 @@ void MainWindow::createDirStarted(const QString& aDirPath)
 //==============================================================================
 // Creaet Dir Finished
 //==============================================================================
-void MainWindow::createDirFinished(const QString& aDirPath)
+void MainWindow::createDirFinished(const QString& aDirPath, const int& aErrorCode)
 {
-    qDebug() << "MainWindow::createDirFinished - aDirPath: " << aDirPath;
+    qDebug() << "MainWindow::createDirFinished - aDirPath: " << aDirPath << " - aErrorCode: " << aErrorCode;
 
-    // ...
+    // Check Error Code & UI
+    if (aErrorCode == 0 &&
+        ui &&
+        ui->mainPanel1 &&
+        ui->mainPanel1->ui &&
+        ui->mainPanel1->ui->fileList &&
+        ui->mainPanel2 &&
+        ui->mainPanel2->ui &&
+        ui->mainPanel2->ui->fileList) {
+
+        // Init Current File List
+        CustomFilelist* currentFileList = NULL;
+        // Init Current Dir
+        QString currentDirName = FileUtils::getDirName(aDirPath);
+
+        // Get Current Panel Index
+        if (cPanelIndex == 0) {
+            // Check Panel UI
+            if (ui->mainPanel1->ui && ui->mainPanel1->ui->fileList) {
+                // Get Current File List
+                currentFileList = ui->mainPanel1->ui->fileList;
+            }
+        } else if (cPanelIndex == 1) {
+            // Check Panel UI
+            if (ui->mainPanel2->ui && ui->mainPanel2->ui->fileList) {
+                // Get Current File List
+                currentFileList = ui->mainPanel2->ui->fileList;
+            }
+        }
+
+        // Check Current File List
+        if (currentFileList) {
+            // Set Previous Dir Name Before Reload
+            currentFileList->prevDirName = currentDirName;
+        }
+    }
+}
+
+//==============================================================================
+// Get Admin Password Query Provider
+//==============================================================================
+AdminPassQueryProvider* MainWindow::passQueryProvider()
+{
+    return this;
+}
+
+//==============================================================================
+// Get File Utils Client
+//==============================================================================
+FileUtilsClient* MainWindow::getUtilsClient(const QString& aAdminPass)
+{
+    // Check Admin Pass & File utils Client
+    if (!aAdminPass.isEmpty() && !fileUtilsClient) {
+        qDebug() << "MainWindow::getUtilsClient - Creating File utils Client";
+
+        // Create File Utils Client
+        fileUtilsClient = new FileUtilsClient();
+    }
+
+    // Connect To Server
+    if (fileUtilsClient && !fileUtilsClient->connectToServer(aAdminPass)) {
+        // Delete File Utils Client
+        delete fileUtilsClient;
+        fileUtilsClient = NULL;
+    }
+
+    return fileUtilsClient;
 }
 
 //==============================================================================
@@ -1962,13 +2205,6 @@ MainWindow::~MainWindow()
         settings->release();
         settings = NULL;
     }
-/*
-    // Check Confirmation Dialog
-    if (confirmDialog) {
-        // Delete Confirmaion Dialog
-        delete confirmDialog;
-        confirmDialog = NULL;
-    }
 
     // Check Info Dialog
     if (infoDialog) {
@@ -1976,7 +2212,21 @@ MainWindow::~MainWindow()
         delete infoDialog;
         infoDialog = NULL;
     }
-*/
+
+    // Check Confirmation Dialog
+    if (confirmDialog) {
+        // Delete Confirmaion Dialog
+        delete confirmDialog;
+        confirmDialog = NULL;
+    }
+
+    // Check Erorr Dialog
+    if (errorDialog) {
+        // Delete Error Dialog
+        delete errorDialog;
+        errorDialog = NULL;
+    }
+
     // Check Create Dir Dialog
     if (createDirDialog) {
         // Delete Create Dir Dialog
@@ -2019,8 +2269,22 @@ MainWindow::~MainWindow()
         mainQueueDialog = NULL;
     }
 
+    // Check Admin Pass Dialog
+    if (adminPassDialog) {
+        // Delete Dialog
+        delete adminPassDialog;
+        adminPassDialog = NULL;
+    }
+
     // Clear Dialogs
     clearDialogs();
+
+    // Check Util Client
+    if (fileUtilsClient) {
+        // Delete File Util Client
+        delete fileUtilsClient;
+        fileUtilsClient = NULL;
+    }
 
     // Delete UI
     delete ui;

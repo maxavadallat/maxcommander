@@ -8,13 +8,17 @@
 // Application Name
 #define DEFAULT_APPLICATION_NAME                            "Max Commander"
 // Server Name
-#define DEFAULT_SERVER_NAME                                 "Max Commander SERVER"
+#define DEFAULT_SERVER_NAME                                 "max.commander.SERVER"
+// Default Server Path
+#define DEFAULT_SERVER_PIPE_PATH                            "/tmp"
+// Default Full Server Path
+#define DEFAULT_FULL_SERVER_PATH                            DEFAULT_SERVER_PIPE_PATH"/"DEFAULT_SERVER_NAME
 
 // Exec Param Server Mode
 #define PARAM_SERVER_MODE                                   "--server"
 // Exec Param Operation
 #define PARAM_OPERATION                                     "--operation="
-// Exec Param Operation No op
+// Exec Param Operation Noop
 #define PARAM_OPERATION_NOOP                                "noop"
 // Exec Param Operation Read Dir
 #define PARAM_OPERATION_READDIR                             "readdir"
@@ -34,6 +38,38 @@
 #define PARAM_OPERATION_DELETE                              "delete"
 // Exec Param Operation Search
 #define PARAM_OPERATION_SEARCH                              "search"
+// Exec Param Operation Abort
+#define PARAM_OPERATION_ABORT                               "abort"
+// Exec Param Operation Close
+#define PARAM_OPERATION_CLOSE                               "close"
+// Exec Param Operation Quit
+#define PARAM_OPERATION_QUIT                                "quit"
+// Exec Param Operation Root
+#define PARAM_OPERATION_ROOT                                "root"
+
+
+
+
+// Remote Server Response Param Noop
+#define PARAM_RESPONSE_NOOP                                 "noop"
+// Remote Server Response Param Info
+#define PARAM_RESPONSE_INFO                                 "info"
+// Remote Server Response Param Confirmation
+#define PARAM_RESPONSE_CONFIRM                              "confirm"
+// Remote Server Response Param Entry Found - Read Dir, Search
+#define PARAM_RESPONSE_ENTRYFOUND                           "entry"
+// Remote Server Response Param Progress - Copy, Move, Rename, Delete
+#define PARAM_RESPONSE_PROGRESS                             "progress"
+// Remote Server Response Param Error
+#define PARAM_RESPONSE_ERROR                                "error"
+// Remote Server Response Param Close
+#define PARAM_RESPONSE_CLOSE                                "close"
+// Remote Server Response Param Quit
+#define PARAM_RESPONSE_QUIT                                 "quit"
+
+
+
+
 
 // File Operations Token Separator
 #define FILE_OPERATIONS_TOKEN_SEPARATOR                     ';'
@@ -45,7 +81,7 @@
 // File Operation Queue Text Template - DELETE
 #define FILE_OPERATION_QUEUE_TEXT_TEMPLATE_DELETE           "%1:%2"
 
-// Operation ID's
+// Operation/Command ID's
 #define OPERATION_ID_NOOP                                   0x0000
 
 #define OPERATION_ID_READDIR                                0x0001
@@ -57,11 +93,31 @@
 #define OPERATION_ID_RENAME                                 0x0007
 #define OPERATION_ID_DELETE                                 0x0008
 #define OPERATION_ID_SEARCH                                 0x0009
+#define OPERATION_ID_ABORT                                  0x000F
+#define OPERATION_ID_CLOSE                                  0x00FF
+#define OPERATION_ID_QUIT                                   0x01FF
+#define OPERATION_ID_ROOT                                   0xFFFF
+
+
+// Reposnse ID's
+#define RESPONSE_ID_NOOP                                    0xF000
+
+#define RESPONSE_ID_INFO                                    0xF001
+#define RESPONSE_ID_CONFIRM                                 0xF002
+#define RESPONSE_ID_ENTRYFOUND                              0xF003
+#define RESPONSE_ID_PROGRESS                                0xF004
+#define RESPONSE_ID_ERROR                                   0xF00F
+#define RESPONSE_ID_CLOSE                                   0xF0FF
+#define RESPONSE_ID_QUIT                                    0xF1FF
+
 
 // Icon Sizes
 #define DEFAULT_ICON_SIZE_SMALL                             16
 #define DEFAULT_ICON_SIZE_MEDIUM                            32
 #define DEFAULT_ICON_SIZE_LARGE                             64
+
+// Default Font Size
+#define DEFAULT_FONT_SIZE                                   12
 
 // Default Max Drives
 #define DEFAULT_MAX_DRIVES                                  26  // ABCDEFGHIJKLMNOPQRSTUVWXYZ
@@ -95,6 +151,9 @@
 
 // Default File List Box Icon Update Timer Timeout
 #define DEFAULT_FILE_LIST_BOX_ICON_UPDATE_TIMEOUT           10
+
+// Default List Box Icon Get Retry Count Max
+#define DEFAULT_LISTBOX_ICOM_GET_RETRY_COUNT_MAX            32
 
 // Default Status Message Timeout
 #define DEFAULT_STATUS_MESSAGE_TIMEOUT                      5000
@@ -383,7 +442,7 @@
 
 // Default Font Settings Values
 #define SETTINGS_VALUE_FONTFAMILY                           "Tahoma"
-#define SETTINGS_VALUE_FONTSIZE                             12
+#define SETTINGS_VALUE_FONTSIZE                             DEFAULT_FONT_SIZE
 #define SETTINGS_VALUE_FONTBOLD                             false
 #define SETTINGS_VALUE_FONTITALIC                           false
 
@@ -536,18 +595,72 @@
 // Default Delete Progress Dialog Details Hidden Height
 #define DEFAULT_DELETE_PROGRESS_DIALOG_DETAILSHIDDEN_HEIGHT (260 - 128 - 20 - 1)
 
+// Default Button Minimal Width
+#define DEFAULT_BUTTON_MINIMAL_WIDTH                        90
+// Default Button Gap
+#define DEFAULT_BUTTON_GAP                                  8
 
 // Button Texts
-#define DEFAULT_BUTTON_TEXT_PAUSE                           "Pause"
+#define DEFAULT_BUTTON_TEXT_PAUSE                           "&Pause"
 #define DEFAULT_BUTTON_TEXT_RESUME                          "Resume"
-#define DEFAULT_BUTTON_TEXT_ABORT                           "Abort"
-#define DEFAULT_BUTTON_TEXT_CLEAR                           "Clear"
-#define DEFAULT_BUTTON_TEXT_QUEUE                           "Queue"
-#define DEFAULT_BUTTON_TEXT_CANCEL                          "Cancel"
+#define DEFAULT_BUTTON_TEXT_ABORT                           "&Abort"
+#define DEFAULT_BUTTON_TEXT_CLEAR                           "&Clear"
+#define DEFAULT_BUTTON_TEXT_QUEUE                           "&Queue"
+#define DEFAULT_BUTTON_TEXT_CANCEL                          "&Cancel"
+#define DEFAULT_BUTTON_TEXT_YES                             "&Yes"
+#define DEFAULT_BUTTON_TEXT_YESTOALL                        "Yes to &All"
+#define DEFAULT_BUTTON_TEXT_NO                              "&No"
+#define DEFAULT_BUTTON_TEXT_NOTOALL                         "No to All"
+#define DEFAULT_BUTTON_TEXT_SKIP                            "&Skip"
+#define DEFAULT_BUTTON_TEXT_SKIPTOALL                       "Skip to All"
+#define DEFAULT_BUTTON_TEXT_IGNORE                          "&Ignore"
+#define DEFAULT_BUTTON_TEXT_IGNOREALL                       "Ignore A&ll"
+#define DEFAULT_BUTTON_TEXT_RETRY                           "&Retry"
+#define DEFAULT_BUTTON_TEXT_ASADMIN                         "As Ad&min"
+
 
 
 #define DEFAULT_COPY_PROGRESS_DIALOG_TITLE                  "Copy progress..."
 #define DEFAULT_MOVE_PROGRESS_DIALOG_TITLE                  "Move progress..."
+
+
+#define DEFAULT_DIALOG_TITLE_DELETE_CONFIRM                 "Confirm Deletion..."
+#define DEFAULT_DIALOG_TEXT_DELETE_CONFIRM                  "Are you sure to Delete: %1?"
+#define DEFAULT_DIALOG_TEXT_DELETE_CONFIRM_READONLY         "%1 is Read Only! Are you sure to Delete?"
+#define DEFAULT_DIALOG_TEXT_DELETE_CONFIRM_NONEMPTY         "%1 Dir is Not Empty! Are you sure to Delete?"
+
+#define DEFAULT_DIALOG_TITLE_OVERWRITE_CONFIRM              "Confirm Overwrite..."
+#define DEFAULT_DIALOG_TEXT_OVERWRITE_CONFIRM               "Are you sure to Overwrite: %1?"
+#define DEFAULT_DIALOG_TEXT_OVERWRITE_CONFIRM_READONLY      "%1 is Read Only! Are you sure to Overwrite?"
+
+
+#define DEFUALT_DIALOG_TITLE_DELETE_ERROR                   "Delete Error..."
+#define DEFUALT_DIALOG_TITLE_READ_ERROR                     "Read Error..."
+#define DEFUALT_DIALOG_TITLE_WRITE_ERROR                    "Write Error..."
+#define DEFUALT_DIALOG_TITLE_UNKNOWN_ERROR                  "Uknown Error..."
+#define DEFUALT_DIALOG_TITLE_DIRCREATE_ERROR                "Directory Creation Error ..."
+
+
+#define DEFAULT_DIALOG_TEXT_DEFAULT_ERROR                   "Operation error! code: %1"
+
+
+#define DEFAULT_DIALOG_TEXT_DIRCREATE_ERROR_ALREADYEXISTS   "Directory: %1 already exist"
+#define DEFAULT_DIALOG_TEXT_DIRCREATE_ERROR_ACCESSDENIED    "You have insufficient access rights to create: %1"
+
+
+// Default Socket Timeout
+#define DEFAULT_SOCKET_TIMEOUT                              30000
+
+// Default Worker Process Exec Command
+#define DEFAULT_WORKER_PROCESS_EXEC_COMMAND                 "echo \'%1\' | sudo -S %2 --server"
+// Default Worker Process Exec Command Shell Script
+#define DEFAULT_WORKER_PROCESS_SHELL_SCRIPT_PATH            "/tmp/pass.sh"
+// Default Worker Process Exec Command Shell Script Maker
+#define DEFAULT_WORKER_PROCESS_SHELL_SCRIPT_MAKER           "echo \"%1\" > %2"
+// Default Worker Process Exec Command Shell Script Exec Command
+#define DEFAULT_WORKER_PROCESS_SHELL_SCRIPT_EXEC_COMMAND    "/bin/sh %1"
+// Default Worker Process Exec Command Shell Script Remove Command
+#define DEFAULT_WORKER_PROCESS_SHELL_SCRIPT_REMOVE_COMMAND  "rm %1"
 
 
 #endif // CONSTANTS_H

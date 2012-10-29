@@ -2,6 +2,7 @@
 // INCLUDES
 
 #include <QtGui/QApplication>
+#include <QProcess>
 
 #include "constants.h"
 #include "mainwindow.h"
@@ -14,6 +15,8 @@
 #include "settingswindow.h"
 #include "createdirdialog.h"
 #include "fileutils.h"
+#include "fileutilsserver.h"
+#include "fileutilsclient.h"
 
 #include "copyprogressdialog.h"
 #include "deleteprogressdialog.h"
@@ -29,7 +32,7 @@ void messageHandler(QtMsgType aType, const char* aMsg)
 {
     Q_UNUSED(aType);
     // Init Output File
-    QFile outFile(QDir::homePath() + QString("/log.txt"));
+    QFile outFile(QDir::homePath() + QString("/mclog.txt"));
     // Open Output File
     if (outFile.open(QIODevice::Append | QIODevice::Text)) {
         // Init Text Stream
@@ -72,7 +75,7 @@ int main(int argc, char* argv[])
     // Init Server Mode
     bool serverMode = false;
     // Init Operation
-    int operation = -1;
+    //int operation = -1;
 
     // Go Thru Parameters
     for (int n=0; n<plCount; n++) {
@@ -91,7 +94,7 @@ int main(int argc, char* argv[])
             QString oParam = paramList[n].right(paramList[n].length() - QString(PARAM_OPERATION).length());
 
             qDebug() << "main - OPERATION: " << oParam;
-
+/*
             if (oParam == QString(PARAM_OPERATION_READDIR)) {
                 // Set Operation
                 operation = OPERATION_ID_READDIR;
@@ -101,50 +104,150 @@ int main(int argc, char* argv[])
             } else if (oParam == QString(PARAM_OPERATION_TREE)) {
                 // Set Operation
                 operation = OPERATION_ID_TREE;
+            } else if (oParam == QString(PARAM_OPERATION_MAKEDIR)) {
+                // Set Operation
+                operation = OPERATION_ID_MAKEDIR;
             } else if (oParam == QString(PARAM_OPERATION_COPY)) {
                 // Set Operation
                 operation = OPERATION_ID_COPY;
             } else if (oParam == QString(PARAM_OPERATION_MOVE)) {
                 // Set Operation
                 operation = OPERATION_ID_MOVE;
+            } else if (oParam == QString(PARAM_OPERATION_RENAME)) {
+                // Set Operation
+                operation = OPERATION_ID_RENAME;
             } else if (oParam == QString(PARAM_OPERATION_DELETE)) {
                 // Set Operation
                 operation = OPERATION_ID_DELETE;
             } else {
                 qDebug() << "main - UNSUPPORTED OPERATION";
             }
+*/
         }
     }
 
     // Check Arguments Count
-    if (argc > 1 && serverMode && operation >= 0) {
+    if (argc > 1 && serverMode /*&& operation >= 0*/) {
         // Set Application Name
         app.setApplicationName(DEFAULT_SERVER_NAME);
         // Set Applicaiton Version
         app.setApplicationVersion(APP_VERSION);
 
+#if defined(Q_OS_MAC)
+/*      Temporary Disabled
+        // Get Process Number
+        ProcessSerialNumber psn = { 0, kCurrentProcess };
+        // Transform Process Type
+        OSStatus status = TransformProcessType(&psn, kProcessTransformToUIElementApplication);
+
+        qDebug() << "Changing Process psn: " << psn.highLongOfPSN << " " << psn.lowLongOfPSN << "  - status: " << status;
+*/
+#endif // Q_OS_MAC
+
         // ...
 
         qDebug() << "Starting MaxCommander SERVER...";
 
-        // ...
+        // Init Local File Util Server
+        FileUtilsServer localServer;
 
-        return 0;
+        // Start To Listen
+        if (localServer.startListen(DEFAULT_SERVER_NAME)) {
+
+            qDebug() << "MaxCommander SERVER: " << DEFAULT_SERVER_NAME << "listening, starting main loop...";
+
+            // Exec Application In Server Mode
+            int result = app.exec();
+
+            qDebug() << "MaxCommander SERVER: " << DEFAULT_SERVER_NAME << "exited from main loop...";
+
+            // Close Local Server
+            localServer.close();
+
+            return result;
+        } else {
+            qDebug() << "MaxCommander SERVER is NOT Listening - errorString: " << localServer.errorString();
+
+            //qDebug() << localServer.fullServerName();
+        }
+
+        return -1;
+
     } else {
-
-
         //qDebug() << "\nDebugging MaxCommander...\n";
 
-        //qDebug() << "File Name Parse Test: " << FileUtils::parseTargetFileName(QString("whatever.txt"), QString("../*.bak"));
-        //qDebug() << "File Name Parse Test: " << FileUtils::parseTargetFileName(QString("whatever.txt"), QString("../cucc.*"));
-        //qDebug() << "File Name Parse Test: " << FileUtils::parseTargetFileName(QString("whatever.tar.gz"), QString("../cucc.*"));
-        //qDebug() << "File Name Parse Test: " << FileUtils::parseTargetFileName(QString("whatever.tar.gz"), QString("../cucc.tema.*"));
-        //qDebug() << "File Name Parse Test: " << FileUtils::parseTargetFileName(QString("sss333sss"), QString("sss*sss"));
-        //qDebug() << "File Name Parse Test: " << FileUtils::parseTargetFileName(QString("Temp"), QString("/Users/Max/Temp2"));
+/*
+        // Init Command Line
+        QString commandLine = QString(DEFAULT_WORKER_PROCESS_EXEC_COMMAND).arg("Duzzasztott").arg(QApplication::applicationFilePath());
+
+        QProcess p;
+
+        QString passInput = QString("%1/pass.sh").arg(QDir::tempPath());
+
+        qDebug() << "passInput: " << passInput;
+
+        system((QString("echo \"%1\" > %2").arg(commandLine).arg(passInput)).toAscii().data());
+
+        //p.setStandardInputFile(passInput);
+
+        bool res = p.startDetached(QString("/bin/sh %1").arg(passInput));
+
+        //int res = system(commandLine.toAscii().data());
+
+        qDebug() << commandLine << " - started: " << res;
+*/
+/*
+        FileUtilClient fuClient;
+
+        fuClient.connectToServer();
+
+        if (fuClient.waitForConnected()) {
+
+            fuClient.sendMessage(QString("Testing Testing Testing... Hello QLocalSocket World! = )"));
+
+            //sleep(2);
+
+            fuClient.sendMessage(QString("Testing Testing Testing... Next Message = )"));
+
+            //sleep(2);
+
+            fuClient.sendMessage(QString("Testing Testing Testing... Third Message = )"));
+
+            //sleep(2);
+
+            fuClient.sendMessage(QString("Testing Testing Testing... One More Message = )"));
+        }
+
+        //sleep(10);
+
+        //fuClient.disconnectFromServer();
+
+        //fuClient.waitForDisconnected();
+
+        QEventLoop el;
+
+        el.exec();
+
+        fuClient.disconnectFromServer();
+
+        //fuClient.waitForDisconnected();
+
+        return 0;
+*/
+/*
+        QFileInfo fileInfo(QString("/.DocumentRevisions-V100/PerUID"));
+
+        qDebug() << "/.DocumentRevisions-V100/PerUID - isReadable: " <<  fileInfo.isReadable();
+        qDebug() << "/.DocumentRevisions-V100/PerUID - size: " <<  fileInfo.size();
+        qDebug() << "/.DocumentRevisions-V100/PerUID - permissions: " <<  fileInfo.permissions();
+        qDebug() << "/.DocumentRevisions-V100/PerUID - isDir: " <<  fileInfo.isDir();
+*/
 
         //qDebug() << "\nDebugging MaxCommander...\n";
 
         //return 0;
+
+        //qDebug() << "System Locale: " << QLocale::system().name();
 
         // Set Application Name
         app.setApplicationName(DEFAULT_APPLICATION_NAME);
@@ -153,101 +256,12 @@ int main(int argc, char* argv[])
         // Set Window Icon
         app.setWindowIcon(QIcon(":mainIcon"));
 
-        qDebug() << "System Locale: " << QLocale::system().name();
-
 
         // Init Main Window
         MainWindow* mw = MainWindow::getInstance();
         // Show Main Window
         mw->show();
 
-/*
-        HeaderItem hi;
-
-        hi.show();
-*/
-
-/*
-        CustomHeader ch;
-
-        ch.show();
-*/
-
-/*
-        QImage fileIcon = FileUtils::getFileIconImage(QFileInfo(QString("/Users/Max")), 32, 32);
-
-        qDebug() << "Icon Dev Type: " << fileIcon.devType();
-
-        if (fileIcon.isNull()) {
-            qDebug() << "/Users/Max - NULL ICON";
-        }
-*/
-
-/*
-        CustomPanel cp;
-
-        cp.show();
-
-        cp.setPanelName(QString(DEFAULT_FILELIST_PANEL_NAME1));
-
-        cp.loadSettings();
-*/
-
-/*
-        DirSizeScanner dsScanner;
-
-        dsScanner.scanDirSize(QString("/Users/Max/Temp"));
-*/
-/*
-        SettingsWindow sw;
-
-        sw.show();
-*/
-
-/*
-        CustomFilelist cfl;
-
-        cfl.show();
-*/
-
-/*
-        QFileInfo fileInfo(QString("/Users/Max/Dev/MaxCommander/MaxCommander.app"));
-        //QFileInfo fileInfo(QString("/Users/Max/Dev/MaxCommander"));
-
-        qDebug() << "File Info - File Name: " << fileInfo.absoluteFilePath();
-        qDebug() << "File Info - Bundle: " << fileInfo.isBundle();
-        qDebug() << "File Info - Dir: " << fileInfo.isDir();
-        qDebug() << "File Info - Executeable: " << fileInfo.isExecutable();
-
-        return 0;
-*/
-/*
-        CreateDirDialog createDirDialog;
-
-        int result = createDirDialog.exec();
-
-        qDebug() << "Create Dir Dialog - result: " << result;
-*/
-
-        //FileUtils::createDir(QString("/Users/Max/Testing/Creating/Directory////"));
-
-        //FileUtils::deleteFile(QString("/Users/Max/Testing/Creating/Directory////"));
-
-/*
-        CopyProgressDialog copyProgressDialog;
-
-        copyProgressDialog.show();
-
-
-        DeleteProgressDialog deleteProgressDialog;
-
-        deleteProgressDialog.show();
-
-
-        MainQueueDialog mainQueueDialog;
-
-        mainQueueDialog.show();
-*/
 
         qDebug() << "Starting MaxCommander APPLICATION...";
 

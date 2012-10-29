@@ -5,9 +5,13 @@
 #include <QFont>
 #include <QDebug>
 
+#include "mainwindow.h"
+#include "confirmationdialog.h"
+#include "infodialog.h"
 #include "mainqueuedialog.h"
 #include "ui_mainqueuedialog.h"
 #include "constants.h"
+#include "fileoperations.h"
 
 
 // IMPLEMENTATION
@@ -22,7 +26,14 @@ MainQueueDialog::MainQueueDialog(QWidget* parent)
     , abortButton(NULL)
     , clearButton(NULL)
     , paused(false)
+    , qFinished(false)
     , opQueue(NULL)
+
+    , infoDialog(NULL)
+    , deleteConfirmDialog(NULL)
+    , overWriteConfirmDialog(NULL)
+    , errorDialog(NULL)
+
 {
     qDebug() << "Creating MainQueueDialog...";
 
@@ -45,6 +56,58 @@ MainQueueDialog::MainQueueDialog(QWidget* parent)
     // Reset
     resetProgress();
 
+    // Create Info Dialog - MUST BE DONE IN UI THREAD CONTEXT!
+    infoDialog = new InfoDialog();
+
+
+    // Create Delete Confirmation Dialog - MUST BE DONE IN UI THREAD CONTEXT!
+    deleteConfirmDialog = new ConfirmationDialog();
+    // Set Clear Custom Buttons On Exit
+    deleteConfirmDialog->setClearCustomButtonsOnConfirm(false);
+    // Set Title
+    deleteConfirmDialog->setTitle(QString(DEFAULT_DIALOG_TITLE_DELETE_CONFIRM));
+    // Clear Default Buttons
+    deleteConfirmDialog->clearButtons();
+    // Add Dialog Buttons - MUST BE DONE IN UI THREAD CONTEXT!
+    deleteConfirmDialog->addButton(QString(DEFAULT_BUTTON_TEXT_YES), QDialogButtonBox::ActionRole, (int)FOORTYes);
+    deleteConfirmDialog->addButton(QString(DEFAULT_BUTTON_TEXT_YESTOALL), QDialogButtonBox::ActionRole, (int)FOORTYesToAll);
+    deleteConfirmDialog->addButton(QString(DEFAULT_BUTTON_TEXT_NO), QDialogButtonBox::ActionRole, (int)FOORTNo, true);
+    deleteConfirmDialog->addButton(QString(DEFAULT_BUTTON_TEXT_NOTOALL), QDialogButtonBox::ActionRole, (int)FOORTNoToAll);
+    deleteConfirmDialog->addButton(QString(DEFAULT_BUTTON_TEXT_ABORT), QDialogButtonBox::ActionRole, (int)FOORTAbort);
+
+
+    // Create Overwrite Confirm Dialog
+    overWriteConfirmDialog = new ConfirmationDialog();
+    // Set Clear Custom Buttons On Exit
+    overWriteConfirmDialog->setClearCustomButtonsOnConfirm(false);
+    // Set Title
+    overWriteConfirmDialog->setTitle(QString(DEFAULT_DIALOG_TITLE_OVERWRITE_CONFIRM));
+    // Clear Default Buttons
+    overWriteConfirmDialog->clearButtons();
+    // Add Dialog Buttons - MUST BE DONE IN UI THREAD CONTEXT!
+    overWriteConfirmDialog->addButton(QString(DEFAULT_BUTTON_TEXT_YES), QDialogButtonBox::ActionRole, (int)FOORTYes);
+    overWriteConfirmDialog->addButton(QString(DEFAULT_BUTTON_TEXT_YESTOALL), QDialogButtonBox::ActionRole, (int)FOORTYesToAll);
+    overWriteConfirmDialog->addButton(QString(DEFAULT_BUTTON_TEXT_NO), QDialogButtonBox::ActionRole, (int)FOORTNo, true);
+    overWriteConfirmDialog->addButton(QString(DEFAULT_BUTTON_TEXT_NOTOALL), QDialogButtonBox::ActionRole, (int)FOORTNoToAll);
+    overWriteConfirmDialog->addButton(QString(DEFAULT_BUTTON_TEXT_ABORT), QDialogButtonBox::ActionRole, (int)FOORTAbort);
+
+
+    // Create Error Dialog - MUST BE DONE IN UI THREAD CONTEXT!
+    errorDialog = new ConfirmationDialog();
+    // Set Clear Custom Buttons On Exit
+    errorDialog->setClearCustomButtonsOnConfirm(false);
+    // Set Title
+    errorDialog->setTitle(QString(DEFUALT_DIALOG_TITLE_UNKNOWN_ERROR));
+    // Clear Default Buttons
+    errorDialog->clearButtons();
+    // Add Dialog Buttons - MUST BE DONE IN UI THREAD CONTEXT!
+    errorDialog->addButton(QString(DEFAULT_BUTTON_TEXT_RETRY), QDialogButtonBox::ActionRole, (int)FOORTRetry, true);
+    errorDialog->addButton(QString(DEFAULT_BUTTON_TEXT_ASADMIN), QDialogButtonBox::ActionRole, (int)FOORTAsRoot);
+    errorDialog->addButton(QString(DEFAULT_BUTTON_TEXT_IGNORE), QDialogButtonBox::ActionRole, (int)FOORTIgnore);
+    errorDialog->addButton(QString(DEFAULT_BUTTON_TEXT_IGNOREALL), QDialogButtonBox::ActionRole, (int)FOORTIgnoreAll);
+    errorDialog->addButton(QString(DEFAULT_BUTTON_TEXT_ABORT), QDialogButtonBox::ActionRole, (int)FOORTAbort);
+
+
     qDebug() << "Creating MainQueueDialog...done";
 }
 
@@ -60,10 +123,9 @@ void MainQueueDialog::addOperationEntry(FileOperationEntry* aEntry)
         // Check Operation Queue
         if (!opQueue) {
             // Create Operation Queue
-            opQueue = new FileOperationQueue(this);
+            opQueue = new FileOperationQueue(this, NULL, this, this, this, this);
 
             // Connect Signals
-
             connect(opQueue, SIGNAL(opStarted()), this, SLOT(opQueueStarted()));
             connect(opQueue, SIGNAL(opStopped()), this, SLOT(opQueueStopped()));
             connect(opQueue, SIGNAL(opFinished()), this, SLOT(opQueueFinished()));
@@ -168,6 +230,16 @@ void MainQueueDialog::setModal(const bool& aModal)
         // Reset Window Modality
         setWindowModality(Qt::NonModal);
     }
+}
+
+//==============================================================================
+// Operation Entry Added Callback - SIGNALS DON't WORK
+//==============================================================================
+void MainQueueDialog::operationEntryAdded(const int& aIndex, const int& aCount)
+{
+    qDebug() << "MainQueueDialog::operationEntryAdded - aIndex: " << aIndex << " - aCount: " << aCount;
+
+
 }
 
 //==============================================================================
@@ -282,6 +354,23 @@ void MainQueueDialog::abort()
         // Abort
         opQueue->stop();
     }
+/*
+    // Check Abort Button
+    if (abortButton) {
+        // Set Text
+        //abortButton->setText(QString());
+        // Set Abort Button Enabled State
+        abortButton->setEnabled(false);
+    }
+
+    // Check Pause Button
+    if (pauseButton) {
+        // Set Pause Button Enabled State
+        pauseButton->setEnabled(false);
+    }
+*/
+    // Configure Buttons
+    //configureButtons();
 
     // ...
 }
@@ -335,13 +424,6 @@ void MainQueueDialog::clear()
 {
     qDebug() << "MainQueueDialog::clear";
 
-    // Disable Clear Button
-    clearButton->setEnabled(false);
-    // Disable Pause Button
-    pauseButton->setEnabled(false);
-    // Disable Abort Button
-    abortButton->setEnabled(false);
-
     // ...
 
     // Check UI
@@ -359,6 +441,410 @@ void MainQueueDialog::clear()
     }
 
     // ...
+
+    // Check Operation Queue
+    if (opQueue) {
+        // Stop Queue
+        opQueue->stop();
+        // Clear
+        opQueue->clear();
+    }
+
+    // Configure Buttons
+    configureButtons();
+
+    // ...
+}
+
+//==============================================================================
+// Clear
+//==============================================================================
+void MainQueueDialog::configureButtons()
+{
+    // Check UI
+    if (ui && ui->mainQueueList) {
+        qDebug() << "MainQueueDialog::clear";
+
+        // Init Pause Enabled
+        bool pauseEnabled = (ui->mainQueueList->count() > 0);
+        // Init Abort Enabled
+        bool abortEnabled = (ui->mainQueueList->count() > 0);
+        // Init Clear Enabled
+        bool clearEnabled = (ui->mainQueueList->count() > 0);
+
+        // Check Finished State
+        if (qFinished || (opQueue && opQueue->stopping())) {
+            // Set Pause Enabled
+            pauseEnabled = false;
+            // Set Abort Enabled
+            abortEnabled = false;
+        }
+
+        // Check Pause Button
+        if (pauseButton) {
+            // Set Enabled State
+            pauseButton->setEnabled(pauseEnabled);
+        }
+
+        // Check Abort Button
+        if (abortButton) {
+            // Set Enabled State
+            abortButton->setEnabled(abortEnabled);
+        }
+
+        // Check Clear Button
+        if (clearButton) {
+            // Set Enabled State
+            clearButton->setEnabled(clearEnabled);
+        }
+    }
+}
+
+
+//==============================================================================
+// Confirm Deletion Callback
+//==============================================================================
+int MainQueueDialog::confirmDeletion(const QString& aFilePath, const bool& aReadOnly, const bool& aNonEmpty)
+{
+    // Check Delete Confirm Dialog
+    if (!deleteConfirmDialog) {
+        return (int)FOORTNo;
+    }
+
+    qDebug() << "MainQueueDialog::confirmDeletion - aFilePath: " << aFilePath << " - aReadOnly: " << aReadOnly << " - aNonEmpty: " << aNonEmpty;
+
+    // Check Read Only Flag
+    if (aReadOnly) {
+        // Set Dialog Text
+        deleteConfirmDialog->setConfirmMsg(QString(DEFAULT_DIALOG_TEXT_DELETE_CONFIRM_READONLY).arg(aFilePath));
+    // Check Non Empty Dir Flag
+    } else if (aNonEmpty) {
+        // Set Dialog Text
+        deleteConfirmDialog->setConfirmMsg(QString(DEFAULT_DIALOG_TEXT_DELETE_CONFIRM_NONEMPTY).arg(aFilePath));
+    } else {
+        // Set Dialog Text
+        deleteConfirmDialog->setConfirmMsg(QString(DEFAULT_DIALOG_TEXT_DELETE_CONFIRM).arg(aFilePath));
+    }
+
+    // Get Main Window Instance
+    MainWindow* mainWindow = MainWindow::getInstance();
+
+    // Check Main Window Instance
+    if (mainWindow) {
+
+        // Init Confirm Event Loop
+        QEventLoop ceLoop;
+
+        // Connect Signal
+        connect(this, SIGNAL(showConfirmation(ConfirmDialogProvider*,int,QEventLoop*)), mainWindow, SLOT(showConfirmation(ConfirmDialogProvider*,int,QEventLoop*)));
+        // Emit Show Confirm Signal
+        emit showConfirmation(this, aNonEmpty ? ECTDeleteNonEmpty : aReadOnly ? ECTDeleteReadOnly : ECTDelete, &ceLoop);
+        // Disconnect Signal
+        disconnect(this, SIGNAL(showConfirmation(ConfirmDialogProvider*,int,QEventLoop*)), mainWindow, SLOT(showConfirmation(ConfirmDialogProvider*,int,QEventLoop*)));
+
+        // Start Confirm Event Loop
+        int result = ceLoop.exec();
+
+        qDebug() << "MainQueueDialog::confirmDeletion - aFilePath: " << aFilePath << " - result: " << result;
+
+        // Release Main Window Instance
+        mainWindow->release();
+
+        return result;
+    }
+
+    return (int)FOORTNo;
+}
+
+//==============================================================================
+// Deletion Error Callback
+//==============================================================================
+int MainQueueDialog::deleteError(const QString& aFilePath, const int& aErrorCode)
+{
+    qDebug() << "MainQueueDialog::deleteError - aFilePath: " << aFilePath << " - aErrorCode: " << aErrorCode;
+
+
+    // ...
+
+    return (int)FOORTIgnore;
+}
+
+//==============================================================================
+// Delete File Started Notification Callback
+//==============================================================================
+void MainQueueDialog::deleteFileStarted(const QString& aFilePath)
+{
+    qDebug() << "MainQueueDialog::deleteFileStarted - aFilePath: " << aFilePath;
+
+    // ...
+}
+
+//==============================================================================
+// Delete File Finished Notification Callback
+//==============================================================================
+void MainQueueDialog::deleteFileFinished(const QString& aFilePath, const int& aErrorCode)
+{
+    qDebug() << "MainQueueDialog::deleteFileFinished - aFilePath: " << aFilePath << " - aErrorCode: " << aErrorCode;
+
+    // ...
+}
+
+//==============================================================================
+// Confirm OverWrite Callback
+//==============================================================================
+int MainQueueDialog::confirmCopyOverWrite(const QString& aSource, const QString& aTarget, const bool& aReadOnly)
+{
+    qDebug() << "MainQueueDialog::confirmCopyOverWrite - aSource: " << aSource << " - aTarget: " << aTarget << " - aReadOnly: " << aReadOnly;
+
+    // ...
+
+    return (int)FOORTNo;
+}
+
+//==============================================================================
+// Copy File Error Callback
+//==============================================================================
+int MainQueueDialog::copyError(const QString& aSource, const QString& aTarget, const int& aErrorCode)
+{
+    qDebug() << "MainQueueDialog::copyError - aSource: " << aSource << " - aTarget: " << aTarget << " - aErrorCode: " << aErrorCode;
+
+    // Check Delete Confirm Dialog
+    if (!errorDialog) {
+        return (int)FOORTIgnore;
+    }
+
+    // Switch Error Code
+
+    // Set Error Dialog Text
+
+    // Get Main Window Instance
+    MainWindow* mainWindow = MainWindow::getInstance();
+
+    // Check Main Window Instance
+    if (mainWindow) {
+
+        // Init Error Event Loop
+        QEventLoop eeLoop;
+
+        // Connect Show Error Signal
+
+        // Emit Show Error Signal
+
+        // Disconnect Show Error Signal
+
+        // Start Error Dialog Event Loop
+
+        // Release Main Window Instance
+        mainWindow->release();
+
+        // Return Result
+    }
+
+    return (int)FOORTIgnore;
+}
+
+//==============================================================================
+// Copy File Started Callback
+//==============================================================================
+void MainQueueDialog::copyStarted(const QString& aSource, const QString& aTarget)
+{
+    qDebug() << "MainQueueDialog::copyStarted - aSource: " << aSource << " - aTarget: " << aTarget;
+
+    // ...
+}
+
+//==============================================================================
+// Copy File Progress Callback
+//==============================================================================
+void MainQueueDialog::copyProgress(const QString& aSource, const QString& aTarget, const qint64& aCurrentSize, const qint64& aFullSize)
+{
+    qDebug() << "MainQueueDialog::copyProgress - aSource: " << aSource << " - aTarget: " << aTarget << " - aCurrentSize: " << aCurrentSize << " - aFullSize: " << aFullSize;
+
+    // ...
+}
+
+//==============================================================================
+// Copy File Finished Callback
+//==============================================================================
+void MainQueueDialog::copyFinished(const QString& aSource, const QString& aTarget, const int& aErrorCode)
+{
+    qDebug() << "MainQueueDialog::copyFinished - aSource: " << aSource << " - aTarget: " << aTarget << " - aErrorCode: " << aErrorCode;
+
+    // ...
+}
+
+//==============================================================================
+// Confirm OverWrite Callback
+//==============================================================================
+int MainQueueDialog::confirmMoveOverWrite(const QString& aSource, const QString& aTarget, const bool& aReadOnly)
+{
+    qDebug() << "MainQueueDialog::confirmMoveOverWrite - aSource: " << aSource << " - aTarget: " << aTarget << " - aReadOnly: " << aReadOnly;
+
+    // ...
+
+    return (int)FOORTNo;
+}
+
+//==============================================================================
+// Confirm Source Deletion Callback
+//==============================================================================
+int MainQueueDialog::confirmMoveDeletion(const QString& aSource, const bool& aReadOnly, const bool& aNonEmpty)
+{
+    qDebug() << "MainQueueDialog::confirmMoveDeletion - aSource: " << aSource << " - aReadOnly: " << aReadOnly << " - aNonEmpty: " << aNonEmpty;
+
+    // ...
+
+    return (int)FOORTNo;
+}
+
+//==============================================================================
+// Rename/Move File Error Callback
+//==============================================================================
+int MainQueueDialog::moveError(const QString& aSource, const QString& aTarget, const int& aErrorCode)
+{
+    qDebug() << "MainQueueDialog::moveError - aSource: " << aSource << " - aTarget: " << aTarget << " - aErrorCode: " << aErrorCode;
+
+    // ...
+
+    return (int)FOORTIgnore;
+}
+
+//==============================================================================
+// Rename/Move File Started Callback
+//==============================================================================
+void MainQueueDialog::moveStarted(const QString& aSource, const QString& aTarget)
+{
+    qDebug() << "MainQueueDialog::moveStarted - aSource: " << aSource << " - aTarget: " << aTarget;
+
+    // ...
+}
+
+//==============================================================================
+// Renamve/Move File Progress Callback
+//==============================================================================
+void MainQueueDialog::moveProgress(const QString& aSource, const QString& aTarget, const qint64& aCurrentSize, const qint64& aFullSize)
+{
+    qDebug() << "MainQueueDialog::moveProgress - aSource: " << aSource << " - aTarget: " << aTarget << " - aCurrentSize: " << aCurrentSize << " - aFullSize: " << aFullSize;
+
+    // ...
+}
+
+//==============================================================================
+// Rename/Move File Finished Callback
+//==============================================================================
+void MainQueueDialog::moveFinished(const QString& aSource, const QString& aTarget, const int& aErrorCode)
+{
+    qDebug() << "MainQueueDialog::moveFinished - aSource: " << aSource << " - aTarget: " << aTarget << " - aErrorCode: " << aErrorCode;
+
+    // ...
+}
+
+//==============================================================================
+// Confirm OverWrite Callback
+//==============================================================================
+int MainQueueDialog::confirmRenameOverWrite(const QString& aSource, const QString& aTarget, const bool& aReadOnly)
+{
+    qDebug() << "MainQueueDialog::confirmRenameOverWrite - aSource: " << aSource << " - aTarget: " << aTarget << " - aReadOnly: " << aReadOnly;
+
+    // ...
+
+    return (int)FOORTNo;
+}
+
+//==============================================================================
+// Confirm Source Deletion Callback
+//==============================================================================
+int MainQueueDialog::confirmRenameDeletion(const QString& aSource, const bool& aReadOnly, const bool& aNonEmpty)
+{
+    qDebug() << "MainQueueDialog::confirmRenameDeletion - aSource: " << aSource << " - aReadOnly: " << aReadOnly << " - aNonEmpty: " << aNonEmpty;
+
+    // ...
+
+    return (int)FOORTNo;
+}
+
+//==============================================================================
+// Rename File Error Callback
+//==============================================================================
+int MainQueueDialog::renameError(const QString& aSource, const QString& aTarget, const int& aErrorCode)
+{
+    qDebug() << "MainQueueDialog::renameError - aSource: " << aSource << " - aTarget: " << aTarget << " - aErrorCode: " << aErrorCode;
+
+    // ...
+
+    return (int)FOORTIgnore;
+}
+
+//==============================================================================
+// Rename File Started Callback
+//==============================================================================
+void MainQueueDialog::renameStarted(const QString& aSource, const QString& aTarget)
+{
+    qDebug() << "MainQueueDialog::renameStarted - aSource: " << aSource << " - aTarget: " << aTarget;
+
+    // ...
+}
+
+//==============================================================================
+// Rename File Finished Callback
+//==============================================================================
+void MainQueueDialog::renameFinished(const QString& aSource, const QString& aTarget, const int& aErrorCode)
+{
+    qDebug() << "MainQueueDialog::renameFinished - aSource: " << aSource << " - aTarget: " << aTarget << " - aErrorCode: " << aErrorCode;
+
+    // ...
+}
+
+//==============================================================================
+// Launch Confirmation Dialog - MUST BE CALLED FROM GUI THREAD CONTEXT
+//==============================================================================
+int MainQueueDialog::launchConfirm(const int& aType)
+{
+    qDebug() << "MainQueueDialog::launchConfirm - aType: " << aType;
+
+    int result = (int)FOORTNo;
+
+    // Switch Type
+    switch (aType) {
+        case ECTDelete:
+        case ECTDeleteReadOnly:
+        case ECTDeleteNonEmpty:
+            // Check Delete Confirmation Dialog
+            if (deleteConfirmDialog) {
+                // Set Size
+                //deleteConfirmDialog->resize(deleteConfirmDialog->minimumSize());
+                // Exec Dialog
+                result = deleteConfirmDialog->exec();
+            }
+        break;
+
+        case ECTOverWrite:
+        case ECTOverWriteReadOnly:
+            // Check Overwrite Confirmation Dialog
+            if (overWriteConfirmDialog) {
+                // Set Size
+                //overWriteConfirmDialog->resize(overWriteConfirmDialog->minimumSize());
+                // Exec Dialog
+                result = overWriteConfirmDialog->exec();
+            }
+        break;
+    }
+
+    return result;
+}
+
+//==============================================================================
+// Exit Confirmation Dialog
+//==============================================================================
+void MainQueueDialog::exitConfirm(QEventLoop* aEventLoop, const int& aResult)
+{
+    qDebug() << "MainQueueDialog::exitConfirm - aEventLoop: " << aEventLoop << " - aResult: " << aResult;
+
+    // Check Event Loop
+    if (aEventLoop) {
+        // Exit Event Loop
+        aEventLoop->exit(aResult);
+    }
 }
 
 //==============================================================================
@@ -385,6 +871,9 @@ void MainQueueDialog::abortButtonPressed()
 {
     qDebug() << "MainQueueDialog::abortButtonPressed";
 
+    // Abort
+    abort();
+
     // ...
 }
 
@@ -409,6 +898,9 @@ void MainQueueDialog::opQueueStarted()
 {
     qDebug() << "MainQueueDialog::opQueueStarted";
 
+    // Set Queue Finished Flag
+    qFinished = false;
+
     // ...
 }
 
@@ -418,6 +910,9 @@ void MainQueueDialog::opQueueStarted()
 void MainQueueDialog::opQueueStopped()
 {
     qDebug() << "MainQueueDialog::opQueueStopped";
+
+    // Configure Buttons
+    configureButtons();
 
     // ...
 }
@@ -433,7 +928,19 @@ void MainQueueDialog::opQueueFinished()
 
     // Get Settings - Close Dialog On Completed
 
+    // Setting Queue Finished Flag
+    qFinished = true;
 
+    // Configure Buttons
+    configureButtons();
+
+/*
+    // Hide
+    hide();
+
+    // Clear
+    clear();
+*/
 }
 
 //==============================================================================
@@ -481,24 +988,6 @@ void MainQueueDialog::operationAdded(const int& aIndex, const int& aCount)
                 // Add New Item
                 ui->mainQueueList->insertItem(aIndex, newWidgetItem);
             }
-
-            // Check Pause Button
-            if (pauseButton && !pauseButton->isEnabled() && ui->mainQueueList->count() > 0) {
-                // set Enabled State
-                pauseButton->setEnabled(true);
-            }
-
-            // Check Abort Button
-            if (abortButton && !abortButton->isEnabled() && ui->mainQueueList->count() > 0) {
-                // Set Enabled State
-                abortButton->setEnabled(true);
-            }
-
-            // Check Clear Button
-            if (clearButton && !clearButton->isEnabled() && ui->mainQueueList->count() > 0) {
-                // Set Enabled State
-                clearButton->setEnabled(true);
-            }
         }
 
         // Check UI
@@ -506,6 +995,9 @@ void MainQueueDialog::operationAdded(const int& aIndex, const int& aCount)
             // Set Max Value
             ui->queueProgress->setMaximum(ui->mainQueueList->count());
         }
+
+        // Configure Buttons
+        configureButtons();
     }
 }
 
@@ -632,16 +1124,47 @@ void MainQueueDialog::operationCompleted(const int& aIndex)
 MainQueueDialog::~MainQueueDialog()
 {
     qDebug() << "Deleteing MainQueueDialog...";
+
     // Abort
     abort();
     // Clear
     clear();
+
+    // Check Info Dialog
+    if (infoDialog) {
+        // Delete Info Dialog
+        delete infoDialog;
+        infoDialog = NULL;
+    }
+
+    // Check Delete Confirmation Dialog
+    if (deleteConfirmDialog) {
+        // Delete Dialog
+        delete deleteConfirmDialog;
+        deleteConfirmDialog = NULL;
+    }
+
+    // Check Over Write Confirmation Dialog
+    if (overWriteConfirmDialog) {
+        // Delete OverWirte Confirmation Dialog
+        delete overWriteConfirmDialog;
+        overWriteConfirmDialog = NULL;
+    }
+
+    // Check Error Dialog
+    if (errorDialog) {
+        // Delete Error Dialog
+        delete errorDialog;
+        errorDialog = NULL;
+    }
+
     // Check Operation Queue
     if (opQueue) {
         // Delete Operations Queue
         delete opQueue;
         opQueue = NULL;
     }
+
     // Delete UI
     delete ui;
 

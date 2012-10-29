@@ -32,14 +32,6 @@ public:
     //! @param aParent Parent
     CustomPlainTextEditor(QWidget* aParent = NULL);
 
-    //! @brief Key Pressed
-    //! @param aEvent Key Event
-    virtual void keyPressEvent(QKeyEvent* aEvent);
-
-    //! @brief Key Released
-    //! @param aEvent Key Event
-    virtual void keyReleaseEvent(QKeyEvent* aEvent);
-
     //! @brief Destructor
     //! @param none
     virtual ~CustomPlainTextEditor();
@@ -50,9 +42,26 @@ signals:
     //! @param none
     void escPressed();
 
+protected: // From QPlainTextEdit
+
+    //! @brief Key Pressed
+    //! @param aEvent Key Event
+    virtual void keyPressEvent(QKeyEvent* aEvent);
+
+    //! @brief Key Released
+    //! @param aEvent Key Event
+    virtual void keyReleaseEvent(QKeyEvent* aEvent);
+
 protected: // Data
 
 };
+
+
+
+
+
+
+
 
 
 //==============================================================================
@@ -70,8 +79,9 @@ public:
 
     //! @brief Load File
     //! @param aFilePath File Path
+    //! @param aReadOnly Read Only Settings
     //! @return true If Successful
-    bool loadFile(const QString& aFilePath);
+    bool loadFile(const QString& aFilePath, const bool& aReadOnly = true);
 
     //! @brief Close Viewer
     //! @param none
@@ -96,6 +106,10 @@ public:
     //! @brief Find Next Matching Text
     //! @param none
     void findNext();
+
+    //! @brief Set Read Only
+    //! @param aReadOnly Read Only Settings
+    void setReadOnly(const bool& aReadOnly);
 
     //! @brief Destructor
     //! @param none

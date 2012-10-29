@@ -47,11 +47,20 @@ public:
     //! @param aButtons Default Button
     void setButtons(const QDialogButtonBox::StandardButtons& aButtons, const QDialogButtonBox::StandardButton& aDefault);
 
+    //! @brief Clear Buttons
+    //! @param none
+    void clearButtons();
+
     //! @brief Add Button
     //! @param aButtonText Button Text
     //! @param aButtonRole Button Role
     //! @param aID Button ID
-    void addButton(const QString& aButtonText, QDialogButtonBox::ButtonRole aButtonRole, const int& aID);
+    //! @param aDefault Default Button
+    void addButton(const QString& aButtonText, QDialogButtonBox::ButtonRole aButtonRole, const int& aID, const bool& aDefault = false);
+
+    //! @brief Set Clear Custom Buttons On Confirm
+    //! @param aClear Clear Custom Buttons
+    void setClearCustomButtonsOnConfirm(const bool& aClear);
 
     //! @brief Destructor
     //! @param none
@@ -69,6 +78,10 @@ protected:
     //! @param none
     void clearCustomButtons();
 
+    //! @brief Update Size
+    //! @param none
+    void updateSize();
+
 protected: // Data
 
     //! UI
@@ -76,6 +89,9 @@ protected: // Data
 
     //! Button Group For Custom Buttons
     QButtonGroup*           buttonGroup;
+
+    //! Clear Custom Buttons On Selection
+    bool                    clearCustomButtonsOnConfirm;
 };
 
 #endif // CONFIRMATIONDIALOG_H

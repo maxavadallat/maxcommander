@@ -11,6 +11,9 @@ TEMPLATE = app
 # Qt Config
 QT += core gui webkit network
 
+# Config
+CONFIG += static
+
 macx: {
 # Icon
 ICON = resources/images/icons/maxcommander.icns
@@ -51,7 +54,11 @@ SOURCES += src/main.cpp\
     src/treewindow.cpp \
     src/aboutdialog.cpp \
     src/listpopup.cpp \
-    src/mainqueuedialog.cpp
+    src/mainqueuedialog.cpp \
+    src/adminpassdialog.cpp \
+    src/fileutilsserver.cpp \
+    src/fileutilsclient.cpp \
+    src/fileoperations.cpp
 
 # Headers
 HEADERS  += src/mainwindow.h \
@@ -82,7 +89,11 @@ HEADERS  += src/mainwindow.h \
     src/treewindow.h \
     src/aboutdialog.h \
     src/listpopup.h \
-    src/mainqueuedialog.h
+    src/mainqueuedialog.h \
+    src/adminpassdialog.h \
+    src/fileutilsserver.h \
+    src/fileutilsclient.h \
+    src/fileoperations.h
 
 # Forms
 FORMS    += ui/mainwindow.ui \
@@ -107,11 +118,18 @@ FORMS    += ui/mainwindow.ui \
     ui/helpdialog.ui \
     ui/treewindow.ui \
     ui/aboutdialog.ui \
-    ui/mainqueuedialog.ui
+    ui/mainqueuedialog.ui \
+    ui/adminpassdialog.ui
 
 macx: {
-LIBS += -framework CoreServices -framework ApplicationServices
+LIBS += -framework CoreServices -framework ApplicationServices -framework Security -framework Carbon
 }
+
+#for Win8
+win32: {
+LIBS += -lgdi32 -lole32
+}
+
 
 # Resources
 RESOURCES += \

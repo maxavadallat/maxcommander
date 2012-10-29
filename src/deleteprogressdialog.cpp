@@ -7,6 +7,7 @@
 #include "deleteprogressdialog.h"
 #include "ui_deleteprogressdialog.h"
 #include "constants.h"
+#include "fileoperations.h"
 
 
 // IMPLEMENTATION
@@ -163,6 +164,16 @@ void DeleteProgressDialog::setModal(const bool& aModal)
         // Reset Window Modality
         setWindowModality(Qt::NonModal);
     }
+}
+
+//==============================================================================
+// Operation Entry Added Callback - SIGNALS DON't WORK
+//==============================================================================
+void DeleteProgressDialog::operationEntryAdded(const int& aIndex, const int& aCount)
+{
+    qDebug() << "DeleteProgressDialog::operationEntryAdded - aIndex: " << aIndex << " - aCount: " << aCount;
+
+
 }
 
 //==============================================================================

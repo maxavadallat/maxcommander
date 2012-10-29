@@ -64,6 +64,11 @@ public:
     //! @param aModal Modal Setting
     virtual void setModal(const bool& aModal);
 
+    //! @brief Operation Added Callback - SIGNALS DON't WORK
+    //! @param aIndex Inserted Index
+    //! @param aCount Current Count
+    virtual void operationEntryAdded(const int& aIndex, const int& aCount);
+
     //! @brief Reset All Count & Progress
     //! @param none
     void reset();

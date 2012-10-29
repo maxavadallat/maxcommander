@@ -6,6 +6,7 @@
 
 #include "confirmationdialog.h"
 #include "ui_confirmationdialog.h"
+#include "constants.h"
 
 
 // IMPLEMENTATION
@@ -17,6 +18,7 @@ ConfirmationDialog::ConfirmationDialog(QWidget* aParent)
     : QDialog(aParent)
     , ui(new Ui::ConfirmationDialog)
     , buttonGroup(NULL)
+    , clearCustomButtonsOnConfirm(true)
 {
     // Setup UI
     ui->setupUi(this);
@@ -41,6 +43,9 @@ void ConfirmationDialog::setConfirmMsg(const QString& aInfoMsg)
         // Set Confirm Label Text
         ui->confirmLabel->setText(aInfoMsg);
     }
+
+    // Update Size
+    updateSize();
 }
 
 //==============================================================================
@@ -75,16 +80,36 @@ void ConfirmationDialog::setButtons(const QDialogButtonBox::StandardButtons& aBu
 }
 
 //==============================================================================
+// Clear Buttons
+//==============================================================================
+void ConfirmationDialog::clearButtons()
+{
+    // Clear Custom Buttons
+    clearCustomButtons();
+
+    // Check UI
+    if (ui && ui->buttonBox) {
+        // Clear Buttons
+        ui->buttonBox->clear();
+    }
+}
+
+//==============================================================================
 // Add Button
 //==============================================================================
-void ConfirmationDialog::addButton(const QString& aButtonText, QDialogButtonBox::ButtonRole aButtonRole, const int& aID)
+void ConfirmationDialog::addButton(const QString& aButtonText, QDialogButtonBox::ButtonRole aButtonRole, const int& aID, const bool& aDefault)
 {
     // Check UI
     if (ui && ui->buttonBox && !aButtonText.isEmpty()) {
         // Add Button
         QPushButton* newButton = ui->buttonBox->addButton(aButtonText, aButtonRole);
+        // Set Button Minimal Width
+        newButton->setMinimumWidth(DEFAULT_BUTTON_MINIMAL_WIDTH);
+        // Set Default
+        newButton->setDefault(aDefault);
         // Set Focus Policy
         newButton->setFocusPolicy(Qt::StrongFocus);
+
         // Check Button Group
         if (!buttonGroup) {
             // Create Button Group
@@ -94,8 +119,26 @@ void ConfirmationDialog::addButton(const QString& aButtonText, QDialogButtonBox:
         if (buttonGroup) {
             // Add Button
             buttonGroup->addButton(newButton, aID);
+        } else {
+            // Remove New Button
+            ui->buttonBox->removeButton(newButton);
+            // Delete New Button
+            delete newButton;
+            newButton = NULL;
         }
+
+        // Update Size
+        updateSize();
     }
+}
+
+//==============================================================================
+// Set Clear Custom Buttons On Confirm
+//==============================================================================
+void ConfirmationDialog::setClearCustomButtonsOnConfirm(const bool& aClear)
+{
+    // Set Clear Custom Buttons On Confirm
+    clearCustomButtonsOnConfirm = aClear;
 }
 
 //==============================================================================
@@ -120,8 +163,11 @@ void ConfirmationDialog::on_buttonBox_clicked(QAbstractButton* aButton)
             done(buttonID);
         }
 
-        // Clear Custom Buttons
-        clearCustomButtons();
+        // Check Clear Custom Buttons On Confirm
+        if (clearCustomButtonsOnConfirm) {
+            // Clear Custom Buttons
+           clearCustomButtons();
+        }
     }
 }
 
@@ -164,6 +210,27 @@ void ConfirmationDialog::clearCustomButtons()
         // Delete Button Group
         delete buttonGroup;
         buttonGroup = NULL;
+    }
+}
+
+//==============================================================================
+// Update Size
+//==============================================================================
+void ConfirmationDialog::updateSize()
+{
+    qDebug() << "ConfirmationDialog::updateSize";
+
+    // Check UI
+    if (ui && ui->buttonBox && ui->confirmIcon && ui->confirmLabel) {
+        // Calculate Minimum Width
+        int minWidth = qMax(ui->buttonBox->buttons().count() * (DEFAULT_BUTTON_MINIMAL_WIDTH + DEFAULT_BUTTON_GAP) + DEFAULT_BUTTON_GAP * 2,
+                            ui->confirmIcon->width() + ui->confirmLabel->minimumWidth() + DEFAULT_BUTTON_GAP * 3);
+
+        // Set Minimum Width
+        setMinimumWidth(minWidth);
+
+        // Set Width
+        resize(minWidth, minimumHeight());
     }
 }
 

@@ -25,12 +25,14 @@ class ConfirmationDialog;
 //! @class MainQueueDialog Main Queue Dialog Class
 //==============================================================================
 class MainQueueDialog : public QDialog,
-                        public FileOperationQueueHandler,
+                        public FileOpQueueViewAPI,
                         public FileDeleteObserver,
                         public FileCopyObserver,
                         public FileMoveObserver,
                         public FileRenameObserver,
-                        public ConfirmDialogProvider
+                        public InfoDialogProvider,
+                        public ConfirmDialogProvider,
+                        public ErrorDialogProvider
 {
     Q_OBJECT
 
@@ -79,6 +81,15 @@ public:
     //! @param aCount Current Count
     virtual void operationEntryAdded(const int& aIndex, const int& aCount);
 
+    //! @brief Operation Entry Removed Callback - SIGNALS DON'T WORK
+    //! @param aIndex Removed Index
+    //! @param aCount Count
+    virtual void operationEntryRemoved(const int& aIndex, const int& aCount);
+
+    //! @brief Operation Entry Updated Callback - SIGNALS DON'T WORK
+    //! @param aIndex Updated Item Index
+    virtual void operationEntryUpdated(const int& aIndex);
+
     //! @brief Reset All Count & Progress
     //! @param none
     void resetProgress();
@@ -126,6 +137,12 @@ signals:
     //! @param aType Confirmation Type
     //! @param aLoop Blocking Event Loop
     void showConfirmation(ConfirmDialogProvider* aProvider, const int& aType, QEventLoop* aLoop);
+
+    //! @brief Show Error Signal
+    //! @param aProvider Error Dialog Provider
+    //! @param aErrorCode Error Code
+    //! @param aLoop Blocking Event Loop
+    void showError(ErrorDialogProvider* aProvider, const int& aErrorCode, QEventLoop* aLoop);
 
 protected:
 
@@ -282,6 +299,18 @@ protected: // From FileRenameObserver
     //! @param aErrorCode File Rename Error Code
     virtual void renameFinished(const QString& aSource, const QString& aTarget, const int& aErrorCode);
 
+protected: // From InfoDialogProvider
+
+    //! @brief Launch Info Dialog - MUST BE CALLED FROM GUI THREAD CONTEXT
+    //! @param aType Info Type
+    //! @return Dialog Result
+    virtual int launchInfo(const int& aType);
+
+    //! @brief Exit Info Dialog
+    //! @param aEventLoop Event Loop Blocking Confirm Dialog Provider
+    //! @param aResult Dialog Result
+    virtual void exitInfo(QEventLoop* aEventLoop, const int& aResult);
+
 protected: // From ConfirmDialogProvider
 
     //! @brief Launch Confirmation Dialog - MUST BE CALLED FROM GUI THREAD CONTEXT
@@ -293,6 +322,18 @@ protected: // From ConfirmDialogProvider
     //! @param aEventLoop Event Loop Blocking Confirm Dialog Provider
     //! @param aResult Dialog Result
     virtual void exitConfirm(QEventLoop* aEventLoop, const int& aResult);
+
+protected: // From ErrorDialogProvider
+
+    //! @brief Launch Confirmation Dialog - MUST BE CALLED FROM GUI THREAD CONTEXT
+    //! @param aErrorCode Error Code
+    //! @return Dialog Result
+    virtual int launchError(const int& aErrorCode);
+
+    //! @brief Exit Error Dialog
+    //! @param aEventLoop Event Loop Blocking Error Dialog Provider
+    //! @param aResult Dialog Result
+    virtual void exitError(QEventLoop* aEventLoop, const int& aResult);
 
 protected slots:
 
@@ -338,6 +379,10 @@ protected slots:
     //! @param aIndex Operation Index
     void operationStopped(const int& aIndex);
 
+    //! @brief Operation Updated Slot
+    //! @param aIndex Operation Index
+    void operationUpdated(const int& aIndex);
+
     //! @brief Operation Completed Slot
     //! @param aIndex Operation Index
     void operationCompleted(const int& aIndex);
@@ -360,10 +405,7 @@ protected: // Data
     bool                    qFinished;
 
     //! Operation Queue
-    FileOperationQueue*     opQueue;
-
-    //! Confirmation Event Loop
-    //QEventLoop              confirmEventLoop;
+    FileOpQueueHandler*     opQueueHandler;
 
     //! Info Dialog
     InfoDialog*             infoDialog;

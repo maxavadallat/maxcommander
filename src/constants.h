@@ -75,6 +75,10 @@
 #define FILE_OPERATIONS_TOKEN_SEPARATOR                     ';'
 // File Operation Done
 #define FILE_OPERATION_DONE                                 " ... done"
+// File Operation Failed
+#define FILE_OPERATION_FAILED                               " ... failed"
+// File Operation Skipped
+#define FILE_OPERATION_SKIPPED                              " ... skipped"
 
 // File Operation Queue Text Template - COPY, MOVE, RENAME
 #define FILE_OPERATION_QUEUE_TEXT_TEMPLATE_COPY             "%1:%2 - > %3"
@@ -153,7 +157,7 @@
 #define DEFAULT_FILE_LIST_BOX_ICON_UPDATE_TIMEOUT           10
 
 // Default List Box Icon Get Retry Count Max
-#define DEFAULT_LISTBOX_ICOM_GET_RETRY_COUNT_MAX            32
+#define DEFAULT_LISTBOX_ICOM_GET_RETRY_COUNT_MAX            5
 
 // Default Status Message Timeout
 #define DEFAULT_STATUS_MESSAGE_TIMEOUT                      5000
@@ -293,6 +297,9 @@
 #define SETTINGS_KEY_SHOW_STATUSBAR                         "ShowStatusBar"
 
 // Appearance
+
+#define SETTINGS_KEY_SHOW_SYSTEM_ICONS                      "ShowSystemIcons"
+
 
 // Colors Keys
 
@@ -575,7 +582,7 @@
 
 
 // Default Copy Buffer Size
-#define DEFAULT_COPY_BUFFER_SIZE                            (8192 * 2 * 1024)
+#define DEFAULT_COPY_BUFFER_SIZE                            (ONE_MEGA * 16)
 
 
 // Default Dialog Result
@@ -616,7 +623,9 @@
 #define DEFAULT_BUTTON_TEXT_IGNORE                          "&Ignore"
 #define DEFAULT_BUTTON_TEXT_IGNOREALL                       "Ignore A&ll"
 #define DEFAULT_BUTTON_TEXT_RETRY                           "&Retry"
+#define DEFAULT_BUTTON_TEXT_RENAME                          "&Rename"
 #define DEFAULT_BUTTON_TEXT_ASADMIN                         "As Ad&min"
+
 
 
 
@@ -639,9 +648,14 @@
 #define DEFUALT_DIALOG_TITLE_WRITE_ERROR                    "Write Error..."
 #define DEFUALT_DIALOG_TITLE_UNKNOWN_ERROR                  "Uknown Error..."
 #define DEFUALT_DIALOG_TITLE_DIRCREATE_ERROR                "Directory Creation Error ..."
+#define DEFUALT_DIALOG_TITLE_COPY_ERROR                     "Copy Error..."
+#define DEFUALT_DIALOG_TITLE_MOVE_ERROR                     "Move Error..."
+#define DEFUALT_DIALOG_TITLE_RENAME_ERROR                   "Rename Error..."
 
 
 #define DEFAULT_DIALOG_TEXT_DEFAULT_ERROR                   "Operation error! code: %1"
+
+#define DEFAULT_DIALOG_TEXT_ERROR_TARGET_SAME               "Source And Target Is the Same: %1!"
 
 
 #define DEFAULT_DIALOG_TEXT_DIRCREATE_ERROR_ALREADYEXISTS   "Directory: %1 already exist"

@@ -11,9 +11,6 @@ TEMPLATE = app
 # Qt Config
 QT += core gui webkit network
 
-# Config
-CONFIG += static
-
 macx: {
 # Icon
 ICON = resources/images/icons/maxcommander.icns
@@ -123,11 +120,6 @@ FORMS    += ui/mainwindow.ui \
 
 macx: {
 LIBS += -framework CoreServices -framework ApplicationServices -framework Security -framework Carbon
-}
-
-#for Win8
-win32: {
-LIBS += -lgdi32 -lole32
 }
 
 

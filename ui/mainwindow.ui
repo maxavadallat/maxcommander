@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>782</width>
+    <width>749</width>
     <height>496</height>
    </rect>
   </property>
@@ -34,8 +34,30 @@
        </size>
       </property>
       <property name="styleSheet">
-       <string notr="true">background-color: rgb(170, 255, 127);</string>
+       <string notr="true">background-color: rgb(255, 204, 153);</string>
       </property>
+      <widget class="QPushButton" name="newButton">
+       <property name="geometry">
+        <rect>
+         <x>4</x>
+         <y>2</y>
+         <width>20</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="text">
+        <string>Z</string>
+       </property>
+       <property name="autoDefault">
+        <bool>true</bool>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+      </widget>
      </widget>
     </item>
     <item row="1" column="0">
@@ -85,6 +107,11 @@
            <height>16777215</height>
           </size>
          </property>
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
          <property name="focusPolicy">
           <enum>Qt::NoFocus</enum>
          </property>
@@ -109,6 +136,11 @@
            <width>84</width>
            <height>16777215</height>
           </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
          </property>
          <property name="focusPolicy">
           <enum>Qt::NoFocus</enum>
@@ -135,6 +167,11 @@
            <height>16777215</height>
           </size>
          </property>
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
          <property name="focusPolicy">
           <enum>Qt::NoFocus</enum>
          </property>
@@ -159,6 +196,11 @@
            <width>84</width>
            <height>16777215</height>
           </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
          </property>
          <property name="focusPolicy">
           <enum>Qt::NoFocus</enum>
@@ -185,6 +227,11 @@
            <height>16777215</height>
           </size>
          </property>
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
          <property name="focusPolicy">
           <enum>Qt::NoFocus</enum>
          </property>
@@ -209,6 +256,11 @@
            <width>84</width>
            <height>16777215</height>
           </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
          </property>
          <property name="focusPolicy">
           <enum>Qt::NoFocus</enum>
@@ -235,6 +287,11 @@
            <height>16777215</height>
           </size>
          </property>
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
          <property name="focusPolicy">
           <enum>Qt::NoFocus</enum>
          </property>
@@ -259,6 +316,11 @@
            <width>84</width>
            <height>16777215</height>
           </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
          </property>
          <property name="focusPolicy">
           <enum>Qt::NoFocus</enum>
@@ -285,6 +347,11 @@
            <height>16777215</height>
           </size>
          </property>
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
          <property name="focusPolicy">
           <enum>Qt::NoFocus</enum>
          </property>
@@ -310,6 +377,11 @@
            <height>16777215</height>
           </size>
          </property>
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
          <property name="focusPolicy">
           <enum>Qt::NoFocus</enum>
          </property>
@@ -331,8 +403,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>782</width>
-     <height>20</height>
+     <width>749</width>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -559,7 +631,7 @@
     <string>Show/Hide &amp;Hidden Files</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+H</string>
+    <string>Meta+H</string>
    </property>
   </action>
   <action name="actionShowToolbar">

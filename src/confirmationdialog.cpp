@@ -63,12 +63,29 @@ void ConfirmationDialog::setIcon(const QPixmap& aPixmap)
 //==============================================================================
 // Set Buttons
 //==============================================================================
-void ConfirmationDialog::setButtons(const QDialogButtonBox::StandardButtons& aButtons, const QDialogButtonBox::StandardButton& aDefault)
+void ConfirmationDialog::setStandardButtons(const QDialogButtonBox::StandardButtons& aButtons, const QDialogButtonBox::StandardButton& aDefault)
 {
     // Check UI
     if (ui && ui->buttonBox) {
         // Set Buttons
         ui->buttonBox->setStandardButtons(aButtons);
+        // Get Button
+        QPushButton* button = ui->buttonBox->button(aDefault);
+        // Check Button
+        if (button) {
+            // Set Default
+            button->setDefault(true);
+        }
+    }
+}
+
+//==============================================================================
+// Set Default Button
+//==============================================================================
+void ConfirmationDialog::setDefaultStandardButton(const QDialogButtonBox::StandardButton& aDefault)
+{
+    // Check UI
+    if (ui && ui->buttonBox) {
         // Get Button
         QPushButton* button = ui->buttonBox->button(aDefault);
         // Check Button

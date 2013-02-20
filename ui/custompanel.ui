@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>381</width>
-    <height>449</height>
+    <width>370</width>
+    <height>418</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -75,6 +75,11 @@
           <width>0</width>
           <height>16</height>
          </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
         </property>
         <property name="focusPolicy">
          <enum>Qt::NoFocus</enum>
@@ -166,17 +171,11 @@
           <height>24</height>
          </size>
         </property>
-        <property name="maximumSize">
-         <size>
-          <width>56</width>
-          <height>16777215</height>
-         </size>
-        </property>
         <property name="focusPolicy">
          <enum>Qt::NoFocus</enum>
         </property>
         <property name="text">
-         <string>C:</string>
+         <string/>
         </property>
         <property name="icon">
          <iconset>
@@ -249,8 +248,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>377</width>
-        <height>367</height>
+        <width>366</width>
+        <height>336</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="filelistLayout">
@@ -280,10 +279,23 @@
            <height>24</height>
           </size>
          </property>
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
         </widget>
        </item>
        <item row="1" column="0">
-        <widget class="CustomFilelist" name="fileList"/>
+        <widget class="CustomFilelist" name="fileList">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -326,6 +338,11 @@
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
         </property>
         <property name="focusPolicy">
          <enum>Qt::NoFocus</enum>
@@ -378,6 +395,11 @@
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
         </property>
         <property name="focusPolicy">
          <enum>Qt::NoFocus</enum>

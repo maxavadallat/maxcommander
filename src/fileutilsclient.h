@@ -18,10 +18,10 @@ class FileOperationEntry;
 // DECLARATIONS
 
 //==============================================================================
-//! @class FileUtilsClient File Utils Client Class
+//! @class RemoteFileUtils Remote File Utils Client Class
 //!        This class provides client for Remote File Utils Server
 //==============================================================================
-class FileUtilsClient : public QObject
+class RemoteFileUtils : public QObject
 {
     Q_OBJECT
 
@@ -29,7 +29,7 @@ public:
 
     //! @brief Constructor
     //! @param aParent Parent
-    explicit FileUtilsClient(QObject* aParent = NULL);
+    explicit RemoteFileUtils(QObject* aParent = NULL);
 
     //! @brief Get Server Running State - Trying To Connect
     //! @param none
@@ -111,7 +111,7 @@ public:
 
     //! @brief Destructor
     //! @param none
-    virtual ~FileUtilsClient();
+    virtual ~RemoteFileUtils();
 
 signals:
 

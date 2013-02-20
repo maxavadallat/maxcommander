@@ -29,7 +29,7 @@ HelpDialog::HelpDialog(QWidget* aParent)
     // Load Help HTML
     ui->helpWebView->setUrl(QUrl::fromLocalFile(QApplication::applicationDirPath() + QString("/../../Help/maxcommander.html")));
 
-#elif defined(Q_OS_WIN)
+#elif define(Q_OS_WIN)
 
 #elif defined(Q_OS_UNIX)
 

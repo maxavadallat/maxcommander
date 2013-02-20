@@ -25,7 +25,7 @@ class CustomHeader;
 class Settings;
 class IconScanner;
 class ListPopup;
-class FileUtilsClient;
+class RemoteFileUtils;
 
 
 // DECLARATIONS
@@ -579,6 +579,8 @@ protected: // Data
     CacheType*  delegateCache;
     //! File List Box First Visible Index
     int         firstVisibleIndex;
+    //! Settings
+    Settings*   settings;
 };
 
 
@@ -975,7 +977,7 @@ protected: // Data
     FileUtils*              fileUtils;
 
     //! File Utils Client
-    FileUtilsClient*        fileUtilsClient;
+    RemoteFileUtils*        fileUtilsClient;
 
     //! Sort Order
     FileSortType            sortOrder;

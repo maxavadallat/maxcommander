@@ -39,6 +39,8 @@
 
 //! Default Abort Check For Thread
 #define DEFAULT_THREAD_ABORT_CHECK                  if (abort || restart) return
+//! Default Abort Check For Thread Returning False
+#define DEFAULT_THREAD_ABORT_CHECK_FALSE            if (abort || restart) return false
 //! Default Abort Check For Functions
 #define DEFAULT_FUNC_ABORT_CHECK                    if (aAbortSig) return
 
@@ -50,7 +52,7 @@
 
 //! File Delete Options - Skip All Files
 #define FILE_DELETE_OPTION_DELETE_SKIP_NORMAL       0x0010
-//! File Delete Options - Delete Non Empty Directories Without Any Further Confirmation
+//! File Delete Options - Skip All Read Only Files
 #define FILE_DELETE_OPTION_DELETE_SKIP_READONLY     0x0020
 
 //! File Delete Options - Ignore Deletion Error
@@ -60,13 +62,19 @@
 
 //! File Delete Options - Delete Non Empty Directories Without Any Further Confirmation
 #define FILE_DELETE_OPTION_DELETE_NON_EMPTY_DIR     0x1000
-
+//! File Delete Options - Delete Non Empty Directories Without Any Further Confirmation
+#define FILE_DELETE_OPTION_SKIP_NON_EMPTY_DIR       0x3000
 
 
 //! File Copy Options - Overwrite All Normal Files Without Confirmation
 #define FILE_COPY_OPTION_OVERWRITE_NORMAL           0x0001
 //! File Copy Options - Overwrite All Read Only Files Without Any Further Confirmation
 #define FILE_COPY_OPTION_OVERWRITE_READONLY         0x0003
+
+//! File Copy Options - Skip Overwrite All Files
+#define FILE_COPY_OPTION_OVERWRITE_SKIP_NORMAL      0x0010
+//! File Copy Options - Skip Overwrite Read Only Files
+#define FILE_COPY_OPTION_OVERWRITE_SKIP_READONLY    0x0020
 
 
 //! File Copy Options - Ignore Read Error
@@ -107,11 +115,20 @@
 #define FILE_OPERATION_OPTION_ADMIN                 0xFF00
 
 
+//! File Utils Response - No Error
+#define FILE_UTILS_RESPONSE_NOERROR                 0x0000
+//! File Utils Response - Error
+#define FILE_UTILS_RESPONSE_ERROR                   0x0001
+//! File Utils Response - Skip
+#define FILE_UTILS_RESPONSE_SKIP                    0x0003
+
+
 
 // FORWARD DECLARATIONS
 
+class FileOpQueueViewAPI;
 class FileOperationEntry;
-class FileUtilsClient;
+class RemoteFileUtils;
 
 
 
@@ -168,8 +185,11 @@ enum FOORespType
     FOORTIgnore,
     FOORTIgnoreAll,
     FOORTRetry,
+    FOORTRename,
     FOORTAsRoot
 };
+
+
 
 
 //==============================================================================
@@ -193,6 +213,30 @@ public:
     virtual QString launchAdminPassQuery() = 0;
 };
 
+
+
+
+//==============================================================================
+//! @class InfoDialogProvider Information Dialog Provider Interface Class
+// To be able to launch Dialogs from different thread context
+// Have to Emit a signal to Dialog Launcher To Call launchInfo.
+// Caller Thread Must be blocked by an QEventLoop, which need to be exited by
+// calling exitConfirm by Launcher
+//==============================================================================
+class InfoDialogProvider
+{
+public:
+
+    //! @brief Launch Info Dialog - MUST BE CALLED FROM GUI THREAD CONTEXT
+    //! @param aType Info Type
+    //! @return Dialog Result
+    virtual int launchInfo(const int& aType) = 0;
+
+    //! @brief Exit Info Dialog
+    //! @param aEventLoop Event Loop Blocking Confirm Dialog Provider
+    //! @param aResult Dialog Result
+    virtual void exitInfo(QEventLoop* aEventLoop, const int& aResult) = 0;
+};
 
 
 
@@ -368,7 +412,7 @@ public:
     //! @brief Get A Connected File Utils Client - Observer/Owner Has To Delete After Finished!!
     //! @param aAdminPass Admin Password
     //! @return Connected File Utils Client
-    virtual FileUtilsClient* getUtilsClient(const QString& aAdminPass = QString("")) = 0;
+    virtual RemoteFileUtils* getUtilsClient(const QString& aAdminPass = QString("")) = 0;
 };
 
 
@@ -740,46 +784,21 @@ public:
     //! @return a QImage
     static OSStatus convertMacIcon(const IconRef& aMacIconref, QImage& aIconImage);
 
-    //! @brief Get File Icon Image - MAC
-    //! @param aInfo File Info
-    //! @param aWidth Requested Width
-    //! @param aHeight Requested Height
-    //! @return File Icon Image
-    static QImage getFileIconImageMAC(const QFileInfo& aInfo, const int& aWidth, const int& aHeight);
-
 #elif defined(Q_OS_WIN)
 
-    //! @brief Get/Convert Windows Image To QImage
-    //! @param aHDC Context Handle
-    //! @param aBitmap Windows Bitmap Handle
-    //! @param aWidth Windows Bitmap Width
-    //! @param aHeight Windows Bitmap Height
-    //! @return a QImage
-    static QImage convertWinHBITMAP(HDC aHDC, HBITMAP aBitmap, int aWidth, int aHeight);
-
-    //! @brief Get File Icon Image - WIN
-    //! @param aInfo File Info
-    //! @param aWidth Requested Width
-    //! @param aHeight Requested Height
-    //! @return File Icon Image
-    static QImage getFileIconImageWIN(const QFileInfo& aInfo, const int& aWidth, const int& aHeight);
+    static convertWinIcon(... , QImage& aIconImage);
 
 #else // Q_OS_UNIX
 
-    //! @brief Get File Icon Image - UNIX
-    //! @param aInfo File Info
-    //! @param aWidth Requested Width
-    //! @param aHeight Requested Height
-    //! @return File Icon Image
-    static QImage getFileIconImageUNIX(const QFileInfo& aInfo, const int& aWidth, const int& aHeight);
+    static convertLinuxIcon(... , QImage& aIconImage);
 
 #endif // Q_OS_UNIX
 
-    //! @brief Get File Icon Image
+    //! @brief Get File Icon Pixmap
     //! @param aInfo File Info
     //! @param aWidth Requested Width
     //! @param aHeight Requested Height
-    //! @return File Icon Image
+    //! @return File Icon Pixmap
     static QImage getFileIconImage(const QFileInfo& aInfo, const int& aWidth, const int& aHeight);
 
     //! @brief Get Parent Dir Path
@@ -845,23 +864,24 @@ public:
     static QString parseTargetFileName(const QString& aSourceName, const QString& aTargetName);
 
     //! @brief Create File Operation Entry
+    //! @param aQueueHandler Operation Queue Handler
     //! @param aOperation Operation Index
     //! @param aSourceDir Source Directory
     //! @param aSourceName Source Name
     //! @param aTargetDir Target Directory
     //! @param aTargetName Target Name/Pattern
     //! @return New File OperationEntry
-    static FileOperationEntry* createFileOperationEntry(const int& aOperation, const QString& aSourceDir, const QString& aSourceName, const QString& aTargetDir, const QString& aTargetName);
+    static FileOperationEntry* createFileOperationEntry(FileOpQueueViewAPI* aQueueHandler,
+                                                        const int& aOperation,
+                                                        const QString& aSourceDir,
+                                                        const QString& aSourceName,
+                                                        const QString& aTargetDir,
+                                                        const QString& aTargetName);
 
     //! @brief Is Full Path
     //! @param aFilePath File Path
     //! @return true If It's A Full Path
     static bool isFullPath(const QString& aFilePath);
-
-    //! @brief Is Dir Readable
-    //! @param aDirPath Directory Path
-    //! @return true If It's Readable By The Current User
-    static bool isDirReadable(const QString& aDirPath);
 /*
     //! @brief Get Authorization
     //! @param none
@@ -1196,9 +1216,9 @@ protected: // Data
 
 
 //==============================================================================
-//! @class FileOperationQueueHandler File Operation Queue Handler Interface Class
+//! @class FileOpQueueViewAPI File Operation Queue Handler Interface Class
 //==============================================================================
-class FileOperationQueueHandler
+class FileOpQueueViewAPI
 {
 public:
 
@@ -1236,10 +1256,19 @@ public:
     //! @param aModal Modal Setting
     virtual void setModal(const bool& aModal) = 0;
 
-    //! @brief Operation Entry Added Callback - SIGNALS DON't WORK
+    //! @brief Operation Entry Added Callback - SIGNALS DON'T WORK
     //! @param aIndex Inserted Index
-    //! @param aCount Current Count
+    //! @param aCount Count
     virtual void operationEntryAdded(const int& aIndex, const int& aCount) = 0;
+
+    //! @brief Operation Entry Removed Callback - SIGNALS DON'T WORK
+    //! @param aIndex Removed Index
+    //! @param aCount Count
+    virtual void operationEntryRemoved(const int& aIndex, const int& aCount) = 0;
+
+    //! @brief Operation Entry Updated Callback - SIGNALS DON'T WORK
+    //! @param aIndex Updated Item Index
+    virtual void operationEntryUpdated(const int& aIndex) = 0;
 };
 
 
@@ -1259,7 +1288,7 @@ public:
 //==============================================================================
 //! @class FileOperationQueue File Operation Queue Class
 //==============================================================================
-class FileOperationQueue : public FileUtilThreadBase
+class FileOpQueueHandler : public FileUtilThreadBase
 {
 
     Q_OBJECT
@@ -1267,9 +1296,9 @@ class FileOperationQueue : public FileUtilThreadBase
 public:
 
     //! @brief Constructor
-    //! @param aOpHandler Handler
+    //! @param aOpHandler File Operation Queue View Api
     //! @param aParent Parent
-    FileOperationQueue(FileOperationQueueHandler* aOpHandler,
+    FileOpQueueHandler(FileOpQueueViewAPI* aOpQViewAPI,
                        DirCreatorObserver* aDirCreatorObserver = NULL,
                        FileDeleteObserver* aDeleteObserver = NULL,
                        FileCopyObserver* aCopyObserver = NULL,
@@ -1315,7 +1344,7 @@ public:
 
     //! @brief Destructor
     //! @param none
-    virtual ~FileOperationQueue();
+    virtual ~FileOpQueueHandler();
 
 signals:
 
@@ -1341,6 +1370,14 @@ signals:
     //! @param aIndex Operation Index
     void operationCompleted(const int& aIndex);
 
+    //! @brief Operation Updated/Progress Changed Signal
+    //! @param aIndex Operation Index
+    void operationUpdated(const int& aIndex);
+
+    //! @brief Operation Aborted Signal
+    //! @param aIndex Operation Index
+    void operationAborted(const int& aIndex);
+
 protected: // From FileUtilThreadBase
 
     //! @brief Do Operation
@@ -1360,14 +1397,15 @@ protected: // From FileUtilThreadBase
     //! @brief Process Directory Entry
     //! @param aEntry File Operation Entry
     //! @param aIndex File Operation Entry Index
-    virtual void processDirEntry(FileOperationEntry* aEntry, const int& aIndex);
+    //! @return true If Entry Is Processed, false Otherwise
+    virtual bool processDirEntry(FileOperationEntry* aEntry, const int& aIndex);
 
 protected: // Data
 
     //! File Operations List
     QList<FileOperationEntry*>  operations;
-    //! Operations Queue Handler
-    FileOperationQueueHandler*  opHandler;
+    //! Operations Queue View API
+    FileOpQueueViewAPI*         opQView;
 
     //! Current Operation Index
     int                         currOp;

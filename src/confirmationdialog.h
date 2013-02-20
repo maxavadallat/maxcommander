@@ -42,10 +42,14 @@ public:
     //! @param aPixmap Icon Pixmap
     void setIcon(const QPixmap& aPixmap);
 
-    //! @brief Set Buttons
+    //! @brief Set Standard Buttons
     //! @param aButtons Buttons
-    //! @param aButtons Default Button
-    void setButtons(const QDialogButtonBox::StandardButtons& aButtons, const QDialogButtonBox::StandardButton& aDefault);
+    //! @param aDefault Default Button
+    void setStandardButtons(const QDialogButtonBox::StandardButtons& aButtons, const QDialogButtonBox::StandardButton& aDefault);
+
+    //! @brief Set Default Standard Button
+    //! @param aDefault Default Button
+    void setDefaultStandardButton(const QDialogButtonBox::StandardButton& aDefault);
 
     //! @brief Clear Buttons
     //! @param none

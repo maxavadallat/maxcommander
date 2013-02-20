@@ -20,7 +20,7 @@ class DeleteProgressDialog;
 //==============================================================================
 //! @class DeleteProgressDialog Delete Progress Dialog Class
 //==============================================================================
-class DeleteProgressDialog : public QDialog, public FileOperationQueueHandler
+class DeleteProgressDialog : public QDialog, public FileOpQueueViewAPI
 {
     Q_OBJECT
 
@@ -68,6 +68,15 @@ public:
     //! @param aIndex Inserted Index
     //! @param aCount Current Count
     virtual void operationEntryAdded(const int& aIndex, const int& aCount);
+
+    //! @brief Operation Entry Removed Callback - SIGNALS DON'T WORK
+    //! @param aIndex Removed Index
+    //! @param aCount Count
+    virtual void operationEntryRemoved(const int& aIndex, const int& aCount);
+
+    //! @brief Operation Entry Updated Callback - SIGNALS DON'T WORK
+    //! @param aIndex Updated Item Index
+    virtual void operationEntryUpdated(const int& aIndex);
 
     //! @brief Reset All Count & Progress
     //! @param none
@@ -162,7 +171,7 @@ protected: // Data
     bool                        paused;
 
     //! Operation Queue
-    FileOperationQueue*         opQueue;
+    FileOpQueueHandler*         opQueueHandler;
 };
 
 #endif // DELETEPROGRESSDIALOG_H

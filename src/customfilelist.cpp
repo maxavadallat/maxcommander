@@ -1675,6 +1675,7 @@ IconScanner::IconScanner(QObject* aParent)
     , iconSize(DEFAULT_ICON_SIZE_MEDIUM)
     , delegateCache(NULL)
     , firstVisibleIndex(-1)
+    , settings(NULL)
 {
     qDebug() << "Creating IconScanner...done";
 }
@@ -1687,6 +1688,23 @@ void IconScanner::scanIcons(const CacheType* aCache, const int& aFVI, const int&
     //qDebug() << "IconScanner::scanIcons - aIconSize: " << aIconSize;
     // Lock
     mutex.lock();
+
+    // Check Settings
+    if (!settings) {
+        // Get Settings Instance
+        settings = Settings::getInstance();
+    }
+
+    // Get Show System Icons
+    bool showSystemIcons = settings->getValue(SETTINGS_KEY_SHOW_SYSTEM_ICONS, true).toBool();
+
+    // Check Show System Icons Setting
+    if (!showSystemIcons) {
+        // Unlock
+        mutex.unlock();
+
+        return;
+    }
 
     // Set Cache
     delegateCache = (CacheType*)aCache;
@@ -1717,25 +1735,19 @@ void IconScanner::updateItemIcon(const int& aIndex)
     if (delegateCache) {
         // Get Cahced Item
         FileListDelegate* fileListDelegate = reinterpret_cast<FileListDelegate*>((*delegateCache)[aIndex]);
-
         DEFAULT_THREAD_ABORT_CHECK;
-
         // Check If Needs Icon
         if (fileListDelegate && fileListDelegate->getNeedsIconUpdate()) {
             //qDebug() << "IconScanner::updateItemIcon - fileName: " << reinterpret_cast<FileItemData*>(fileListDelegate->getData())->getFileInfo().fileName();
             //qDebug() << "IconScanner::updateItemIcon - aIndex: " << aIndex;
             DEFAULT_THREAD_ABORT_CHECK;
-
             // Sleep
-            msleep(2);
+            msleep(1);
 
             DEFAULT_THREAD_ABORT_CHECK;
-
             // Get File Item Data
             FileItemData* fileItemData = reinterpret_cast<FileItemData*>(fileListDelegate->getData());
-
             DEFAULT_THREAD_ABORT_CHECK;
-
             // Lock Mutex
             mutex.lock();
             // Set Icon
@@ -1805,6 +1817,9 @@ void IconScanner::doOperation()
 IconScanner::~IconScanner()
 {
     qDebug() << "Deleting IconScanner...done";
+
+    // Release Settings
+    settings->release();
 }
 
 
@@ -1921,7 +1936,7 @@ void CustomFilelist::setCurrentDir(const QString& aDirectory, const bool& aRefre
     // Check Current Dir
     if (QFile::exists(aDirectory)) {
         // Check Dir Reader And If Dir Readable
-        if (dirReader && dirReader->isReadable(aDirectory) && FileUtils::isDirReadable(aDirectory)) {
+        if (dirReader && dirReader->isReadable(aDirectory)) {
             // Check Current Dir
             if (currentDirPath != QDir::cleanPath(aDirectory) || forceRefresh) {
                 qDebug() << "CustomFilelist::setCurrentDir - panelName: " << panelName << " - aDirectory: " << aDirectory;
@@ -1946,11 +1961,7 @@ void CustomFilelist::setCurrentDir(const QString& aDirectory, const bool& aRefre
 
             // ...
 
-            // Check Permissions
-
-            // Switch To Admin Mode if Needed
-
-            // ...
+            // Switch To Admin Mode
         }
     } else {
         qDebug() << "CustomFilelist::setCurrentDir - DIR DOESN'T EXIST";

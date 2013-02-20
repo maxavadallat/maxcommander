@@ -16,7 +16,7 @@
 //==============================================================================
 // Constructor
 //==============================================================================
-FileUtilsClient::FileUtilsClient(QObject* aParent)
+RemoteFileUtils::RemoteFileUtils(QObject* aParent)
     : QObject(aParent)
     , socket(NULL)
     , serverName(DEFAULT_SERVER_NAME)
@@ -30,7 +30,7 @@ FileUtilsClient::FileUtilsClient(QObject* aParent)
 //==============================================================================
 // Create Socket
 //==============================================================================
-void FileUtilsClient::createSocket()
+void RemoteFileUtils::createSocket()
 {
     // Check Socket
     if (!socket) {
@@ -54,7 +54,7 @@ void FileUtilsClient::createSocket()
 //==============================================================================
 // Get Server Running State - Trying To Connect
 //==============================================================================
-bool FileUtilsClient::isServerRunning()
+bool RemoteFileUtils::isServerRunning()
 {
     // Init Result
     bool result = false;
@@ -73,7 +73,7 @@ bool FileUtilsClient::isServerRunning()
 //==============================================================================
 // Connect To Server
 //==============================================================================
-bool FileUtilsClient::connectToServer(AdminPassQueryProvider* aQueryProvider, const int& aTimeout)
+bool RemoteFileUtils::connectToServer(AdminPassQueryProvider* aQueryProvider, const int& aTimeout)
 {
     // Check Socket Connected
     if (socketConnected) {
@@ -125,7 +125,7 @@ bool FileUtilsClient::connectToServer(AdminPassQueryProvider* aQueryProvider, co
 //==============================================================================
 // Connect To Server
 //==============================================================================
-bool FileUtilsClient::connectToServer(const QString& aAdminPass, const int& aTimeout)
+bool RemoteFileUtils::connectToServer(const QString& aAdminPass, const int& aTimeout)
 {
     // Check Socket Connected
     if (socketConnected) {
@@ -168,7 +168,7 @@ bool FileUtilsClient::connectToServer(const QString& aAdminPass, const int& aTim
 //==============================================================================
 // Disconnect From Server
 //==============================================================================
-bool FileUtilsClient::disconnectFromServer(const int& aTimeout)
+bool RemoteFileUtils::disconnectFromServer(const int& aTimeout)
 {
     // Check Socket
     if (socket) {
@@ -190,7 +190,7 @@ bool FileUtilsClient::disconnectFromServer(const int& aTimeout)
 //==============================================================================
 // Send Message
 //==============================================================================
-void FileUtilsClient::sendMessage(const QString& aMessage)
+void RemoteFileUtils::sendMessage(const QString& aMessage)
 {
     // Check Socket
     if (socket) {
@@ -211,7 +211,7 @@ void FileUtilsClient::sendMessage(const QString& aMessage)
 //==============================================================================
 // Send File Operation Entry
 //==============================================================================
-void FileUtilsClient::sendOperation(const FileOperationEntry& aEntry)
+void RemoteFileUtils::sendOperation(const FileOperationEntry& aEntry)
 {
     // Get Message
     QString message = aEntry.getOperation();
@@ -222,7 +222,7 @@ void FileUtilsClient::sendOperation(const FileOperationEntry& aEntry)
 //==============================================================================
 // Is Dir Readable
 //==============================================================================
-bool FileUtilsClient::isReadable(const QString& aDirPath)
+bool RemoteFileUtils::isReadable(const QString& aDirPath)
 {
     // Init File Info
     QFileInfo fileInfo(aDirPath);
@@ -233,7 +233,7 @@ bool FileUtilsClient::isReadable(const QString& aDirPath)
 //==============================================================================
 // Read Dir - Async
 //==============================================================================
-void FileUtilsClient::readDir(const QString& aDirPath, const int& aSortType, const bool& aReverse, const bool& aHidden, const QStringList& aNameFilters)
+void RemoteFileUtils::readDir(const QString& aDirPath, const int& aSortType, const bool& aReverse, const bool& aHidden, const QStringList& aNameFilters)
 {
     // Create Message To Send
     QString message = QString("%1;%2;%3;%4;%5;%6").arg(PARAM_OPERATION_READDIR).arg(aDirPath).arg(aSortType).arg(aReverse).arg(aHidden).arg(aNameFilters.join("$"));
@@ -244,7 +244,7 @@ void FileUtilsClient::readDir(const QString& aDirPath, const int& aSortType, con
 //==============================================================================
 // Scan Dir For Directory Size - Async
 //==============================================================================
-void FileUtilsClient::scanDir(const QString& aDirPath)
+void RemoteFileUtils::scanDir(const QString& aDirPath)
 {
     // Create Message To Send
     QString message = QString("%1;%2").arg(PARAM_OPERATION_SIZE).arg(aDirPath);
@@ -255,7 +255,7 @@ void FileUtilsClient::scanDir(const QString& aDirPath)
 //==============================================================================
 // Create A Dir - Async
 //==============================================================================
-void FileUtilsClient::createDir(const QString& aDirPath)
+void RemoteFileUtils::createDir(const QString& aDirPath)
 {
     // Create Message To Send
     QString message = QString("%1;%2").arg(PARAM_OPERATION_MAKEDIR).arg(aDirPath);
@@ -266,7 +266,7 @@ void FileUtilsClient::createDir(const QString& aDirPath)
 //==============================================================================
 // Remove/Delete Single File/Empty Directory
 //==============================================================================
-void FileUtilsClient::remove(const QString& aFilePath)
+void RemoteFileUtils::remove(const QString& aFilePath)
 {
     // Create Message To Send
     QString message = QString("%1;%2").arg(PARAM_OPERATION_DELETE).arg(aFilePath);
@@ -277,7 +277,7 @@ void FileUtilsClient::remove(const QString& aFilePath)
 //==============================================================================
 // Copy Single File
 //==============================================================================
-void FileUtilsClient::copyFile(const QString& aSource, const QString& aTarget)
+void RemoteFileUtils::copyFile(const QString& aSource, const QString& aTarget)
 {
     // Create Message To Send
     QString message = QString("%1;%2;%3").arg(PARAM_OPERATION_COPY).arg(aSource).arg(aTarget);
@@ -288,7 +288,7 @@ void FileUtilsClient::copyFile(const QString& aSource, const QString& aTarget)
 //==============================================================================
 // Move Single File
 //==============================================================================
-void FileUtilsClient::moveFile(const QString& aSource, const QString& aTarget)
+void RemoteFileUtils::moveFile(const QString& aSource, const QString& aTarget)
 {
     // Create Message To Send
     QString message = QString("%1;%2;%3").arg(PARAM_OPERATION_MOVE).arg(aSource).arg(aTarget);
@@ -299,7 +299,7 @@ void FileUtilsClient::moveFile(const QString& aSource, const QString& aTarget)
 //==============================================================================
 // Rename Single File
 //==============================================================================
-void FileUtilsClient::renameFile(const QString& aSource, const QString& aTarget)
+void RemoteFileUtils::renameFile(const QString& aSource, const QString& aTarget)
 {
     // Create Message To Send
     QString message = QString("%1;%2;%3").arg(PARAM_OPERATION_RENAME).arg(aSource).arg(aTarget);
@@ -310,7 +310,7 @@ void FileUtilsClient::renameFile(const QString& aSource, const QString& aTarget)
 //==============================================================================
 // Search
 //==============================================================================
-void FileUtilsClient::search(const QString& aDirPath, const QString& aNamePattern, const QString& aContentPattern, const int& aSearchOptions)
+void RemoteFileUtils::search(const QString& aDirPath, const QString& aNamePattern, const QString& aContentPattern, const int& aSearchOptions)
 {
     // Create Message To Send
     QString message = QString("%1;%2;%3;%4;%5").arg(PARAM_OPERATION_SEARCH).arg(aDirPath).arg(aNamePattern).arg(aContentPattern).arg(aSearchOptions);
@@ -321,7 +321,7 @@ void FileUtilsClient::search(const QString& aDirPath, const QString& aNamePatter
 //==============================================================================
 // Abort Current Operation
 //==============================================================================
-void FileUtilsClient::abort()
+void RemoteFileUtils::abort()
 {
     // Create Message To Send
     QString message = QString("%1").arg(PARAM_OPERATION_ABORT);
@@ -332,7 +332,7 @@ void FileUtilsClient::abort()
 //==============================================================================
 // Connected Slot
 //==============================================================================
-void FileUtilsClient::connected()
+void RemoteFileUtils::connected()
 {
     qDebug() << "FileUtilClient::connected";
 
@@ -343,7 +343,7 @@ void FileUtilsClient::connected()
 //==============================================================================
 // Disconnected Slot
 //==============================================================================
-void FileUtilsClient::disconnected()
+void RemoteFileUtils::disconnected()
 {
     qDebug() << "FileUtilClient::disconnected";
 
@@ -354,7 +354,7 @@ void FileUtilsClient::disconnected()
 //==============================================================================
 // Error Slot
 //==============================================================================
-void FileUtilsClient::error(QLocalSocket::LocalSocketError aSocketError)
+void RemoteFileUtils::error(QLocalSocket::LocalSocketError aSocketError)
 {
     qDebug() << "FileUtilClient::error - aSocketError: " << aSocketError;
 
@@ -374,7 +374,7 @@ void FileUtilsClient::error(QLocalSocket::LocalSocketError aSocketError)
 //==============================================================================
 // State Changed Slot
 //==============================================================================
-void FileUtilsClient::stateChanged(QLocalSocket::LocalSocketState aSocketState)
+void RemoteFileUtils::stateChanged(QLocalSocket::LocalSocketState aSocketState)
 {
     qDebug() << "FileUtilClient::stateChanged - aSocketState: " << aSocketState;
 
@@ -393,7 +393,7 @@ void FileUtilsClient::stateChanged(QLocalSocket::LocalSocketState aSocketState)
 //==============================================================================
 // About To Close Slot
 //==============================================================================
-void FileUtilsClient::aboutToClose()
+void RemoteFileUtils::aboutToClose()
 {
     qDebug() << "FileUtilClient::aboutToClose";
 
@@ -402,7 +402,7 @@ void FileUtilsClient::aboutToClose()
 //==============================================================================
 // Bytes Written Slot
 //==============================================================================
-void FileUtilsClient::bytesWritten(qint64 aBytes)
+void RemoteFileUtils::bytesWritten(qint64 aBytes)
 {
     qDebug() << "FileUtilClient::bytesWritten - aBytes: " << aBytes;
 
@@ -411,7 +411,7 @@ void FileUtilsClient::bytesWritten(qint64 aBytes)
 //==============================================================================
 // Read Channel Finished Slot
 //==============================================================================
-void FileUtilsClient::readChannelFinished()
+void RemoteFileUtils::readChannelFinished()
 {
     qDebug() << "FileUtilClient::readChannelFinished";
 
@@ -420,7 +420,7 @@ void FileUtilsClient::readChannelFinished()
 //==============================================================================
 // Ready Read Slot
 //==============================================================================
-void FileUtilsClient::readyRead()
+void RemoteFileUtils::readyRead()
 {
     // Check Socket
     if (socket) {
@@ -456,7 +456,7 @@ void FileUtilsClient::readyRead()
 //==============================================================================
 // Delete Socket
 //==============================================================================
-void FileUtilsClient::deleteSocket()
+void RemoteFileUtils::deleteSocket()
 {
     // Check Socket
     if (socket) {
@@ -479,7 +479,7 @@ void FileUtilsClient::deleteSocket()
 //==============================================================================
 // Launch Server
 //==============================================================================
-bool FileUtilsClient::launchServer(const QString& aAdminPass)
+bool RemoteFileUtils::launchServer(const QString& aAdminPass)
 {
 #if defined (Q_OS_UNIX) // Mac & Linux
     // Check Admin Pass
@@ -527,7 +527,7 @@ bool FileUtilsClient::launchServer(const QString& aAdminPass)
 //==============================================================================
 // Parse Line
 //==============================================================================
-void FileUtilsClient::parseLine(const QString& aLine)
+void RemoteFileUtils::parseLine(const QString& aLine)
 {
     qDebug() << "FileUtilsClient::parseLine - aLine: " << aLine;
 
@@ -539,7 +539,7 @@ void FileUtilsClient::parseLine(const QString& aLine)
 //==============================================================================
 // Destructor
 //==============================================================================
-FileUtilsClient::~FileUtilsClient()
+RemoteFileUtils::~RemoteFileUtils()
 {
     // Delete Socket
     deleteSocket();

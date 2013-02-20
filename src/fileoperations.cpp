@@ -7,6 +7,7 @@
 
 #include "fileoperations.h"
 #include "fileutils.h"
+#include "mainwindow.h"
 
 
 // IMPLEMENTAITON
@@ -15,19 +16,21 @@
 //==============================================================================
 // Constructor
 //==============================================================================
-FileOperationEntry::FileOperationEntry(const QString& aOpName, const QString& aSource, const QString& aTarget)
+FileOperationEntry::FileOperationEntry(FileOpQueueViewAPI* aHandler, const QString& aOpName, const QString& aSource, const QString& aTarget)
     : QObject(NULL)
+    , queueHandler(aHandler)
     , opIndex(-1)
     , opName(aOpName)
     , source(aSource)
     , target(aTarget)
+    , current(0)
+    , total(0)
     , opState(FOSIdle)
-/*
-    , running(false)
-    , done(false)
-    , failed(false)
-    , processed(false)
-*/
+//    , deleteDirAfter(false)
+    , parentDeleteObserver(NULL)
+    , parentCopyObserver(NULL)
+    , parentMoveObserver(NULL)
+    , parentRenameObserver(NULL)
 {
     // Check Operation Name
     if (opName == QString(PARAM_OPERATION_COPY)) {
@@ -56,19 +59,17 @@ FileOperationEntry::FileOperationEntry(const QString& aOpName, const QString& aS
 //==============================================================================
 // Constructor
 //==============================================================================
-FileOperationEntry::FileOperationEntry(const QString& aOperation)
+FileOperationEntry::FileOperationEntry(FileOpQueueViewAPI* aHandler, const QString& aOperation)
     : QObject(NULL)
+    , queueHandler(aHandler)
     , opIndex(-1)
     , opName(QString(""))
     , source(QString(""))
     , target(QString(""))
+    , current(0)
+    , total(0)
     , opState(FOSIdle)
-/*
-    , running(false)
-    , done(false)
-    , failed(false)
-    , processed(false)
-*/
+//    , deleteDirAfter(false)
 {
     //qDebug() << "Creating FileOperationEntry - aOperation: " << aOperation;
 
@@ -110,19 +111,17 @@ FileOperationEntry::FileOperationEntry(const QString& aOperation)
 //==============================================================================
 // Constructor
 //==============================================================================
-FileOperationEntry::FileOperationEntry(const int& aOpIndex, const QString& aSource, const QString& aTarget)
+FileOperationEntry::FileOperationEntry(FileOpQueueViewAPI* aHandler, const int& aOpIndex, const QString& aSource, const QString& aTarget)
     : QObject(NULL)
+    , queueHandler(aHandler)
     , opIndex(aOpIndex)
     , opName(QString(""))
     , source(aSource)
     , target(aTarget)
+    , current(0)
+    , total(0)
     , opState(FOSIdle)
-/*
-    , running(false)
-    , done(false)
-    , failed(false)
-    , processed(false)
-*/
+//    , deleteDirAfter(false)
 {
     // Switch Operation Index
     switch (opIndex) {
@@ -144,14 +143,6 @@ FileOperationEntry::FileOperationEntry(const int& aOpIndex, const QString& aSour
 int FileOperationEntry::getOperationIndex()
 {
     return opIndex;
-}
-
-//==============================================================================
-// Get Operation State
-//==============================================================================
-FileOperationState FileOperationEntry::getState()
-{
-    return opState;
 }
 
 //==============================================================================
@@ -184,6 +175,277 @@ QString FileOperationEntry::getTarget()
 QString FileOperationEntry::getOperation() const
 {
     return QString("%1%2%3%4%5").arg(opName).arg(FILE_OPERATIONS_TOKEN_SEPARATOR).arg(source).arg(FILE_OPERATIONS_TOKEN_SEPARATOR).arg(target);
+}
+
+//==============================================================================
+// Get Operation State
+//==============================================================================
+FileOperationState FileOperationEntry::getState()
+{
+    return opState;
+}
+
+//==============================================================================
+// Set Observers
+//==============================================================================
+void FileOperationEntry::setObservers(FileDeleteObserver* aDeleteObserver,
+                                      FileCopyObserver*   aCopyObserver,
+                                      FileMoveObserver*   aMoveObserver,
+                                      FileRenameObserver* aRenameObserver)
+{
+    qDebug() << "FileOperationEntry::setObservers - do: " << aDeleteObserver << " - co: " << aCopyObserver << " - mo: " << aMoveObserver << " - ro: " << aRenameObserver;
+    // Set Delete Observer
+    parentDeleteObserver = aDeleteObserver;
+    // Set Copy Observer
+    parentCopyObserver = aCopyObserver;
+    // Set Move Observer
+    parentMoveObserver = aMoveObserver;
+    // Set Rename Observer
+    parentRenameObserver = aRenameObserver;
+}
+
+//==============================================================================
+// Confirm Deletion Callback
+//==============================================================================
+int FileOperationEntry::confirmDeletion(const QString& aFilePath, const bool& aReadOnly, const bool& aNonEmpty)
+{
+    // Check Parent Observer
+    if (parentDeleteObserver)
+        return parentDeleteObserver->confirmDeletion(aFilePath, aReadOnly, aNonEmpty);
+
+    return (int)FOORTNo;
+}
+
+//==============================================================================
+// Deletion Error Callback
+//==============================================================================
+int FileOperationEntry::deleteError(const QString& aFilePath, const int& aErrorCode)
+{
+    // Check Parent Observer
+    if (parentDeleteObserver)
+        parentDeleteObserver->deleteError(aFilePath, aErrorCode);
+
+    return (int)FOORTIgnore;
+}
+
+//==============================================================================
+// Delete File Started Notification Callback
+//==============================================================================
+void FileOperationEntry::deleteFileStarted(const QString& aFilePath)
+{
+    // Check Parent Observer
+    if (parentDeleteObserver)
+        parentDeleteObserver->deleteFileStarted(aFilePath);
+}
+
+//==============================================================================
+// Delete File Finished Notification Callback
+//==============================================================================
+void FileOperationEntry::deleteFileFinished(const QString& aFilePath, const int& aErrorCode)
+{
+    // Check Parent Observer
+    if (parentDeleteObserver)
+        parentDeleteObserver->deleteFileFinished(aFilePath, aErrorCode);
+}
+
+//==============================================================================
+// Confirm OverWrite Callback
+//==============================================================================
+int FileOperationEntry::confirmCopyOverWrite(const QString& aSource, const QString& aTarget, const bool& aReadOnly)
+{
+    // Check Parent Observer
+    if (parentCopyObserver)
+        return parentCopyObserver->confirmCopyOverWrite(aSource, aTarget, aReadOnly);
+
+    return (int)FOORTNo;
+}
+
+//==============================================================================
+// Copy File Error Callback
+//==============================================================================
+int FileOperationEntry::copyError(const QString& aSource, const QString& aTarget, const int& aErrorCode)
+{
+    // Check Parent Observer
+    if (parentCopyObserver)
+        return parentCopyObserver->copyError(aSource, aTarget, aErrorCode);
+
+    return (int)FOORTIgnore;
+}
+
+//==============================================================================
+// Copy File Started Callback
+//==============================================================================
+void FileOperationEntry::copyStarted(const QString& aSource, const QString& aTarget)
+{
+    // Check Parent Observer
+    if (parentCopyObserver)
+        parentCopyObserver->copyStarted(aSource, aTarget);
+}
+
+//==============================================================================
+// Copy File Progress Callback
+//==============================================================================
+void FileOperationEntry::copyProgress(const QString& aSource, const QString& aTarget, const qint64& aCurrentSize, const qint64& aFullSize)
+{
+    // Set Current Progress
+    current = aCurrentSize;
+    // Set Total Progress
+    total = aFullSize;
+
+    // Check Parent Queue Handler
+    if (queueHandler) {
+        // Notify Queue Handler
+        queueHandler->operationEntryUpdated(opIndex);
+    }
+
+    // Check Parent Observer
+    if (parentCopyObserver) {
+        parentCopyObserver->copyProgress(aSource, aTarget, aCurrentSize, aFullSize);
+    }
+}
+
+//==============================================================================
+// Copy File Finished Callback
+//==============================================================================
+void FileOperationEntry::copyFinished(const QString& aSource, const QString& aTarget, const int& aErrorCode)
+{
+    // Check Parent Observer
+    if (parentCopyObserver)
+        parentCopyObserver->copyFinished(aSource, aTarget, aErrorCode);
+}
+
+//==============================================================================
+// Confirm OverWrite Callback
+//==============================================================================
+int FileOperationEntry::confirmMoveOverWrite(const QString& aSource, const QString& aTarget, const bool& aReadOnly)
+{
+    // Check Parent Observer
+    if (parentMoveObserver)
+        return parentMoveObserver->confirmMoveOverWrite(aSource, aTarget, aReadOnly);
+
+    return (int)FOORTNo;
+}
+
+//==============================================================================
+// Confirm Source Deletion Callback
+//==============================================================================
+int FileOperationEntry::confirmMoveDeletion(const QString& aSource, const bool& aReadOnly, const bool& aNonEmpty)
+{
+    // Check Parent Observer
+    if (parentMoveObserver)
+        return parentMoveObserver->confirmMoveDeletion(aSource, aReadOnly, aNonEmpty);
+
+    return (int)FOORTNo;
+}
+
+//==============================================================================
+// Rename/Move File Error Callback
+//==============================================================================
+int FileOperationEntry::moveError(const QString& aSource, const QString& aTarget, const int& aErrorCode)
+{
+    // Check Parent Observer
+    if (parentMoveObserver)
+        return parentMoveObserver->moveError(aSource, aTarget, aErrorCode);
+
+    return (int)FOORTIgnore;
+}
+
+//==============================================================================
+// Rename/Move File Started Callback
+//==============================================================================
+void FileOperationEntry::moveStarted(const QString& aSource, const QString& aTarget)
+{
+    // Check Parent Observer
+    if (parentMoveObserver)
+        parentMoveObserver->moveStarted(aSource, aTarget);
+}
+
+//==============================================================================
+// Renamve/Move File Progress Callback
+//==============================================================================
+void FileOperationEntry::moveProgress(const QString& aSource, const QString& aTarget, const qint64& aCurrentSize, const qint64& aFullSize)
+{
+    // Set Current Progress
+    current = aCurrentSize;
+    // Set Total Progress
+    total = aFullSize;
+
+    // Check Parent Queue Handler
+    if (queueHandler) {
+        // Notify Queue Handler
+        queueHandler->operationEntryUpdated(opIndex);
+    }
+
+    // Check Parent Observer
+    if (parentMoveObserver) {
+        parentMoveObserver->moveProgress(aSource, aTarget, aCurrentSize, aFullSize);
+    }
+}
+
+//==============================================================================
+// Rename/Move File Finished Callback
+//==============================================================================
+void FileOperationEntry::moveFinished(const QString& aSource, const QString& aTarget, const int& aErrorCode)
+{
+    // Check Parent Observer
+    if (parentMoveObserver)
+        parentMoveObserver->moveFinished(aSource, aTarget, aErrorCode);
+}
+
+//==============================================================================
+// Confirm OverWrite Callback
+//==============================================================================
+int FileOperationEntry::confirmRenameOverWrite(const QString& aSource, const QString& aTarget, const bool& aReadOnly)
+{
+    // Check Parent Observer
+    if (parentRenameObserver)
+        return parentRenameObserver->confirmRenameOverWrite(aSource, aTarget, aReadOnly);
+
+    return (int)FOORTNo;
+}
+
+//==============================================================================
+// Confirm Source Deletion Callback
+//==============================================================================
+int FileOperationEntry::confirmRenameDeletion(const QString& aSource, const bool& aReadOnly, const bool& aNonEmpty)
+{
+    // Check Parent Observer
+    if (parentRenameObserver)
+        parentRenameObserver->confirmRenameDeletion(aSource, aReadOnly, aNonEmpty);
+
+    return (int)FOORTNo;
+}
+
+//==============================================================================
+// Rename File Error Callback
+//==============================================================================
+int FileOperationEntry::renameError(const QString& aSource, const QString& aTarget, const int& aErrorCode)
+{
+    // Check Parent Observer
+    if (parentRenameObserver)
+        return parentRenameObserver->renameError(aSource, aTarget, aErrorCode);
+
+    return (int)FOORTIgnore;
+}
+
+//==============================================================================
+// Rename File Started Callback
+//==============================================================================
+void FileOperationEntry::renameStarted(const QString& aSource, const QString& aTarget)
+{
+    // Check Parent Observer
+    if (parentRenameObserver)
+        parentRenameObserver->renameStarted(aSource, aTarget);
+}
+
+//==============================================================================
+// Rename File Finished Callback
+//==============================================================================
+void FileOperationEntry::renameFinished(const QString& aSource, const QString& aTarget, const int& aErrorCode)
+{
+    // Check Parent Observer
+    if (parentRenameObserver)
+        parentRenameObserver->renameFinished(aSource, aTarget, aErrorCode);
 }
 
 //==============================================================================

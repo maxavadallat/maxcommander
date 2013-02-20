@@ -27,13 +27,11 @@ MainQueueDialog::MainQueueDialog(QWidget* parent)
     , clearButton(NULL)
     , paused(false)
     , qFinished(false)
-    , opQueue(NULL)
-
+    , opQueueHandler(NULL)
     , infoDialog(NULL)
     , deleteConfirmDialog(NULL)
     , overWriteConfirmDialog(NULL)
     , errorDialog(NULL)
-
 {
     qDebug() << "Creating MainQueueDialog...";
 
@@ -58,6 +56,7 @@ MainQueueDialog::MainQueueDialog(QWidget* parent)
 
     // Create Info Dialog - MUST BE DONE IN UI THREAD CONTEXT!
     infoDialog = new InfoDialog();
+
 
 
     // Create Delete Confirmation Dialog - MUST BE DONE IN UI THREAD CONTEXT!
@@ -121,22 +120,22 @@ void MainQueueDialog::addOperationEntry(FileOperationEntry* aEntry)
         qDebug() << "MainQueueDialog::addOperationEntry - aEntry: " << aEntry;
 
         // Check Operation Queue
-        if (!opQueue) {
+        if (!opQueueHandler) {
             // Create Operation Queue
-            opQueue = new FileOperationQueue(this, NULL, this, this, this, this);
+            opQueueHandler = new FileOpQueueHandler(this, NULL, this, this, this, this);
 
             // Connect Signals
-            connect(opQueue, SIGNAL(opStarted()), this, SLOT(opQueueStarted()));
-            connect(opQueue, SIGNAL(opStopped()), this, SLOT(opQueueStopped()));
-            connect(opQueue, SIGNAL(opFinished()), this, SLOT(opQueueFinished()));
+            connect(opQueueHandler, SIGNAL(opStarted()), this, SLOT(opQueueStarted()));
+            connect(opQueueHandler, SIGNAL(opStopped()), this, SLOT(opQueueStopped()));
+            connect(opQueueHandler, SIGNAL(opFinished()), this, SLOT(opQueueFinished()));
 
-            connect(opQueue, SIGNAL(operationAdded(int,int)), this, SLOT(operationAdded(int,int)));
-            connect(opQueue, SIGNAL(operationStarted(int)), this, SLOT(operationStarted(int)));
-            connect(opQueue, SIGNAL(operationCompleted(int)), this, SLOT(operationCompleted(int)));
+            connect(opQueueHandler, SIGNAL(operationAdded(int,int)), this, SLOT(operationAdded(int,int)));
+            connect(opQueueHandler, SIGNAL(operationStarted(int)), this, SLOT(operationStarted(int)));
+            connect(opQueueHandler, SIGNAL(operationCompleted(int)), this, SLOT(operationCompleted(int)));
         }
 
         // Add Entry
-        opQueue->addOperation(aEntry);
+        opQueueHandler->addOperation(aEntry);
     }
 }
 
@@ -146,10 +145,10 @@ void MainQueueDialog::addOperationEntry(FileOperationEntry* aEntry)
 void MainQueueDialog::removeOperationEntry(const int& aIndex)
 {
     // Check Operation Queue
-    if (opQueue) {
+    if (opQueueHandler) {
         qDebug() << "MainQueueDialog::removeOperationEntry - aIndex: " << aIndex;
         // Remove Entry
-        opQueue->removeOperation(aIndex);
+        opQueueHandler->removeOperation(aIndex);
     }
 }
 
@@ -159,8 +158,8 @@ void MainQueueDialog::removeOperationEntry(const int& aIndex)
 int MainQueueDialog::opEntryCount()
 {
     // Check Operations Queue
-    if (opQueue) {
-        return opQueue->count();
+    if (opQueueHandler) {
+        return opQueueHandler->count();
     }
 
     return 0;
@@ -172,8 +171,8 @@ int MainQueueDialog::opEntryCount()
 FileOperationEntry* MainQueueDialog::getOperationEntry(const int& aIndex)
 {
     // Check Operations Queue
-    if (opQueue) {
-        return opQueue->getOperation(aIndex);
+    if (opQueueHandler) {
+        return opQueueHandler->getOperation(aIndex);
     }
 
     return NULL;
@@ -185,14 +184,14 @@ FileOperationEntry* MainQueueDialog::getOperationEntry(const int& aIndex)
 void MainQueueDialog::processQueue()
 {
     // Check Operation Queue
-    if (opQueue) {
+    if (opQueueHandler) {
         // Get Operations Count
-        int qCount =  opQueue->count();
+        int qCount =  opQueueHandler->count();
 
         qDebug() << "MainQueueDialog::processQueue - qCount: " << qCount;
 
         // Process Queue
-        opQueue->processQueue();
+        opQueueHandler->processQueue();
     }
 }
 
@@ -239,7 +238,27 @@ void MainQueueDialog::operationEntryAdded(const int& aIndex, const int& aCount)
 {
     qDebug() << "MainQueueDialog::operationEntryAdded - aIndex: " << aIndex << " - aCount: " << aCount;
 
+    // ...
+}
 
+//==============================================================================
+// Operation Entry Removed Callback - SIGNALS DON'T WORK
+//==============================================================================
+void MainQueueDialog::operationEntryRemoved(const int& aIndex, const int& aCount)
+{
+    qDebug() << "MainQueueDialog::operationEntryRemoved - aIndex: " << aIndex << " - aCount: " << aCount;
+
+    // ...
+}
+
+//==============================================================================
+// Operation Entry Updated Callback - SIGNALS DON'T WORK
+//==============================================================================
+void MainQueueDialog::operationEntryUpdated(const int& aIndex)
+{
+    qDebug() << "MainQueueDialog::operationEntryUpdated - aIndex: " << aIndex;
+
+    // ...
 }
 
 //==============================================================================
@@ -258,6 +277,8 @@ void MainQueueDialog::resetProgress()
         // Reset Value
         ui->queueProgress->setValue(0);
     }
+
+    // ...
 }
 
 //==============================================================================
@@ -350,27 +371,13 @@ void MainQueueDialog::abort()
     qDebug() << "MainQueueDialog::abort";
 
     // Check Operation Queue
-    if (opQueue) {
+    if (opQueueHandler) {
         // Abort
-        opQueue->stop();
-    }
-/*
-    // Check Abort Button
-    if (abortButton) {
-        // Set Text
-        //abortButton->setText(QString());
-        // Set Abort Button Enabled State
-        abortButton->setEnabled(false);
+        opQueueHandler->stop();
     }
 
-    // Check Pause Button
-    if (pauseButton) {
-        // Set Pause Button Enabled State
-        pauseButton->setEnabled(false);
-    }
-*/
     // Configure Buttons
-    //configureButtons();
+    configureButtons();
 
     // ...
 }
@@ -388,9 +395,9 @@ void MainQueueDialog::pause()
     pauseButton->setText(QString(DEFAULT_BUTTON_TEXT_RESUME));
 
     // Check Operation Queue
-    if (opQueue) {
+    if (opQueueHandler) {
         // Pause
-        opQueue->pause();
+        opQueueHandler->pause();
     }
 
     // ...
@@ -409,9 +416,9 @@ void MainQueueDialog::resume()
     pauseButton->setText(QString(DEFAULT_BUTTON_TEXT_PAUSE));
 
     // Check Operation Queue
-    if (opQueue) {
+    if (opQueueHandler) {
         // Resume
-        opQueue->resume();
+        opQueueHandler->resume();
     }
 
     // ...
@@ -436,6 +443,8 @@ void MainQueueDialog::clear()
     if (ui && ui->queueProgress) {
         // Set Current Progress
         ui->queueProgress->setValue(0);
+        // Set Mminimum Value
+        ui->queueProgress->setMinimum(0);
         // Set Maximum Value
         ui->queueProgress->setMaximum(0);
     }
@@ -443,11 +452,11 @@ void MainQueueDialog::clear()
     // ...
 
     // Check Operation Queue
-    if (opQueue) {
+    if (opQueueHandler) {
         // Stop Queue
-        opQueue->stop();
+        opQueueHandler->stop();
         // Clear
-        opQueue->clear();
+        opQueueHandler->clear();
     }
 
     // Configure Buttons
@@ -463,7 +472,7 @@ void MainQueueDialog::configureButtons()
 {
     // Check UI
     if (ui && ui->mainQueueList) {
-        qDebug() << "MainQueueDialog::clear";
+        qDebug() << "MainQueueDialog::configureButtons";
 
         // Init Pause Enabled
         bool pauseEnabled = (ui->mainQueueList->count() > 0);
@@ -473,7 +482,7 @@ void MainQueueDialog::configureButtons()
         bool clearEnabled = (ui->mainQueueList->count() > 0);
 
         // Check Finished State
-        if (qFinished || (opQueue && opQueue->stopping())) {
+        if (qFinished || (opQueueHandler && opQueueHandler->stopping())) {
             // Set Pause Enabled
             pauseEnabled = false;
             // Set Abort Enabled
@@ -594,9 +603,48 @@ void MainQueueDialog::deleteFileFinished(const QString& aFilePath, const int& aE
 //==============================================================================
 int MainQueueDialog::confirmCopyOverWrite(const QString& aSource, const QString& aTarget, const bool& aReadOnly)
 {
+    // Check Copy Overwrite Confirm Dialog
+    if (!overWriteConfirmDialog) {
+        return (int)FOORTNo;
+    }
+
     qDebug() << "MainQueueDialog::confirmCopyOverWrite - aSource: " << aSource << " - aTarget: " << aTarget << " - aReadOnly: " << aReadOnly;
 
-    // ...
+    // Check Read Only Flag
+    if (aReadOnly) {
+        // Set Dialog Text
+        overWriteConfirmDialog->setConfirmMsg(QString(DEFAULT_DIALOG_TEXT_OVERWRITE_CONFIRM_READONLY).arg(aTarget));
+    } else {
+        // Set Dialog Text
+        overWriteConfirmDialog->setConfirmMsg(QString(DEFAULT_DIALOG_TEXT_OVERWRITE_CONFIRM).arg(aTarget));
+    }
+
+    // Get Main Window Instance
+    MainWindow* mainWindow = MainWindow::getInstance();
+
+    // Check Main Window Instance
+    if (mainWindow) {
+
+        // Init Confirm Event Loop
+        QEventLoop ceLoop;
+
+        // Connect Signal
+        connect(this, SIGNAL(showConfirmation(ConfirmDialogProvider*,int,QEventLoop*)), mainWindow, SLOT(showConfirmation(ConfirmDialogProvider*,int,QEventLoop*)));
+        // Emit Show Confirm Signal
+        emit showConfirmation(this, aReadOnly ? ECTOverWriteReadOnly : ECTOverWrite, &ceLoop);
+        // Disconnect Signal
+        disconnect(this, SIGNAL(showConfirmation(ConfirmDialogProvider*,int,QEventLoop*)), mainWindow, SLOT(showConfirmation(ConfirmDialogProvider*,int,QEventLoop*)));
+
+        // Start Confirm Event Loop
+        int result = ceLoop.exec();
+
+        qDebug() << "MainQueueDialog::confirmCopyOverWrite - aTarget: " << aTarget << " - result: " << result;
+
+        // Release Main Window Instance
+        mainWindow->release();
+
+        return result;
+    }
 
     return (int)FOORTNo;
 }
@@ -614,6 +662,23 @@ int MainQueueDialog::copyError(const QString& aSource, const QString& aTarget, c
     }
 
     // Switch Error Code
+    switch (aErrorCode) {
+
+#if defined (Q_OS_WIN)
+        case ERROR_INVALID_PARAMETER:
+#elif defined (Q_OS_MAC) || defined (Q_OS_UNIX)
+            // Set Last Error Manually
+        case EINVAL:
+#endif // Q_OS_MAC || Q_OS_UNIX
+            // Set Dialog Title
+            errorDialog->setTitle(QString(DEFUALT_DIALOG_TITLE_COPY_ERROR));
+            // Set Dialog Text
+            errorDialog->setConfirmMsg(QString(DEFAULT_DIALOG_TEXT_ERROR_TARGET_SAME).arg(aTarget));
+        break;
+
+        default:
+        break;
+    }
 
     // Set Error Dialog Text
 
@@ -626,18 +691,23 @@ int MainQueueDialog::copyError(const QString& aSource, const QString& aTarget, c
         // Init Error Event Loop
         QEventLoop eeLoop;
 
-        // Connect Show Error Signal
-
+        // Connect Signal
+        connect(this, SIGNAL(showError(ErrorDialogProvider*,int,QEventLoop*)), mainWindow, SLOT(showError(ErrorDialogProvider*,int,QEventLoop*)));
         // Emit Show Error Signal
+        emit showError(this, aErrorCode, &eeLoop);
+        // Disconnect Signal
+        disconnect(this, SIGNAL(showError(ErrorDialogProvider*,int,QEventLoop*)), mainWindow, SLOT(showError(ErrorDialogProvider*,int,QEventLoop*)));
 
-        // Disconnect Show Error Signal
+        // Start Confirm Event Loop
+        int result = eeLoop.exec();
 
-        // Start Error Dialog Event Loop
+        qDebug() << "MainQueueDialog::copyError - aTarget: " << aTarget << " - result: " << result;
 
         // Release Main Window Instance
         mainWindow->release();
 
         // Return Result
+        return result;
     }
 
     return (int)FOORTIgnore;
@@ -796,6 +866,34 @@ void MainQueueDialog::renameFinished(const QString& aSource, const QString& aTar
 }
 
 //==============================================================================
+// Launch Info Dialog - MUST BE CALLED FROM GUI THREAD CONTEXT
+//==============================================================================
+int MainQueueDialog::launchInfo(const int& aType)
+{
+    qDebug() << "MainQueueDialog::launchInfo - aType: " << aType;
+
+    int result = (int)FOORTNo;
+
+    // ...
+
+    return result;
+}
+
+//==============================================================================
+// Exit Info Dialog
+//==============================================================================
+void MainQueueDialog::exitInfo(QEventLoop* aEventLoop, const int& aResult)
+{
+    qDebug() << "MainQueueDialog::exitInfo - aEventLoop: " << aEventLoop << " - aResult: " << aResult;
+
+    // Check Event Loop
+    if (aEventLoop) {
+        // Exit Event Loop
+        aEventLoop->exit(aResult);
+    }
+}
+
+//==============================================================================
 // Launch Confirmation Dialog - MUST BE CALLED FROM GUI THREAD CONTEXT
 //==============================================================================
 int MainQueueDialog::launchConfirm(const int& aType)
@@ -839,6 +937,74 @@ int MainQueueDialog::launchConfirm(const int& aType)
 void MainQueueDialog::exitConfirm(QEventLoop* aEventLoop, const int& aResult)
 {
     qDebug() << "MainQueueDialog::exitConfirm - aEventLoop: " << aEventLoop << " - aResult: " << aResult;
+
+    // Check Event Loop
+    if (aEventLoop) {
+        // Exit Event Loop
+        aEventLoop->exit(aResult);
+    }
+}
+
+//==============================================================================
+// Launch Confirmation Dialog - MUST BE CALLED FROM GUI THREAD CONTEXT
+//==============================================================================
+int MainQueueDialog::launchError(const int& aErrorCode)
+{
+    qDebug() << "MainQueueDialog::launchError - aErrorCode: " << aErrorCode;
+
+    // Init result
+    int result = (int)FOORTIgnore;
+
+    // Check Error Dialog
+    if (errorDialog) {
+
+        // Set Up Buttons
+
+        // Switch Error Code
+        switch (aErrorCode) {
+#if defined (Q_OS_WIN)
+            case ERROR_INVALID_PARAMETER:
+#elif defined (Q_OS_MAC) || defined (Q_OS_UNIX)
+            case EINVAL:
+#endif // Q_OS_MAC || Q_OS_UNIX
+                // Clear Default Buttons
+                errorDialog->clearButtons();
+                // Add Dialog Buttons - MUST BE DONE IN UI THREAD CONTEXT!
+                errorDialog->addButton(QString(DEFAULT_BUTTON_TEXT_RENAME), QDialogButtonBox::ActionRole, (int)FOORTRename);
+                errorDialog->addButton(QString(DEFAULT_BUTTON_TEXT_IGNORE), QDialogButtonBox::ActionRole, (int)FOORTIgnore);
+                errorDialog->addButton(QString(DEFAULT_BUTTON_TEXT_IGNOREALL), QDialogButtonBox::ActionRole, (int)FOORTIgnoreAll);
+                errorDialog->addButton(QString(DEFAULT_BUTTON_TEXT_ABORT), QDialogButtonBox::ActionRole, (int)FOORTAbort);
+            break;
+
+            default:
+
+                // Clear Default Buttons
+                errorDialog->clearButtons();
+                // Add Dialog Buttons - MUST BE DONE IN UI THREAD CONTEXT!
+                errorDialog->addButton(QString(DEFAULT_BUTTON_TEXT_RETRY), QDialogButtonBox::ActionRole, (int)FOORTRetry, true);
+                errorDialog->addButton(QString(DEFAULT_BUTTON_TEXT_ASADMIN), QDialogButtonBox::ActionRole, (int)FOORTAsRoot);
+                errorDialog->addButton(QString(DEFAULT_BUTTON_TEXT_IGNORE), QDialogButtonBox::ActionRole, (int)FOORTIgnore);
+                errorDialog->addButton(QString(DEFAULT_BUTTON_TEXT_IGNOREALL), QDialogButtonBox::ActionRole, (int)FOORTIgnoreAll);
+                errorDialog->addButton(QString(DEFAULT_BUTTON_TEXT_ABORT), QDialogButtonBox::ActionRole, (int)FOORTAbort);
+
+            break;
+        }
+
+        // ...
+
+        // Exec Error Dialog
+        result = errorDialog->exec();
+    }
+
+    return result;
+}
+
+//==============================================================================
+// Exit Error Dialog
+//==============================================================================
+void MainQueueDialog::exitError(QEventLoop* aEventLoop, const int& aResult)
+{
+    qDebug() << "MainQueueDialog::exitError - aEventLoop: " << aEventLoop << " - aResult: " << aResult;
 
     // Check Event Loop
     if (aEventLoop) {
@@ -949,9 +1115,9 @@ void MainQueueDialog::opQueueFinished()
 void MainQueueDialog::operationAdded(const int& aIndex, const int& aCount)
 {
     // Check UI
-    if (ui && ui->mainQueueList && opQueue) {
+    if (ui && ui->mainQueueList && opQueueHandler) {
         // Get Entry
-        FileOperationEntry* newEntry = opQueue->getOperation(aIndex);
+        FileOperationEntry* newEntry = opQueueHandler->getOperation(aIndex);
         // Check Entry
         if (newEntry) {
             qDebug() << "MainQueueDialog::operationAdded - aIndex: " << aIndex << " - aCount: " << aCount << " - newEntry: " << newEntry->getSource();
@@ -989,12 +1155,15 @@ void MainQueueDialog::operationAdded(const int& aIndex, const int& aCount)
                 ui->mainQueueList->insertItem(aIndex, newWidgetItem);
             }
         }
-
+/*
         // Check UI
         if (ui->queueProgress) {
             // Set Max Value
             ui->queueProgress->setMaximum(ui->mainQueueList->count());
         }
+*/
+        // Set Main Queue Progress Bar Max Value
+        setMaxValue(ui->mainQueueList->count());
 
         // Configure Buttons
         configureButtons();
@@ -1019,12 +1188,15 @@ void MainQueueDialog::operationRemoved(const int& aIndex, const int& aCount)
             // Remove Item Widget
             ui->mainQueueList->removeItemWidget(item);
         }
-
+/*
         // Check UI
         if (ui->queueProgress) {
             // Set Max Value
             ui->queueProgress->setMaximum(ui->mainQueueList->count());
         }
+*/
+        // Set Main Queue Progress Bar Max Value
+        setMaxValue(ui->mainQueueList->count());
     }
 }
 
@@ -1085,6 +1257,44 @@ void MainQueueDialog::operationStopped(const int& aIndex)
 }
 
 //==============================================================================
+// Operation Updated Slot
+//==============================================================================
+void MainQueueDialog::operationUpdated(const int& aIndex)
+{
+    qDebug() << "MainQueueDialog::operationUpdated - aIndex: " << aIndex;
+
+    // Check UI
+    if (ui && ui->mainQueueList && opQueueHandler) {
+        // get Main Queue List Count
+        int mqCount = ui->mainQueueList->count();
+        // Check Index
+        if (aIndex >= 0 && aIndex < mqCount) {
+            // Get Item
+            QListWidgetItem* item = ui->mainQueueList->item(aIndex);
+            // Get Operation Entry
+            FileOperationEntry* opEntry = opQueueHandler->getOperation(aIndex);
+            // Check Item
+            if (item && opEntry) {
+                // Get Font
+                QFont itemFont = item->font();
+                // set Bold state
+                itemFont.setBold(false);
+                // Set Item Font
+                item->setFont(itemFont);
+
+                // Init Status String
+                QString statusString = QString("");
+
+                // Compose Status String
+
+                // Update Item Text
+                item->setText(item->text() + statusString);
+            }
+        }
+    }
+}
+
+//==============================================================================
 // Operation Completed Slot
 //==============================================================================
 void MainQueueDialog::operationCompleted(const int& aIndex)
@@ -1095,15 +1305,17 @@ void MainQueueDialog::operationCompleted(const int& aIndex)
     addToProgress(1);
 
     // Check UI
-    if (ui && ui->mainQueueList) {
+    if (ui && ui->mainQueueList && opQueueHandler) {
         // get Main Queue List Count
         int mqCount = ui->mainQueueList->count();
         // Check Index
         if (aIndex >= 0 && aIndex < mqCount) {
             // Get Item
             QListWidgetItem* item = ui->mainQueueList->item(aIndex);
+            // Get Operation Entry
+            FileOperationEntry* opEntry = opQueueHandler->getOperation(aIndex);
             // Check Item
-            if (item) {
+            if (item && opEntry) {
                 // Get Font
                 QFont itemFont = item->font();
                 // set Bold state
@@ -1111,8 +1323,19 @@ void MainQueueDialog::operationCompleted(const int& aIndex)
                 // Set Item Font
                 item->setFont(itemFont);
 
+                // Init Status String
+                QString statusString = QString("");
+
+                // Switch Entry State
+                switch (opEntry->getState()) {
+                    default:
+                    case FOSDone:       statusString = QString(FILE_OPERATION_DONE);    break;
+                    case FOSSkipped:    statusString = QString(FILE_OPERATION_SKIPPED); break;
+                    case FOSFailed:     statusString = QString(FILE_OPERATION_FAILED);  break;
+                }
+
                 // Update Item Text
-                item->setText(item->text() + QString(FILE_OPERATION_DONE));
+                item->setText(item->text() + statusString);
             }
         }
     }
@@ -1159,10 +1382,10 @@ MainQueueDialog::~MainQueueDialog()
     }
 
     // Check Operation Queue
-    if (opQueue) {
+    if (opQueueHandler) {
         // Delete Operations Queue
-        delete opQueue;
-        opQueue = NULL;
+        delete opQueueHandler;
+        opQueueHandler = NULL;
     }
 
     // Delete UI

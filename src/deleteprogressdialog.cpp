@@ -23,7 +23,7 @@ DeleteProgressDialog::DeleteProgressDialog(QWidget* aParent)
     , abortButton(NULL)
     , clearButton(NULL)
     , paused(false)
-    , opQueue(NULL)
+    , opQueueHandler(NULL)
 {
     qDebug() << "Creating DeleteProgressDialog...";
 
@@ -62,13 +62,13 @@ void DeleteProgressDialog::addOperationEntry(FileOperationEntry* aEntry)
         qDebug() << "DeleteProgressDialog::addOperationEntry";
 
         // Check Operation Queue
-        if (!opQueue) {
+        if (!opQueueHandler) {
             // Create Operation Queue
-            opQueue = new FileOperationQueue(this);
+            opQueueHandler = new FileOpQueueHandler(this);
         }
 
         // Add Entry
-        opQueue->addOperation(aEntry);
+        opQueueHandler->addOperation(aEntry);
 
         // Check UI
         if (ui && ui->detailsList) {
@@ -87,10 +87,10 @@ void DeleteProgressDialog::addOperationEntry(FileOperationEntry* aEntry)
 void DeleteProgressDialog::removeOperationEntry(const int& aIndex)
 {
     // Check Operation Queue
-    if (opQueue) {
+    if (opQueueHandler) {
         qDebug() << "DeleteProgressDialog::removeOperationEntry - aIndex: " << aIndex;
         // Remove Entry
-        opQueue->removeOperation(aIndex);
+        opQueueHandler->removeOperation(aIndex);
     }
 }
 
@@ -100,8 +100,8 @@ void DeleteProgressDialog::removeOperationEntry(const int& aIndex)
 int DeleteProgressDialog::opEntryCount()
 {
     // Check Operations Queue
-    if (opQueue) {
-        return opQueue->count();
+    if (opQueueHandler) {
+        return opQueueHandler->count();
     }
 
     return 0;
@@ -113,8 +113,8 @@ int DeleteProgressDialog::opEntryCount()
 FileOperationEntry* DeleteProgressDialog::getOperationEntry(const int& aIndex)
 {
     // Check Operations Queue
-    if (opQueue) {
-        return opQueue->getOperation(aIndex);
+    if (opQueueHandler) {
+        return opQueueHandler->getOperation(aIndex);
     }
 
     return NULL;
@@ -173,7 +173,27 @@ void DeleteProgressDialog::operationEntryAdded(const int& aIndex, const int& aCo
 {
     qDebug() << "DeleteProgressDialog::operationEntryAdded - aIndex: " << aIndex << " - aCount: " << aCount;
 
+    // ...
+}
 
+//==============================================================================
+// Operation Entry Removed Callback - SIGNALS DON'T WORK
+//==============================================================================
+void DeleteProgressDialog::operationEntryRemoved(const int& aIndex, const int& aCount)
+{
+    qDebug() << "DeleteProgressDialog::operationEntryRemoved - aIndex: " << aIndex << " - aCount: " << aCount;
+
+    // ...
+}
+
+//==============================================================================
+// Operation Entry Updated Callback - SIGNALS DON'T WORK
+//==============================================================================
+void DeleteProgressDialog::operationEntryUpdated(const int& aIndex)
+{
+    qDebug() << "DeleteProgressDialog::operationEntryUpdated - aIndex: " << aIndex;
+
+    // ...
 }
 
 //==============================================================================
@@ -413,10 +433,10 @@ DeleteProgressDialog::~DeleteProgressDialog()
     // Clear
     clear();
     // Check Operation Queue
-    if (opQueue) {
+    if (opQueueHandler) {
         // Delete Operations Queue
-        delete opQueue;
-        opQueue = NULL;
+        delete opQueueHandler;
+        opQueueHandler = NULL;
     }
     // Delete UI
     delete ui;

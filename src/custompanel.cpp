@@ -264,16 +264,8 @@ void CustomPanel::loadSettings()
 
             // Set Show Hidden Files
             ui->fileList->setShowHiddenFiles(showHidden, false);
-            // Get Last Saved Dir
-            QString lastSavedDir = settings->getValue(QString(SETTINGS_KEY_LASTDIR), defaultDir).toString();
-            // Check Last Saved Dir
-            if (lastSavedDir.isEmpty()) {
-                // Set Current Dir
-                ui->fileList->setCurrentDir(defaultDir, false);
-            } else {
-                // Set Current Dir
-                ui->fileList->setCurrentDir(lastSavedDir, false);
-            }
+            // Set Current Dir
+            ui->fileList->setCurrentDir(settings->getValue(QString(SETTINGS_KEY_LASTDIR), defaultDir).toString(), false);
         }
 
         // Check UI
@@ -461,7 +453,7 @@ void CustomPanel::fileListFocusChanged(const QString& aPanelName, const bool& aF
 {
     // Check Active State
     if (active != aFocused && panelName == aPanelName) {
-        qDebug() << "CustomPanel::fileListFocusChanged - panelName: " << panelName << " - aFocused: " << aFocused;
+        //qDebug() << "CustomPanel::fileListFocusChanged - panelName: " << panelName << " - aFocused: " << aFocused;
 
         // Set Active State
         active = aFocused;

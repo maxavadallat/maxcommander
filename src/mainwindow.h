@@ -35,7 +35,7 @@ class TreeWindow;
 class AboutDialog;
 class MainQueueDialog;
 class AdminPassDialog;
-class FileUtilsClient;
+class RemoteFileUtils;
 class AdminPassQueryProvider;
 
 
@@ -192,7 +192,7 @@ protected:
     //! @param aCurrFileName Current File Name In Source Panel
     //! @param aTargetFileName Target File Name In Source Panel
     void addItemsToQueue(const int& aOperation,
-                         FileOperationQueueHandler* aQueueHandler,
+                         FileOpQueueViewAPI* aQueueHandler,
                          const int& aSourcePanelIndex,
                          const int& aSelCount = 0,
                          const QString& aCurrFileName = QString(""),
@@ -221,7 +221,7 @@ protected:
     //! @brief Get File Utils Client
     //! @param aAdminPass Admin Password
     //! @return File Utils Client
-    virtual FileUtilsClient* getUtilsClient(const QString& aAdminPass);
+    virtual RemoteFileUtils* getUtilsClient(const QString& aAdminPass);
 
     //! @brief Destructor
     //! @param none
@@ -439,7 +439,7 @@ protected: // Data
     QList<QDialog*>     dialogs;
 
     //! File Util Client For Remote Worker Process
-    FileUtilsClient*    fileUtilsClient;
+    RemoteFileUtils*    fileUtilsClient;
 };
 
 #endif // MAINWINDOW_H

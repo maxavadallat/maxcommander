@@ -23,7 +23,7 @@ CopyProgressDialog::CopyProgressDialog(QWidget* aParent)
     , abortButton(NULL)
     , clearButton(NULL)
     , paused(false)
-    , opQueue(NULL)
+    , opQueueHandler(NULL)
 {
     qDebug() << "Creating CopyProgressDialog...";
 
@@ -62,13 +62,13 @@ void CopyProgressDialog::addOperationEntry(FileOperationEntry* aEntry)
         qDebug() << "CopyProgressDialog::addOperationEntry";
 
         // Check Operation Queue
-        if (!opQueue) {
+        if (!opQueueHandler) {
             // Create Operation Queue
-            opQueue = new FileOperationQueue(this);
+            opQueueHandler = new FileOpQueueHandler(this);
         }
 
         // Add Entry
-        opQueue->addOperation(aEntry);
+        opQueueHandler->addOperation(aEntry);
 
         // Check UI
         if (ui && ui->detailsList) {
@@ -88,10 +88,10 @@ void CopyProgressDialog::addOperationEntry(FileOperationEntry* aEntry)
 void CopyProgressDialog::removeOperationEntry(const int& aIndex)
 {
     // Check Operation Queue
-    if (opQueue) {
+    if (opQueueHandler) {
         qDebug() << "CopyProgressDialog::removeOperationEntry - aIndex: " << aIndex;
         // Remove Entry
-        opQueue->removeOperation(aIndex);
+        opQueueHandler->removeOperation(aIndex);
     }
 }
 
@@ -101,8 +101,8 @@ void CopyProgressDialog::removeOperationEntry(const int& aIndex)
 int CopyProgressDialog::opEntryCount()
 {
     // Check Operations Queue
-    if (opQueue) {
-        return opQueue->count();
+    if (opQueueHandler) {
+        return opQueueHandler->count();
     }
 
     return 0;
@@ -114,8 +114,8 @@ int CopyProgressDialog::opEntryCount()
 FileOperationEntry* CopyProgressDialog::getOperationEntry(const int& aIndex)
 {
     // Check Operations Queue
-    if (opQueue) {
-        return opQueue->getOperation(aIndex);
+    if (opQueueHandler) {
+        return opQueueHandler->getOperation(aIndex);
     }
 
     return NULL;
@@ -174,8 +174,29 @@ void CopyProgressDialog::operationEntryAdded(const int& aIndex, const int& aCoun
 {
     qDebug() << "CopyProgressDialog::operationEntryAdded - aIndex: " << aIndex << " - aCount: " << aCount;
 
-
+    // ...
 }
+
+//==============================================================================
+// Operation Entry Removed Callback - SIGNALS DON'T WORK
+//==============================================================================
+void CopyProgressDialog::operationEntryRemoved(const int& aIndex, const int& aCount)
+{
+    qDebug() << "CopyProgressDialog::operationEntryRemoved - aIndex: " << aIndex << " - aCount: " << aCount;
+
+    // ...
+}
+
+//==============================================================================
+// Operation Entry Updated Callback - SIGNALS DON'T WORK
+//==============================================================================
+void CopyProgressDialog::operationEntryUpdated(const int& aIndex)
+{
+    qDebug() << "CopyProgressDialog::operationEntryUpdated - aIndex: " << aIndex;
+
+    // ...
+}
+
 
 //==============================================================================
 // Reset All Count & Progress
@@ -469,10 +490,10 @@ CopyProgressDialog::~CopyProgressDialog()
     // Clear
     clear();
     // Check Operation Queue
-    if (opQueue) {
+    if (opQueueHandler) {
         // Delete Operations Queue
-        delete opQueue;
-        opQueue = NULL;
+        delete opQueueHandler;
+        opQueueHandler = NULL;
     }
     // Delete UI
     delete ui;

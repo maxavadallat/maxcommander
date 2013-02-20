@@ -7,8 +7,6 @@
 
 #if defined(Q_OS_WIN)
 
-#include <Windows.h>
-#include <Winbase.h>
 #include <Shellapi.h>
 
 #endif // Q_OS_WIN
@@ -545,7 +543,7 @@ void MainWindow::launchDelete()
         // Exec Dialog
         if (confirmDialog->exec()) {
             // Init Operation Queue Handler
-            FileOperationQueueHandler* opQueueHandler = NULL;
+            FileOpQueueViewAPI* opQueueHandler = NULL;
 
             // Check Dialog Result
             if (confirmDialog->result() == DEFAULT_DIALOG_RESULT_OK) {
@@ -686,7 +684,7 @@ void MainWindow::launchCopy()
         // Exec Copy Dialog
         if (copyDialog->exec()) {
             // Init Operation Queue Handler
-            FileOperationQueueHandler* opQueueHandler = NULL;
+            FileOpQueueViewAPI* opQueueHandler = NULL;
 
             // Check Dialog Result
             if (copyDialog->result() == DEFAULT_DIALOG_RESULT_QUEUE) {
@@ -820,7 +818,7 @@ void MainWindow::launchMove()
         // Exec Copy Dialog
         if (copyDialog->exec()) {
             // Init Operation Queue Handler
-            FileOperationQueueHandler* opQueueHandler = NULL;
+            FileOpQueueViewAPI* opQueueHandler = NULL;
 
             // Check Dialog Result
             if (copyDialog->result() == DEFAULT_DIALOG_RESULT_QUEUE) {
@@ -1013,7 +1011,7 @@ int MainWindow::showConfirmation(const QString& aTitle,
             // Check Buttons
             if (aButtons) {
                 // Set Buttons
-                confirmDialog->setButtons(aButtons, aDefault);
+                confirmDialog->setStandardButtons(aButtons, aDefault);
             }
 
             // Exec Confirm Dialog
@@ -1330,7 +1328,7 @@ void MainWindow::panelKeyReleased(const QString& aPanelName, const int& aKey, co
         case Qt::Key_F8:    on_f8Button_clicked();  break;
         case Qt::Key_F9:    on_f9Button_clicked();  break;
         case Qt::Key_F10:   on_f10Button_clicked(); break;
-/*
+
         case Qt::Key_H: {
 #ifdef Q_OS_MAC
             if (metaKeyPressed)
@@ -1346,7 +1344,7 @@ void MainWindow::panelKeyReleased(const QString& aPanelName, const int& aKey, co
                 }
             }
         } break;
-*/
+
         case Qt::Key_Delete: {
             // Launch Delete
             launchDelete();
@@ -1742,12 +1740,6 @@ void MainWindow::on_actionSwapPanels_triggered()
 //==============================================================================
 void MainWindow::on_actionShowHidden_triggered()
 {
-    // Check UI & Panels
-    if (ui && ui->actionShowHidden && ui->mainPanel1 && ui->mainPanel2) {
-        // Set Show Hidden Files
-        ui->mainPanel1->setShowHiddenFiles(ui->actionShowHidden->isChecked());
-        ui->mainPanel2->setShowHiddenFiles(ui->actionShowHidden->isChecked());
-    }
 }
 
 //==============================================================================
@@ -1936,7 +1928,7 @@ void MainWindow::clearDialogs()
 // Build And Add Queue
 //==============================================================================
 void MainWindow::addItemsToQueue(const int& aOperation,
-                                 FileOperationQueueHandler* aQueueHandler,
+                                 FileOpQueueViewAPI* aQueueHandler,
                                  const int& aSourcePanelIndex,
                                  const int& aSelCount,
                                  const QString& aCurrFileName,
@@ -2003,17 +1995,18 @@ void MainWindow::addItemsToQueue(const int& aOperation,
                 // Get File Name
                 QString fileName = itemData ? itemData->getFileInfo().fileName() : QString("");
                 // Check Item Data
-                if (itemData &&  !fileName.isEmpty() && fileName != QString("..")) {
+                if (itemData && itemData->isSelected() && !fileName.isEmpty() && fileName != QString("..")) {
                     // Create New Operation Entry
-                    //FileOperationEntry* newOpEntry = FileUtils::createFileOperationEntry(aOperation, sourceDirName, fileName, targetDirName, fileName);
-                    FileOperationEntry* newOpEntry = FileUtils::createFileOperationEntry(aOperation, sourceDirName, fileName, targetDirName, aTargetFileName);
+                    FileOperationEntry* newOpEntry = FileUtils::createFileOperationEntry(aQueueHandler, aOperation, sourceDirName, fileName, targetDirName, aTargetFileName);
                     // Add To Queue Handler
                     aQueueHandler->addOperationEntry(newOpEntry);
+                    // Reset Selected Flag
+                    itemData->setSelected(false);
                 }
             }
         } else {
             // Create New Operation Entry
-            FileOperationEntry* newOpEntry = FileUtils::createFileOperationEntry(aOperation, sourceDirName, aCurrFileName, targetDirName, aTargetFileName);
+            FileOperationEntry* newOpEntry = FileUtils::createFileOperationEntry(aQueueHandler, aOperation, sourceDirName, aCurrFileName, targetDirName, aTargetFileName);
             // Add To Queue Handler
             aQueueHandler->addOperationEntry(newOpEntry);
         }
@@ -2165,14 +2158,14 @@ AdminPassQueryProvider* MainWindow::passQueryProvider()
 //==============================================================================
 // Get File Utils Client
 //==============================================================================
-FileUtilsClient* MainWindow::getUtilsClient(const QString& aAdminPass)
+RemoteFileUtils* MainWindow::getUtilsClient(const QString& aAdminPass)
 {
     // Check Admin Pass & File utils Client
     if (!aAdminPass.isEmpty() && !fileUtilsClient) {
         qDebug() << "MainWindow::getUtilsClient - Creating File utils Client";
 
         // Create File Utils Client
-        fileUtilsClient = new FileUtilsClient();
+        fileUtilsClient = new RemoteFileUtils();
     }
 
     // Connect To Server
@@ -2291,11 +2284,5 @@ MainWindow::~MainWindow()
 
     qDebug() << "Deleting MainWindow...done";
 }
-
-
-
-
-
-
 
 

@@ -152,11 +152,11 @@ protected:
 protected: // Data
 
     //! Local Socket
-    QLocalSocket*   socket;
+    QLocalSocket*       socket;
     //! Server
-    FileUtilsServer* server;
+    FileUtilsServer*    server;
     //! Thread Pool
-    QThreadPool*    threadPool;
+    QThreadPool*        threadPool;
 };
 
 

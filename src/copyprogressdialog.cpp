@@ -197,6 +197,13 @@ void CopyProgressDialog::operationEntryUpdated(const int& aIndex)
     // ...
 }
 
+//==============================================================================
+// Get File Operations Queue Handler
+//==============================================================================
+FileOpQueueHandler* CopyProgressDialog::queueHandler()
+{
+    return opQueueHandler;
+}
 
 //==============================================================================
 // Reset All Count & Progress

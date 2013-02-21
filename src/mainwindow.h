@@ -186,13 +186,13 @@ protected:
 
     //! @brief Build And Add Queue
     //! @param aOperation Operation Index
-    //! @param aQueueHandler Operation Queue Handler
+    //! @param aQueueView Operation Queue View
     //! @param aSourcePanelIndex Source Panel Index
     //! @param aSelCount File Selection Count
     //! @param aCurrFileName Current File Name In Source Panel
     //! @param aTargetFileName Target File Name In Source Panel
     void addItemsToQueue(const int& aOperation,
-                         FileOpQueueViewAPI* aQueueHandler,
+                         FileOpQueueViewAPI* aQueueView,
                          const int& aSourcePanelIndex,
                          const int& aSelCount = 0,
                          const QString& aCurrFileName = QString(""),

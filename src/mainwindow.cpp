@@ -460,7 +460,7 @@ void MainWindow::launchCreateDir()
             bool abortSig = false;
 
             // Create Dir
-            if (FileUtils::createDir(dirNameTemp, createDirOptions, abortSig, this)) {
+            if (FileUtils::createDir(dirNameTemp, createDirOptions, abortSig, this) == FILE_UTILS_RESPONSE_NOERROR) {
 
                 // ...
 
@@ -543,7 +543,7 @@ void MainWindow::launchDelete()
         // Exec Dialog
         if (confirmDialog->exec()) {
             // Init Operation Queue Handler
-            FileOpQueueViewAPI* opQueueHandler = NULL;
+            FileOpQueueViewAPI* opQueueView = NULL;
 
             // Check Dialog Result
             if (confirmDialog->result() == DEFAULT_DIALOG_RESULT_OK) {
@@ -555,8 +555,8 @@ void MainWindow::launchDelete()
                     // Add Dialog To Dialogs List
                     dialogs << newDialog;
                 }
-                // Set Operation Queue Handler
-                opQueueHandler = newDialog;
+                // Set Operation Queue View
+                opQueueView = newDialog;
             // Check Dialog Result
             } else if (confirmDialog->result() == DEFAULT_DIALOG_RESULT_QUEUE) {
                 qDebug() << "MainWindow::launchDelete - QUEUE";
@@ -565,22 +565,22 @@ void MainWindow::launchDelete()
                     // Create Main Queue Dialog
                     mainQueueDialog = new MainQueueDialog();
                 }
-                // Set Operation Queue Handler
-                opQueueHandler = mainQueueDialog;
+                // Set Operation Queue View
+                opQueueView = mainQueueDialog;
             }
 
-            // Check Operation Queue handler
-            if (opQueueHandler) {
+            // Check Operation Queue View
+            if (opQueueView) {
                 // Show Copy Progress Dialog
-                opQueueHandler->show();
+                opQueueView->show();
                 // Set Modal
-                opQueueHandler->setModal(true);
+                opQueueView->setModal(true);
                 // Add Items To Delete Queue
-                addItemsToQueue(OPERATION_ID_DELETE, opQueueHandler, cPanelIndex, sfCount, currFileName);
+                addItemsToQueue(OPERATION_ID_DELETE, opQueueView, cPanelIndex, sfCount, currFileName);
                 // Reset Modal
-                opQueueHandler->setModal(false);
+                opQueueView->setModal(false);
                 // Exec/Processs Copy Queue
-                opQueueHandler->processQueue();
+                opQueueView->processQueue();
             }
         }
     }
@@ -684,7 +684,7 @@ void MainWindow::launchCopy()
         // Exec Copy Dialog
         if (copyDialog->exec()) {
             // Init Operation Queue Handler
-            FileOpQueueViewAPI* opQueueHandler = NULL;
+            FileOpQueueViewAPI* opQueueView = NULL;
 
             // Check Dialog Result
             if (copyDialog->result() == DEFAULT_DIALOG_RESULT_QUEUE) {
@@ -693,8 +693,8 @@ void MainWindow::launchCopy()
                     // Create Main Queue Dialog
                     mainQueueDialog = new MainQueueDialog();
                 }
-                // Set Operation Queue Handler
-                opQueueHandler = mainQueueDialog;
+                // Set Operation Queue View
+                opQueueView = mainQueueDialog;
             } else if (copyDialog->result() == DEFAULT_DIALOG_RESULT_OK) {
                 // Create New Copy Progress Dialog
                 CopyProgressDialog* newDialog = new CopyProgressDialog();
@@ -705,24 +705,22 @@ void MainWindow::launchCopy()
                     // Add Dialog To Dialogs List
                     dialogs << newDialog;
                 }
-                // Set Operation Queue Handler
-                opQueueHandler = newDialog;
+                // Set Operation Queue View
+                opQueueView = newDialog;
             }
 
-            // Check Opearion Queue Handler
-            if (opQueueHandler) {
+            // Check Opearion Queue View
+            if (opQueueView) {
                 // Show Copy Progress Dialog
-                opQueueHandler->show();
+                opQueueView->show();
                 // Set Modal
-                opQueueHandler->setModal(true);
-
+                opQueueView->setModal(true);
                 // Add Items To Copy Queue
-                addItemsToQueue(OPERATION_ID_COPY, opQueueHandler, cPanelIndex, sfCount, currFileName, copyDialog->getTarget());
-
+                addItemsToQueue(OPERATION_ID_COPY, opQueueView, cPanelIndex, sfCount, currFileName, copyDialog->getTarget());
                 // Reset Modal
-                opQueueHandler->setModal(false);
+                opQueueView->setModal(false);
                 // Exec/Processs Copy Queue
-                opQueueHandler->processQueue();
+                opQueueView->processQueue();
             }
         }
     }
@@ -817,8 +815,8 @@ void MainWindow::launchMove()
 
         // Exec Copy Dialog
         if (copyDialog->exec()) {
-            // Init Operation Queue Handler
-            FileOpQueueViewAPI* opQueueHandler = NULL;
+            // Init Operation Queue View
+            FileOpQueueViewAPI* opQueueView = NULL;
 
             // Check Dialog Result
             if (copyDialog->result() == DEFAULT_DIALOG_RESULT_QUEUE) {
@@ -827,8 +825,8 @@ void MainWindow::launchMove()
                     // Create Main Queue Dialog
                     mainQueueDialog = new MainQueueDialog();
                 }
-                // Set Operation Queue Handler
-                opQueueHandler = mainQueueDialog;
+                // Set Operation Queue View
+                opQueueView = mainQueueDialog;
 
             // Check Dialog Result
             } else if (copyDialog->result() == DEFAULT_DIALOG_RESULT_OK) {
@@ -841,22 +839,22 @@ void MainWindow::launchMove()
                     // Add Dialog To Dialogs List
                     dialogs << newDialog;
                 }
-                // Set Operation Queue Handler
-                opQueueHandler = newDialog;
+                // Set Operation Queue View
+                opQueueView = newDialog;
             }
 
-            // Check Opearion Queue Handler
-            if (opQueueHandler) {
+            // Check Opearion Queue View
+            if (opQueueView) {
                 // Show Copy Progress Dialog
-                opQueueHandler->show();
+                opQueueView->show();
                 // Set Modal
-                opQueueHandler->setModal(true);
+                opQueueView->setModal(true);
                 // Add Items To Copy Queue
-                addItemsToQueue(OPERATION_ID_MOVE, opQueueHandler, cPanelIndex, sfCount, currFileName, copyDialog->getTarget());
+                addItemsToQueue(OPERATION_ID_MOVE, opQueueView, cPanelIndex, sfCount, currFileName, copyDialog->getTarget());
                 // Reset Modal
-                opQueueHandler->setModal(false);
+                opQueueView->setModal(false);
                 // Exec/Processs Copy Queue
-                opQueueHandler->processQueue();
+                opQueueView->processQueue();
             }
         }
     }
@@ -1928,14 +1926,14 @@ void MainWindow::clearDialogs()
 // Build And Add Queue
 //==============================================================================
 void MainWindow::addItemsToQueue(const int& aOperation,
-                                 FileOpQueueViewAPI* aQueueHandler,
+                                 FileOpQueueViewAPI* aQueueView,
                                  const int& aSourcePanelIndex,
                                  const int& aSelCount,
                                  const QString& aCurrFileName,
                                  const QString& aTargetFileName)
 {
     // Check Queue Handler
-    if (aQueueHandler &&
+    if (aQueueView &&
         ui &&
         ui->mainPanel1 &&
         ui->mainPanel1->ui &&
@@ -1951,23 +1949,23 @@ void MainWindow::addItemsToQueue(const int& aOperation,
         // Switch Operation
         switch (aOperation) {
             case OPERATION_ID_MAKEDIR:
-                qDebug() << "MainWindow::buildQueue - MAKEDIR";
+                qDebug() << "MainWindow::addItemsToQueue - MAKEDIR";
             break;
 
             case OPERATION_ID_COPY:
-                qDebug() << "MainWindow::buildQueue - COPY";
+                qDebug() << "MainWindow::addItemsToQueue - COPY";
             break;
 
             case OPERATION_ID_MOVE:
-                qDebug() << "MainWindow::buildQueue - MOVE";
+                qDebug() << "MainWindow::addItemsToQueue - MOVE";
             break;
 
             case OPERATION_ID_RENAME:
-                qDebug() << "MainWindow::buildQueue - RENAME";
+                qDebug() << "MainWindow::addItemsToQueue - RENAME";
             break;
 
             case OPERATION_ID_DELETE:
-                qDebug() << "MainWindow::buildQueue - DELETE";
+                qDebug() << "MainWindow::addItemsToQueue - DELETE";
             break;
 
             default:
@@ -1997,18 +1995,18 @@ void MainWindow::addItemsToQueue(const int& aOperation,
                 // Check Item Data
                 if (itemData && itemData->isSelected() && !fileName.isEmpty() && fileName != QString("..")) {
                     // Create New Operation Entry
-                    FileOperationEntry* newOpEntry = FileUtils::createFileOperationEntry(aQueueHandler, aOperation, sourceDirName, fileName, targetDirName, aTargetFileName);
-                    // Add To Queue Handler
-                    aQueueHandler->addOperationEntry(newOpEntry);
+                    FileOperationEntry* newOpEntry = FileUtils::createFileOperationEntry(aQueueView->queueHandler(), aOperation, sourceDirName, fileName, targetDirName, aTargetFileName);
+                    // Add To Queue View
+                    aQueueView->addOperationEntry(newOpEntry);
                     // Reset Selected Flag
                     itemData->setSelected(false);
                 }
             }
         } else {
             // Create New Operation Entry
-            FileOperationEntry* newOpEntry = FileUtils::createFileOperationEntry(aQueueHandler, aOperation, sourceDirName, aCurrFileName, targetDirName, aTargetFileName);
-            // Add To Queue Handler
-            aQueueHandler->addOperationEntry(newOpEntry);
+            FileOperationEntry* newOpEntry = FileUtils::createFileOperationEntry(aQueueView->queueHandler(), aOperation, sourceDirName, aCurrFileName, targetDirName, aTargetFileName);
+            // Add To Queue View
+            aQueueView->addOperationEntry(newOpEntry);
         }
 
         // Unlock Mutex

@@ -120,13 +120,16 @@
 //! File Utils Response - Error
 #define FILE_UTILS_RESPONSE_ERROR                   0x0001
 //! File Utils Response - Skip
-#define FILE_UTILS_RESPONSE_SKIP                    0x0003
+#define FILE_UTILS_RESPONSE_SKIP                    0x0002
+//! File Utils Response - Abort
+#define FILE_UTILS_RESPONSE_ABORT                   0x0004
 
 
 
 // FORWARD DECLARATIONS
 
 class FileOpQueueViewAPI;
+class FileOpQueueHandler;
 class FileOperationEntry;
 class RemoteFileUtils;
 
@@ -653,32 +656,32 @@ public:
     //! @param aOptions Options/Flags
     //! @param aAbortSig Abort Signal Flag
     //! @param aObserver Directory Create Observer Interface
-    //! @return true If Successful
-    static bool createDir(const QString& aDirName, int& aOptions, bool& aAbortSig, DirCreatorObserver* aObserver = NULL);
+    //! @return FILE_UTILS_RESPONSE_NOERROR If Successful
+    static int createDir(const QString& aDirName, int& aOptions, bool& aAbortSig, DirCreatorObserver* aObserver = NULL);
 
     //! @brief Read Directory
     //! @param aDirName Directory Path
     //! @param aOptions Options/Flags
     //! @param aAbortSig Abort Signal Flag
     //! @param aObserver Directory Read Observer Interface
-    //! @return true If Started Successful
-    static bool readDir(const QString& aDirName, int& aOptions, bool& aAbortSig, DirReaderObserver* aObserver = NULL);
+    //! @return FILE_UTILS_RESPONSE_NOERROR If Started Successful
+    static int readDir(const QString& aDirName, int& aOptions, bool& aAbortSig, DirReaderObserver* aObserver = NULL);
 
     //! @brief Scan Directory For Size
     //! @param aDirName Directory Path
     //! @param aOptions Options/Flags
     //! @param aAbortSig Abort Signal Flag
     //! @param aObserver Directory Scan Observer Interface
-    //! @return true If Started Successful
-    static bool scanDir(const QString& aDirName, int& aOptions, bool& aAbortSig, DirScannerObserver* aObserver = NULL);
+    //! @return FILE_UTILS_RESPONSE_NOERROR If Started Successful
+    static int scanDir(const QString& aDirName, int& aOptions, bool& aAbortSig, DirScannerObserver* aObserver = NULL);
 
     //! @brief Delete File
     //! @param aFileName File Name
     //! @param aOptions Options/Flags
     //! @param aAbortSig Abort Signal Flag
     //! @param aObserver Delete Observer Interface
-    //! @return true If Successful
-    static bool deleteFile(const QString& aFileName, int& aOptions, bool& aAbortSig, FileDeleteObserver* aObserver = NULL);
+    //! @return FILE_UTILS_RESPONSE_NOERROR If Successful
+    static int deleteFile(const QString& aFileName, int& aOptions, bool& aAbortSig, FileDeleteObserver* aObserver = NULL);
 
     //! @brief Copy File
     //! @param aSource Source File Name
@@ -686,8 +689,8 @@ public:
     //! @param aOptions Options/Flags
     //! @param aAbortSig Abort Signal Flag
     //! @param aObserver Copy Observer Interface
-    //! @return true If Successful
-    static bool copyFile(const QString& aSource, const QString& aTarget, int& aOptions, bool& aAbortSig, FileCopyObserver* aObserver = NULL);
+    //! @return FILE_UTILS_RESPONSE_NOERROR If Successful
+    static int copyFile(const QString& aSource, const QString& aTarget, int& aOptions, bool& aAbortSig, FileCopyObserver* aObserver = NULL);
 
     //! @brief Rename File
     //! @param aSource Source File Name
@@ -695,8 +698,8 @@ public:
     //! @param aOptions Options/Flags
     //! @param aAbortSig Abort Signal Flag
     //! @param aObserver Rename Observer Interface
-    //! @return true If Successful
-    static bool renameFile(const QString& aSource, const QString& aTarget, int& aOptions, bool& aAbortSig, FileRenameObserver* aObserver = NULL);
+    //! @return FILE_UTILS_RESPONSE_NOERROR If Successful
+    static int renameFile(const QString& aSource, const QString& aTarget, int& aOptions, bool& aAbortSig, FileRenameObserver* aObserver = NULL);
 
     //! @brief Move File
     //! @param aSource Source File Name
@@ -704,8 +707,8 @@ public:
     //! @param aOptions Options/Flags
     //! @param aAbortSig Abort Signal Flag
     //! @param aObserver Move Observer Interface
-    //! @return true If Successful
-    static bool moveFile(const QString& aSource, const QString& aTarget, int& aOptions, bool& aAbortSig, FileMoveObserver* aObserver = NULL);
+    //! @return FILE_UTILS_RESPONSE_NOERROR If Successful
+    static int moveFile(const QString& aSource, const QString& aTarget, int& aOptions, bool& aAbortSig, FileMoveObserver* aObserver = NULL);
 
     //! @brief Set File Attributes
     //! @param aFilePath File Name
@@ -871,7 +874,7 @@ public:
     //! @param aTargetDir Target Directory
     //! @param aTargetName Target Name/Pattern
     //! @return New File OperationEntry
-    static FileOperationEntry* createFileOperationEntry(FileOpQueueViewAPI* aQueueHandler,
+    static FileOperationEntry* createFileOperationEntry(FileOpQueueHandler* aQueueHandler,
                                                         const int& aOperation,
                                                         const QString& aSourceDir,
                                                         const QString& aSourceName,
@@ -1269,6 +1272,11 @@ public:
     //! @brief Operation Entry Updated Callback - SIGNALS DON'T WORK
     //! @param aIndex Updated Item Index
     virtual void operationEntryUpdated(const int& aIndex) = 0;
+
+    //! @brief Get File Operations Queue Handler
+    //! @param none
+    //! @return File Operations Queue Handler
+    virtual FileOpQueueHandler* queueHandler() = 0;
 };
 
 
@@ -1332,6 +1340,11 @@ public:
     //! @param none
     //! @return Operations Count
     int count();
+
+    //! @brief Get Operations Index
+    //! @param none
+    //! @return Operations Index
+    int getOperationIndex(FileOperationEntry* aEntry);
 
     //! @brief Clear
     //! @param none
@@ -1399,6 +1412,13 @@ protected: // From FileUtilThreadBase
     //! @param aIndex File Operation Entry Index
     //! @return true If Entry Is Processed, false Otherwise
     virtual bool processDirEntry(FileOperationEntry* aEntry, const int& aIndex);
+
+protected:
+    friend class FileOperationEntry;
+
+    //! @brief Notify View About Entry Updated
+    //! @param aIndex File operation Entry Index
+    virtual void notifyEntryUpdated(const int& aIndex);
 
 protected: // Data
 

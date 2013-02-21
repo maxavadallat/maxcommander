@@ -47,21 +47,21 @@ public:
     //! @brief Constructor
     //! @param aHandler File Operation Queue Handler
     //! @param aOperation Composit Operation Token
-    FileOperationEntry(FileOpQueueViewAPI* aHandler, const QString& aOperation);
+    FileOperationEntry(FileOpQueueHandler* aHandler, const QString& aOperation);
 
     //! @brief Constructor
     //! @param aHandler File Operation Queue Handler
     //! @param aOperation Operation Name
     //! @param aSource Operation Source Name
     //! @param aTarget Operation Target Name
-    FileOperationEntry(FileOpQueueViewAPI* aHandler, const QString& aOperation, const QString& aSource, const QString& aTarget);
+    FileOperationEntry(FileOpQueueHandler* aHandler, const QString& aOperation, const QString& aSource, const QString& aTarget);
 
     //! @brief Constructor
     //! @param aHandler File Operation Queue Handler
     //! @param aOperation Operation Index
     //! @param aSource Operation Source Name
     //! @param aTarget Operation Target Name
-    FileOperationEntry(FileOpQueueViewAPI* aHandler, const int& aOperation, const QString& aSource, const QString& aTarget);
+    FileOperationEntry(FileOpQueueHandler* aHandler, const int& aOperation, const QString& aSource, const QString& aTarget);
 
     //! @brief Get Operation Index
     //! @param none
@@ -102,6 +102,25 @@ public:
                       FileCopyObserver*   aCopyObserver = NULL,
                       FileMoveObserver*   aMoveObserver = NULL,
                       FileRenameObserver* aRenameObserver = NULL);
+
+    //! @brief Set File Operation State By File Utils Response
+    //! @param aFileUtilsResponse File Utils Response
+    void setOpStateByFileUtilsResponse(const int& aFileUtilsResponse);
+
+    //! @brief Is Entry Ready To Be Processed
+    //! @param none
+    //! @return Operation State
+    bool isEntryReadyToBeProcessed();
+
+    //! @brief Get Operation Progress - Current
+    //! @param none
+    //! @return Operation Progress - Current
+    qint64 getCurrent();
+
+    //! @brief Get Operation Progress - Total
+    //! @param none
+    //! @return Operation Progress - Total
+    qint64 getTotal();
 
     //! @brief Destructor
     //! @param none
@@ -244,8 +263,11 @@ protected: // Data
     friend class FileOpQueueHandler;
     friend class FileOpQueueViewAPI;
 
-    //! Queue Handler
-    FileOpQueueViewAPI*  queueHandler;
+    //! Queue Handler Parent
+    FileOpQueueHandler*         queueHandler;
+
+    //! Operation Queue Index
+    int                         queueIndex;
 
     //! Operation Index
     int                         opIndex;
@@ -263,9 +285,6 @@ protected: // Data
 
     //! File Operation State
     FileOperationState          opState;
-
-    //! Delete Dir Confirmation Flag If Empty After Deleting All Files
-    //bool                        deleteDirAfter;
 
     //! Delete Observer
     FileDeleteObserver*         parentDeleteObserver;

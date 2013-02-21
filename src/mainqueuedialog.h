@@ -90,6 +90,11 @@ public:
     //! @param aIndex Updated Item Index
     virtual void operationEntryUpdated(const int& aIndex);
 
+    //! @brief Get File Operations Queue Handler
+    //! @param none
+    //! @return File Operations Queue Handler
+    virtual FileOpQueueHandler* queueHandler();
+
     //! @brief Reset All Count & Progress
     //! @param none
     void resetProgress();
@@ -386,6 +391,10 @@ protected slots:
     //! @brief Operation Completed Slot
     //! @param aIndex Operation Index
     void operationCompleted(const int& aIndex);
+
+    //! @brief Operation Aborted Slot
+    //! @param aIndex Operation Index
+    void operationAborted(const int& aIndex);
 
 protected: // Data
 

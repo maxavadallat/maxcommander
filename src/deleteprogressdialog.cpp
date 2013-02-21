@@ -197,6 +197,14 @@ void DeleteProgressDialog::operationEntryUpdated(const int& aIndex)
 }
 
 //==============================================================================
+// Get File Operations Queue Handler
+//==============================================================================
+FileOpQueueHandler* DeleteProgressDialog::queueHandler()
+{
+    return opQueueHandler;
+}
+
+//==============================================================================
 // Reset All Count & Progress
 //==============================================================================
 void DeleteProgressDialog::reset()

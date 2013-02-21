@@ -16,9 +16,10 @@
 //==============================================================================
 // Constructor
 //==============================================================================
-FileOperationEntry::FileOperationEntry(FileOpQueueViewAPI* aHandler, const QString& aOpName, const QString& aSource, const QString& aTarget)
+FileOperationEntry::FileOperationEntry(FileOpQueueHandler* aHandler, const QString& aOpName, const QString& aSource, const QString& aTarget)
     : QObject(NULL)
     , queueHandler(aHandler)
+    , queueIndex(-1)
     , opIndex(-1)
     , opName(aOpName)
     , source(aSource)
@@ -32,6 +33,8 @@ FileOperationEntry::FileOperationEntry(FileOpQueueViewAPI* aHandler, const QStri
     , parentMoveObserver(NULL)
     , parentRenameObserver(NULL)
 {
+    qDebug() << "Creating FileOperationEntry - aOpName: " << aOpName;
+
     // Check Operation Name
     if (opName == QString(PARAM_OPERATION_COPY)) {
         // Set Operation Index
@@ -53,15 +56,16 @@ FileOperationEntry::FileOperationEntry(FileOpQueueViewAPI* aHandler, const QStri
         opIndex = OPERATION_ID_NOOP;
     }
 
-    //qDebug() << "Creating FileOperationEntry...done";
+    qDebug() << "Creating FileOperationEntry...done";
 }
 
 //==============================================================================
 // Constructor
 //==============================================================================
-FileOperationEntry::FileOperationEntry(FileOpQueueViewAPI* aHandler, const QString& aOperation)
+FileOperationEntry::FileOperationEntry(FileOpQueueHandler* aHandler, const QString& aOperation)
     : QObject(NULL)
     , queueHandler(aHandler)
+    , queueIndex(-1)
     , opIndex(-1)
     , opName(QString(""))
     , source(QString(""))
@@ -69,9 +73,8 @@ FileOperationEntry::FileOperationEntry(FileOpQueueViewAPI* aHandler, const QStri
     , current(0)
     , total(0)
     , opState(FOSIdle)
-//    , deleteDirAfter(false)
 {
-    //qDebug() << "Creating FileOperationEntry - aOperation: " << aOperation;
+    qDebug() << "Creating FileOperationEntry - aOperation: " << aOperation;
 
     // Split Operation Token
     QStringList opList = aOperation.split(QChar(FILE_OPERATIONS_TOKEN_SEPARATOR));
@@ -105,15 +108,16 @@ FileOperationEntry::FileOperationEntry(FileOpQueueViewAPI* aHandler, const QStri
     // set Operation Target
     target = opList[2];
 
-    //qDebug() << "Creating FileOperationEntry...done";
+    qDebug() << "Creating FileOperationEntry...done";
 }
 
 //==============================================================================
 // Constructor
 //==============================================================================
-FileOperationEntry::FileOperationEntry(FileOpQueueViewAPI* aHandler, const int& aOpIndex, const QString& aSource, const QString& aTarget)
+FileOperationEntry::FileOperationEntry(FileOpQueueHandler* aHandler, const int& aOpIndex, const QString& aSource, const QString& aTarget)
     : QObject(NULL)
     , queueHandler(aHandler)
+    , queueIndex(-1)
     , opIndex(aOpIndex)
     , opName(QString(""))
     , source(aSource)
@@ -121,8 +125,9 @@ FileOperationEntry::FileOperationEntry(FileOpQueueViewAPI* aHandler, const int& 
     , current(0)
     , total(0)
     , opState(FOSIdle)
-//    , deleteDirAfter(false)
 {
+    qDebug() << "Creating FileOperationEntry - aOpIndex: " << aOpIndex;
+
     // Switch Operation Index
     switch (opIndex) {
         default:
@@ -134,7 +139,7 @@ FileOperationEntry::FileOperationEntry(FileOpQueueViewAPI* aHandler, const int& 
         case OPERATION_ID_MAKEDIR: opName = QString(PARAM_OPERATION_MAKEDIR); break;
     }
 
-    //qDebug() << "Creating FileOperationEntry...done";
+    qDebug() << "Creating FileOperationEntry...done";
 }
 
 //==============================================================================
@@ -202,6 +207,45 @@ void FileOperationEntry::setObservers(FileDeleteObserver* aDeleteObserver,
     parentMoveObserver = aMoveObserver;
     // Set Rename Observer
     parentRenameObserver = aRenameObserver;
+}
+
+//==============================================================================
+// Set File Operation State By File Utils Response
+//==============================================================================
+void FileOperationEntry::setOpStateByFileUtilsResponse(const int& aFileUtilsResponse)
+{
+    // Switch File Utils Response
+    switch (aFileUtilsResponse) {
+        default:
+        case FILE_UTILS_RESPONSE_NOERROR:   opState = FOSDone;      break;
+        case FILE_UTILS_RESPONSE_ABORT:
+        case FILE_UTILS_RESPONSE_ERROR:     opState = FOSFailed;    break;
+        case FILE_UTILS_RESPONSE_SKIP:      opState = FOSSkipped;   break;
+    }
+}
+
+//==============================================================================
+// Is Entry Ready To Be Processed
+//==============================================================================
+bool FileOperationEntry::isEntryReadyToBeProcessed()
+{
+    return (opState != FOSDone && opState != FOSFailed && opState != FOSSkipped && opState != FOSRunning);
+}
+
+//==============================================================================
+// Get Operation Progress - Current
+//==============================================================================
+qint64 FileOperationEntry::getCurrent()
+{
+    return current;
+}
+
+//==============================================================================
+// Get Operation Progress - Total
+//==============================================================================
+qint64 FileOperationEntry::getTotal()
+{
+    return total;
 }
 
 //==============================================================================
@@ -295,7 +339,7 @@ void FileOperationEntry::copyProgress(const QString& aSource, const QString& aTa
     // Check Parent Queue Handler
     if (queueHandler) {
         // Notify Queue Handler
-        queueHandler->operationEntryUpdated(opIndex);
+        queueHandler->notifyEntryUpdated(queueIndex);
     }
 
     // Check Parent Observer
@@ -373,7 +417,7 @@ void FileOperationEntry::moveProgress(const QString& aSource, const QString& aTa
     // Check Parent Queue Handler
     if (queueHandler) {
         // Notify Queue Handler
-        queueHandler->operationEntryUpdated(opIndex);
+        queueHandler->notifyEntryUpdated(queueIndex);
     }
 
     // Check Parent Observer

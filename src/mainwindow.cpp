@@ -807,7 +807,16 @@ void MainWindow::launchMove()
         // Check Target Path
         if (!targetPath.endsWith(QString("/")) && !targetPath.endsWith(QString("\\"))) {
             // Add Slash
-            targetPath += QString("/");
+            targetPath += QDir::separator();
+        }
+
+        // Check Selected File Count
+        if (sfCount > 0) {
+            // Add WildCards To Target path
+            targetPath += QString("*.*");
+        } else {
+            // Add Current File Name To Target Path
+            targetPath += currFileName;
         }
 
         // Set Initial Target Path

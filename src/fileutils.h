@@ -38,91 +38,110 @@
 // CONSTANTS/DEFINES
 
 //! Default Abort Check For Thread
-#define DEFAULT_THREAD_ABORT_CHECK                  if (abort || restart) return
+#define DEFAULT_THREAD_ABORT_CHECK                      if (abort || restart) return
 //! Default Abort Check For Thread Returning False
-#define DEFAULT_THREAD_ABORT_CHECK_FALSE            if (abort || restart) return false
+#define DEFAULT_THREAD_ABORT_CHECK_FALSE                if (abort || restart) return false
 //! Default Abort Check For Functions
-#define DEFAULT_FUNC_ABORT_CHECK                    if (aAbortSig) return
+#define DEFAULT_FUNC_ABORT_CHECK                        if (aAbortSig) return
 
 
 //! File Delete Options - Delete All Normal Files Without Confirmation
-#define FILE_DELETE_OPTION_DELETE_NORMAL            0x0001
+#define FILE_DELETE_OPTION_DELETE_NORMAL                0x0001
 //! File Delete Options - Delete All Read Only Files Without Any Further Confirmation
-#define FILE_DELETE_OPTION_DELETE_READONLY          0x0003
+#define FILE_DELETE_OPTION_DELETE_READONLY              0x0003
 
 //! File Delete Options - Skip All Files
-#define FILE_DELETE_OPTION_DELETE_SKIP_NORMAL       0x0010
+#define FILE_DELETE_OPTION_DELETE_SKIP_NORMAL           0x0010
 //! File Delete Options - Skip All Read Only Files
-#define FILE_DELETE_OPTION_DELETE_SKIP_READONLY     0x0020
+#define FILE_DELETE_OPTION_DELETE_SKIP_READONLY         0x0020
 
 //! File Delete Options - Ignore Deletion Error
-#define FILE_DELETE_OPTION_IGNORE_DELETE_ERROR      0x0100
+#define FILE_DELETE_OPTION_IGNORE_DELETE_ERROR          0x0100
 //! File Delete Options - Ignore All Deletion Error
-#define FILE_DELETE_OPTION_IGNORE_ALL_DELETE_ERROR  0x0300
+#define FILE_DELETE_OPTION_IGNORE_ALL_DELETE_ERROR      0x0300
 
 //! File Delete Options - Delete Non Empty Directories Without Any Further Confirmation
-#define FILE_DELETE_OPTION_DELETE_NON_EMPTY_DIR     0x1000
+#define FILE_DELETE_OPTION_DELETE_NON_EMPTY_DIR         0x1000
 //! File Delete Options - Delete Non Empty Directories Without Any Further Confirmation
-#define FILE_DELETE_OPTION_SKIP_NON_EMPTY_DIR       0x3000
+#define FILE_DELETE_OPTION_SKIP_NON_EMPTY_DIR           0x3000
 
 
 //! File Copy Options - Overwrite All Normal Files Without Confirmation
-#define FILE_COPY_OPTION_OVERWRITE_NORMAL           0x0001
+#define FILE_COPY_OPTION_OVERWRITE_NORMAL               0x0001
 //! File Copy Options - Overwrite All Read Only Files Without Any Further Confirmation
-#define FILE_COPY_OPTION_OVERWRITE_READONLY         0x0003
+#define FILE_COPY_OPTION_OVERWRITE_READONLY             0x0003
 
 //! File Copy Options - Skip Overwrite All Files
-#define FILE_COPY_OPTION_OVERWRITE_SKIP_NORMAL      0x0010
+#define FILE_COPY_OPTION_OVERWRITE_SKIP_NORMAL          0x0010
 //! File Copy Options - Skip Overwrite Read Only Files
-#define FILE_COPY_OPTION_OVERWRITE_SKIP_READONLY    0x0020
+#define FILE_COPY_OPTION_OVERWRITE_SKIP_READONLY        0x0020
 
 
 //! File Copy Options - Ignore Read Error
-#define FILE_COPY_OPTION_IGNORE_READ_ERROR          0x0010
+#define FILE_COPY_OPTION_IGNORE_READ_ERROR              0x0010
 //! File Copy Options - Ignore All Read Errors
-#define FILE_COPY_OPTION_IGNORE_ALL_READ_ERROR      0x0030
+#define FILE_COPY_OPTION_IGNORE_ALL_READ_ERROR          0x0030
 //! File Copy Options - Ignore Write Error
-#define FILE_COPY_OPTION_IGNORE_WRITE_ERROR         0x0100
+#define FILE_COPY_OPTION_IGNORE_WRITE_ERROR             0x0100
 //! File Copy Options - Ignore All Write Errors
-#define FILE_COPY_OPTION_IGNORE_WRITE_ALL_ERROR     0x0300
+#define FILE_COPY_OPTION_IGNORE_WRITE_ALL_ERROR         0x0300
 
 
 
 
 //! File Move Options - Overwrite All Normal Files Without Confirmation
-#define FILE_MOVE_OPTION_OVERWRITE_NORMAL           0x0001
+#define FILE_MOVE_OPTION_OVERWRITE_NORMAL               0x0001
 //! File Move Options - Overwrite All Read Only Files Without Any Further Confirmation
-#define FILE_MOVE_OPTION_OVERWRITE_READONLY         0x0003
+#define FILE_MOVE_OPTION_OVERWRITE_READONLY             0x0003
+
+//! File Move Options - Skip Overwrite All Files
+#define FILE_MOVE_OPTION_OVERWRITE_SKIP_NORMAL          0x0010
+//! File Move Options - Skip Overwrite Read Only Files
+#define FILE_MOVE_OPTION_OVERWRITE_SKIP_READONLY        0x0020
 
 //! File Move Options - Delete Read Only Source
-#define FILE_MOVE_OPTION_DELETE_READONLY_SOURCE     0x0004
+#define FILE_MOVE_OPTION_DELETE_READONLY_SOURCE         0x0004
+//! File Move Options - Skip Delete Read Only Source
+#define FILE_MOVE_OPTION_SKIP_DELETE_READONLY_SOURCE    0x0008
 
 //! File Move Options - Ignore Read Error
-#define FILE_MOVE_OPTION_IGNORE_READ_ERROR          0x0010
+#define FILE_MOVE_OPTION_IGNORE_READ_ERROR              0x0010
 //! File Move Options - Ignore All Read Errors
-#define FILE_MOVE_OPTION_IGNORE_ALL_READ_ERROR      0x0030
+#define FILE_MOVE_OPTION_IGNORE_ALL_READ_ERROR          0x0030
 //! File Move Options - Ignore Write Error
-#define FILE_MOVE_OPTION_IGNORE_WRITE_ERROR         0x0100
+#define FILE_MOVE_OPTION_IGNORE_WRITE_ERROR             0x0100
 //! File Move Options - Ignore All Write Errors
-#define FILE_MOVE_OPTION_IGNORE_WRITE_ALL_ERROR     0x0300
+#define FILE_MOVE_OPTION_IGNORE_WRITE_ALL_ERROR         0x0300
 //! File Move Options - Ignore Delete Error
-#define FILE_MOVE_OPTION_IGNORE_DELETE_ERROR        0x1000
+#define FILE_MOVE_OPTION_IGNORE_DELETE_ERROR            0x1000
 //! File Move Options - Ignore All Delete Errors
-#define FILE_MOVE_OPTION_IGNORE_ALL_DELETE_ERROR    0x3000
+#define FILE_MOVE_OPTION_IGNORE_ALL_DELETE_ERROR        0x3000
+
+
+//! File Rename Options - Overwrite All Normal Files Without Confirmation
+#define FILE_RENAME_OPTION_OVERWRITE_NORMAL             0x0001
+//! File Rename Options - Overwrite All Read Only Files Without Any Further Confirmation
+#define FILE_RENAME_OPTION_OVERWRITE_READONLY           0x0003
+
+//! File Rename Options - Skip Overwrite All Files Without Confirmation
+#define FILE_RENAME_OPTION_OVERWRITE_SKIP_NORMAL        0x0010
+//! File Rename Options - Skip Overwrite Read Only Files Without Confirmation
+#define FILE_RENAME_OPTION_OVERWRITE_SKIP_READONLY      0x0020
+
 
 
 //! File Operation Option - Admin Mode
-#define FILE_OPERATION_OPTION_ADMIN                 0xFF00
+#define FILE_OPERATION_OPTION_ADMIN                     0xFF00
 
 
 //! File Utils Response - No Error
-#define FILE_UTILS_RESPONSE_NOERROR                 0x0000
+#define FILE_UTILS_RESPONSE_NOERROR                     0x0000
 //! File Utils Response - Error
-#define FILE_UTILS_RESPONSE_ERROR                   0x0001
+#define FILE_UTILS_RESPONSE_ERROR                       0x0001
 //! File Utils Response - Skip
-#define FILE_UTILS_RESPONSE_SKIP                    0x0002
+#define FILE_UTILS_RESPONSE_SKIP                        0x0002
 //! File Utils Response - Abort
-#define FILE_UTILS_RESPONSE_ABORT                   0x0004
+#define FILE_UTILS_RESPONSE_ABORT                       0x0004
 
 
 
@@ -312,6 +331,41 @@ public:
     //! @param aResult Dialog Result
     virtual void exitError(QEventLoop* aEventLoop, const int& aResult) = 0;
 };
+
+
+
+
+
+
+
+
+
+//==============================================================================
+//! @class DriveScannerObserver Drive Scanner UI Observer Interface Class
+//==============================================================================
+class DriveScannerObserver
+{
+public:
+    //! @brief Read Drive Error Callback
+    //! @param aErrorCode Error Code
+    //! @return Drives Read Error Response
+    virtual int readDriveError(const int& aErrorCode) = 0;
+
+    //! @brief Read Drive Started
+    virtual void readDriveStarted() = 0;
+
+    //! @brief Read Drive Entry Found
+    //! @param aFilePath Drive Entry File Path
+    //! @param aDriveName Drive Entry Drive Name
+    virtual void readDriveEntryFount(const QString& aFilePath, const QString& aDriveName) = 0;
+
+    //! @brief Read Drive Finished
+    //! @param aErrorCode Directory Read Error Code
+    virtual void readDriveFinished(const int& aErrorCode) = 0;
+};
+
+
+
 
 
 
@@ -885,6 +939,18 @@ public:
     //! @param aFilePath File Path
     //! @return true If It's A Full Path
     static bool isFullPath(const QString& aFilePath);
+
+    //! @brief Are Files On The Same Drive
+    //! @param aSourceName Source Name
+    //! @param aTargetName Target Name/Pattern
+    //! @return true if yes
+    static bool areFilesOnSameDrive(const QString& aSourceName, const QString& aTargetName);
+
+    //! @brief Extract Drive Name
+    //! @param aSourceName Source Name
+    //! @return Drive Name
+    static QString extractDriveName(const QString& aSourceName);
+
 /*
     //! @brief Get Authorization
     //! @param none

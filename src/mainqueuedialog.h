@@ -396,6 +396,12 @@ protected slots:
     //! @param aIndex Operation Index
     void operationAborted(const int& aIndex);
 
+protected:
+
+    //! @brief Update Operation Item Text
+    //! @param aIndex Operation Index
+    void updateQueueItemText(const int& aIndex);
+
 protected: // Data
 
     //! UI

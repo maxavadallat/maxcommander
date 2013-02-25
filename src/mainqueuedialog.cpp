@@ -1220,6 +1220,11 @@ void MainQueueDialog::operationStarted(const int& aIndex)
 {
     qDebug() << "MainQueueDialog::operationStarted - aIndex: " << aIndex;
 
+    // ...
+
+    // Update Operation Queue Item Text
+    updateQueueItemText(aIndex);
+/*
     // Check UI
     if (ui && ui->mainQueueList) {
         // get Main Queue List Count
@@ -1239,6 +1244,7 @@ void MainQueueDialog::operationStarted(const int& aIndex)
             }
         }
     }
+*/
 }
 
 //==============================================================================
@@ -1248,6 +1254,11 @@ void MainQueueDialog::operationStopped(const int& aIndex)
 {
     qDebug() << "MainQueueDialog::operationStarted - aIndex: " << aIndex;
 
+    // ...
+
+    // Update Operation Queue Item Text
+    updateQueueItemText(aIndex);
+/*
     // Check UI
     if (ui && ui->mainQueueList) {
         // get Main Queue List Count
@@ -1260,13 +1271,14 @@ void MainQueueDialog::operationStopped(const int& aIndex)
             if (item) {
                 // Get Font
                 QFont itemFont = item->font();
-                // set Bold state
+                // Set Bold state
                 itemFont.setBold(false);
                 // Set Item Font
                 item->setFont(itemFont);
             }
         }
     }
+*/
 }
 
 //==============================================================================
@@ -1276,64 +1288,10 @@ void MainQueueDialog::operationUpdated(const int& aIndex)
 {
     qDebug() << "MainQueueDialog::operationUpdated - aIndex: " << aIndex;
 
-    // Check UI
-    if (ui && ui->mainQueueList && opQueueHandler) {
-        // get Main Queue List Count
-        int mqCount = ui->mainQueueList->count();
-        // Check Index
-        if (aIndex >= 0 && aIndex < mqCount) {
-            // Get Item
-            QListWidgetItem* item = ui->mainQueueList->item(aIndex);
-            // Get Operation Entry
-            FileOperationEntry* opEntry = opQueueHandler->getOperation(aIndex);
-            // Check Item
-            if (item && opEntry) {
-                // Init Status String
-                QString statusString = QString("");
+    // ...
 
-                // Switch To Entry Operation State
-                switch (opEntry->getState()) {
-                    case FOSRunning: {
-                        // Check Operation Index
-                        if (opEntry->getOperationIndex() == OPERATION_ID_COPY || opEntry->getOperationIndex() == OPERATION_ID_MOVE) {
-                            // Get Progress Total
-                            qint64 total = opEntry->getTotal();
-                            // Get Progress Current
-                            qint64 current = opEntry->getCurrent();
-
-                            // Check Operation Entry Total
-                            if (total > 0) {
-                                // Calculate Progress
-                                qreal progress = ((qreal)current) * 100.0f / total;
-
-                                // Compose Status String
-                                statusString = QString(FILE_OPERATION_QUEUE_TEXT_TEMPLATE_COPY).arg(opEntry->getOperationName())
-                                                                                               .arg(opEntry->getSource())
-                                                                                               .arg(opEntry->getTarget());
-                                // Add Progress
-                                statusString += QString(" ... %1%").arg(progress, 2, 'f', 1, QChar('0'));
-                            }
-                        } else {
-                            // Compose Status String
-                            statusString = QString(FILE_OPERATION_QUEUE_TEXT_TEMPLATE_COPY).arg(opEntry->getOperationName())
-                                                                                           .arg(opEntry->getSource())
-                                                                                           .arg(opEntry->getTarget());
-
-                            // Add Progress
-                            statusString += QString(" ... running");
-                        }
-                    } break;
-
-                    default:
-                        // ...
-                    break;
-                }
-
-                // Update Item Text
-                item->setText(statusString);
-            }
-        }
-    }
+    // Update Operation Queue Item Text
+    updateQueueItemText(aIndex);
 }
 
 //==============================================================================
@@ -1346,6 +1304,11 @@ void MainQueueDialog::operationCompleted(const int& aIndex)
     // Add To Progress
     addToProgress(1);
 
+    // ...
+
+    // Update Operation Queue Item Text
+    updateQueueItemText(aIndex);
+/*
     // Check UI
     if (ui && ui->mainQueueList && opQueueHandler) {
         // get Main Queue List Count
@@ -1382,6 +1345,7 @@ void MainQueueDialog::operationCompleted(const int& aIndex)
             }
         }
     }
+*/
 }
 
 //==============================================================================
@@ -1392,6 +1356,131 @@ void MainQueueDialog::operationAborted(const int& aIndex)
     qDebug() << "MainQueueDialog::operationAborted - aIndex: " << aIndex;
 
     // ...
+
+    // Update Operation Queue Item Text
+    updateQueueItemText(aIndex);
+}
+
+//==============================================================================
+// Update Operation Item Text
+//==============================================================================
+void MainQueueDialog::updateQueueItemText(const int& aIndex)
+{
+    qDebug() << "MainQueueDialog::updateQueueItemText - aIndex: " << aIndex;
+
+    // Check UI
+    if (ui && ui->mainQueueList && opQueueHandler) {
+        // get Main Queue List Count
+        int mqCount = ui->mainQueueList->count();
+        // Check Index
+        if (aIndex >= 0 && aIndex < mqCount) {
+            // Get Item
+            QListWidgetItem* item = ui->mainQueueList->item(aIndex);
+            // Get Operation Entry
+            FileOperationEntry* opEntry = opQueueHandler->getOperation(aIndex);
+            // Check Item
+            if (item && opEntry) {
+                // Init Status String
+                QString statusString = QString("");//QString("%1: ").arg(opEntry->getOperationName());
+                // Init Use Bold Font
+                bool useBoldFont = false;
+                // Check Operation Index
+                switch (opEntry->getOperationIndex()) {
+                    default:
+                    case OPERATION_ID_COPY:
+                    case OPERATION_ID_MOVE:
+                    case OPERATION_ID_RENAME:
+                        // Compose Status String
+                        statusString += QString(FILE_OPERATION_QUEUE_TEXT_TEMPLATE_COPY).arg(opEntry->getOperationName())
+                                                                                        .arg(opEntry->getSource())
+                                                                                        .arg(opEntry->getTarget());
+                        break;
+
+                    case OPERATION_ID_MAKEDIR:
+                    case OPERATION_ID_DELETE:
+                        // Compose Status String
+                        statusString += QString(FILE_OPERATION_QUEUE_TEXT_TEMPLATE_DELETE).arg(opEntry->getOperationName())
+                                                                                          .arg(opEntry->getSource());
+                        break;
+                }
+
+                // Switch To Entry Operation State
+                switch (opEntry->getState()) {
+                    case FOSIdle: {
+                        statusString += QString(FILE_OPERATION_IDLE);
+                    } break;
+
+                    case FOSRunning: {
+                        // Check Operation Index
+                        if (opEntry->getOperationIndex() == OPERATION_ID_COPY || opEntry->getOperationIndex() == OPERATION_ID_MOVE) {
+                            // Get Progress Total
+                            qint64 total = opEntry->getTotal();
+                            // Get Progress Current
+                            qint64 current = opEntry->getCurrent();
+
+                            // Check Operation Entry Total
+                            if (total > 0) {
+                                // Calculate Progress
+                                qreal progress = ((qreal)current) * 100.0f / total;
+
+                                // Add Progress
+                                statusString += QString(FILE_OPERATION_PROGRESS).arg(progress, 2, 'f', 1, QChar('0'));
+                            }
+                        } else {
+                            // Adjust Status String
+                            statusString += QString(FILE_OPERATION_RUNNING);
+                        }
+                        // Set Use Bold Font
+                        useBoldFont = true;
+                    } break;
+
+                    case FOSDeleteLater: {
+                        // Adjust Status String
+                        statusString += QString(FILE_OPERATION_RUNNING);
+                        // Set Use Bold Font
+                        useBoldFont = true;
+                    } break;
+
+                    case FOSDone: {
+                        // Adjust Status String
+                        statusString += QString(FILE_OPERATION_DONE);
+                    } break;
+
+                    case FOSSkipped: {
+                        // Adjust Status String
+                        statusString += QString(FILE_OPERATION_SKIPPED);
+                    } break;
+
+                    case FOSFailed: {
+                        // Adjust Status String
+                        statusString += QString(FILE_OPERATION_FAILED);
+                    } break;
+
+                    case FOSRetry: {
+                        // Adjust Status String
+                        statusString += QString(FILE_OPERATION_RETRY);
+                    } break;
+
+                    default:
+
+                        qDebug() << "MainQueueDialog::operationUpdated - aIndex: " << aIndex << " - Status NOT Handled";
+
+                        // ...
+                    break;
+                }
+
+                // Update Item Text
+                item->setText(statusString);
+
+                // Get Font
+                QFont itemFont = item->font();
+                // Set Bold state
+                itemFont.setBold(useBoldFont);
+                // Set Item Font
+                item->setFont(itemFont);
+            }
+        }
+    }
 }
 
 //==============================================================================

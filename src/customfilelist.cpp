@@ -1731,10 +1731,14 @@ void IconScanner::scanIcons(const CacheType* aCache, const int& aFVI, const int&
 void IconScanner::updateItemIcon(const int& aIndex)
 {
     DEFAULT_THREAD_ABORT_CHECK;
+    // Lock Mutex
+    //mutex.lock();
+
     // Check Cache
     if (delegateCache) {
         // Get Cahced Item
         FileListDelegate* fileListDelegate = reinterpret_cast<FileListDelegate*>((*delegateCache)[aIndex]);
+
         DEFAULT_THREAD_ABORT_CHECK;
         // Check If Needs Icon
         if (fileListDelegate && fileListDelegate->getNeedsIconUpdate()) {
@@ -1745,8 +1749,10 @@ void IconScanner::updateItemIcon(const int& aIndex)
             msleep(1);
 
             DEFAULT_THREAD_ABORT_CHECK;
+
             // Get File Item Data
             FileItemData* fileItemData = reinterpret_cast<FileItemData*>(fileListDelegate->getData());
+
             DEFAULT_THREAD_ABORT_CHECK;
             // Lock Mutex
             mutex.lock();
@@ -1756,6 +1762,9 @@ void IconScanner::updateItemIcon(const int& aIndex)
             mutex.unlock();
         }
     }
+
+    // Unlock Mutex
+    //mutex.unlock();
 }
 
 //==============================================================================

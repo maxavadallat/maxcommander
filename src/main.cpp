@@ -247,7 +247,72 @@ int main(int argc, char* argv[])
 
         //return 0;
 
-        //qDebug() << "System Locale: " << QLocale::system().name();
+        qDebug() << "System Locale: " << QLocale::system().name();
+
+/*
+        //QString fileName1 = QString("/Users/Max/Temp3/Temp4/Top.Gear.S19E04.PROPER.HDTV.X264-FoVBiA.mp4");
+        //QString fileName2 = QString("/Users/Max/Temp2/Temp4/Top.Gear.S19E04.PROPER.HDTV.X264-FoVBiA.mp4");
+        QString fileName1 = QString("/Users/Max/Temp2/Temp4");
+        QString fileName2 = QString("/Users/Max/Temp3/Temp4");
+
+        bool renResult = false;
+
+        if (QFile::exists(fileName1)) {
+
+            renResult = QFile::rename(fileName1, fileName2);
+
+            qDebug() << "rename: " << fileName1 << " -> " << fileName2 << QString(renResult ? "SUCCESS" : "FAILED");
+
+        } else if (QFile::exists(fileName2)) {
+
+            renResult = QFile::rename(fileName2, fileName1);
+
+            qDebug() << "rename: " << fileName2 << " -> " << fileName1 << QString(renResult ? "SUCCESS" : "FAILED");
+        }
+
+        return 0;
+*/
+/*
+        QDir volumes(QString(DEFAULT_DRIVES_PATH));
+
+        QStringList veList = volumes.entryList(QDir::Drives | QDir::Dirs | QDir::NoDotAndDotDot);
+
+        int veCount = veList.count();
+
+        qDebug() << "Volumes";
+
+        for (int i=0; i<veCount; ++i) {
+            qDebug() << " +-- " << veList[i];
+        }
+
+        return 0;
+*/
+/*
+        //QString examplePath = QString("/Volumes/WIN8ENTRPRS");
+        QString examplePath = QString("/Users/Max/Temp3/Top.Gear.S19E04.PROPER.HDTV.X264-FoVBiA.mp4");
+
+        qDebug() << examplePath << " - volume: " << FileUtils::extractDriveName(examplePath);
+
+        return 0;
+*/
+/*
+        QString fileName1 = QString("/Users/Max/Temp2/Temp4");
+        QString fileName2 = QString("/Users/Max/Temp3/Temp4");
+
+
+        if (QFile::rename(fileName1, fileName2)) {
+
+            qDebug() << "rename: " << fileName1 << " -> " << fileName2 << " - SUCCESS";
+
+        } else {
+
+            qDebug() << "rename: " << fileName1 << " -> " << fileName2 << " - FAILED";
+
+        }
+
+        return 0;
+*/
+
 
         // Set Application Name
         app.setApplicationName(DEFAULT_APPLICATION_NAME);

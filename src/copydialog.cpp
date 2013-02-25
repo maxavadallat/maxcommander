@@ -72,6 +72,10 @@ void CopyDialog::setTarget(const QString& aTarget)
     if (ui && ui->targetEdit) {
         // Set Target Edit Text
         ui->targetEdit->setText(aTarget);
+
+        // Set Optimal Dialog Size
+
+        // ...
     }
 }
 

@@ -73,12 +73,20 @@
 
 // File Operations Token Separator
 #define FILE_OPERATIONS_TOKEN_SEPARATOR                     ';'
+// File Operation Idle
+#define FILE_OPERATION_IDLE                                 " ... idle"
+// File Operation Running
+#define FILE_OPERATION_RUNNING                              " ... running"
+// File Operation Progress
+#define FILE_OPERATION_PROGRESS                             " ... %1%"
 // File Operation Done
 #define FILE_OPERATION_DONE                                 " ... done"
 // File Operation Failed
 #define FILE_OPERATION_FAILED                               " ... failed"
 // File Operation Skipped
 #define FILE_OPERATION_SKIPPED                              " ... skipped"
+// File Operation Retry
+#define FILE_OPERATION_RETRY                                " ... retry"
 
 // File Operation Queue Text Template - COPY, MOVE, RENAME
 #define FILE_OPERATION_QUEUE_TEXT_TEMPLATE_COPY             "%1:%2 - > %3"
@@ -161,6 +169,23 @@
 
 // Default Status Message Timeout
 #define DEFAULT_STATUS_MESSAGE_TIMEOUT                      5000
+
+
+
+// System Drives/Volumes Path
+#if defined (Q_OS_MAC)
+
+#define DEFAULT_DRIVES_PATH                                 "/Volumes/"
+
+#elif defined (Q_OS_UNIX)
+
+#define DEFAULT_DRIVES_PATH                                 "/Media/"
+
+#elif defined (Q_OS_WIN)
+
+#define DEFAULT_DRIVES_PATH                                 ""
+
+#endif
 
 // File Size Consts
 #define ONE_KILO                                            1024

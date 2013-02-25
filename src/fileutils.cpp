@@ -675,7 +675,7 @@ int FileUtils::readDir(const QString& aDirName, int& aOptions, bool& aAbortSig, 
     QFileInfo dirInfo(dirName);
 
     // Init Observer Response
-    int observerResponse = 0;
+    //int observerResponse = 0;
     // Init Last Error
     int lastError = 0;
 
@@ -738,7 +738,7 @@ int FileUtils::scanDir(const QString& aDirName, int& aOptions, bool& aAbortSig, 
     QFileInfo dirInfo(dirName);
 
     // Init Observer Response
-    int observerResponse = 0;
+    //int observerResponse = 0;
     // Init Last Error
     int lastError = 0;
 
@@ -792,7 +792,6 @@ int FileUtils::deleteFile(const QString& aFileName, int& aOptions, bool& aAbortS
     bool skipFiles = aOptions & FILE_DELETE_OPTION_DELETE_SKIP_NORMAL;
     // Init Skip Deleting All Read Only  Files
     bool skipReadOnlyFiles = aOptions & FILE_DELETE_OPTION_DELETE_SKIP_READONLY;
-
     // Init Delete Non Empty Directories
     //bool deleteNonEmpty = aOptions & FILE_DELETE_OPTION_DELETE_NON_EMPTY_DIR;
 
@@ -817,6 +816,11 @@ int FileUtils::deleteFile(const QString& aFileName, int& aOptions, bool& aAbortS
         return FILE_UTILS_RESPONSE_ERROR;
     }
 
+    // Check Abort Signal
+    if (aAbortSig) {
+        return FILE_UTILS_RESPONSE_ABORT;
+    }
+
     // Check Observer
     if (aObserver) {
         // Notify
@@ -826,8 +830,7 @@ int FileUtils::deleteFile(const QString& aFileName, int& aOptions, bool& aAbortS
     // Init Observer Response
     int observerResponse = 0;
     // Init Remove Result
-    int removeResult = 0;
-
+    //int removeResult = 0;
     // Init File Read Only
     bool fileReadOnly = false;
 
@@ -848,158 +851,125 @@ int FileUtils::deleteFile(const QString& aFileName, int& aOptions, bool& aAbortS
 
 #endif // Q_OS_WIN
 
-    // Check Observer
-    if (aObserver) {
-        // Check Delete Read Only Files Option
-        if (fileReadOnly && !deleteReadOnlyFiles && !skipReadOnlyFiles) {
-            // Get Confirmation Result
-            observerResponse = aObserver->confirmDeletion(fileName, fileReadOnly);
+    // Check Options
+    if ((fileReadOnly && skipReadOnlyFiles) || (!fileReadOnly && skipFiles))
+        return FILE_UTILS_RESPONSE_SKIP;
 
-            // Evaluate Observer Result
-            if (observerResponse == FOORTSkipAll || observerResponse == FOORTNoToAll) {
-                // Add To Options
-                aOptions |= FILE_DELETE_OPTION_DELETE_SKIP_READONLY;
-
-                return FILE_UTILS_RESPONSE_SKIP;
-
-            // Evaluate Observer Result
-            } else if (observerResponse == FOORTYesToAll) {
-                // Add To Options
-                aOptions |= FILE_DELETE_OPTION_DELETE_READONLY;
-                // Update Delete Read Only Files
-                deleteReadOnlyFiles = true;
-
-            // Evaluate Observer Result
-            } else if (observerResponse == FOORTAbort || observerResponse == FOORTCancel) {
-                // Set Abort Sig
-                aAbortSig = true;
-
-                return FILE_UTILS_RESPONSE_ABORT;
-
-            // Evaluate Observer Result
-            } else if (observerResponse == FOORTSkip || observerResponse == FOORTNo) {
-
-                return FILE_UTILS_RESPONSE_SKIP;
-
-            // Evaluate Observer Result
-            } else if (observerResponse == FOORTYes) {
-                // Update Delete Read Only Files
-                deleteReadOnlyFiles = true;
-            }
-
-        // Check Delete Normal Files Option
-        } else if (!deleteFiles && !skipFiles) {
-            // Get Confirmation Result
-            observerResponse = aObserver->confirmDeletion(fileName, fileReadOnly);
-            // Evaluate Observer Result
-            if (observerResponse == FOORTSkipAll || observerResponse == FOORTNoToAll) {
-                // Add To Options
-                aOptions |= FILE_DELETE_OPTION_DELETE_SKIP_NORMAL;
-
-                return FILE_UTILS_RESPONSE_SKIP;
-
-            // Evaluate Observer Result
-            } else if (observerResponse == FOORTYesToAll) {
-                // Add To Options
-                aOptions |= FILE_DELETE_OPTION_DELETE_NORMAL;
-                // Update Delete File
-                deleteFiles = true;
-
-            // Evaluate Observer Result
-            } else if (observerResponse == FOORTAbort || observerResponse == FOORTCancel) {
-                // Set Abort Sig
-                aAbortSig = true;
-
-                return FILE_UTILS_RESPONSE_ABORT;
-
-            // Evaluate Observer Result
-            } else if (observerResponse == FOORTSkip || observerResponse == FOORTNo) {
-
-                return FILE_UTILS_RESPONSE_SKIP;
-
-            // Evaluate Observer Result
-            } else if (observerResponse == FOORTYes) {
-                // Update Delete Files
-                deleteFiles = true;
-            }
-
-        // Check Skip Read Only Files Option
-        } else if (fileReadOnly && skipReadOnlyFiles) {
-
-            return FILE_UTILS_RESPONSE_SKIP;
-
-        // Check Skip Files Option
-        } else if (!fileReadOnly && skipFiles) {
-
-            return FILE_UTILS_RESPONSE_SKIP;
-
-        }
-    } else {
-        // Check Options
-        if ((fileReadOnly && skipReadOnlyFiles) || skipFiles || !deleteReadOnlyFiles && !deleteFiles) {
-
-            return FILE_UTILS_RESPONSE_ERROR;
-        }
+    // Check Abort Signal
+    if (aAbortSig) {
+        return FILE_UTILS_RESPONSE_ABORT;
     }
 
-    qDebug() << "FileUtils::deleteFile - fileName: " << fileName;
+    // Reset Last Error
+    lastError = 0;
 
-    do {
-        // Check Abort Signal
-        if (aAbortSig) {
-            return FILE_UTILS_RESPONSE_ABORT;
+    // Check Options
+    if ((fileReadOnly && deleteReadOnlyFiles) || (!fileReadOnly && deleteFiles)) {
+
+        // Do Nothing Here... Let App Go Thru
+
+    // Check Observer
+    } else if (aObserver) {
+
+        // Display Confirmation
+        observerResponse = aObserver->confirmDeletion(fileName, fileReadOnly);
+
+        switch (observerResponse) {
+            case FOORTSkipAll:
+            case FOORTNoToAll:
+                // Set Options
+                aOptions |= fileReadOnly ? FILE_DELETE_OPTION_DELETE_SKIP_READONLY : FILE_DELETE_OPTION_DELETE_SKIP_NORMAL;
+                // Fall Thru
+            case FOORTNo:
+                return FILE_UTILS_RESPONSE_SKIP;
+            break;
+
+            case FOORTYesToAll:
+                // Set Options
+                aOptions |= fileReadOnly ? FILE_DELETE_OPTION_DELETE_READONLY : FILE_DELETE_OPTION_DELETE_NORMAL;
+                // Fall Thru
+            case FOORTYes:
+                // Do nothing, go thru
+            break;
+
+            case FOORTAbort:
+            case FOORTCancel:
+
+                // Set Abort Sig
+                aAbortSig = true;
+
+                return FILE_UTILS_RESPONSE_ABORT;
+            break;
         }
 
-        // Check File Info
-        if (fileInfo.isDir()) {
-#if defined (Q_OS_WIN)
-            // Delete Directory
-            removeResult = !RemoveDirectory(QFile::encodeName(fileName));
-#elif defined (Q_OS_MAC) || defined (Q_OS_UNIX)
-            // Delete File
-            removeResult = rmdir(QFile::encodeName(fileName));
-#endif // Q_OS_MAC || Q_OS_UNIX
-        } else {
-#if defined (Q_OS_WIN)
-            // Delete File
-            removeResult = !DeleteFile(QFile::encodeName(fileName));
-#elif defined (Q_OS_MAC) || defined (Q_OS_UNIX)
-            // Delete File
-            removeResult = unlink(QFile::encodeName(fileName));
-#endif // Q_OS_MAC || Q_OS_UNIX
-        }
+        // Let App Go Thru...
 
-        // Check Remove Result
-        if (removeResult && observerResponse != FOORTSkipAll && observerResponse != FOORTIgnoreAll) {
-#if defined (Q_OS_WIN)
-            // Get Last Error
-            lastError = GetLastError();
-#elif defined (Q_OS_MAC) || defined (Q_OS_UNIX)
-            // Get Last Error
-            lastError = errno;
+    } else {
+        return FILE_UTILS_RESPONSE_ERROR;
+    }
 
-            // Check Last Error
-            if (lastError == EEXIST) {
-                // Reset Last Error
-                lastError = 0;
-            }
-#endif // Q_OS_MAC || Q_OS_UNIX
-            // Check Last Error
-            if (lastError) {
-                qDebug() << "FileUtils::deleteFile - lastError: " << lastError;
-                // Check Observer
-                if (aObserver) {
-                    // Get Observer Response
+    // Check Abort Signal
+    if (aAbortSig) {
+        return FILE_UTILS_RESPONSE_ABORT;
+    }
+
+    // Check If Read Only
+    if (fileReadOnly) {
+        do {
+            // Reset Last Error
+            lastError = 0;
+
+#ifdef Q_OS_WIN
+            // Set File Attibute
+            if (FileUtils::setFileAttributes(fileName, FILE_ATTRIBUTE_NORMAL)) {
+#else // Q_OS_WIN
+            // Set File Attibute
+            if (FileUtils::setFileAttributes(fileName, 0777)) {
+#endif // Q_OS_WIN
+                // Get Last Error
+                lastError = getLastError();
+                // Check Last Error
+                if (lastError && aObserver) {
+                    // Show Observer Error - Get Response
                     observerResponse = aObserver->deleteError(fileName, lastError);
 
-                    // Check Observer Error
+                    // Check Observer Response
 
-                } else {
-                    return FILE_UTILS_RESPONSE_ERROR;
+                    // ...
                 }
             }
+        } while (lastError && aObserver && observerResponse == FOORTRetry);
+    }
+
+    // Check Abort Signal
+    if (aAbortSig) {
+        return FILE_UTILS_RESPONSE_ABORT;
+    }
+
+    do {
+        // Reset Last Error
+        lastError = 0;
+
+        // Delete File
+        if (!QFile::remove(fileName)) {
+            // Get Last Error
+            lastError = getLastError();
+            // Check Last Error
+            if (lastError && aObserver) {
+                // Show Observer Error - Get Response
+                observerResponse = aObserver->deleteError(fileName, lastError);
+
+                // Check Observer Response
+
+                // ...
+            }
         }
-    } while (aObserver && observerResponse == FOORTRetry);
+    } while (lastError && aObserver && observerResponse == FOORTRetry);
+
+    // Check Abort Signal
+    if (aAbortSig) {
+        return FILE_UTILS_RESPONSE_ABORT;
+    }
 
     // Check Observer
     if (aObserver) {
@@ -1079,6 +1049,10 @@ int FileUtils::copyFile(const QString& aSource, const QString& aTarget, int& aOp
 #endif // Q_OS_MAC || Q_OS_UNIX
             // Notify
             observerResponse = aObserver->copyError(sourceName, targetName, lastError);
+
+            // Give Possibility To Rename
+
+            // ...
         }
 
         return FILE_UTILS_RESPONSE_ERROR;
@@ -1088,9 +1062,6 @@ int FileUtils::copyFile(const QString& aSource, const QString& aTarget, int& aOp
     if (aAbortSig) {
         return FILE_UTILS_RESPONSE_ABORT;
     }
-
-    // Check Target File
-    if (QFile::exists(targetName) && !targetInfo.isDir()) {
 
 #if defined (Q_OS_WIN)
 
@@ -1109,78 +1080,172 @@ int FileUtils::copyFile(const QString& aSource, const QString& aTarget, int& aOp
 
 #endif // Q_OS_WIN
 
+    // Check Abort Sig
+    if (aAbortSig) {
+        return FILE_UTILS_RESPONSE_ABORT;
+    }
+
+    // Check Target File
+    if (QFile::exists(targetName) && !targetInfo.isDir()) {
+
+        // Check If Target File Read Only And Overwrite Files
+        if (!fileReadOnly && overwriteFiles) {
+            do {
+                // Reset Last Error
+                lastError = 0;
+
+                // Delete File
+                if (!QFile::remove(targetName)) {
+                    // Get Last Error
+                    lastError = getLastError();
+                    // Check Last Error
+                    if (lastError && aObserver) {
+                        // Show Observer Error - Get Response
+                        observerResponse = aObserver->copyError(sourceName, targetName, lastError);
+
+                        // Check Observer Response
+                        if (observerResponse == FOORTAbort || observerResponse == FOORTCancel) {
+                            return FILE_UTILS_RESPONSE_ABORT;
+                        }
+
+                        // ...
+                    }
+                }
+            } while (lastError && aObserver && observerResponse == FOORTRetry);
+
+        // Check If Target File Read Only And Overwrite Files
+        } else if (fileReadOnly && overWriteReadOnlyFiles) {
+            do {
+                // Reset Last Error
+                lastError = 0;
+
+#ifdef Q_OS_WIN
+                // Set File Attibute
+                if (FileUtils::setFileAttributes(targetName, FILE_ATTRIBUTE_NORMAL)) {
+#else // Q_OS_WIN
+                // Set File Attibute
+                if (FileUtils::setFileAttributes(targetName, 0777)) {
+#endif // Q_OS_WIN
+                    // Get Last Error
+                    lastError = getLastError();
+                    // Check Last Error
+                    if (lastError && aObserver) {
+                        // Show Observer Error - Get Response
+                        observerResponse = aObserver->copyError(sourceName, targetName, lastError);
+
+                        // Check Observer Response
+
+                        // ...
+                    }
+                }
+            } while (lastError && aObserver && observerResponse == FOORTRetry);
+
+            do {
+                // Reset Last Error
+                lastError = 0;
+
+                // Delete File
+                if (!QFile::remove(targetName)) {
+                    // Get Last Error
+                    lastError = getLastError();
+                    // Check Last Error
+                    if (lastError && aObserver) {
+                        // Show Observer Error - Get Response
+                        observerResponse = aObserver->copyError(sourceName, targetName, lastError);
+
+                        // Check Observer Response
+
+                        // ...
+                    }
+                }
+            } while (lastError && aObserver && observerResponse == FOORTRetry);
+        // Check File Read Only Flag And Options
+        } else if ((!fileReadOnly && skipFiles) || (fileReadOnly && skipReadOnlyFiles)) {
+
+            return FILE_UTILS_RESPONSE_SKIP;
+
         // Check Observer
-        if (!(overwriteFiles || overWriteReadOnlyFiles || skipFiles || skipReadOnlyFiles) && aObserver) {
+        } else if (aObserver) {
             // Get Confirmation
-            observerResponse = aObserver->confirmCopyOverWrite(sourceName, targetName);
-            // Check Observer Response
-            if (observerResponse == FOORTYes || observerResponse == FOORTYesToAll) {
-                // Check Observer Response
-                if (observerResponse == FOORTYesToAll) {
-                    // Check Entry If Read Only
-                    if (fileReadOnly) {
-                        // Add To Options
-                        aOptions |= FILE_COPY_OPTION_OVERWRITE_READONLY;
-                    } else {
-                        // Add To Options
-                        aOptions |= FILE_COPY_OPTION_OVERWRITE_NORMAL;
-                    }
-                }
+            observerResponse = aObserver->confirmCopyOverWrite(sourceName, targetName, fileReadOnly);
 
-                do {
-                    // Delete File
-                    if (!QFile::remove(targetName)) {
-                        // Get Last Error
-                        lastError = getLastError();
-                        // Check Last Error
-                        if (aObserver && lastError) {
-                            // Error
-                            observerResponse = aObserver->copyError(sourceName, targetName, lastError);
+            // Switch ObserverResponse
+            switch (observerResponse) {
+                case FOORTYesToAll:
+
+                    // Set Options
+                    aOptions |= fileReadOnly ? FILE_COPY_OPTION_OVERWRITE_READONLY : FILE_COPY_OPTION_OVERWRITE_NORMAL;
+
+                case FOORTYes:
+                    // Check If Read Only
+                    if (fileReadOnly) {
+                        do {
+                            // Reset Last Error
+                            lastError = 0;
+
+#ifdef Q_OS_WIN
+                            // Set File Attibute
+                            if (FileUtils::setFileAttributes(targetName, FILE_ATTRIBUTE_NORMAL)) {
+#else // Q_OS_WIN
+                            // Set File Attibute
+                            if (FileUtils::setFileAttributes(targetName, 0777)) {
+#endif // Q_OS_WIN
+                                // Get Last Error
+                                lastError = getLastError();
+                                // Check Last Error
+                                if (lastError && aObserver) {
+                                    // Show Observer Error - Get Response
+                                    observerResponse = aObserver->copyError(sourceName, targetName, lastError);
+
+                                    // Check Observer Response
+
+                                    // ...
+                                }
+                            }
+                        } while (lastError && aObserver && observerResponse == FOORTRetry);
+                    }
+
+                    do {
+                        // Reset Last Error
+                        lastError = 0;
+
+                        // Delete File
+                        if (!QFile::remove(targetName)) {
+                            // Get Last Error
+                            lastError = getLastError();
+
+                            // Check Last Error
+                            if (lastError && aObserver) {
+                                // Show Observer Error - Get Response
+                                observerResponse = aObserver->copyError(sourceName, targetName, lastError);
+
+                                // Check Observer Response
+
+                                // ...
+                            }
                         }
-                    }
-                } while (aObserver && observerResponse == FOORTRetry);
+                    } while (lastError && aObserver && observerResponse == FOORTRetry);
 
-            } else {
+                break;
 
-                // Check Observer Response
-                if (observerResponse == FOORTNoToAll) {
-                    // Check If Target File Is Read Only
-                    if (fileReadOnly) {
-                        // Add To Options
-                        aOptions |= FILE_COPY_OPTION_OVERWRITE_SKIP_READONLY;
-                    } else {
-                        // Add To Options
-                        aOptions |= FILE_COPY_OPTION_OVERWRITE_SKIP_NORMAL;
-                    }
-                // Evaluate Observer Result
-                } else if (observerResponse == FOORTAbort || observerResponse == FOORTCancel) {
-                    // Set Abort Sig
-                    aAbortSig = true;
+                case FOORTNoToAll:
 
-                    return FILE_UTILS_RESPONSE_ABORT;
-                }
+                    // Set Options
+                    aOptions |= fileReadOnly ? FILE_COPY_OPTION_OVERWRITE_SKIP_READONLY : FILE_COPY_OPTION_OVERWRITE_SKIP_NORMAL;
 
-                return FILE_UTILS_RESPONSE_SKIP;
+                    // Fall Thru
+
+                case FOORTNo:
+
+                    return FILE_UTILS_RESPONSE_SKIP;
+
+                break;
             }
+
+            // Let App Go Thru...
+
         } else {
-            // Check Options
-            if ((!fileReadOnly && overwriteFiles) || (fileReadOnly && overWriteReadOnlyFiles)) {
-                do {
-                    // Delete File
-                    if (!QFile::remove(targetName)) {
-                        // Get Last Error
-                        lastError = getLastError();
-                        // Check Last Error
-                        if (aObserver && lastError) {
-                            // Error
-                            observerResponse = aObserver->copyError(sourceName, targetName, lastError);
-                        }
-                    }
-                } while (aObserver && observerResponse == FOORTRetry);
-
-            } else {
-                return FILE_UTILS_RESPONSE_ERROR;
-            }
+            return FILE_UTILS_RESPONSE_ERROR;
         }
     }
 
@@ -1345,7 +1410,7 @@ int FileUtils::copyFile(const QString& aSource, const QString& aTarget, int& aOp
                         // ...
                     }
                 }
-            } while (observerResponse == FOORTRetry);
+            } while (aObserver && observerResponse == FOORTRetry);
 
             // Close Source File
             sf.close();
@@ -1369,6 +1434,7 @@ int FileUtils::copyFile(const QString& aSource, const QString& aTarget, int& aOp
         // Free Copy Buffer
         free(buf);
     }
+
     // Check Observer
     if (aObserver) {
         // Notify
@@ -1388,6 +1454,15 @@ int FileUtils::renameFile(const QString& aSource, const QString& aTarget, int& a
     // Get Target Name
     QString targetName = QDir::cleanPath(aTarget);
 
+    // Init Overwrite Files
+    bool overwriteFiles = aOptions & FILE_RENAME_OPTION_OVERWRITE_NORMAL;
+    // Init Overwrite All Read Only, System, Hidden Files
+    bool overWriteReadOnlyFiles = aOptions & FILE_RENAME_OPTION_OVERWRITE_READONLY;
+    // Init Skip Overwriting All Normal Files
+    bool skipFiles = aOptions & FILE_RENAME_OPTION_OVERWRITE_SKIP_NORMAL;
+    // Init Skip Overwrite All Read Only  Files
+    bool skipReadOnlyFiles = aOptions & FILE_RENAME_OPTION_OVERWRITE_SKIP_READONLY;
+
     // Check Abort Sig
     if (aAbortSig) {
         return FILE_UTILS_RESPONSE_ABORT;
@@ -1402,11 +1477,38 @@ int FileUtils::renameFile(const QString& aSource, const QString& aTarget, int& a
 
     // Init Last Error
     int lastError = 0;
+    // Init Observer Response
+    int observerResponse = 0;
+    // Init File Read Only
+    bool fileReadOnly = false;
+
+    // Compare Source And Target File Name If They Are The Same
+    if (sourceName == targetName) {
+        // Check Observer
+        if (aObserver) {
+#if defined (Q_OS_WIN)
+            // Set Last Error
+            lastError = ERROR_INVALID_PARAMETER;
+#elif defined (Q_OS_MAC) || defined (Q_OS_UNIX)
+            // Set Last Error Manually
+            lastError = EINVAL;
+#endif // Q_OS_MAC || Q_OS_UNIX
+            // Notify
+            observerResponse = aObserver->renameError(sourceName, targetName, lastError);
+
+            // Give Possibility To Rename
+
+            // ...
+        }
+
+        return FILE_UTILS_RESPONSE_ERROR;
+    }
 
     // Check Abort Sig
     if (aAbortSig) {
         return FILE_UTILS_RESPONSE_ABORT;
     }
+
     // Check If Source File Exists
     if (!sourceInfo.exists()) {
         // Check Observer
@@ -1425,8 +1527,27 @@ int FileUtils::renameFile(const QString& aSource, const QString& aTarget, int& a
         return FILE_UTILS_RESPONSE_ERROR;
     }
 
-    // Init Observer Response
-    int observerResponse = 0;
+    // Check Abort Sig
+    if (aAbortSig) {
+        return FILE_UTILS_RESPONSE_ABORT;
+    }
+
+#if defined (Q_OS_WIN)
+
+        // Get File Attributes
+        int attrib =  FileUtils::getFileAttributes(targetName);
+
+        // Check Attribute
+        if ((attrib & FILE_ATTRIBUTE_HIDDEN) || (attrib & FILE_ATTRIBUTE_READONLY) || (attrib & FILE_ATTRIBUTE_SYSTEM)) {
+            // Set Read Only Flag
+            fileReadOnly = true;
+        }
+
+#else // Q_OS_WIN
+
+    // ...
+
+#endif // Q_OS_WIN
 
     // Check Abort Sig
     if (aAbortSig) {
@@ -1435,19 +1556,49 @@ int FileUtils::renameFile(const QString& aSource, const QString& aTarget, int& a
 
     // Check Target File
     if (QFile::exists(targetName) && !targetInfo.isDir()) {
-        // Check Observer
-        if (aObserver) {
-            // Get Confirmation
-            observerResponse = aObserver->confirmRenameOverWrite(sourceName, targetName);
-            // Check Observer Response
-            if (observerResponse == FOORTYes || observerResponse == FOORTYesToAll) {
-                do {
-                    // Delete File
-                    QFile::remove(targetName);
+
+        // Check If Target File Read Only And Overwrite Files
+        if (!fileReadOnly && overwriteFiles) {
+            do {
+                // Reset Last Error
+                lastError = 0;
+
+                // Delete File
+                if (!QFile::remove(targetName)) {
                     // Get Last Error
                     lastError = getLastError();
                     // Check Last Error
-                    if (lastError) {
+                    if (lastError && aObserver) {
+                        // Show Observer Error - Get Response
+                        observerResponse = aObserver->renameError(sourceName, targetName, lastError);
+
+                        // Check Observer Response
+                        if (observerResponse == FOORTAbort || observerResponse == FOORTCancel) {
+                            return FILE_UTILS_RESPONSE_ABORT;
+                        }
+
+                        // ...
+                    }
+                }
+            } while (lastError && aObserver && observerResponse == FOORTRetry);
+
+        // Check If Target File Read Only And Overwrite Files
+        } else if (fileReadOnly && overWriteReadOnlyFiles) {
+            do {
+                // Reset Last Error
+                lastError = 0;
+
+#ifdef Q_OS_WIN
+                // Set File Attibute
+                if (FileUtils::setFileAttributes(targetName, FILE_ATTRIBUTE_NORMAL)) {
+#else // Q_OS_WIN
+                // Set File Attibute
+                if (FileUtils::setFileAttributes(targetName, 0777)) {
+#endif // Q_OS_WIN
+                    // Get Last Error
+                    lastError = getLastError();
+                    // Check Last Error
+                    if (lastError && aObserver) {
                         // Show Observer Error - Get Response
                         observerResponse = aObserver->renameError(sourceName, targetName, lastError);
 
@@ -1455,8 +1606,113 @@ int FileUtils::renameFile(const QString& aSource, const QString& aTarget, int& a
 
                         // ...
                     }
-                } while (observerResponse == FOORTRetry);
+                }
+            } while (lastError && aObserver && observerResponse == FOORTRetry);
+
+            do {
+                // Reset Last Error
+                lastError = 0;
+
+                // Delete File
+                if (!QFile::remove(targetName)) {
+                    // Get Last Error
+                    lastError = getLastError();
+                    // Check Last Error
+                    if (lastError && aObserver) {
+                        // Show Observer Error - Get Response
+                        observerResponse = aObserver->renameError(sourceName, targetName, lastError);
+
+                        // Check Observer Response
+
+                        // ...
+                    }
+                }
+            } while (lastError && aObserver && observerResponse == FOORTRetry);
+        // Check File Read Only Flag And Options
+        } else if ((!fileReadOnly && skipFiles) || (fileReadOnly && skipReadOnlyFiles)) {
+
+            return FILE_UTILS_RESPONSE_SKIP;
+
+        // Check Observer
+        } else if (aObserver) {
+            // Get Confirmation
+            observerResponse = aObserver->confirmRenameOverWrite(sourceName, targetName, fileReadOnly);
+
+            // Switch ObserverResponse
+            switch (observerResponse) {
+                case FOORTYesToAll:
+
+                    // Set Options
+                    aOptions |= fileReadOnly ? FILE_RENAME_OPTION_OVERWRITE_READONLY : FILE_RENAME_OPTION_OVERWRITE_NORMAL;
+
+                case FOORTYes:
+                    // Check If Read Only
+                    if (fileReadOnly) {
+                        do {
+                            // Reset Last Error
+                            lastError = 0;
+
+#ifdef Q_OS_WIN
+                            // Set File Attibute
+                            if (FileUtils::setFileAttributes(targetName, FILE_ATTRIBUTE_NORMAL)) {
+#else // Q_OS_WIN
+                            // Set File Attibute
+                            if (FileUtils::setFileAttributes(targetName, 0777)) {
+#endif // Q_OS_WIN
+                                // Get Last Error
+                                lastError = getLastError();
+                                // Check Last Error
+                                if (lastError && aObserver) {
+                                    // Show Observer Error - Get Response
+                                    observerResponse = aObserver->renameError(sourceName, targetName, lastError);
+
+                                    // Check Observer Response
+
+                                    // ...
+                                }
+                            }
+                        } while (lastError && aObserver && observerResponse == FOORTRetry);
+                    }
+
+                    do {
+                        // Reset Last Error
+                        lastError = 0;
+
+                        // Delete File
+                        if (!QFile::remove(targetName)) {
+                            // Get Last Error
+                            lastError = getLastError();
+
+                            // Check Last Error
+                            if (lastError && aObserver) {
+                                // Show Observer Error - Get Response
+                                observerResponse = aObserver->renameError(sourceName, targetName, lastError);
+
+                                // Check Observer Response
+
+                                // ...
+                            }
+                        }
+                    } while (lastError && aObserver && observerResponse == FOORTRetry);
+
+                break;
+
+                case FOORTNoToAll:
+
+                    // Set Options
+                    aOptions |= fileReadOnly ? FILE_RENAME_OPTION_OVERWRITE_SKIP_READONLY : FILE_RENAME_OPTION_OVERWRITE_SKIP_NORMAL;
+
+                    // Fall Thru
+
+                case FOORTNo:
+
+                    return FILE_UTILS_RESPONSE_SKIP;
+
+                break;
             }
+
+            // Let App Go Thru...
+
         } else {
             return FILE_UTILS_RESPONSE_ERROR;
         }
@@ -1510,6 +1766,15 @@ int FileUtils::moveFile(const QString& aSource, const QString& aTarget, int& aOp
     // Get Target Name
     QString targetName = QDir::cleanPath(aTarget);
 
+    // Init Overwrite Files
+    bool overwriteFiles = aOptions & FILE_MOVE_OPTION_OVERWRITE_NORMAL;
+    // Init Overwrite All Read Only, System, Hidden Files
+    bool overWriteReadOnlyFiles = aOptions & FILE_MOVE_OPTION_OVERWRITE_READONLY;
+    // Init Skip Overwriting All Normal Files
+    bool skipFiles = aOptions & FILE_MOVE_OPTION_OVERWRITE_SKIP_NORMAL;
+    // Init Skip Overwrite All Read Only  Files
+    bool skipReadOnlyFiles = aOptions & FILE_MOVE_OPTION_OVERWRITE_SKIP_READONLY;
+
     qDebug() << "FileUtils::moveFile - sN: " << sourceName << " - tN: " << targetName << " - aOptions: " << aOptions << " - aObserver: " << aObserver;
 
     // Check Abort Sig
@@ -1524,6 +1789,32 @@ int FileUtils::moveFile(const QString& aSource, const QString& aTarget, int& aOp
 
     // Init Last Error
     int lastError = 0;
+    // Init Observer Response
+    int observerResponse = 0;
+    // Init File Read Only
+    bool fileReadOnly = false;
+
+    // Compare Source And Target File Name If They Are The Same
+    if (sourceName == targetName) {
+        // Check Observer
+        if (aObserver) {
+#if defined (Q_OS_WIN)
+            // Set Last Error
+            lastError = ERROR_INVALID_PARAMETER;
+#elif defined (Q_OS_MAC) || defined (Q_OS_UNIX)
+            // Set Last Error Manually
+            lastError = EINVAL;
+#endif // Q_OS_MAC || Q_OS_UNIX
+            // Notify
+            observerResponse = aObserver->moveError(sourceName, targetName, lastError);
+
+            // Give Possibility To Rename
+
+            // ...
+        }
+
+        return FILE_UTILS_RESPONSE_ERROR;
+    }
 
     // Check Abort Sig
     if (aAbortSig) {
@@ -1553,43 +1844,189 @@ int FileUtils::moveFile(const QString& aSource, const QString& aTarget, int& aOp
         return FILE_UTILS_RESPONSE_ABORT;
     }
 
-    // Init Observer Response
-    int observerResponse = 0;
+#if defined (Q_OS_WIN)
+
+        // Get File Attributes
+        int attrib =  FileUtils::getFileAttributes(targetName);
+
+        // Check Attribute
+        if ((attrib & FILE_ATTRIBUTE_HIDDEN) || (attrib & FILE_ATTRIBUTE_READONLY) || (attrib & FILE_ATTRIBUTE_SYSTEM)) {
+            // Set Read Only Flag
+            fileReadOnly = true;
+        }
+
+#else // Q_OS_WIN
+
+    // ...
+
+#endif // Q_OS_WIN
+
+    // Check Abort Sig
+    if (aAbortSig) {
+        return FILE_UTILS_RESPONSE_ABORT;
+    }
 
     // Check Target File
     if (QFile::exists(targetName) && !targetInfo.isDir()) {
 
-        // Check Abort Sig
-        if (aAbortSig) {
-            return FILE_UTILS_RESPONSE_ABORT;
-        }
+        // Check If Target File Read Only And Overwrite Files
+        if (!fileReadOnly && overwriteFiles) {
+            do {
+                // Reset Last Error
+                lastError = 0;
 
-        // Check Observer
-        if (aObserver) {
-            // Get Confirmation
-            observerResponse = aObserver->confirmMoveOverWrite(sourceName, targetName);
-            // Check Observer Response
-            if (observerResponse == FOORTYes || observerResponse == FOORTYesToAll) {
-                do {
-                    // Delete File
-                    QFile::remove(targetName);
+                // Delete File
+                if (!QFile::remove(targetName)) {
                     // Get Last Error
                     lastError = getLastError();
                     // Check Last Error
-                    if (lastError) {
-                        // Show Observer Move Error - Get Response
+                    if (lastError && aObserver) {
+                        // Show Observer Error - Get Response
+                        observerResponse = aObserver->moveError(sourceName, targetName, lastError);
+
+                        // Check Observer Response
+                        if (observerResponse == FOORTAbort || observerResponse == FOORTCancel) {
+                            return FILE_UTILS_RESPONSE_ABORT;
+                        }
+
+                        // ...
+                    }
+                }
+            } while (lastError && aObserver && observerResponse == FOORTRetry);
+
+        // Check If Target File Read Only And Overwrite Files
+        } else if (fileReadOnly && overWriteReadOnlyFiles) {
+            do {
+                // Reset Last Error
+                lastError = 0;
+
+#ifdef Q_OS_WIN
+                // Set File Attibute
+                if (FileUtils::setFileAttributes(targetName, FILE_ATTRIBUTE_NORMAL)) {
+#else // Q_OS_WIN
+                // Set File Attibute
+                if (FileUtils::setFileAttributes(targetName, 0777)) {
+#endif // Q_OS_WIN
+                    // Get Last Error
+                    lastError = getLastError();
+                    // Check Last Error
+                    if (lastError && aObserver) {
+                        // Show Observer Error - Get Response
                         observerResponse = aObserver->moveError(sourceName, targetName, lastError);
 
                         // Check Observer Response
 
                         // ...
                     }
-                } while (observerResponse == FOORTRetry);
+                }
+            } while (lastError && aObserver && observerResponse == FOORTRetry);
+
+            do {
+                // Reset Last Error
+                lastError = 0;
+
+                // Delete File
+                if (!QFile::remove(targetName)) {
+                    // Get Last Error
+                    lastError = getLastError();
+                    // Check Last Error
+                    if (lastError && aObserver) {
+                        // Show Observer Error - Get Response
+                        observerResponse = aObserver->moveError(sourceName, targetName, lastError);
+
+                        // Check Observer Response
+
+                        // ...
+                    }
+                }
+            } while (lastError && aObserver && observerResponse == FOORTRetry);
+        // Check File Read Only Flag And Options
+        } else if ((!fileReadOnly && skipFiles) || (fileReadOnly && skipReadOnlyFiles)) {
+
+            return FILE_UTILS_RESPONSE_SKIP;
+
+        // Check Observer
+        } else if (aObserver) {
+            // Get Confirmation
+            observerResponse = aObserver->confirmMoveOverWrite(sourceName, targetName);
+
+            // Switch ObserverResponse
+            switch (observerResponse) {
+                case FOORTYesToAll:
+
+                    // Set Options
+                    aOptions |= fileReadOnly ? FILE_MOVE_OPTION_OVERWRITE_READONLY : FILE_MOVE_OPTION_OVERWRITE_NORMAL;
+
+                case FOORTYes:
+                    // Check If Read Only
+                    if (fileReadOnly) {
+                        do {
+                            // Reset Last Error
+                            lastError = 0;
+
+#ifdef Q_OS_WIN
+                            // Set File Attibute
+                            if (FileUtils::setFileAttributes(targetName, FILE_ATTRIBUTE_NORMAL)) {
+#else // Q_OS_WIN
+                            // Set File Attibute
+                            if (FileUtils::setFileAttributes(targetName, 0777)) {
+#endif // Q_OS_WIN
+                                // Get Last Error
+                                lastError = getLastError();
+                                // Check Last Error
+                                if (lastError && aObserver) {
+                                    // Show Observer Error - Get Response
+                                    observerResponse = aObserver->moveError(sourceName, targetName, lastError);
+
+                                    // Check Observer Response
+
+                                    // ...
+                                }
+                            }
+                        } while (lastError && aObserver && observerResponse == FOORTRetry);
+                    }
+
+                    do {
+                        // Reset Last Error
+                        lastError = 0;
+
+                        // Delete File
+                        if (!QFile::remove(targetName)) {
+                            // Get Last Error
+                            lastError = getLastError();
+
+                            // Check Last Error
+                            if (lastError && aObserver) {
+                                // Show Observer Error - Get Response
+                                observerResponse = aObserver->moveError(sourceName, targetName, lastError);
+
+                                // Check Observer Response
+
+                                // ...
+                            }
+                        }
+                    } while (lastError && aObserver && observerResponse == FOORTRetry);
+
+                break;
+
+                case FOORTNoToAll:
+
+                    // Set Options
+                    aOptions |= fileReadOnly ? FILE_MOVE_OPTION_OVERWRITE_SKIP_READONLY : FILE_MOVE_OPTION_OVERWRITE_SKIP_NORMAL;
+
+                    // Fall Thru
+
+                case FOORTNo:
+
+                    return FILE_UTILS_RESPONSE_SKIP;
+
+                break;
             }
         } else {
             return FILE_UTILS_RESPONSE_ERROR;
         }
     }
+
 
     // Check Observer
     if (aObserver) {
@@ -1602,10 +2039,351 @@ int FileUtils::moveFile(const QString& aSource, const QString& aTarget, int& aOp
         return FILE_UTILS_RESPONSE_ABORT;
     }
 
-    do {
+    // Get Source File Size
+    qint64 sfSize = sourceInfo.size();
+    // Get Settings Instance
+    Settings* settings = Settings::getInstance();
+    // Get Copy Buffer Size
+    qint64 buffSize = settings ? settings->getValue(QString(SETTINGS_KEY_COPY_BUFFER_SIZE), DEFAULT_COPY_BUFFER_SIZE).toInt() : DEFAULT_COPY_BUFFER_SIZE;
+    // Adjust Buff Size
+    buffSize = qMin(buffSize, sfSize);
 
+    // Alloc Main Buffer For Copy File
+    char* buf = (char*)malloc(buffSize);
 
+    // Init Source File
+    QFile sf(sourceName);
+    // Init Target File
+    QFile tf(targetName);
+
+    // Check Abort Sig
+    if (aAbortSig) {
+        // Free Copy Buffer
+        free(buf);
+
+        return FILE_UTILS_RESPONSE_ABORT;
+    }
+
+    do {// OPEN SOURCE
+        // Open Source File
+        if (sf.open(QIODevice::ReadOnly)) {
+            do { // OPEN TARGET
+                // Open Target File
+                if (tf.open(QIODevice::WriteOnly)) {
+                    // Source File Pos
+                    qint64 spos = 0;
+                    // Source File Size
+                    qint64 ssize = sourceInfo.size();
+                    // Go Thru Source File
+                    while (!sf.atEnd()) {
+                        do { // READ SOURCE
+
+                            // Check Abort Signal
+                            if (aAbortSig) {
+                                // Close Source File
+                                sf.close();
+                                // Close Target File
+                                tf.close();
+                                // Free Copy Buffer
+                                free(buf);
+
+                                return FILE_UTILS_RESPONSE_ABORT;
+                            }
+
+                            // Read File Into Buff
+                            qint64 byteRead = sf.read(buf, buffSize);
+                            // Check Byte Read
+                            if (byteRead < 0) {
+                                // Get Last Error
+                                lastError = getLastError();
+
+                                // Check Observer
+                                if (aObserver && lastError) {
+                                    // Copy Error
+                                    observerResponse = aObserver->moveError(sourceName, targetName, lastError);
+
+                                    // Check Observer Response
+                                    if (observerResponse == FOORTCancel) {
+                                        // Close Source File
+                                        sf.close();
+                                        // Close Target File
+                                        tf.close();
+                                        // Free Copy Buffer
+                                        free(buf);
+
+                                        // Set Abort Sig
+                                        aAbortSig = true;
+
+                                        return FILE_UTILS_RESPONSE_ABORT;
+                                    }
+                                } else {
+                                    // Close Source File
+                                    sf.close();
+                                    // Close Target File
+                                    tf.close();
+                                    // Free Copy Buffer
+                                    free(buf);
+
+                                    return FILE_UTILS_RESPONSE_ERROR;
+                                }
+                            } else {
+                                // Set Source Pos
+                                spos += byteRead;
+                                do { // WRITE TARGET
+                                    // Write To Target File
+                                    if (tf.write(buf, byteRead) < 0) {
+                                        // Get Last Error
+                                        lastError = getLastError();
+
+                                        // Check Observer
+                                        if (aObserver && lastError) {
+                                            // Copy Error
+                                            observerResponse = aObserver->moveError(sourceName, targetName, lastError);
+
+                                            // Check Observer Response
+                                            if (observerResponse == FOORTCancel) {
+                                                // Close Source File
+                                                sf.close();
+                                                // Close Target File
+                                                tf.close();
+                                                // Free Copy Buffer
+                                                free(buf);
+
+                                                // Set Abort Sig
+                                                aAbortSig = true;
+
+                                                return FILE_UTILS_RESPONSE_ABORT;
+                                            }
+                                        } else {
+                                            // Close Source File
+                                            sf.close();
+                                            // Close Target File
+                                            tf.close();
+                                            // Free Copy Buffer
+                                            free(buf);
+
+                                            return FILE_UTILS_RESPONSE_ERROR;
+                                        }
+                                    } else {
+                                        // Check Observer
+                                        if (aObserver) {
+                                            // Notify
+                                            aObserver->moveProgress(sourceName, targetName, spos, ssize);
+                                        }
+                                    }
+                                } while (aObserver && observerResponse == FOORTRetry);
+                            }
+                        } while (aObserver && observerResponse == FOORTRetry);
+                    }
+                    // Close Target File
+                    tf.close();
+                } else {
+                    // Get Last Error
+                    lastError = getLastError();
+                    // Check Observer
+                    if (aObserver && lastError) {
+                        // Show Copy Error
+                        observerResponse = aObserver->moveError(sourceName, targetName, lastError);
+
+                        // Check Observer Response
+
+                        // ...
+                    }
+                }
+            } while (aObserver && observerResponse == FOORTRetry);
+
+            // Close Source File
+            sf.close();
+        } else {
+            // Get Last Error
+            lastError = getLastError();
+            // Check Observer
+            if (aObserver) {
+                // Show Copy Error - Get Response
+                observerResponse = aObserver->moveError(sourceName, targetName, lastError);
+
+                // Check Observer Response
+
+                // ...
+            }
+        }
     } while (aObserver && observerResponse == FOORTRetry);
+
+    // Check Copy Buffer
+    if (buf) {
+        // Free Copy Buffer
+        free(buf);
+    }
+
+    // Check Abort Sig
+    if (aAbortSig) {
+        return FILE_UTILS_RESPONSE_ABORT;
+    }
+
+#if defined (Q_OS_WIN)
+
+        // Get Source File Attributes
+        int attrib =  FileUtils::getFileAttributes(sourceName);
+
+        // Check Source File Attributes
+        if ((attrib & FILE_ATTRIBUTE_HIDDEN) || (attrib & FILE_ATTRIBUTE_READONLY) || (attrib & FILE_ATTRIBUTE_SYSTEM)) {
+            // Set Read Only Flag
+            fileReadOnly = true;
+        }
+
+#else // Q_OS_WIN
+
+    // ...
+
+#endif // Q_OS_WIN
+
+    // Check Options
+    if (fileReadOnly && FILE_MOVE_OPTION_SKIP_DELETE_READONLY_SOURCE) {
+
+        return FILE_UTILS_RESPONSE_SKIP;
+
+    // Check Options
+    } else if (fileReadOnly && FILE_MOVE_OPTION_DELETE_READONLY_SOURCE) {
+
+        do {
+            // Reset Last Error
+            lastError = 0;
+
+#ifdef Q_OS_WIN
+            // Set File Attibute
+            if (FileUtils::setFileAttributes(sourceName, FILE_ATTRIBUTE_NORMAL)) {
+#else // Q_OS_WIN
+            // Set File Attibute
+            if (FileUtils::setFileAttributes(sourceName, 0777)) {
+#endif // Q_OS_WIN
+                // Get Last Error
+                lastError = getLastError();
+                // Check Last Error
+                if (lastError && aObserver) {
+                    // Show Observer Error - Get Response
+                    observerResponse = aObserver->moveError(sourceName, targetName, lastError);
+
+                    // Check Observer Response
+
+                    // ...
+                }
+            }
+        } while (lastError && aObserver && observerResponse == FOORTRetry);
+
+        do {
+            // Reset Last Error
+            lastError = 0;
+
+            // Delete File
+            if (!QFile::remove(sourceName)) {
+                // Get Last Error
+                lastError = getLastError();
+                // Check Last Error
+                if (lastError && aObserver) {
+                    // Show Observer Error - Get Response
+                    observerResponse = aObserver->moveError(sourceName, targetName, lastError);
+
+                    // Check Observer Response
+                    if (observerResponse == FOORTAbort || observerResponse == FOORTCancel) {
+                        // set Abort Sig
+                        aAbortSig = true;
+
+                        return FILE_UTILS_RESPONSE_ABORT;
+                    }
+
+                    // ...
+                }
+            }
+        } while (lastError && aObserver && observerResponse == FOORTRetry);
+
+    // Check Observer
+    } else if (aObserver && fileReadOnly) {
+        // Confirm source Deletion
+        observerResponse = aObserver->confirmMoveDeletion(sourceName, fileReadOnly);
+        // Switch Observer Response
+        switch (observerResponse) {
+            case FOORTNoToAll:
+                // Set Options
+                aOptions |= FILE_MOVE_OPTION_SKIP_DELETE_READONLY_SOURCE;
+                // Fall Thru
+            case FOORTNo:
+
+                return FILE_UTILS_RESPONSE_SKIP;
+
+            case FOORTAbort:
+            case FOORTCancel:
+                // set Abort Sig
+                aAbortSig = true;
+
+                return FILE_UTILS_RESPONSE_ABORT;
+
+            case FOORTYesToAll:
+                // Set Options
+                aOptions |= FILE_MOVE_OPTION_DELETE_READONLY_SOURCE;
+                // Fall Thru
+            case FOORTYes:
+                do {
+                    // Reset Last Error
+                    lastError = 0;
+
+                    // Delete File
+                    if (!QFile::remove(sourceName)) {
+                        // Get Last Error
+                        lastError = getLastError();
+                        // Check Last Error
+                        if (lastError && aObserver) {
+                            // Show Observer Error - Get Response
+                            observerResponse = aObserver->moveError(sourceName, targetName, lastError);
+
+                            // Check Observer Response
+                            if (observerResponse == FOORTAbort || observerResponse == FOORTCancel) {
+                                // set Abort Sig
+                                aAbortSig = true;
+
+                                return FILE_UTILS_RESPONSE_ABORT;
+                            }
+
+                            // ...
+                        }
+                    }
+                } while (lastError && aObserver && observerResponse == FOORTRetry);
+            break;
+        }
+
+    // Check If source read only
+    } else if (!fileReadOnly) {
+
+        do {
+            // Reset Last Error
+            lastError = 0;
+
+            // Delete File
+            if (!QFile::remove(sourceName)) {
+                // Get Last Error
+                lastError = getLastError();
+                // Check Last Error
+                if (lastError && aObserver) {
+                    // Show Observer Error - Get Response
+                    observerResponse = aObserver->moveError(sourceName, targetName, lastError);
+
+                    // Check Observer Response
+                    if (observerResponse == FOORTAbort || observerResponse == FOORTCancel) {
+                        // set Abort Sig
+                        aAbortSig = true;
+
+                        return FILE_UTILS_RESPONSE_ABORT;
+                    }
+
+                    // ...
+                }
+            }
+        } while (lastError && aObserver && observerResponse == FOORTRetry);
+
+    } else {
+
+        return FILE_UTILS_RESPONSE_ERROR;
+
+    }
 
     // Check Observer
     if (aObserver) {
@@ -2652,6 +3430,73 @@ bool FileUtils::isFullPath(const QString& aFilePath)
     return false;
 }
 
+//==============================================================================
+// Are Files On The Same Drive
+//==============================================================================
+bool FileUtils::areFilesOnSameDrive(const QString& aSourceName, const QString& aTargetName)
+{
+#if defined (Q_OS_MAC)
+/*
+    // Check If Paths Contain /Volumes/
+    if (aSourceName.indexOf(QString(DEFAULT_DRIVES_PATH)) < 0 && aTargetName.indexOf(QString(DEFAULT_DRIVES_PATH)) < 0)
+        return true;
+*/
+    return (extractDriveName(aSourceName) == extractDriveName(aTargetName));
+
+#elif defined (Q_OS_UNIX)
+
+
+
+
+#elif defined (Q_OS_WIN)
+
+    return (aSourceName.toLower()[0] == aTargetName.toLower()[0]);
+
+#endif // Q_OS_WIN
+
+    // ...
+
+    return false;
+}
+
+//==============================================================================
+// Extract Drive Name
+//==============================================================================
+QString FileUtils::extractDriveName(const QString& aSourceName)
+{
+#if defined (Q_OS_MAC)
+
+    // Init Drives Path
+    QString drivePath = QString(DEFAULT_DRIVES_PATH);
+    // Init Result
+    QString result = QString("");
+
+    // Check If Contains Drive Path
+    if (aSourceName.indexOf(drivePath) == 0) {
+        // Cut Off Drives Path
+        result = aSourceName.right(aSourceName.length() - drivePath.length());
+        // Get Drive/Volume Name Length
+        int driveRootPos = result.indexOf(QString("/"));
+        // Check Drive/Volume Name Length
+        if (driveRootPos < 0)
+            return result;
+
+        return result.left(driveRootPos);
+    }
+
+#elif defined (Q_OS_UNIX)
+
+
+#elif defined (Q_OS_WIN)
+
+    return QString(aSourceName.toLower()[0]);
+
+#endif // Q_OS_WIN
+
+
+    return QString("/");
+}
+
 /*
 //==============================================================================
 // Get Authorization
@@ -3682,8 +4527,16 @@ bool FileOpQueueHandler::processEntry(FileOperationEntry* aEntry, const int& aIn
                 qDebug() << "FileOperationQueue::processEntry - aEntry[" << aIndex << "]: " << aEntry->getSource() << " - MOVE";
                 // Set Entry Running State
                 aEntry->opState = FOSRunning;
-                // Move File
-                fuResp = FileUtils::moveFile(aEntry->source, aEntry->target, moveFlags, abort, aEntry);
+
+                // Check If Source And Target File Name Are On The Same Drive
+                if (FileUtils::areFilesOnSameDrive(aEntry->source, aEntry->target)) {
+                    // Rename File
+                    fuResp = FileUtils::renameFile(aEntry->source, aEntry->target, moveFlags, abort, aEntry);
+                } else {
+                    // Move File
+                    fuResp = FileUtils::moveFile(aEntry->source, aEntry->target, moveFlags, abort, aEntry);
+                }
+
                 // Set Result
                 result = (fuResp == FILE_UTILS_RESPONSE_NOERROR);
                 // Set Entry State
@@ -3695,12 +4548,31 @@ bool FileOpQueueHandler::processEntry(FileOperationEntry* aEntry, const int& aIn
             qDebug() << "FileOperationQueue::processEntry - aEntry[" << aIndex << "]: " << aEntry->getSource() << " - RENAME";
             // Set Entry Running State
             aEntry->opState = FOSRunning;
-            // Rename File
-            fuResp = FileUtils::renameFile(aEntry->source, aEntry->target, moveFlags, abort, aEntry);
-            // Set Result
-            result = (fuResp == FILE_UTILS_RESPONSE_NOERROR);
-            // Set Entry State
-            aEntry->setOpStateByFileUtilsResponse(fuResp);
+
+            // Check If Source And Target File Name Are On The Same Drive
+            if (FileUtils::areFilesOnSameDrive(aEntry->source, aEntry->target)) {
+                // Rename File
+                fuResp = FileUtils::renameFile(aEntry->source, aEntry->target, moveFlags, abort, aEntry);
+                // Set Result
+                result = (fuResp == FILE_UTILS_RESPONSE_NOERROR);
+                // Set Entry State
+                aEntry->setOpStateByFileUtilsResponse(fuResp);
+            } else {
+
+#if defined (Q_OS_WIN)
+                // Set Last Error
+                int lastError = ERROR_INVALID_PARAMETER;
+#elif defined (Q_OS_MAC) || defined (Q_OS_UNIX)
+                // Set Last Error Manually
+                int lastError = EINVAL;
+#endif // Q_OS_MAC || Q_OS_UNIX
+
+                // Notify Observer
+                aEntry->renameError(aEntry->source, aEntry->target, lastError);
+
+
+
+            }
         } break;
 
         case OPERATION_ID_DELETE: {
@@ -3793,18 +4665,15 @@ bool FileOpQueueHandler::processDirEntry(FileOperationEntry* aEntry, const int& 
 
             // Compare Source And Target Dir File Names
             if (sourceDirTemp == targetDirTemp) {
-                // Check Copy Observer
-                if (copyObserver) {
 #if defined (Q_OS_WIN)
-                    // Set Last Error
-                    int lastError = ERROR_INVALID_PARAMETER;
+                // Set Last Error
+                int lastError = ERROR_INVALID_PARAMETER;
 #elif defined (Q_OS_MAC) || defined (Q_OS_UNIX)
-                    // Set Last Error Manually
-                    int lastError = EINVAL;
+                // Set Last Error Manually
+                int lastError = EINVAL;
 #endif // Q_OS_MAC || Q_OS_UNIX
-                    // Notify Observer For Now  - TODO: Add Possibility For Rename
-                    copyObserver->copyError(sourceDirTemp, targetDirTemp, lastError);
-                }
+                // Notify Observer For Now  - TODO: Add Possibility For Rename
+                aEntry->copyError(sourceDirTemp, targetDirTemp, lastError);
 
                 // Set Entry Operation State
                 aEntry->opState = FOSFailed;
@@ -3850,6 +4719,21 @@ bool FileOpQueueHandler::processDirEntry(FileOperationEntry* aEntry, const int& 
         } break;
 
         case OPERATION_ID_MOVE: {
+            // Check Entry State
+            if (aEntry->opState == FOSDeleteLater) {
+
+                // Set Entry Running State
+                aEntry->opState = FOSRunning;
+                // Delete File
+                fuResp = FileUtils::deleteFile(aEntry->source, deleteFlags, abort, aEntry);
+                // Set Result
+                result = (fuResp == FILE_UTILS_RESPONSE_NOERROR);
+                // Set Entry State
+                aEntry->setOpStateByFileUtilsResponse(fuResp);
+
+                return result;
+            }
+
             qDebug() << "FileOperationQueue::processDirEntry - aEntry[" << aIndex << "]: " << aEntry->getSource() << " - MOVE";
             // Set Entry Operation State
             aEntry->opState = FOSRunning;
@@ -3859,6 +4743,24 @@ bool FileOpQueueHandler::processDirEntry(FileOperationEntry* aEntry, const int& 
             QString sourceDirTemp = aEntry->source;
             // Init Target Dir Temp
             QString targetDirTemp = aEntry->target;
+
+            // Compare Source And Target Dir File Names
+            if (sourceDirTemp == targetDirTemp) {
+#if defined (Q_OS_WIN)
+                // Set Last Error
+                int lastError = ERROR_INVALID_PARAMETER;
+#elif defined (Q_OS_MAC) || defined (Q_OS_UNIX)
+                // Set Last Error Manually
+                int lastError = EINVAL;
+#endif // Q_OS_MAC || Q_OS_UNIX
+                // Notify Observer For Now  - TODO: Add Possibility For Rename
+                aEntry->moveError(sourceDirTemp, targetDirTemp, lastError);
+
+                // Set Entry Operation State
+                aEntry->opState = FOSFailed;
+
+                return false;
+            }
 
             // Check Source Dir Temp Path
             if (!sourceDirTemp.endsWith(QString("/")) && !sourceDirTemp.endsWith(QString("\\"))) {
@@ -3893,30 +4795,101 @@ bool FileOpQueueHandler::processDirEntry(FileOperationEntry* aEntry, const int& 
 
             // Create Target Dir
             fuResp = FileUtils::createDir(aEntry->target, createDirFlags, abort, dirCreatorObserver);
-            // Set Entry State
-            aEntry->setOpStateByFileUtilsResponse(fuResp);
+
+            // Set Operation State
+            aEntry->opState = FOSDeleteLater;
+            // Set Result
+            result = true;
         } break;
 
         case OPERATION_ID_RENAME: {
+            // Check Entry State
+            if (aEntry->opState == FOSDeleteLater) {
+                // Set Entry Running State
+                aEntry->opState = FOSRunning;
+                // Delete File
+                fuResp = FileUtils::deleteFile(aEntry->source, deleteFlags, abort, aEntry);
+                // Set Result
+                result = (fuResp == FILE_UTILS_RESPONSE_NOERROR);
+                // Set Entry State
+                aEntry->setOpStateByFileUtilsResponse(fuResp);
+
+                return result;
+            }
+
             qDebug() << "FileOperationQueue::processDirEntry - aEntry[" << aIndex << "]: " << aEntry->getSource() << " - RENAME";
             // Set Entry Operation State
             aEntry->opState = FOSRunning;
-            // Rename Dir
-            fuResp = FileUtils::renameFile(aEntry->source, aEntry->target, renameFlags, abort, aEntry);
-            // Set Entry State
-            aEntry->setOpStateByFileUtilsResponse(fuResp);
+
+            // Init Source Dir To Read Entries
+            QDir sourceDir(aEntry->source);
+            // Init Source Dir Temp
+            QString sourceDirTemp = aEntry->source;
+            // Init Target Dir Temp
+            QString targetDirTemp = aEntry->target;
+
+            // Compare Source And Target Dir File Names
+            if (sourceDirTemp == targetDirTemp) {
+#if defined (Q_OS_WIN)
+                // Set Last Error
+                int lastError = ERROR_INVALID_PARAMETER;
+#elif defined (Q_OS_MAC) || defined (Q_OS_UNIX)
+                // Set Last Error Manually
+                int lastError = EINVAL;
+#endif // Q_OS_MAC || Q_OS_UNIX
+                // Notify Observer For Now  - TODO: Add Possibility For Rename
+                aEntry->renameError(sourceDirTemp, targetDirTemp, lastError);
+
+                // Set Entry Operation State
+                aEntry->opState = FOSFailed;
+
+                return false;
+            }
+
+            // Check Source Dir Temp Path
+            if (!sourceDirTemp.endsWith(QString("/")) && !sourceDirTemp.endsWith(QString("\\"))) {
+                // Add Slash
+                sourceDirTemp += QDir::separator();
+            }
+
+            // Check Target Dir Temp Path
+            if (!targetDirTemp.endsWith(QString("/")) && !targetDirTemp.endsWith(QString("\\"))) {
+                // Add Slash
+                targetDirTemp += QDir::separator();
+            }
+
+            // Get Entry Info List
+            QFileInfoList sourceEntryInfoList = sourceDir.entryInfoList(QDir::AllDirs | QDir::Files | QDir::Hidden | QDir::System | QDir::NoDotAndDotDot);
+
+            DEFAULT_THREAD_ABORT_CHECK_FALSE;
+
+            // Get Source Entry List Count
+            int seilCount = sourceEntryInfoList.count();
+
+            // Go Through Source Entry Info List
+            for (int i=0; i<seilCount; ++i) {
+
+                DEFAULT_THREAD_ABORT_CHECK_FALSE;
+
+                // Create new Entry
+                FileOperationEntry* newEntry = FileUtils::createFileOperationEntry(this, aEntry->opIndex, sourceDirTemp, sourceEntryInfoList[i].fileName(), targetDirTemp, sourceEntryInfoList[i].fileName());
+                // Insert Operation
+                insertOperation(newEntry, aIndex + i);
+            }
+
+            // Create Target Dir
+            fuResp = FileUtils::createDir(aEntry->target, createDirFlags, abort, dirCreatorObserver);
+
+            // Set Operation State
+            aEntry->opState = FOSDeleteLater;
+            // Set Result
+            result = true;
         } break;
 
         case OPERATION_ID_DELETE: {
             // Check Entry State
             if (aEntry->opState == FOSDeleteLater) {
                 qDebug() << "FileOperationQueue::processDirEntry - aEntry[" << aIndex << "]: " << aEntry->getSource() << " - DELETE DIR AFTER ALL ITEMS DELETED";
-/*
-                // Set Entry Operation State
-                aEntry->opState = FOSDone;
-                // Remove Directory
-                return QFile::remove(sourceDirTemp);
-*/
                 // Set Entry Running State
                 aEntry->opState = FOSRunning;
                 // Delete File
@@ -4009,7 +4982,7 @@ bool FileOpQueueHandler::processDirEntry(FileOperationEntry* aEntry, const int& 
 
                 qDebug() << "FileOperationQueue::processDirEntry - newEntry[" << i << "]: " << newEntry->getSource() << " - DELETE";
 
-                // Add Operation
+                // Insert Operation
                 insertOperation(newEntry, aIndex + i);
             }
 

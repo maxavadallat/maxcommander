@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qml/FileList.qml</file>
+        <file>qml/FileListHeader.qml</file>
+        <file>qml/FileListHeaderItem.qml</file>
+        <file>qml/FileListDelegate.qml</file>
+        <file>qml/FileListPopup.qml</file>
+        <file>qml/js/constants.js</file>
+        <file>qml/FileListHightLight.qml</file>
+        <file>qml/FileListText.qml</file>
+    </qresource>
+</RCC>

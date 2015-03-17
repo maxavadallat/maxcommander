@@ -71,6 +71,14 @@ void RemoteFileUtilClient::connectToFileServer(const bool& asRoot, const QString
 }
 
 //==============================================================================
+// Is Client Connected
+//==============================================================================
+bool RemoteFileUtilClient::isConnected()
+{
+    return client ? client->state() == QLocalSocket::ConnectedState : false;
+}
+
+//==============================================================================
 // Get Dir List
 //==============================================================================
 void RemoteFileUtilClient::getDirList(const QString& aDirPath, const int& aOptions, const int& aSortFlags)
@@ -140,7 +148,7 @@ void RemoteFileUtilClient::searchFile(const QString& aName, const QString& aCont
 void RemoteFileUtilClient::abort()
 {
     // Check Client
-    if (client) {
+    if (client && cID > 0) {
         qDebug() << "RemoteFileUtilClient::abort - cID: " << cID;
 
         // Abort
@@ -156,10 +164,10 @@ void RemoteFileUtilClient::close()
     // Abort
     abort();
 
-    qDebug() << "RemoteFileUtilClient::close - cID: " << cID;
-
     // Check Client
-    if (client) {
+    if (client && cID > 0) {
+        qDebug() << "RemoteFileUtilClient::close - cID: " << cID;
+
         // Disconnect From Server
         client->disconnectFromServer();
         // Close Client
@@ -181,12 +189,55 @@ void RemoteFileUtilClient::executeShellCommand(const QString& aCommand, const bo
 //==============================================================================
 // Launch Server Test
 //==============================================================================
-void RemoteFileUtilClient::launchServerTest()
+void RemoteFileUtilClient::launchServerTest(const bool& asRoot, const QString& aRootPass)
 {
     qDebug() << "RemoteFileUtilClient::launchServerTest - cID: " << cID;
 
     // Connect To File Server
-    connectToFileServer();
+    connectToFileServer(asRoot, aRootPass);
+}
+
+//==============================================================================
+// Start Test Operation
+//==============================================================================
+void RemoteFileUtilClient::startTestOperation()
+{
+    // Check If Connected
+    if (!isConnected()) {
+        qDebug() << "RemoteFileUtilClient::startTestOperation - cID: " << cID << " - CLIENT NOT CONNECTED!!";
+        return;
+    }
+
+    qDebug() << "RemoteFileUtilClient::startTestOperation - cID: " << cID;
+
+    // Init New Data
+    QVariantMap newData;
+
+    // Set Up New Data
+    newData[DEFAULT_KEY_CID]        = cID;
+    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_REQUEST_TEST);
+
+    // Write Data
+    wirteData(newData);
+
+    // ...
+}
+
+//==============================================================================
+// Stop/Abort Test Operation
+//==============================================================================
+void RemoteFileUtilClient::stopTestOperation()
+{
+    // Check If Connected
+    if (!isConnected()) {
+        qDebug() << "RemoteFileUtilClient::stopTestOperation - cID: " << cID << " - CLIENT NOT CONNECTED!!";
+        return;
+    }
+
+    qDebug() << "RemoteFileUtilClient::stopTestOperation - cID: " << cID;
+
+    // Abort
+    abort();
 }
 
 //==============================================================================
@@ -194,8 +245,32 @@ void RemoteFileUtilClient::launchServerTest()
 //==============================================================================
 void RemoteFileUtilClient::sendTestResponse()
 {
+    // Check If Connected
+    if (!isConnected()) {
+        qDebug() << "RemoteFileUtilClient::sendTestResponse - cID: " << cID << " - CLIENT NOT CONNECTED!!";
+        return;
+    }
+
     qDebug() << "RemoteFileUtilClient::sendTestResponse - cID: " << cID;
 
+    // ...
+}
+
+//==============================================================================
+// Disconnect Test
+//==============================================================================
+void RemoteFileUtilClient::disconnectTest()
+{
+    // Check If Connected
+    if (!isConnected()) {
+        qDebug() << "RemoteFileUtilClient::disconnectTest - cID: " << cID << " - CLIENT NOT CONNECTED!!";
+        return;
+    }
+
+    qDebug() << "RemoteFileUtilClient::disconnectTest - cID: " << cID;
+
+    // Close
+    close();
 }
 
 //==============================================================================
@@ -241,11 +316,40 @@ void RemoteFileUtilClient::writeData(const QByteArray& aData)
         return;
     }
 
+    // Check If Client Is Connected
+    if (!isConnected()) {
+        qWarning() << "RemoteFileUtilClient::writeData - cID: " << cID << " - CLIENT NOT CONNECTED!!";
+        return;
+    }
+
     // Check Data
     if (!aData.isNull() && !aData.isEmpty()) {
-        qWarning() << "RemoteFileUtilClient::writeData - cID: " << cID << " - length: " << aData.length();
+        qDebug() << "RemoteFileUtilClient::writeData - cID: " << cID << " - length: " << aData.length();
         // Write Data
         client->write(aData);
+    }
+}
+
+//==============================================================================
+// Write Data
+//==============================================================================
+void RemoteFileUtilClient::wirteData(const QVariantMap& aData)
+{
+    // Check Data
+    if (!aData.isEmpty() && aData.count() > 0) {
+        qDebug() << "RemoteFileUtilClient::writeData - cID: " << cID << " - aData[clientid]: " << aData[DEFAULT_KEY_CID].toInt();
+
+        // Init New Byte Array
+        QByteArray newByteArray;
+
+        // Init New Data Stream
+        QDataStream newDataStream(&newByteArray, QIODevice::ReadWrite);
+
+        // Add Variant Map To Data Stream
+        newDataStream << aData;
+
+        // Write Data
+        writeData(newByteArray);
     }
 }
 
@@ -257,6 +361,9 @@ void RemoteFileUtilClient::socketConnected()
     qDebug() << "RemoteFileUtilClient::socketConnected - cID: " << cID;
 
     // ...
+
+    // Emit Client Connection Changed Signal
+    //emit clientConnectionChanged(cID, true);
 }
 
 //==============================================================================
@@ -264,7 +371,13 @@ void RemoteFileUtilClient::socketConnected()
 //==============================================================================
 void RemoteFileUtilClient::socketDisconnected()
 {
-    qDebug() << "RemoteFileUtilClient::socketDisconnected - cID: " << cID;
+    qDebug() << "RemoteFileUtilClient::socketDisconnected - cID: " << cID << " - Resetting Client ID!";
+
+    // Emit Client Connection Changed Signal
+    emit clientConnectionChanged(cID, false);
+
+    // Reset Client ID
+    cID = 0;
 
     // ...
 }
@@ -294,7 +407,7 @@ void RemoteFileUtilClient::socketStateChanged(QLocalSocket::LocalSocketState soc
 //==============================================================================
 void RemoteFileUtilClient::socketAboutToClose()
 {
-    qDebug() << "RemoteFileUtilClient::socketAboutToClose - cID: " << cID;
+    //qDebug() << "RemoteFileUtilClient::socketAboutToClose - cID: " << cID;
 
     // ...
 }
@@ -338,6 +451,10 @@ void RemoteFileUtilClient::socketReadyRead()
         cID = QString(lastBuffer).toULongLong(&ok);
 
         qDebug() << "RemoteFileUtilClient::socketReadyRead - cID: " << cID << " - Client ID is SET!!";
+
+        // Emit Client Connection Changed Signal
+        emit clientConnectionChanged(cID, true);
+
     }
 
     // ...

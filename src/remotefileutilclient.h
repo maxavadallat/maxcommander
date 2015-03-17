@@ -89,6 +89,9 @@ public:
     // Connect To File Server
     void connectToFileServer(const bool& asRoot = false, const QString& aRootPass = "");
 
+    // Is Client Connected
+    bool isConnected();
+
     // Get Dir List
     void getDirList(const QString& aDirPath, const int& aOptions, const int& aSortFlags);
 
@@ -123,15 +126,24 @@ public:
 
 
     // Launch Server Test
-    void launchServerTest();
+    void launchServerTest(const bool& asRoot = false, const QString& aRootPass = "");
+    // Start Test Operation
+    void startTestOperation();
+    // Stop/Abort Test Operation
+    void stopTestOperation();
     // Send Test
     void sendTestResponse();
+    // Disconnect Test
+    void disconnectTest();
 
 
     // Destructor
     virtual ~RemoteFileUtilClient();
 
 signals:
+
+    // Client Connection Changed Signal
+    void clientConnectionChanged(const int& aID, const bool& aConnected);
 
     // File Operation Progress Signal
     void fileOpProgress(const unsigned int& aID,
@@ -198,6 +210,8 @@ protected slots:
 
     // Write Data
     void writeData(const QByteArray& aData);
+    // Write Data
+    void wirteData(const QVariantMap& aData);
 
     // Socket Connected Slot
     void socketConnected();

@@ -46,12 +46,19 @@ void MainWindow::release()
 MainWindow::MainWindow(QWidget* aParent)
     : QMainWindow(aParent)
     , ui(new Ui::MainWindow)
+    , leftPanel(NULL)
+    , rightPanel(NULL)
+    , modifierKeys(Qt::NoModifier)
     , testClient(NULL)
 {
     qDebug() << "MainWindow::MainWindow";
 
     // Setup UI
     ui->setupUi(this);
+
+    // Set Left Panel
+    leftPanel  = ui->leftPanel;
+    rightPanel = ui->rightPanel;
 
     // Init
     init();
@@ -68,16 +75,16 @@ void MainWindow::init()
     qDebug() << "MainWindow::init";
 
     // Set Panel Name
-    ui->leftPanel->panelName = DEFAULT_PANEL_NAME_LEFT;
+    leftPanel->panelName = DEFAULT_PANEL_NAME_LEFT;
     // Set Panel Name
-    ui->rightPanel->panelName = DEFAULT_PANEL_NAME_RIGHT;
+    rightPanel->panelName = DEFAULT_PANEL_NAME_RIGHT;
 
     // Connect Signals
-    connect(ui->leftPanel, SIGNAL(exitKeyReleased()), this, SLOT(quitApp()));
-    connect(ui->rightPanel, SIGNAL(exitKeyReleased()), this, SLOT(quitApp()));
+    connect(leftPanel, SIGNAL(exitKeyReleased()), this, SLOT(quitApp()));
+    connect(rightPanel, SIGNAL(exitKeyReleased()), this, SLOT(quitApp()));
 
-    connect(ui->leftPanel, SIGNAL(modifierKeysChanged(int)), this, SLOT(modifierKeysChanged(int)));
-    connect(ui->rightPanel, SIGNAL(modifierKeysChanged(int)), this, SLOT(modifierKeysChanged(int)));
+    connect(leftPanel, SIGNAL(modifierKeysChanged(int)), this, SLOT(modifierKeysChanged(int)));
+    connect(rightPanel, SIGNAL(modifierKeysChanged(int)), this, SLOT(modifierKeysChanged(int)));
 
 
     // Create Test Client
@@ -112,9 +119,10 @@ void MainWindow::restoreUI()
     // Check Last Focused Panel
 
     // Set Focus
-    ui->leftPanel->setPanelFocus(true);
+    leftPanel->setPanelFocus(true);
 
-
+    // Update Function Keys
+    updateFunctionKeys();
 }
 
 //==============================================================================
@@ -273,7 +281,7 @@ void MainWindow::updateFunctionKeys()
 
     } else {
         qDebug() << "MainWindow::updateFunctionKeys";
-
+/*
         // Set Button Text
         ui->helpButton->setText(tr("Help"));
         ui->terminalButton->setText(tr("Terminal"));
@@ -284,6 +292,18 @@ void MainWindow::updateFunctionKeys()
         ui->makeDirButton->setText(tr("MakeDir"));
         ui->delButton->setText(tr("Delete"));
         ui->optionsButton->setText(tr("Options"));
+        ui->exitButton->setText(tr("Exit"));
+*/
+        // Set Button Text
+        ui->helpButton->setText(tr("File Server"));
+        ui->terminalButton->setText(tr("Start Test"));
+        ui->viewButton->setText(tr("Stop Test"));
+        ui->editButton->setText(tr("Disconnect"));
+        ui->copyButton->setText(tr(""));
+        ui->moveButton->setText(tr(""));
+        ui->makeDirButton->setText(tr(""));
+        ui->delButton->setText(tr(""));
+        ui->optionsButton->setText(tr(""));
         ui->exitButton->setText(tr("Exit"));
 
     }
@@ -449,7 +469,7 @@ void MainWindow::on_helpButton_clicked()
             qDebug() << "#### testClient - Connect";
 
             // Launch Server Test
-            testClient->launchServerTest();
+            testClient->launchServerTest(true, "");
         }
     }
 }
@@ -471,6 +491,15 @@ void MainWindow::on_terminalButton_clicked()
     } else {
         // Trigger Terminal Action
         //ui->actionTerminal->trigger();
+
+        // Check Test Client
+        if (testClient) {
+
+            qDebug() << "#### testClient - Start Test";
+
+            // Start Test Operation
+            testClient->startTestOperation();
+        }
     }
 }
 
@@ -489,6 +518,17 @@ void MainWindow::on_viewButton_clicked()
     } else if (modifierKeys & Qt::MetaModifier) {
 
     } else {
+        // Trigger View Action
+        //ui->actionView->trigger();
+
+        // Check Test Client
+        if (testClient) {
+
+            qDebug() << "#### testClient - Stop Test";
+
+            // Stop Test Operation
+            testClient->stopTestOperation();
+        }
 
     }
 }
@@ -508,7 +548,17 @@ void MainWindow::on_editButton_clicked()
     } else if (modifierKeys & Qt::MetaModifier) {
 
     } else {
+        // Trigger Edit Action
+        //ui->actionEdit->trigger();
 
+        // Check Test Client
+        if (testClient) {
+
+            qDebug() << "#### testClient - Disconnect Test";
+
+            // Disconnect Test
+            testClient->disconnectTest();
+        }
     }
 }
 
@@ -527,6 +577,8 @@ void MainWindow::on_copyButton_clicked()
     } else if (modifierKeys & Qt::MetaModifier) {
 
     } else {
+        // Trigger Copy Action
+        //ui->actionCopy->trigger();
 
     }
 }
@@ -546,6 +598,8 @@ void MainWindow::on_moveButton_clicked()
     } else if (modifierKeys & Qt::MetaModifier) {
 
     } else {
+        // Trigger Move Action
+        //ui->actionMove->trigger();
 
     }
 }
@@ -565,6 +619,8 @@ void MainWindow::on_makeDirButton_clicked()
     } else if (modifierKeys & Qt::MetaModifier) {
 
     } else {
+        // Trigger Make Dir Action
+        //ui->actionNew_Directory->trigger();
 
     }
 }
@@ -584,6 +640,9 @@ void MainWindow::on_delButton_clicked()
     } else if (modifierKeys & Qt::MetaModifier) {
 
     } else {
+        // Trigger Delete Action
+        //ui->actionDelete_File->trigger();
+
 
     }
 }
@@ -603,6 +662,8 @@ void MainWindow::on_optionsButton_clicked()
     } else if (modifierKeys & Qt::MetaModifier) {
 
     } else {
+        // Trigger Options Action
+        //ui->actionPreferences->trigger();
 
     }
 }

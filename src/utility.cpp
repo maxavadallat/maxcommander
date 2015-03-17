@@ -351,17 +351,25 @@ QImage getFileIconImage(const QFileInfo& aInfo, const int& aWidth, const int& aH
 //==============================================================================
 int execShellCommand(const QString& aCommand, const bool& asRoot, const QString& aRootPass)
 {
+    // Init Result
+    int result = 0;
+
 #if defined(Q_OS_MAC) || defined (Q_OS_UNIX)
 
     // Init Command Line
     QString commandLine = asRoot ? QString(DEFAULT_ROOT_SHELL_COMMAND_TEMPLATE).arg(aRootPass).arg(aCommand) : aCommand;
 
-    // Init Process
-    QProcess process;
-
-    // Start New Process
-    if (!process.startDetached(commandLine.toLocal8Bit().data())) {
-        qDebug() << "utility::execShellCommand - ERROR STARTING commandLine: " << commandLine << " - error: " << process.errorString();
+    // Check If As Root
+    if (asRoot) {
+        // Run With System
+        result = system(commandLine.toLocal8Bit().data());
+    } else {
+        // Init Process
+        QProcess process;
+        // Start New Process
+        if (!process.startDetached(commandLine.toLocal8Bit().data())) {
+            qDebug() << "utility::execShellCommand - ERROR STARTING commandLine: " << commandLine << " - error: " << process.errorString();
+        }
     }
 
 #elif defined(Q_OS_WIN)
@@ -369,7 +377,7 @@ int execShellCommand(const QString& aCommand, const bool& asRoot, const QString&
 
 #endif // Q_OS_WIN
 
-    return 0;
+    return result;
 }
 
 //==============================================================================
@@ -419,7 +427,7 @@ int launchRemoteFileServer(const bool& asRoot, const QString& aRootPass)
     int result = execShellCommand(fileServerCommandLine, asRoot, aRootPass);
 
     // Wait a bit
-    QThread::msleep(500);
+    QThread::msleep(DEFAULT_FILE_SERVER_LAUNCH_DELAY);
 
     return result;
 }

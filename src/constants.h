@@ -75,10 +75,19 @@
 #define DEFAULT_ICOM_GET_RETRY_COUNT_MAX                    5
 
 // Default Root Shell Command Template
-#define DEFAULT_ROOT_SHELL_COMMAND_TEMPLATE                 "echo \"%1\" | sudo -S %2"
+#define DEFAULT_ROOT_SHELL_COMMAND_TEMPLATE                 "echo \"%1\" | sudo -S %2 &"
 
 // Default PS Command Line To Check If File Serverr Is Running
 #define DEFAULT_PS_COMMAND_CHECK_FILESERVER                 "ps x"
+
+// Default File Server Launch Delay
+#define DEFAULT_FILE_SERVER_LAUNCH_DELAY                    200
+
+
+
+
+
+
 
 
 

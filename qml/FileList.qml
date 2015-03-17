@@ -27,6 +27,7 @@ Rectangle {
         clip: true
         snapMode: ListView.SnapToItem
         focus: true
+        highlightMoveDuration: 50
 
         model: ListModel {
             ListElement {
@@ -70,9 +71,7 @@ Rectangle {
             id: fileListDelegateRoot
             width: fileListView.width
             height: 32
-
-            fileIconSource: Const.DEFAULT_FILE_ICON_PREFIX + "/"
-
+            fileIconSource: Const.DEFAULT_FILE_ICON_PREFIX + fileName
             fileNameText: fileName
             fileExtText:  fileExt
             fileTypeText: fileType
@@ -81,20 +80,29 @@ Rectangle {
 
             MouseArea {
                 anchors.fill: parent
-
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
                 onClicked: {
-                    // Set Current Index
-                    fileListView.currentIndex = index;
-                    // Set Panel Has Focus
-                    mainController.panelHasFocus = true;
+                    console.log("fileListDelegateRoot.MouseArea.onClicked - index: " + index);
+
+                    // Check Button
+                    if (mouse.button === Qt.LeftButton) {
+                        // Set Current Index
+                        fileListView.currentIndex = index;
+                        // Set Panel Has Focus
+                        mainController.panelHasFocus = true;
+                    }
                 }
 
                 onPressed: {
+                    console.log("fileListDelegateRoot.MouseArea.onPressed - index: " + index);
 
+                    // ...
                 }
 
                 onReleased: {
+                    console.log("fileListDelegateRoot.MouseArea.onReleased - index: " + index);
 
+                    // ...
                 }
             }
         }
@@ -108,19 +116,19 @@ Rectangle {
 
     // On Focus Changed
     onFocusChanged: {
-        console.log("fileListRoot.onFocusChanged");
+        //console.log("fileListRoot.onFocusChanged");
     }
 
 
     // On Completed
     Component.onCompleted: {
-        console.log("fileListRoot.onCompleted");
+        //console.log("fileListRoot.onCompleted");
 
     }
 
     // On Destruction
     Component.onDestruction: {
-        console.log("fileListRoot.onDestruction");
+        //console.log("fileListRoot.onDestruction");
 
     }
 

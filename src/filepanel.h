@@ -73,8 +73,14 @@ signals:
 
     // Current Dir Changed Signal
     void currentDirChanged(const QString& aCurrentDir);
-    // Panel Focus Changed
+    // Panel Focus Changed Signal
     void panelFocusChanged(const bool& aPanelFocus);
+
+    // Modifier Keys Pressed Signal
+    void modifierKeysChanged(const int& aModifierKeys);
+
+    // Exit Key Released Signal
+    void exitKeyReleased();
 
 protected slots:
 
@@ -127,6 +133,9 @@ private:
 
     // File List image Provider
     FileListImageProvider*  fileListImageProvider;
+
+    // Modifier Keys
+    int                     modifierKeys;
 };
 
 #endif // FILEPANEL_H

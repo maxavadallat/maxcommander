@@ -27,6 +27,7 @@ FilePanel::FilePanel(QWidget* aParent)
     , panelHasFocus(false)
     , fileListModel(NULL)
     , fileListImageProvider(NULL)
+    , modifierKeys(Qt::NoModifier)
 {
     // Setup UI
     ui->setupUi(this);
@@ -385,33 +386,60 @@ void FilePanel::keyPressEvent(QKeyEvent* aEvent)
             break;
 
             case Qt::Key_Shift:
-                qDebug() << "FilePanel::keyPressEvent - key: SHIFT";
-
-
+                //qDebug() << "FilePanel::keyPressEvent - key: SHIFT";
+                // Check If Auto Repeat
+                if (!aEvent->isAutoRepeat()) {
+                    // Accept
+                    aEvent->accept();
+                    // Update Modifier Keys
+                    modifierKeys |= Qt::ShiftModifier;
+                    // Emit Modifier Keys Changed Signal
+                    emit modifierKeysChanged(modifierKeys);
+                }
             break;
 
             case Qt::Key_Control:
-                qDebug() << "FilePanel::keyPressEvent - key: CONTROL";
-
+                //qDebug() << "FilePanel::keyPressEvent - key: CONTROL";
+                // Check If Auto Repeat
+                if (!aEvent->isAutoRepeat()) {
+                    // Accept
+                    aEvent->accept();
+                    // Update Modifier Keys
+                    modifierKeys |= Qt::ControlModifier;
+                    // Emit Modifier Keys Changed Signal
+                    emit modifierKeysChanged(modifierKeys);
+                }
             break;
 
             case Qt::Key_AltGr:
             case Qt::Key_Alt:
-                qDebug() << "FilePanel::keyPressEvent - key: ALT";
-
-
+                //qDebug() << "FilePanel::keyPressEvent - key: ALT";
+                // Check If Auto Repeat
+                if (!aEvent->isAutoRepeat()) {
+                    // Accept
+                    aEvent->accept();
+                    // Update Modifier Keys
+                    modifierKeys |= Qt::AltModifier;
+                    // Emit Modifier Keys Changed Signal
+                    emit modifierKeysChanged(modifierKeys);
+                }
             break;
 
             case Qt::Key_Meta:
-                qDebug() << "FilePanel::keyPressEvent - key: META";
-
-
+                //qDebug() << "FilePanel::keyPressEvent - key: META";
+                // Check If Auto Repeat
+                if (!aEvent->isAutoRepeat()) {
+                    // Accept
+                    aEvent->accept();
+                    // Update Modifier Keys
+                    modifierKeys |= Qt::MetaModifier;
+                    // Emit Modifier Keys Changed Signal
+                    emit modifierKeysChanged(modifierKeys);
+                }
             break;
 
             case Qt::Key_F10:
-                qDebug() << "FilePanel::keyPressEvent - key: F10";
-
-
+                //qDebug() << "FilePanel::keyPressEvent - key: F10";
             break;
 
             default:
@@ -512,32 +540,42 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
             break;
 
             case Qt::Key_Shift:
-                qDebug() << "FilePanel::keyReleaseEvent - key: SHIFT";
-
-
+                //qDebug() << "FilePanel::keyReleaseEvent - key: SHIFT";
+                // Update Modifier Keys
+                modifierKeys ^= Qt::ShiftModifier;
+                // Emit Modifier Keys Changed Signal
+                emit modifierKeysChanged(modifierKeys);
             break;
 
             case Qt::Key_Control:
-                qDebug() << "FilePanel::keyReleaseEvent - key: CONTROL";
-
+                //qDebug() << "FilePanel::keyReleaseEvent - key: CONTROL";
+                // Update Modifier Keys
+                modifierKeys = modifierKeys ^ Qt::ControlModifier;
+                // Emit Modifier Keys Changed Signal
+                emit modifierKeysChanged(modifierKeys);
             break;
 
             case Qt::Key_AltGr:
             case Qt::Key_Alt:
-                qDebug() << "FilePanel::keyReleaseEvent - key: ALT";
-
-
+                //qDebug() << "FilePanel::keyReleaseEvent - key: ALT";
+                // Update Modifier Keys
+                modifierKeys = modifierKeys ^ Qt::AltModifier;
+                // Emit Modifier Keys Changed Signal
+                emit modifierKeysChanged(modifierKeys);
             break;
 
             case Qt::Key_Meta:
-                qDebug() << "FilePanel::keyReleaseEvent - key: META";
-
-
+                //qDebug() << "FilePanel::keyReleaseEvent - key: META";
+                // Update Modifier Keys
+                modifierKeys = modifierKeys ^ Qt::MetaModifier;
+                // Emit Modifier Keys Changed Signal
+                emit modifierKeysChanged(modifierKeys);
             break;
 
             case Qt::Key_F10:
-                qDebug() << "FilePanel::keyReleaseEvent - key: F10";
-
+                //qDebug() << "FilePanel::keyReleaseEvent - key: F10";
+                // Emit Exit Key Released Signal
+                emit exitKeyReleased();
             break;
 
             default:

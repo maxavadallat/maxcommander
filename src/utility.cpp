@@ -1,4 +1,11 @@
 #include <QFileInfo>
+#include <QPaintDevice>
+#include <QImage>
+#include <QPainter>
+#include <QColor>
+#include <QProcess>
+#include <QApplication>
+#include <QThread>
 #include <QDebug>
 
 #if defined(Q_OS_WIN)
@@ -7,6 +14,10 @@
 #include <shellapi.h
 
 #elif defined(Q_OS_MAC)
+
+#include <CoreServices/CoreServices.h>
+#include <ApplicationServices/ApplicationServices.h>
+#include <CoreFoundation/CoreFoundation.h>
 
 #include <sys/stat.h>
 #include <sys/statvfs.h>
@@ -17,6 +28,11 @@
 #include <sys/statvfs.h>
 
 #endif // Q_OS_UNIX
+
+#include <mcwinterface.h>
+
+#include "utility.h"
+#include "constants.h"
 
 
 //==============================================================================
@@ -125,6 +141,295 @@ qint64 getFreeSpace(const QString& aDirPath)
 }
 
 
-#include "utility.h"
+#if defined(Q_OS_MAC)
+
+//==============================================================================
+// Get Mac CG Context
+//==============================================================================
+CGContextRef getMacCGContext(const QPaintDevice* aPaintDevice)
+{
+    // Init Flags
+    uint flags = kCGImageAlphaPremultipliedFirst;
+
+#ifdef kCGBitmapByteOrder32Host
+    // Adjust Flags
+    flags |= kCGBitmapByteOrder32Host;
+#endif
+
+    // Init Context Ref
+    CGContextRef contextRef = NULL;
+
+    // Check Paint Device Type - Works Only With QImage!
+    if (aPaintDevice && aPaintDevice->devType() == QInternal::Image) {
+        // Get Image
+        QImage* image = (QImage*)aPaintDevice;
+        // Get CG Context
+        contextRef = CGBitmapContextCreate(image->bits(), image->width(), image->height(), DEFAULT_BITS_PER_COMPONENTS, image->bytesPerLine(), CGColorSpaceCreateDeviceRGB(), flags);
+    }
+
+    return contextRef;
+}
+
+//==============================================================================
+// Get/Convert Mac Icon To QImage
+//==============================================================================
+OSStatus convertMacIcon(const IconRef& aMacIconref, QImage& aIconImage)
+{
+    // Fill Icon Image
+    aIconImage.fill(QColor(0, 0, 0, 0));
+    // Create Rect
+    CGRect rect = CGRectMake(0, 0, aIconImage.width(), aIconImage.height());
+    // Get Graphics Context Ref
+    CGContextRef ctx = getMacCGContext(&aIconImage);
+    // Init Color
+    RGBColor color;
+    // Reset Colors
+    color.blue = color.green = color.red = 255 * 255;
+    //color.blue = color.green = color.red = 0;
+
+    // Init Status
+    OSStatus status = noErr;
+
+    // Plot Icon Ref In Context
+    status = PlotIconRefInContext(ctx, &rect, kAlignNone, kTransformNone, &color, kPlotIconRefNormalFlags, aMacIconref);
+
+    // Release Context
+    CGContextRelease(ctx);
+
+    // Return Icon Image
+    return status;
+}
+
+#elif defined(Q_OS_WIN)
+
+
+// ...
+
+
+#else // Q_OS_UNIX
+
+
+// ...
+
+
+#endif // Q_OS_UNIX
+
+//==============================================================================
+// Get File Icon Pixmap
+//==============================================================================
+QImage getFileIconImage(const QFileInfo& aInfo, const int& aWidth, const int& aHeight)
+{
+    // Init New Image
+    QImage newImage(aWidth, aHeight, QImage::Format_ARGB32_Premultiplied);
+
+#if defined(Q_OS_MAC)
+
+    //qDebug() << "getFileIconImage MAC - size: " << newImage.size();
+
+    // Init File System Reference
+    FSRef macRef;
+
+    // Init Status
+    OSStatus status = noErr;
+
+    // Init Safe Counter
+    int safeCount = 0;
+
+    do {
+        // Get file System Reference
+        status = FSPathMakeRef(reinterpret_cast<const UInt8*>(aInfo.canonicalFilePath().toUtf8().constData()), &macRef, 0);
+
+        // Check Status
+        if (status != noErr) {
+            qDebug() << "### getFileIconImage - FSPathMakeRef: " << status;
+            // Increase Safe Count
+            safeCount++;
+            //return QImage(0, 0, QImage::Format_ARGB32_Premultiplied);
+            continue;
+        }
+
+        // Init file System Catalog Info
+        FSCatalogInfo info;
+
+        // Init Mac Name
+        HFSUniStr255 macName;
+
+        // Get Catalog Info
+        status = FSGetCatalogInfo(&macRef, kIconServicesCatalogInfoMask, &info, &macName, 0, 0);
+
+        // Check Status
+        if (status != noErr) {
+            qDebug() << "### getFileIconImage - FSGetCatalogInfo: " << status;
+            // Increase Safe Count
+            safeCount++;
+            //return QImage(0, 0, QImage::Format_ARGB32_Premultiplied);
+            continue;
+        }
+
+        // Init Icon Reference
+        IconRef iconRef;
+        // Init Icon Label
+        SInt16 iconLabel;
+
+        // Get Icon Reference
+        status = GetIconRefFromFileInfo(&macRef, macName.length, macName.unicode, kIconServicesCatalogInfoMask, &info, kIconServicesNormalUsageFlag, &iconRef, &iconLabel);
+
+        // Check Status
+        if (status != noErr) {
+            qDebug() << "### getFileIconImage - GetIconRefFromFileInfo: " << status;
+            // Release Icon Ref
+            ReleaseIconRef(iconRef);
+            // Increase Safe Count
+            safeCount++;
+            //return QImage(0, 0, QImage::Format_ARGB32_Premultiplied);
+            continue;
+        }
+
+        // Convert Mac Icon
+        status = convertMacIcon(iconRef, newImage);
+
+        // Check Status
+        if (status != noErr) {
+            qDebug() << "### getFileIconImage - convertMacIcon: " << status;
+
+            // Release Icon Ref
+            //ReleaseIconRef(iconRef);
+            //return QImage(0, 0, QImage::Format_ARGB32_Premultiplied);
+            //continue;
+        }
+
+        // Release Icon Ref
+        ReleaseIconRef(iconRef);
+        // Increase Safe Count
+        safeCount++;
+
+    } while (status != noErr && safeCount < DEFAULT_ICOM_GET_RETRY_COUNT_MAX);
+
+    // Check Safe Count
+    if (safeCount >= DEFAULT_ICOM_GET_RETRY_COUNT_MAX) {
+        // Init Painter
+        QPainter painter(&newImage);
+        // Fill Image
+        newImage.fill(QColor(0, 0, 0, 0));
+        // Draw Default Icon
+        painter.drawImage(newImage.rect(), QImage(QString(":defaultIcon32x32")));
+    }
+
+#elif defined(Q_OS_WIN)
+
+    // Init Painter
+    QPainter painter(&newImage);
+
+    newImage.fill(QColor(0, 0, 0, 0));
+
+    //painter.drawImage(newImage.rect(), QImage(QString(":defaultIcon32x32")));
+
+#else // Q_OS_UNIX
+
+    // Init Painter
+    QPainter painter(&newImage);
+
+    newImage.fill(QColor(0, 0, 0, 0));
+
+    //painter.drawImage(newImage.rect(), QImage(QString(":defaultIcon32x32")));
+
+#endif // Q_OS_UNIX
+
+    return newImage;
+}
+
+
+
+
+
+
+
+
+
+//==============================================================================
+// Execute Shell Command
+//==============================================================================
+int execShellCommand(const QString& aCommand, const bool& asRoot, const QString& aRootPass)
+{
+#if defined(Q_OS_MAC) || defined (Q_OS_UNIX)
+
+    // Init Command Line
+    QString commandLine = asRoot ? QString(DEFAULT_ROOT_SHELL_COMMAND_TEMPLATE).arg(aRootPass).arg(aCommand) : aCommand;
+
+    // Init Process
+    QProcess process;
+
+    // Start New Process
+    if (!process.startDetached(commandLine.toLocal8Bit().data())) {
+        qDebug() << "utility::execShellCommand - ERROR STARTING commandLine: " << commandLine << " - error: " << process.errorString();
+    }
+
+#elif defined(Q_OS_WIN)
+
+
+#endif // Q_OS_WIN
+
+    return 0;
+}
+
+//==============================================================================
+// Check If File Server Running
+//==============================================================================
+bool checkRemoteFileServerRunning()
+{
+#if defined(Q_OS_MAC) || defined (Q_OS_UNIX)
+
+    // Init New PS Process
+    QProcess psProcess;
+
+    // Execute Process
+    psProcess.start(QString(DEFAULT_PS_COMMAND_CHECK_FILESERVER));
+    // Wait For Finished
+    psProcess.waitForFinished();
+
+    // Process Output
+    QString output = psProcess.readAllStandardOutput();
+
+    //qDebug() << "utility::checkRemoteFileServerRunning";
+    //qDebug() << output;
+
+    // Check Occurence
+    if (output.indexOf(DEFAULT_FILE_SERVER_EXEC_NAME) > 0) {
+        return true;
+    }
+
+#elif defined(Q_OS_WIN)
+
+#endif // Q_OS_WIN
+
+    return false;
+}
+
+//==============================================================================
+// Launch File Server
+//==============================================================================
+int launchRemoteFileServer(const bool& asRoot, const QString& aRootPass)
+{
+    // Init File Server Command Line
+    QString fileServerCommandLine = asRoot ? QString("./%1 %2").arg(DEFAULT_FILE_SERVER_EXEC_NAME)
+                                                               .arg(DEFAULT_OPTION_RUNASROOT)
+                                           : QString("./%1").arg(DEFAULT_FILE_SERVER_EXEC_NAME);
+
+    // Exec Shell Command
+    int result = execShellCommand(fileServerCommandLine, asRoot, aRootPass);
+
+    // Wait a bit
+    QThread::msleep(500);
+
+    return result;
+}
+
+
+
+
+
+
+
+
 
 

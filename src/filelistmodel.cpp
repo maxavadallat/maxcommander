@@ -1,9 +1,17 @@
+#include <QDir>
 #include <QSettings>
 #include <QDebug>
 
 #include "filelistmodel.h"
+#include "remotefileutilclient.h"
+#include "utility.h"
+#include "constants.h"
 
 
+
+//==============================================================================
+// Constructor
+//==============================================================================
 FileListModelItem::FileListModelItem()
     : selected(false)
 {
@@ -22,9 +30,36 @@ FileListModelItem::FileListModelItem()
 //==============================================================================
 FileListModel::FileListModel(QObject* aParent)
     : QAbstractListModel(aParent)
+    , currentDir(QDir::homePath())
+    , fileUtil(NULL)
 {
     qDebug() << "FileListModel::FileListModel";
 
+    // Init
+    init();
+
+    // ...
+}
+
+//==============================================================================
+// Init
+//==============================================================================
+void FileListModel::init()
+{
+    qDebug() << "FileListModel::init";
+
+    // Create File Utin
+    fileUtil = new RemoteFileUtilClient();
+
+    // Connect Signals
+    connect(fileUtil, SIGNAL(dirListItemFound(uint,QString,QString)), this, SLOT(dirListItemFound(uint,QString,QString)));
+    connect(fileUtil, SIGNAL(fileOpFinished(uint,QString,QString,QString,int)), this, SLOT(fileOpFinished(uint,QString,QString,QString,int)));
+    connect(fileUtil, SIGNAL(fileOpError(uint,QString,QString,QString,int)), this, SLOT(fileOpError(uint,QString,QString,QString,int)));
+
+    // Connect To File Server
+    //fileUtil->connectToFileServer();
+
+    // ...
 }
 
 //==============================================================================
@@ -79,6 +114,125 @@ void FileListModel::clear()
 
     // End Reset Model
     endResetModel();
+}
+
+//==============================================================================
+// Fetch Dir
+//==============================================================================
+void FileListModel::fetchDirItems()
+{
+    // Check File Util
+    if (!fileUtil) {
+        qWarning() << "FileListModel::fetchDirItems - NO FILE UTIL!!";
+        return;
+    }
+
+    qDebug() << "FileListModel::fetchDirItems - currentDir: " << currentDir;
+
+    // Fetch Dir Items
+    fileUtil->getDirList(currentDir, QDir::AllEntries | QDir::NoDot | QDir::Hidden, QDir::DirsFirst);
+}
+
+//==============================================================================
+// File Operation Progress Slot
+//==============================================================================
+void FileListModel::fileOpProgress(const unsigned int& aID,
+                                   const QString& aOp,
+                                   const QString& aCurrFilePath,
+                                   const quint64& aCurrProgress,
+                                   const quint64& aCurrTotal,
+                                   const quint64& aOverallProgress,
+                                   const quint64& aOverallTotal,
+                                   const int& aSpeed)
+{
+    qDebug() << "FileListModel::fileOpProgress - aID: " << aID << " - aOp: " << aOp;
+
+    // ...
+}
+
+//==============================================================================
+// File Operation Finished Slot
+//==============================================================================
+void FileListModel::fileOpFinished(const unsigned int& aID,
+                                   const QString& aOp,
+                                   const QString& aSource,
+                                   const QString& aTarget,
+                                   const int& aError)
+{
+    qDebug() << "FileListModel::fileOpFinished - aID: " << aID << " - aOp: " << aOp;
+
+    // ...
+}
+
+//==============================================================================
+// File Operation Error Slot
+//==============================================================================
+void FileListModel::fileOpError(const unsigned int& aID,
+                                const QString& aOp,
+                                const QString& aSource,
+                                const QString& aTarget,
+                                const int& aError)
+{
+    qDebug() << "FileListModel::fileOpError - aID: " << aID << " - aOp: " << aOp << " - aError: " << aError;
+
+    // ...
+}
+
+//==============================================================================
+// Need Confirmation Slot
+//==============================================================================
+void FileListModel::fileOpNeedConfirm(const unsigned int& aID,
+                                      const QString& aOp,
+                                      const QString& aCode,
+                                      const QString& aSource,
+                                      const QString& aTarget)
+{
+    qDebug() << "FileListModel::fileOpNeedConfirm - aID: " << aID << " - aOp: " << aOp << " - aCode: " << aCode;
+
+    // ...
+}
+
+//==============================================================================
+// Dir Size Scan Progress Slot
+//==============================================================================
+void FileListModel::dirSizeScanProgress(const unsigned int& aID,
+                                        const QString& aPath,
+                                        const quint64& aNumDirs,
+                                        const quint64& aNumFiles,
+                                        const quint64& aScannedSize)
+{
+
+}
+
+//==============================================================================
+// Dir List Item Found Slot
+//==============================================================================
+void FileListModel::dirListItemFound(const unsigned int& aID,
+                                     const QString& aPath,
+                                     const QString& aFileName)
+{
+    qDebug() << "FileListModel::dirListItemFound - aID: " << aID << " - aPath: " << aPath << " - aFileName: " << aFileName;
+
+    // ...
+
+    // Create New File List Item
+
+    // Begin Insert Row
+
+    // Add Item
+
+    // End Insert Row
+}
+
+//==============================================================================
+// File Operation Queue Item Found Slot
+//==============================================================================
+void FileListModel::fileOpQueueItemFound(const unsigned int& aID,
+                                         const QString& aOp,
+                                         const QString& aSource,
+                                         const QString& aTarget)
+{
+
 }
 
 //==============================================================================

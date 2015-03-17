@@ -8,6 +8,7 @@ class MainWindow;
 }
 
 class FilePanel;
+class RemoteFileUtilClient;
 
 //==============================================================================
 // Main Window Class
@@ -44,8 +45,6 @@ public slots:
 signals:
 
 
-protected slots:
-
 
 protected:
 
@@ -79,7 +78,66 @@ protected: // From QMainWindow
     // Key Release Event
     virtual void keyReleaseEvent(QKeyEvent* aEvent);
 
-private slots:
+protected slots:
+
+    // Modifier Keys Changed Slot
+    void modifierKeysChanged(const int& aModifiers);
+
+    // Update Function Keys
+    void updateFunctionKeys();
+
+protected slots: // REmote File Util Client
+
+    // File Operation Progress Slot
+    void fileOpProgress(const unsigned int& aID,
+                        const QString& aOp,
+                        const QString& aCurrFilePath,
+                        const quint64& aCurrProgress,
+                        const quint64& aCurrTotal,
+                        const quint64& aOverallProgress,
+                        const quint64& aOverallTotal,
+                        const int& aSpeed);
+
+    // File Operation Finished Slot
+    void fileOpFinished(const unsigned int& aID,
+                        const QString& aOp,
+                        const QString& aSource,
+                        const QString& aTarget,
+                        const int& aError);
+
+    // File Operation Error Slot
+    void fileOpError(const unsigned int& aID,
+                     const QString& aOp,
+                     const QString& aSource,
+                     const QString& aTarget,
+                     const int& aError);
+
+    // Need Confirmation Slot
+    void fileOpNeedConfirm(const unsigned int& aID,
+                           const QString& aOp,
+                           const QString& aCode,
+                           const QString& aSource,
+                           const QString& aTarget);
+
+    // Dir Size Scan Progress Slot
+    void dirSizeScanProgress(const unsigned int& aID,
+                             const QString& aPath,
+                             const quint64& aNumDirs,
+                             const quint64& aNumFiles,
+                             const quint64& aScannedSize);
+
+    // Dir List Item Found Slot
+    void dirListItemFound(const unsigned int& aID,
+                          const QString& aPath,
+                          const QString& aFileName);
+
+    // File Operation Queue Item Found Slot
+    void fileOpQueueItemFound(const unsigned int& aID,
+                              const QString& aOp,
+                              const QString& aSource,
+                              const QString& aTarget);
+
+protected slots: // Actions & Button
 
     // Help Button Clicked Slot
     void on_helpButton_clicked();
@@ -164,8 +222,11 @@ private:
     // Right Panel
     FilePanel*              rightPanel;
 
-    // Command Buttons
+    // Modifier Keys Pressed
+    int                     modifierKeys;
 
+    // Test Remote File Util Client
+    RemoteFileUtilClient*   testClient;
 };
 
 #endif // MAINWINDOW_H

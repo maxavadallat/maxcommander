@@ -29,8 +29,9 @@ SOURCES                 += src/main.cpp \
                         src/filepanel.cpp \
                         src/filelistmodel.cpp \
                         src/utility.cpp \
-    src/filelistwidget.cpp \
-    src/filelistimageprovider.cpp
+                        src/filelistwidget.cpp \
+                        src/filelistimageprovider.cpp \
+                        src/remotefileutilclient.cpp
 
 # Heders
 HEADERS                 += src/constants.h \
@@ -38,8 +39,15 @@ HEADERS                 += src/constants.h \
                         src/filepanel.h \
                         src/filelistmodel.h \
                         src/utility.h \
-    src/filelistwidget.h \
-    src/filelistimageprovider.h
+                        src/filelistwidget.h \
+                        src/filelistimageprovider.h \
+                        src/remotefileutilclient.h \
+#                        ../MCWorker/src/mcwinterface.h
+
+# Include Path
+INCLUDEPATH             += \
+                        /usr/local/include/mcw \
+                        ../MCWorker/src
 
 # Forms
 FORMS                   += \
@@ -49,11 +57,17 @@ FORMS                   += \
 # Resources
 RESOURCES               += \
                         maxcommander.qrc \
-    maxcommanderimages.qrc
+                        maxcommanderimages.qrc
 
 # Other Files
 OTHER_FILES             += \
                         createdmg.sh
+
+MCWORKERFILES.files     += mcworker
+MCWORKERFILES.path      = Contents/MacOS
+
+QMAKE_BUNDLE_DATA       += MCWORKERFILES
+
 
 macx: {
 # Libs

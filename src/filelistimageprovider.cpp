@@ -1,6 +1,8 @@
 #include <QImage>
+#include <QDebug>
 
 #include "filelistimageprovider.h"
+#include "utility.h"
 #include "constants.h"
 
 //==============================================================================
@@ -12,6 +14,8 @@ FileListImageProvider::FileListImageProvider()
 
 }
 
+
+
 //==============================================================================
 // Request Image
 //==============================================================================
@@ -20,6 +24,8 @@ QImage FileListImageProvider::requestImage(const QString& aID, QSize* aSize, con
     Q_UNUSED(aID);
     Q_UNUSED(aSize);
     Q_UNUSED(aRequestedSize);
+
+    //qDebug() << "FileListImageProvider::requestImage - aID: " << aID;
 
     // Init Default Image
     QImage image(":/resources/images/icons/default_file.png");

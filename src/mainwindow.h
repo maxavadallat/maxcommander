@@ -63,21 +63,6 @@ protected:
     // Destructor
     virtual ~MainWindow();
 
-protected: // From QMainWindow
-
-    // Function Keys Mode
-    enum EFNKeyModeType {
-        EFNKMNormal = 0,
-        EFNKMControl,
-        EFNKMAlt,
-        EFNKMShift
-    };
-
-    // Key Press Event
-    virtual void keyPressEvent(QKeyEvent* aEvent);
-    // Key Release Event
-    virtual void keyReleaseEvent(QKeyEvent* aEvent);
-
 protected slots:
 
     // Modifier Keys Changed Slot

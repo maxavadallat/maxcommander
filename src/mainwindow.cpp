@@ -3,6 +3,9 @@
 #include <QKeyEvent>
 #include <QDebug>
 
+#include <QDialogButtonBox>
+#include <mcwinterface.h>
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "remotefileutilclient.h"
@@ -298,12 +301,12 @@ void MainWindow::updateFunctionKeys()
         ui->helpButton->setText(tr("File Server"));
         ui->terminalButton->setText(tr("Start Test"));
         ui->viewButton->setText(tr("Stop Test"));
-        ui->editButton->setText(tr("Disconnect"));
-        ui->copyButton->setText(tr(""));
-        ui->moveButton->setText(tr(""));
+        ui->editButton->setText(tr(""));
+        ui->copyButton->setText(tr("Send Yes"));
+        ui->moveButton->setText(tr("Send No"));
         ui->makeDirButton->setText(tr(""));
         ui->delButton->setText(tr(""));
-        ui->optionsButton->setText(tr(""));
+        ui->optionsButton->setText(tr("Disconnect"));
         ui->exitButton->setText(tr("Exit"));
 
     }
@@ -414,36 +417,6 @@ void MainWindow::fileOpQueueItemFound(const unsigned int& aID,
 }
 
 //==============================================================================
-// Key Press Event
-//==============================================================================
-void MainWindow::keyPressEvent(QKeyEvent* aEvent)
-{
-    // Check Event
-    if (aEvent) {
-        // Check If Repeat
-        if (!aEvent->isAutoRepeat()) {
-
-            // Switch
-
-        } else {
-
-        }
-
-    }
-}
-
-//==============================================================================
-// Key Release Event
-//==============================================================================
-void MainWindow::keyReleaseEvent(QKeyEvent* aEvent)
-{
-    // Check Event
-    if (aEvent) {
-
-    }
-}
-
-//==============================================================================
 // Help Button Clicked Slot
 //==============================================================================
 void MainWindow::on_helpButton_clicked()
@@ -469,7 +442,7 @@ void MainWindow::on_helpButton_clicked()
             qDebug() << "#### testClient - Connect";
 
             // Launch Server Test
-            testClient->launchServerTest(true, "");
+            testClient->launchServerTest();
         }
     }
 }
@@ -551,14 +524,6 @@ void MainWindow::on_editButton_clicked()
         // Trigger Edit Action
         //ui->actionEdit->trigger();
 
-        // Check Test Client
-        if (testClient) {
-
-            qDebug() << "#### testClient - Disconnect Test";
-
-            // Disconnect Test
-            testClient->disconnectTest();
-        }
     }
 }
 
@@ -579,6 +544,15 @@ void MainWindow::on_copyButton_clicked()
     } else {
         // Trigger Copy Action
         //ui->actionCopy->trigger();
+
+        // Check Test Client
+        if (testClient) {
+
+            qDebug() << "#### testClient - Send Yes";
+
+            // Stop Test Operation
+            testClient->sendTestResponse(DEFAULT_RESPONSE_YES);
+        }
 
     }
 }
@@ -601,6 +575,14 @@ void MainWindow::on_moveButton_clicked()
         // Trigger Move Action
         //ui->actionMove->trigger();
 
+        // Check Test Client
+        if (testClient) {
+
+            qDebug() << "#### testClient - Send No";
+
+            // Stop Test Operation
+            testClient->sendTestResponse(DEFAULT_RESPONSE_NO);
+        }
     }
 }
 
@@ -665,6 +647,14 @@ void MainWindow::on_optionsButton_clicked()
         // Trigger Options Action
         //ui->actionPreferences->trigger();
 
+        // Check Test Client
+        if (testClient) {
+
+            qDebug() << "#### testClient - Disconnect Test";
+
+            // Disconnect Test
+            testClient->disconnectTest();
+        }
     }
 }
 

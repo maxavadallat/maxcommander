@@ -93,7 +93,7 @@ public:
     bool isConnected();
 
     // Get Dir List
-    void getDirList(const QString& aDirPath, const int& aOptions, const int& aSortFlags);
+    void getDirList(const QString& aDirPath, const int& aFilters, const int& aSortFlags);
 
     // Create Directory
     void createDir(const QString& aDirPath);
@@ -110,17 +110,21 @@ public:
     // Rename/Move File
     void moveFile(const QString& aSource, const QString& aTarget);
 
+    // Set File Attributes
+
+    // Set File Owner
+
+    // Set File Permissions
+
     // Search File
-    void searchFile(const QString& aName, const QString& aContent, const int& aOptions);
+    void searchFile(const QString& aName, const QString& aDirPath, const QString& aContent, const int& aOptions);
 
     // Get Drive Info
 
     // Abort Current Operation
     void abort();
-
     // Close
     void close();
-
     // Execute Shell Command
     void executeShellCommand(const QString& aCommand, const bool& asRoot = false, const QString& aRootPass = "");
 
@@ -132,7 +136,7 @@ public:
     // Stop/Abort Test Operation
     void stopTestOperation();
     // Send Test
-    void sendTestResponse();
+    void sendTestResponse(const int& aResponse);
     // Disconnect Test
     void disconnectTest();
 

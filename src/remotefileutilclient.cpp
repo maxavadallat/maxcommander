@@ -81,9 +81,22 @@ bool RemoteFileUtilClient::isConnected()
 //==============================================================================
 // Get Dir List
 //==============================================================================
-void RemoteFileUtilClient::getDirList(const QString& aDirPath, const int& aOptions, const int& aSortFlags)
+void RemoteFileUtilClient::getDirList(const QString& aDirPath, const int& aFilters, const int& aSortFlags)
 {
+    // Init New Data
+    QVariantMap newData;
 
+    // Set Up New Data
+    newData[DEFAULT_KEY_CID]        = cID;
+    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_REQUEST_LIST_DIR);
+    newData[DEFAULT_KEY_PATH]       = aDirPath;
+    newData[DEFAULT_KEY_FILTERS]    = aFilters;
+    newData[DEFAULT_KEY_OPTIONS]    = aSortFlags;
+
+    // ...
+
+    // Write Data
+    wirteData(newData);
 }
 
 //==============================================================================
@@ -91,7 +104,18 @@ void RemoteFileUtilClient::getDirList(const QString& aDirPath, const int& aOptio
 //==============================================================================
 void RemoteFileUtilClient::createDir(const QString& aDirPath)
 {
+    // Init New Data
+    QVariantMap newData;
 
+    // Set Up New Data
+    newData[DEFAULT_KEY_CID]        = cID;
+    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_REQUEST_MAKE_DIR);
+    newData[DEFAULT_KEY_PATH]       = aDirPath;
+
+    // ...
+
+    // Write Data
+    wirteData(newData);
 }
 
 //==============================================================================
@@ -99,7 +123,18 @@ void RemoteFileUtilClient::createDir(const QString& aDirPath)
 //==============================================================================
 void RemoteFileUtilClient::deleteFile(const QString& aFilePath)
 {
+    // Init New Data
+    QVariantMap newData;
 
+    // Set Up New Data
+    newData[DEFAULT_KEY_CID]        = cID;
+    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_REQUEST_DELETE_FILE);
+    newData[DEFAULT_KEY_PATH]       = aFilePath;
+
+    // ...
+
+    // Write Data
+    wirteData(newData);
 }
 
 //==============================================================================
@@ -107,7 +142,18 @@ void RemoteFileUtilClient::deleteFile(const QString& aFilePath)
 //==============================================================================
 void RemoteFileUtilClient::scanDirSize(const QString& aDirPath)
 {
+    // Init New Data
+    QVariantMap newData;
 
+    // Set Up New Data
+    newData[DEFAULT_KEY_CID]        = cID;
+    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_REQUEST_SCAN_DIR);
+    newData[DEFAULT_KEY_PATH]       = aDirPath;
+
+    // ...
+
+    // Write Data
+    wirteData(newData);
 }
 
 //==============================================================================
@@ -115,7 +161,18 @@ void RemoteFileUtilClient::scanDirSize(const QString& aDirPath)
 //==============================================================================
 void RemoteFileUtilClient::scanDirTree(const QString& aDirPath)
 {
+    // Init New Data
+    QVariantMap newData;
 
+    // Set Up New Data
+    newData[DEFAULT_KEY_CID]        = cID;
+    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_REQUEST_TREE_DIR);
+    newData[DEFAULT_KEY_PATH]       = aDirPath;
+
+    // ...
+
+    // Write Data
+    wirteData(newData);
 }
 
 //==============================================================================
@@ -123,7 +180,19 @@ void RemoteFileUtilClient::scanDirTree(const QString& aDirPath)
 //==============================================================================
 void RemoteFileUtilClient::copyFile(const QString& aSource, const QString& aTarget)
 {
+    // Init New Data
+    QVariantMap newData;
 
+    // Set Up New Data
+    newData[DEFAULT_KEY_CID]        = cID;
+    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_REQUEST_COPY_FILE);
+    newData[DEFAULT_KEY_SOURCE]     = aSource;
+    newData[DEFAULT_KEY_TARGET]     = aTarget;
+
+    // ...
+
+    // Write Data
+    wirteData(newData);
 }
 
 //==============================================================================
@@ -131,15 +200,41 @@ void RemoteFileUtilClient::copyFile(const QString& aSource, const QString& aTarg
 //==============================================================================
 void RemoteFileUtilClient::moveFile(const QString& aSource, const QString& aTarget)
 {
+    // Init New Data
+    QVariantMap newData;
 
+    // Set Up New Data
+    newData[DEFAULT_KEY_CID]        = cID;
+    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_REQUEST_MOVE_FILE);
+    newData[DEFAULT_KEY_SOURCE]     = aSource;
+    newData[DEFAULT_KEY_TARGET]     = aTarget;
+
+    // ...
+
+    // Write Data
+    wirteData(newData);
 }
 
 //==============================================================================
 // Search File
 //==============================================================================
-void RemoteFileUtilClient::searchFile(const QString& aName, const QString& aContent, const int& aOptions)
+void RemoteFileUtilClient::searchFile(const QString& aName, const QString& aDirPath, const QString& aContent, const int& aOptions)
 {
+    // Init New Data
+    QVariantMap newData;
 
+    // Set Up New Data
+    newData[DEFAULT_KEY_CID]        = cID;
+    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_REQUEST_SEARCH_FILE);
+    newData[DEFAULT_KEY_FILENAME]   = aName;
+    newData[DEFAULT_KEY_PATH]       = aDirPath;
+    newData[DEFAULT_KEY_CONTENT]    = aContent;
+    newData[DEFAULT_KEY_OPTIONS]    = aOptions;
+
+    // ...
+
+    // Write Data
+    wirteData(newData);
 }
 
 //==============================================================================
@@ -151,8 +246,20 @@ void RemoteFileUtilClient::abort()
     if (client && cID > 0) {
         qDebug() << "RemoteFileUtilClient::abort - cID: " << cID;
 
+        // Init New Data
+        QVariantMap newData;
+
+        // Set Up New Data
+        newData[DEFAULT_KEY_CID]        = cID;
+        newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_REQUEST_ABORT);
+
+        // Write Data
+        wirteData(newData);
+
+        // ...
+
         // Abort
-        client->abort();
+        //client->abort();
     }
 }
 
@@ -243,7 +350,7 @@ void RemoteFileUtilClient::stopTestOperation()
 //==============================================================================
 // Send Test
 //==============================================================================
-void RemoteFileUtilClient::sendTestResponse()
+void RemoteFileUtilClient::sendTestResponse(const int& aResponse)
 {
     // Check If Connected
     if (!isConnected()) {
@@ -252,6 +359,17 @@ void RemoteFileUtilClient::sendTestResponse()
     }
 
     qDebug() << "RemoteFileUtilClient::sendTestResponse - cID: " << cID;
+
+    // Init New Data
+    QVariantMap newData;
+
+    // Set Up New Data
+    newData[DEFAULT_KEY_CID]        = cID;
+    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_REQUEST_RESP);
+    newData[DEFAULT_KEY_RESPONSE]   = aResponse;
+
+    // Write Data
+    wirteData(newData);
 
     // ...
 }
@@ -397,7 +515,7 @@ void RemoteFileUtilClient::socketError(QLocalSocket::LocalSocketError socketErro
 //==============================================================================
 void RemoteFileUtilClient::socketStateChanged(QLocalSocket::LocalSocketState socketState)
 {
-    qDebug() << "RemoteFileUtilClient::socketStateChanged - cID: " << cID << " - socketState: " << socketState;
+    //qDebug() << "RemoteFileUtilClient::socketStateChanged - cID: " << cID << " - socketState: " << socketState;
 
     // ...
 }
@@ -417,7 +535,7 @@ void RemoteFileUtilClient::socketAboutToClose()
 //==============================================================================
 void RemoteFileUtilClient::socketBytesWritten(qint64 bytes)
 {
-    qDebug() << "RemoteFileUtilClient::socketBytesWritten - cID: " << cID << " - bytes: " << bytes;
+    //qDebug() << "RemoteFileUtilClient::socketBytesWritten - cID: " << cID << " - bytes: " << bytes;
 
     // ...
 }
@@ -436,7 +554,7 @@ void RemoteFileUtilClient::socketReadChannelFinished()
 //==============================================================================
 void RemoteFileUtilClient::socketReadyRead()
 {
-    qDebug() << "RemoteFileUtilClient::socketReadyRead - cID: " << cID << " - bytesAvailable: " << client->bytesAvailable();
+    //qDebug() << "RemoteFileUtilClient::socketReadyRead - cID: " << cID << " - bytesAvailable: " << client->bytesAvailable();
 
     // Read Data
     lastBuffer = client->readAll();

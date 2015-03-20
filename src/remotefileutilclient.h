@@ -4,7 +4,7 @@
 #include <QLocalSocket>
 #include <QByteArray>
 #include <QObject>
-
+#include <QMutex>
 
 
 //==============================================================================
@@ -14,7 +14,7 @@ class RemoteFileUtilClientObserver
 {
 public:
 
-    // File Progress
+    // File Progress - Copy/Move/Rename/Delete
     virtual void fileOpProgress(const unsigned int& aID,
                                 const QString& aOp,
                                 const QString& aCurrFilePath,
@@ -27,13 +27,14 @@ public:
     // File Operation Finished
     virtual void fileOpFinished(const unsigned int& aID,
                                 const QString& aOp,
+                                const QString& aPath,
                                 const QString& aSource,
-                                const QString& aTarget,
-                                const int& aError) = 0;
+                                const QString& aTarget) = 0;
 
     // File Operation Error
     virtual void fileOpError(const unsigned int& aID,
                              const QString& aOp,
+                             const QString& aPath,
                              const QString& aSource,
                              const QString& aTarget,
                              const int& aError) = 0;
@@ -41,7 +42,8 @@ public:
     // Need Confirmation
     virtual void fileOpNeedConfirm(const unsigned int& aID,
                                    const QString& aOp,
-                                   const QString& aCode,
+                                   const int& aCode,
+                                   const QString& aPath,
                                    const QString& aSource,
                                    const QString& aTarget) = 0;
 
@@ -111,10 +113,11 @@ public:
     void moveFile(const QString& aSource, const QString& aTarget);
 
     // Set File Attributes
-
+    void setFileAttributes(const QString& aFilePath, const int& aAttrib);
     // Set File Owner
-
+    void setFileOwner(const QString& aFilePath, const QString& aOwner);
     // Set File Permissions
+    void setFilePermissions(const QString& aFilePath, const int& aPermissions);
 
     // Search File
     void searchFile(const QString& aName, const QString& aDirPath, const QString& aContent, const int& aOptions);
@@ -128,6 +131,9 @@ public:
     // Execute Shell Command
     void executeShellCommand(const QString& aCommand, const bool& asRoot = false, const QString& aRootPass = "");
 
+    // Send Response
+    void sendResponse(const int& aResponse, const QString& aNewPath = "");
+
 
     // Launch Server Test
     void launchServerTest(const bool& asRoot = false, const QString& aRootPass = "");
@@ -135,8 +141,6 @@ public:
     void startTestOperation();
     // Stop/Abort Test Operation
     void stopTestOperation();
-    // Send Test
-    void sendTestResponse(const int& aResponse);
     // Disconnect Test
     void disconnectTest();
 
@@ -162,13 +166,14 @@ signals:
     // File Operation Finished Signal
     void fileOpFinished(const unsigned int& aID,
                         const QString& aOp,
+                        const QString& aPath,
                         const QString& aSource,
-                        const QString& aTarget,
-                        const int& aError);
+                        const QString& aTarget);
 
     // File Operation Error Signal
     void fileOpError(const unsigned int& aID,
                      const QString& aOp,
+                     const QString& aPath,
                      const QString& aSource,
                      const QString& aTarget,
                      const int& aError);
@@ -176,7 +181,8 @@ signals:
     // Need Confirmation Signal
     void fileOpNeedConfirm(const unsigned int& aID,
                            const QString& aOp,
-                           const QString& aCode,
+                           const int& aCode,
+                           const QString& aPath,
                            const QString& aSource,
                            const QString& aTarget);
 
@@ -212,6 +218,24 @@ protected slots:
     // Start File Server
     void startFileServer(const bool& asRoot = false, const QString& aRootPass = "");
 
+    // Parse Last Buffer
+    void parseLastBuffer();
+
+    // Handle Preogress
+    void handleProgress();
+    // Handle Confirm
+    void handleConfirm();
+    // Handle Finished
+    void handleFinished();
+    // Handle Error
+    void handleError();
+    // Handle Dir List Item
+    void handleDirListItem();
+    // Handle Queue Item
+    void handleQueueItem();
+    // Handle Dir Size Update
+    void handleDirSizeUpdate();
+
     // Write Data
     void writeData(const QByteArray& aData);
     // Write Data
@@ -235,6 +259,9 @@ protected slots:
     // Socket Ready Read Slot
     void socketReadyRead();
 
+    // Send Acknowledge
+    void sendAcknowledge();
+
 private:
 
     // Client ID
@@ -249,11 +276,17 @@ private:
     // Last Buffer
     QByteArray                      lastBuffer;
 
+    // Last Data Map
+    QVariantMap                     lastDataMap;
+
     // Reconnect As Root
     bool                            reconnectAsRoot;
 
     // Need Reconnect After Disconnect
     bool                            needReconnect;
+
+    // General Mutex
+    QMutex                          mutex;
 };
 
 #endif // REMOTEFILEUTILCLIENT_H

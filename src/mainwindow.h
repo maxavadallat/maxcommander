@@ -71,7 +71,10 @@ protected slots:
     // Update Function Keys
     void updateFunctionKeys();
 
-protected slots: // REmote File Util Client
+protected slots: // Remote File Util Client
+
+    // Client Connection Changed Slot
+    void clientConnectionChanged(const int& aID, const bool& aConnected);
 
     // File Operation Progress Slot
     void fileOpProgress(const unsigned int& aID,
@@ -86,13 +89,14 @@ protected slots: // REmote File Util Client
     // File Operation Finished Slot
     void fileOpFinished(const unsigned int& aID,
                         const QString& aOp,
+                        const QString& aPath,
                         const QString& aSource,
-                        const QString& aTarget,
-                        const int& aError);
+                        const QString& aTarget);
 
     // File Operation Error Slot
     void fileOpError(const unsigned int& aID,
                      const QString& aOp,
+                     const QString& aPath,
                      const QString& aSource,
                      const QString& aTarget,
                      const int& aError);
@@ -100,7 +104,8 @@ protected slots: // REmote File Util Client
     // Need Confirmation Slot
     void fileOpNeedConfirm(const unsigned int& aID,
                            const QString& aOp,
-                           const QString& aCode,
+                           const int& aCode,
+                           const QString& aPath,
                            const QString& aSource,
                            const QString& aTarget);
 
@@ -212,6 +217,9 @@ private:
 
     // Test Remote File Util Client
     RemoteFileUtilClient*   testClient;
+
+    // Dir List Counter
+    int                     dirListCounter;
 };
 
 #endif // MAINWINDOW_H

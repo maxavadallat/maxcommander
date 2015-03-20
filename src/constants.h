@@ -65,6 +65,7 @@
 #define DEFAULT_AVAILABLE_SPACE_FORMAT_STRING               "%1 of %2 Kbytes free"
 
 #define DEFAULT_MAIN_CONTROLLER_NAME                        "mainController"
+#define DEFAULT_FILE_LIST_MODEL_NAME                        "fileListModel"
 
 #define DEFAULT_FILE_ICON_PROVIDER_ID                       "fileicon"
 

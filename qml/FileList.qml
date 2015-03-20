@@ -29,43 +29,7 @@ Rectangle {
         focus: true
         highlightMoveDuration: 50
 
-        model: ListModel {
-            ListElement {
-                fileName  : "FileName1"
-                fileExt   : "ext1"
-                fileType  : "Document"
-                fileSize  : 123456
-                fileDate  : "2015.03.12 14:35"
-                fileOwner : "max"
-            }
-
-            ListElement {
-                fileName  : "FileName2"
-                fileExt   : "ext2"
-                fileType  : "Document"
-                fileSize  : 123456
-                fileDate  : "2015.03.12 14:35"
-                fileOwner : "max"
-            }
-
-            ListElement {
-                fileName  : "FileName3"
-                fileExt   : "ext3"
-                fileType  : "Document"
-                fileSize  : 123456
-                fileDate  : "2015.03.12 14:35"
-                fileOwner : "max"
-            }
-
-            ListElement {
-                fileName  : "FileName4"
-                fileExt   : "ext4"
-                fileType  : "Document"
-                fileSize  : 123456
-                fileDate  : "2015.03.12 14:35"
-                fileOwner : "max"
-            }
-        }
+        model: fileListModel
 
         delegate: FileListDelegate {
             id: fileListDelegateRoot

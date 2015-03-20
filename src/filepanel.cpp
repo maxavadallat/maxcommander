@@ -34,11 +34,16 @@ FilePanel::FilePanel(QWidget* aParent)
 
     // ...
 
+    // Create File List Model
+    fileListModel = new FileListModel();
+
     // Set Context Properties
     QQmlContext* ctx = ui->fileListWidget->rootContext();
 
-    // Set Context Property
+    // Set Context Properties - Main Controller
     ctx->setContextProperty(DEFAULT_MAIN_CONTROLLER_NAME, this);
+    // Set Context Properties - File List Model
+    ctx->setContextProperty(DEFAULT_FILE_LIST_MODEL_NAME, fileListModel);
 
     // Get Engine
     QQmlEngine* engine = ui->fileListWidget->engine();

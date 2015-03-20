@@ -2,6 +2,8 @@
 #include <QSettings>
 #include <QDebug>
 
+#include <mcwinterface.h>
+
 #include "filelistmodel.h"
 #include "remotefileutilclient.h"
 #include "utility.h"
@@ -12,10 +14,11 @@
 //==============================================================================
 // Constructor
 //==============================================================================
-FileListModelItem::FileListModelItem()
-    : selected(false)
+FileListModelItem::FileListModelItem(const QString& aPath, const QString& aFileName)
+    : fileInfo(aPath + "/" + aFileName)
+    , selected(false)
 {
-
+    // ...
 }
 
 
@@ -48,16 +51,19 @@ void FileListModel::init()
 {
     qDebug() << "FileListModel::init";
 
+/*
     // Create File Utin
     fileUtil = new RemoteFileUtilClient();
 
     // Connect Signals
+    connect(fileUtil, SIGNAL(clientConnectionChanged(int,bool)), this, SLOT(clientConnectionChanged(int,bool)));
     connect(fileUtil, SIGNAL(dirListItemFound(uint,QString,QString)), this, SLOT(dirListItemFound(uint,QString,QString)));
-    connect(fileUtil, SIGNAL(fileOpFinished(uint,QString,QString,QString,int)), this, SLOT(fileOpFinished(uint,QString,QString,QString,int)));
-    connect(fileUtil, SIGNAL(fileOpError(uint,QString,QString,QString,int)), this, SLOT(fileOpError(uint,QString,QString,QString,int)));
+    connect(fileUtil, SIGNAL(fileOpFinished(uint,QString,QString,QString,QString,int)), this, SLOT(fileOpFinished(uint,QString,QString,QString,QString,int)));
+    connect(fileUtil, SIGNAL(fileOpError(uint,QString,QString,QString,QString,int)), this, SLOT(fileOpError(uint,QString,QString,QString,QString,int)));
 
     // Connect To File Server
-    //fileUtil->connectToFileServer();
+    fileUtil->connectToFileServer();
+*/
 
     // ...
 }
@@ -129,25 +135,25 @@ void FileListModel::fetchDirItems()
 
     qDebug() << "FileListModel::fetchDirItems - currentDir: " << currentDir;
 
+    // Init Settings
+    //QSettings settings;
+
     // Fetch Dir Items
-    fileUtil->getDirList(currentDir, QDir::AllEntries | QDir::NoDot | QDir::Hidden, QDir::DirsFirst);
+    fileUtil->getDirList(currentDir, DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_NAME | DEFAULT_SORT_ASC | DEFAULT_SORT_DIRFIRST);
 }
 
 //==============================================================================
-// File Operation Progress Slot
+// Client Connection Changed Slot
 //==============================================================================
-void FileListModel::fileOpProgress(const unsigned int& aID,
-                                   const QString& aOp,
-                                   const QString& aCurrFilePath,
-                                   const quint64& aCurrProgress,
-                                   const quint64& aCurrTotal,
-                                   const quint64& aOverallProgress,
-                                   const quint64& aOverallTotal,
-                                   const int& aSpeed)
+void FileListModel::clientConnectionChanged(const int& aID, const bool& aConnected)
 {
-    qDebug() << "FileListModel::fileOpProgress - aID: " << aID << " - aOp: " << aOp;
+    qDebug() << "FileListModel::clientConnectionChanged - aID: " << aID << " - aConnected: " << aConnected;
 
-    // ...
+    // Check If Connected
+    if (aConnected) {
+        // Fetch Dir Items
+        fetchDirItems();
+    }
 }
 
 //==============================================================================
@@ -155,11 +161,14 @@ void FileListModel::fileOpProgress(const unsigned int& aID,
 //==============================================================================
 void FileListModel::fileOpFinished(const unsigned int& aID,
                                    const QString& aOp,
+                                   const QString& aPath,
                                    const QString& aSource,
-                                   const QString& aTarget,
-                                   const int& aError)
+                                   const QString& aTarget)
 {
-    qDebug() << "FileListModel::fileOpFinished - aID: " << aID << " - aOp: " << aOp;
+    Q_UNUSED(aSource);
+    Q_UNUSED(aTarget);
+
+    qDebug() << "FileListModel::fileOpFinished - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath;
 
     // ...
 }
@@ -169,39 +178,17 @@ void FileListModel::fileOpFinished(const unsigned int& aID,
 //==============================================================================
 void FileListModel::fileOpError(const unsigned int& aID,
                                 const QString& aOp,
+                                const QString& aPath,
                                 const QString& aSource,
                                 const QString& aTarget,
                                 const int& aError)
 {
-    qDebug() << "FileListModel::fileOpError - aID: " << aID << " - aOp: " << aOp << " - aError: " << aError;
+    Q_UNUSED(aSource);
+    Q_UNUSED(aTarget);
+
+    qDebug() << "FileListModel::fileOpError - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath << " - aError: " << aError;
 
     // ...
-}
-
-//==============================================================================
-// Need Confirmation Slot
-//==============================================================================
-void FileListModel::fileOpNeedConfirm(const unsigned int& aID,
-                                      const QString& aOp,
-                                      const QString& aCode,
-                                      const QString& aSource,
-                                      const QString& aTarget)
-{
-    qDebug() << "FileListModel::fileOpNeedConfirm - aID: " << aID << " - aOp: " << aOp << " - aCode: " << aCode;
-
-    // ...
-}
-
-//==============================================================================
-// Dir Size Scan Progress Slot
-//==============================================================================
-void FileListModel::dirSizeScanProgress(const unsigned int& aID,
-                                        const QString& aPath,
-                                        const quint64& aNumDirs,
-                                        const quint64& aNumFiles,
-                                        const quint64& aScannedSize)
-{
-
 }
 
 //==============================================================================
@@ -222,17 +209,6 @@ void FileListModel::dirListItemFound(const unsigned int& aID,
     // Add Item
 
     // End Insert Row
-}
-
-//==============================================================================
-// File Operation Queue Item Found Slot
-//==============================================================================
-void FileListModel::fileOpQueueItemFound(const unsigned int& aID,
-                                         const QString& aOp,
-                                         const QString& aSource,
-                                         const QString& aTarget)
-{
-
 }
 
 //==============================================================================

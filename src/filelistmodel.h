@@ -16,7 +16,7 @@ class RemoteFileUtilClient;
 class FileListModelItem
 {
 public:
-    FileListModelItem();
+    explicit FileListModelItem(const QString& aPath, const QString& aFileName);
 
     // File Info
     QFileInfo       fileInfo;
@@ -93,54 +93,28 @@ protected slots:
 
 protected slots: // For Remote File Client
 
-    // File Operation Progress Slot
-    void fileOpProgress(const unsigned int& aID,
-                        const QString& aOp,
-                        const QString& aCurrFilePath,
-                        const quint64& aCurrProgress,
-                        const quint64& aCurrTotal,
-                        const quint64& aOverallProgress,
-                        const quint64& aOverallTotal,
-                        const int& aSpeed);
+    // Client Connection Changed Slot
+    void clientConnectionChanged(const int& aID, const bool& aConnected);
 
     // File Operation Finished Slot
     void fileOpFinished(const unsigned int& aID,
                         const QString& aOp,
+                        const QString& aPath,
                         const QString& aSource,
-                        const QString& aTarget,
-                        const int& aError);
+                        const QString& aTarget);
 
     // File Operation Error Slot
     void fileOpError(const unsigned int& aID,
                      const QString& aOp,
+                     const QString& aPath,
                      const QString& aSource,
                      const QString& aTarget,
                      const int& aError);
-
-    // Need Confirmation Slot
-    void fileOpNeedConfirm(const unsigned int& aID,
-                           const QString& aOp,
-                           const QString& aCode,
-                           const QString& aSource,
-                           const QString& aTarget);
-
-    // Dir Size Scan Progress Slot
-    void dirSizeScanProgress(const unsigned int& aID,
-                             const QString& aPath,
-                             const quint64& aNumDirs,
-                             const quint64& aNumFiles,
-                             const quint64& aScannedSize);
 
     // Dir List Item Found Slot
     void dirListItemFound(const unsigned int& aID,
                           const QString& aPath,
                           const QString& aFileName);
-
-    // File Operation Queue Item Found Slot
-    void fileOpQueueItemFound(const unsigned int& aID,
-                              const QString& aOp,
-                              const QString& aSource,
-                              const QString& aTarget);
 
 protected:
 

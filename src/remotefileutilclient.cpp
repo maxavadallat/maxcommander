@@ -1,3 +1,4 @@
+#include <QMutexLocker>
 #include <QDebug>
 
 #include <mcwinterface.h>
@@ -18,6 +19,8 @@ RemoteFileUtilClient::RemoteFileUtilClient(RemoteFileUtilClientObserver* aObserv
     , reconnectAsRoot(false)
     , needReconnect(false)
 {
+    qDebug() << "RemoteFileUtilClient::RemoteFileUtilClient";
+
     // Init
     init();
 }
@@ -27,6 +30,8 @@ RemoteFileUtilClient::RemoteFileUtilClient(RemoteFileUtilClientObserver* aObserv
 //==============================================================================
 void RemoteFileUtilClient::init()
 {
+    qDebug() << "RemoteFileUtilClient::init";
+
     // Create Client
     client = new QLocalSocket();
 
@@ -83,15 +88,17 @@ bool RemoteFileUtilClient::isConnected()
 //==============================================================================
 void RemoteFileUtilClient::getDirList(const QString& aDirPath, const int& aFilters, const int& aSortFlags)
 {
+    qDebug() << "RemoteFileUtilClient::getDirList - aDirPath: " << aDirPath << " - aFilters: " << aFilters << " - aSortFlags: " << aSortFlags;
+
     // Init New Data
     QVariantMap newData;
 
     // Set Up New Data
     newData[DEFAULT_KEY_CID]        = cID;
-    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_REQUEST_LIST_DIR);
+    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_OPERATION_LIST_DIR);
     newData[DEFAULT_KEY_PATH]       = aDirPath;
     newData[DEFAULT_KEY_FILTERS]    = aFilters;
-    newData[DEFAULT_KEY_OPTIONS]    = aSortFlags;
+    newData[DEFAULT_KEY_FLAGS]      = aSortFlags;
 
     // ...
 
@@ -109,7 +116,7 @@ void RemoteFileUtilClient::createDir(const QString& aDirPath)
 
     // Set Up New Data
     newData[DEFAULT_KEY_CID]        = cID;
-    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_REQUEST_MAKE_DIR);
+    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_OPERATION_MAKE_DIR);
     newData[DEFAULT_KEY_PATH]       = aDirPath;
 
     // ...
@@ -128,7 +135,7 @@ void RemoteFileUtilClient::deleteFile(const QString& aFilePath)
 
     // Set Up New Data
     newData[DEFAULT_KEY_CID]        = cID;
-    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_REQUEST_DELETE_FILE);
+    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_OPERATION_DELETE_FILE);
     newData[DEFAULT_KEY_PATH]       = aFilePath;
 
     // ...
@@ -147,7 +154,7 @@ void RemoteFileUtilClient::scanDirSize(const QString& aDirPath)
 
     // Set Up New Data
     newData[DEFAULT_KEY_CID]        = cID;
-    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_REQUEST_SCAN_DIR);
+    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_OPERATION_SCAN_DIR);
     newData[DEFAULT_KEY_PATH]       = aDirPath;
 
     // ...
@@ -166,7 +173,7 @@ void RemoteFileUtilClient::scanDirTree(const QString& aDirPath)
 
     // Set Up New Data
     newData[DEFAULT_KEY_CID]        = cID;
-    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_REQUEST_TREE_DIR);
+    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_OPERATION_TREE_DIR);
     newData[DEFAULT_KEY_PATH]       = aDirPath;
 
     // ...
@@ -185,7 +192,7 @@ void RemoteFileUtilClient::copyFile(const QString& aSource, const QString& aTarg
 
     // Set Up New Data
     newData[DEFAULT_KEY_CID]        = cID;
-    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_REQUEST_COPY_FILE);
+    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_OPERATION_COPY_FILE);
     newData[DEFAULT_KEY_SOURCE]     = aSource;
     newData[DEFAULT_KEY_TARGET]     = aTarget;
 
@@ -205,7 +212,7 @@ void RemoteFileUtilClient::moveFile(const QString& aSource, const QString& aTarg
 
     // Set Up New Data
     newData[DEFAULT_KEY_CID]        = cID;
-    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_REQUEST_MOVE_FILE);
+    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_OPERATION_MOVE_FILE);
     newData[DEFAULT_KEY_SOURCE]     = aSource;
     newData[DEFAULT_KEY_TARGET]     = aTarget;
 
@@ -213,6 +220,44 @@ void RemoteFileUtilClient::moveFile(const QString& aSource, const QString& aTarg
 
     // Write Data
     wirteData(newData);
+}
+
+//==============================================================================
+// Set File Attributes
+//==============================================================================
+void RemoteFileUtilClient::setFileAttributes(const QString& aFilePath, const int& aAttrib)
+{
+/*
+    // Init New Data
+    QVariantMap newData;
+
+    // Set Up New Data
+    newData[DEFAULT_KEY_CID]        = cID;
+    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_OPERATION_ATTRIBUTES);
+    newData[DEFAULT_KEY_PATH]       = aFilePath;
+    newData[DEFAULT_KEY_TARGET]     = aAttrib;
+
+    // ...
+
+    // Write Data
+    wirteData(newData);
+*/
+}
+
+//==============================================================================
+// Set File Owner
+//==============================================================================
+void RemoteFileUtilClient::setFileOwner(const QString& aFilePath, const QString& aOwner)
+{
+
+}
+
+//==============================================================================
+// Set File Permissions
+//==============================================================================
+void RemoteFileUtilClient::setFilePermissions(const QString& aFilePath, const int& aPermissions)
+{
+
 }
 
 //==============================================================================
@@ -225,7 +270,7 @@ void RemoteFileUtilClient::searchFile(const QString& aName, const QString& aDirP
 
     // Set Up New Data
     newData[DEFAULT_KEY_CID]        = cID;
-    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_REQUEST_SEARCH_FILE);
+    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_OPERATION_SEARCH_FILE);
     newData[DEFAULT_KEY_FILENAME]   = aName;
     newData[DEFAULT_KEY_PATH]       = aDirPath;
     newData[DEFAULT_KEY_CONTENT]    = aContent;
@@ -251,7 +296,7 @@ void RemoteFileUtilClient::abort()
 
         // Set Up New Data
         newData[DEFAULT_KEY_CID]        = cID;
-        newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_REQUEST_ABORT);
+        newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_OPERATION_ABORT);
 
         // Write Data
         wirteData(newData);
@@ -294,6 +339,34 @@ void RemoteFileUtilClient::executeShellCommand(const QString& aCommand, const bo
 }
 
 //==============================================================================
+// Send Test
+//==============================================================================
+void RemoteFileUtilClient::sendResponse(const int& aResponse, const QString& aNewPath)
+{
+    // Check If Connected
+    if (!isConnected()) {
+        qDebug() << "RemoteFileUtilClient::sendResponse - cID: " << cID << " - CLIENT NOT CONNECTED!!";
+        return;
+    }
+
+    qDebug() << "RemoteFileUtilClient::sendResponse - cID: " << cID << " - aResponse: " << aResponse;
+
+    // Init New Data
+    QVariantMap newData;
+
+    // Set Up New Data
+    newData[DEFAULT_KEY_CID]        = cID;
+    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_OPERATION_RESP);
+    newData[DEFAULT_KEY_PATH]       = aNewPath;
+    newData[DEFAULT_KEY_RESPONSE]   = aResponse;
+
+    // Write Data
+    wirteData(newData);
+
+    // ...
+}
+
+//==============================================================================
 // Launch Server Test
 //==============================================================================
 void RemoteFileUtilClient::launchServerTest(const bool& asRoot, const QString& aRootPass)
@@ -322,7 +395,7 @@ void RemoteFileUtilClient::startTestOperation()
 
     // Set Up New Data
     newData[DEFAULT_KEY_CID]        = cID;
-    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_REQUEST_TEST);
+    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_OPERATION_TEST);
 
     // Write Data
     wirteData(newData);
@@ -345,33 +418,6 @@ void RemoteFileUtilClient::stopTestOperation()
 
     // Abort
     abort();
-}
-
-//==============================================================================
-// Send Test
-//==============================================================================
-void RemoteFileUtilClient::sendTestResponse(const int& aResponse)
-{
-    // Check If Connected
-    if (!isConnected()) {
-        qDebug() << "RemoteFileUtilClient::sendTestResponse - cID: " << cID << " - CLIENT NOT CONNECTED!!";
-        return;
-    }
-
-    qDebug() << "RemoteFileUtilClient::sendTestResponse - cID: " << cID;
-
-    // Init New Data
-    QVariantMap newData;
-
-    // Set Up New Data
-    newData[DEFAULT_KEY_CID]        = cID;
-    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_REQUEST_RESP);
-    newData[DEFAULT_KEY_RESPONSE]   = aResponse;
-
-    // Write Data
-    wirteData(newData);
-
-    // ...
 }
 
 //==============================================================================
@@ -442,9 +488,11 @@ void RemoteFileUtilClient::writeData(const QByteArray& aData)
 
     // Check Data
     if (!aData.isNull() && !aData.isEmpty()) {
-        qDebug() << "RemoteFileUtilClient::writeData - cID: " << cID << " - length: " << aData.length();
+        //qDebug() << "RemoteFileUtilClient::writeData - cID: " << cID << " - length: " << aData.length();
         // Write Data
         client->write(aData);
+        // Flush
+        client->flush();
     }
 }
 
@@ -455,7 +503,7 @@ void RemoteFileUtilClient::wirteData(const QVariantMap& aData)
 {
     // Check Data
     if (!aData.isEmpty() && aData.count() > 0) {
-        qDebug() << "RemoteFileUtilClient::writeData - cID: " << cID << " - aData[clientid]: " << aData[DEFAULT_KEY_CID].toInt();
+        //qDebug() << "RemoteFileUtilClient::writeData - cID: " << cID << " - aData[clientid]: " << aData[DEFAULT_KEY_CID].toInt();
 
         // Init New Byte Array
         QByteArray newByteArray;
@@ -515,6 +563,8 @@ void RemoteFileUtilClient::socketError(QLocalSocket::LocalSocketError socketErro
 //==============================================================================
 void RemoteFileUtilClient::socketStateChanged(QLocalSocket::LocalSocketState socketState)
 {
+    Q_UNUSED(socketState);
+
     //qDebug() << "RemoteFileUtilClient::socketStateChanged - cID: " << cID << " - socketState: " << socketState;
 
     // ...
@@ -535,6 +585,8 @@ void RemoteFileUtilClient::socketAboutToClose()
 //==============================================================================
 void RemoteFileUtilClient::socketBytesWritten(qint64 bytes)
 {
+    Q_UNUSED(bytes);
+
     //qDebug() << "RemoteFileUtilClient::socketBytesWritten - cID: " << cID << " - bytes: " << bytes;
 
     // ...
@@ -557,9 +609,41 @@ void RemoteFileUtilClient::socketReadyRead()
     //qDebug() << "RemoteFileUtilClient::socketReadyRead - cID: " << cID << " - bytesAvailable: " << client->bytesAvailable();
 
     // Read Data
-    lastBuffer = client->readAll();
+    lastBuffer = client ? client->readAll() : QByteArray();
+
+    //qDebug() << "RemoteFileUtilClient::socketReadyRead - bytesAvailable: " << client->bytesAvailable();
 
     //qDebug() << "RemoteFileUtilClient::socketReadyRead - cID: " << cID << " - lastBuffer: " << lastBuffer;
+
+    // Parse Last Buffer
+    parseLastBuffer();
+}
+
+//==============================================================================
+// Send Acknowledge
+//==============================================================================
+void RemoteFileUtilClient::sendAcknowledge()
+{
+    // Init New Data
+    QVariantMap newData;
+
+    // Set Up New Data
+    newData[DEFAULT_KEY_CID]        = cID;
+    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_OPERATION_ACKNOWLEDGE);
+
+    // Write Data
+    wirteData(newData);
+
+    // ...
+}
+
+//==============================================================================
+// Parse Last Buffer
+//==============================================================================
+void RemoteFileUtilClient::parseLastBuffer()
+{
+    // Mutex Locker
+    QMutexLocker locker(&mutex);
 
     // Check ID
     if (cID == 0) {
@@ -568,15 +652,179 @@ void RemoteFileUtilClient::socketReadyRead()
         // Set ID
         cID = QString(lastBuffer).toULongLong(&ok);
 
-        qDebug() << "RemoteFileUtilClient::socketReadyRead - cID: " << cID << " - Client ID is SET!!";
+        qDebug() << "RemoteFileUtilClient::parseLastBuffer - cID: " << cID << " - Client ID is SET!!";
 
         // Emit Client Connection Changed Signal
         emit clientConnectionChanged(cID, true);
+
+    } else {
+
+        // Init New Data Stream
+        QDataStream newDataStream(lastBuffer);
+
+        // Clear Last Variant Map
+        lastDataMap.clear();
+
+        // Red Data Stream To Data Map
+        newDataStream >> lastDataMap;
+
+        // Get Last Data Map Client ID
+        unsigned int rcID = lastDataMap[DEFAULT_KEY_CID].toInt();
+
+        // Check Client ID
+        if (cID != rcID) {
+            qWarning() << "RemoteFileUtilClient::parseLastBuffer - cID: " << cID << " - INVALID CLIENT ID: " << rcID;
+            return;
+        }
+
+        // Check Error
+        if (lastDataMap[DEFAULT_KEY_RESPONSE].toString() == QString(DEFAULT_RESPONSE_ERROR)) {
+            // Handle Error
+            handleError();
+            return;
+        }
+
+        // Check Response
+        if (lastDataMap[DEFAULT_KEY_RESPONSE].toString() == QString(DEFAULT_RESPONSE_DIRITEM)) {
+            // Handle Dir List Item
+            handleDirListItem();
+            return;
+        }
+
+        // Check Response
+        if (lastDataMap[DEFAULT_KEY_RESPONSE].toString() == QString(DEFAULT_RESPONSE_QUEUE)) {
+            // Handle Queue Item
+            handleQueueItem();
+            return;
+        }
+
+        // Check Response
+        if (lastDataMap[DEFAULT_KEY_RESPONSE].toString() == QString(DEFAULT_RESPONSE_CONFIRM)) {
+            // Handle Confirm
+            handleConfirm();
+            return;
+        }
+
+        // Check Response
+        if (lastDataMap[DEFAULT_KEY_RESPONSE].toString() == QString(DEFAULT_RESPONSE_READY)) {
+            // Handle Finished
+            handleFinished();
+            return;
+        }
+
+        // Handle Progress
+
+        // Handle Dir Size Scan
 
     }
 
     // ...
 
+}
+
+//==============================================================================
+// Handle Preogress
+//==============================================================================
+void RemoteFileUtilClient::handleProgress()
+{
+    // Emit File Operation Progress Signal
+    emit fileOpProgress(cID,
+                        lastDataMap[DEFAULT_KEY_OPERATION].toString(),
+                        lastDataMap[DEFAULT_KEY_PATH].toString(),
+                        lastDataMap[DEFAULT_KEY_CURRPROGRESS].toULongLong(),
+                        lastDataMap[DEFAULT_KEY_CURRTOTAL].toULongLong(),
+                        lastDataMap[DEFAULT_KEY_OVERALLPROGRESS].toULongLong(),
+                        lastDataMap[DEFAULT_KEY_OVERALLTOTAL].toULongLong(),
+                        lastDataMap[DEFAULT_KEY_SPEED].toInt());
+
+    // Send Acknowledge
+    sendAcknowledge();
+}
+
+//==============================================================================
+// Handle Confirm
+//==============================================================================
+void RemoteFileUtilClient::handleConfirm()
+{
+    // Emit File Operation Need Confirm Signal
+    emit fileOpNeedConfirm(cID,
+                           lastDataMap[DEFAULT_KEY_OPERATION].toString(),
+                           lastDataMap[DEFAULT_KEY_CONFIRMCODE].toInt(),
+                           lastDataMap[DEFAULT_KEY_PATH].toString(),
+                           lastDataMap[DEFAULT_KEY_SOURCE].toString(),
+                           lastDataMap[DEFAULT_KEY_TARGET].toString());
+}
+
+//==============================================================================
+// Handle Finished
+//==============================================================================
+void RemoteFileUtilClient::handleFinished()
+{
+    // Emit File Operation Finished Signal
+    emit fileOpFinished(cID,
+                        lastDataMap[DEFAULT_KEY_OPERATION].toString(),
+                        lastDataMap[DEFAULT_KEY_PATH].toString(),
+                        lastDataMap[DEFAULT_KEY_SOURCE].toString(),
+                        lastDataMap[DEFAULT_KEY_TARGET].toString());
+}
+
+//==============================================================================
+// Handle Error
+//==============================================================================
+void RemoteFileUtilClient::handleError()
+{
+    // Emit Error Signal
+    emit fileOpError(cID,
+                     lastDataMap[DEFAULT_KEY_OPERATION].toString(),
+                     lastDataMap[DEFAULT_KEY_PATH].toString(),
+                     lastDataMap[DEFAULT_KEY_SOURCE].toString(),
+                     lastDataMap[DEFAULT_KEY_TARGET].toString(),
+                     lastDataMap[DEFAULT_KEY_ERROR].toInt());
+}
+
+//==============================================================================
+// Handle Dir List Item
+//==============================================================================
+void RemoteFileUtilClient::handleDirListItem()
+{
+    // Emit Dir List Item Found Signal
+    emit dirListItemFound(cID,
+                          lastDataMap[DEFAULT_KEY_PATH].toString(),
+                          lastDataMap[DEFAULT_KEY_FILENAME].toString());
+
+    // Send Acknowledge
+    sendAcknowledge();
+}
+
+//==============================================================================
+// Handle Queue Item
+//==============================================================================
+void RemoteFileUtilClient::handleQueueItem()
+{
+    // Emit File Operation Queue Item Found Signal
+    emit fileOpQueueItemFound(cID,
+                              lastDataMap[DEFAULT_KEY_PATH].toString(),
+                              lastDataMap[DEFAULT_KEY_SOURCE].toString(),
+                              lastDataMap[DEFAULT_KEY_TARGET].toString());
+
+    // Send Acknowledge
+    sendAcknowledge();
+}
+
+//==============================================================================
+// Handle Dir Size Update
+//==============================================================================
+void RemoteFileUtilClient::handleDirSizeUpdate()
+{
+    // Emit Dir Size Scan Progress Signal
+    emit dirSizeScanProgress(cID,
+                             lastDataMap[DEFAULT_KEY_PATH].toString(),
+                             lastDataMap[DEFAULT_KEY_NUMFILES].toULongLong(),
+                             lastDataMap[DEFAULT_KEY_NUMDIRS].toULongLong(),
+                             lastDataMap[DEFAULT_KEY_DIRSIZE].toULongLong());
+
+    // Send Acknowledge
+    sendAcknowledge();
 }
 
 //==============================================================================

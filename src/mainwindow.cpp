@@ -1,6 +1,7 @@
 #include <QSettings>
 #include <QFileInfo>
 #include <QKeyEvent>
+#include <QDir>
 #include <QDebug>
 
 #include <QDialogButtonBox>
@@ -94,10 +95,13 @@ void MainWindow::init()
     testClient = new RemoteFileUtilClient();
 
     // Connect Signals
+    connect(testClient, SIGNAL(clientConnectionChanged(int,bool)), this, SLOT(clientConnectionChanged(int,bool)));
+
     connect(testClient, SIGNAL(fileOpProgress(uint,QString,QString,quint64,quint64,quint64,quint64,int)), this, SLOT(fileOpProgress(uint,QString,QString,quint64,quint64,quint64,quint64,int)));
-    connect(testClient, SIGNAL(fileOpFinished(uint,QString,QString,QString,int)), this, SLOT(fileOpFinished(uint,QString,QString,QString,int)));
-    connect(testClient, SIGNAL(fileOpError(uint,QString,QString,QString,int)), this, SLOT(fileOpError(uint,QString,QString,QString,int)));
-    connect(testClient, SIGNAL(fileOpNeedConfirm(uint,QString,QString,QString,QString)), this, SLOT(fileOpNeedConfirm(uint,QString,QString,QString,QString)));
+    connect(testClient, SIGNAL(fileOpFinished(uint,QString,QString,QString,QString)), this, SLOT(fileOpFinished(uint,QString,QString,QString,QString)));
+    connect(testClient, SIGNAL(fileOpError(uint,QString,QString,QString,QString,int)), this, SLOT(fileOpError(uint,QString,QString,QString,QString,int)));
+    connect(testClient, SIGNAL(fileOpNeedConfirm(uint,QString,int,QString,QString,QString)), this, SLOT(fileOpNeedConfirm(uint,QString,int,QString,QString,QString)));
+
     connect(testClient, SIGNAL(fileOpQueueItemFound(uint,QString,QString,QString)), this, SLOT(fileOpQueueItemFound(uint,QString,QString,QString)));
 
     connect(testClient, SIGNAL(dirListItemFound(uint,QString,QString)), this, SLOT(dirListItemFound(uint,QString,QString)));
@@ -301,15 +305,25 @@ void MainWindow::updateFunctionKeys()
         ui->helpButton->setText(tr("File Server"));
         ui->terminalButton->setText(tr("Start Test"));
         ui->viewButton->setText(tr("Stop Test"));
-        ui->editButton->setText(tr(""));
-        ui->copyButton->setText(tr("Send Yes"));
-        ui->moveButton->setText(tr("Send No"));
-        ui->makeDirButton->setText(tr(""));
+        ui->editButton->setText(tr("Send Yes"));
+        ui->copyButton->setText(tr("Send No"));
+        ui->moveButton->setText(tr(""));
+        ui->makeDirButton->setText(tr("Get Dir List"));
         ui->delButton->setText(tr(""));
         ui->optionsButton->setText(tr("Disconnect"));
         ui->exitButton->setText(tr("Exit"));
 
     }
+}
+
+//==============================================================================
+// Client Connection Changed Slot
+//==============================================================================
+void MainWindow::clientConnectionChanged(const int& aID, const bool& aConnected)
+{
+    qDebug() << "MainWindow::clientConnectionChanged - aID: " << aID << " - aConnected: " << aConnected;
+
+    // ...
 }
 
 //==============================================================================
@@ -334,11 +348,11 @@ void MainWindow::fileOpProgress(const unsigned int& aID,
 //==============================================================================
 void MainWindow::fileOpFinished(const unsigned int& aID,
                                 const QString& aOp,
+                                const QString& aPath,
                                 const QString& aSource,
-                                const QString& aTarget,
-                                const int& aError)
+                                const QString& aTarget)
 {
-    qDebug() << "MainWindow::fileOpFinished - aID: " << aID << " - aOp: " << aOp << " - aError: " << aError;
+    qDebug() << "MainWindow::fileOpFinished - aID: " << aID << " - aOp: " << aOp << " - dirListCounter: " << dirListCounter;
 
     // ...
 
@@ -349,6 +363,7 @@ void MainWindow::fileOpFinished(const unsigned int& aID,
 //==============================================================================
 void MainWindow::fileOpError(const unsigned int& aID,
                              const QString& aOp,
+                             const QString& aPath,
                              const QString& aSource,
                              const QString& aTarget,
                              const int& aError)
@@ -364,7 +379,8 @@ void MainWindow::fileOpError(const unsigned int& aID,
 //==============================================================================
 void MainWindow::fileOpNeedConfirm(const unsigned int& aID,
                                    const QString& aOp,
-                                   const QString& aCode,
+                                   const int& aCode,
+                                   const QString& aPath,
                                    const QString& aSource,
                                    const QString& aTarget)
 {
@@ -396,7 +412,13 @@ void MainWindow::dirListItemFound(const unsigned int& aID,
                                   const QString& aPath,
                                   const QString& aFileName)
 {
-    qDebug() << "MainWindow::dirListItemFound - aID: " << aID << " - aPath: " << aPath << " - aFileName: " << aFileName;
+    // Inc Dir List Counter
+    dirListCounter++;
+
+    //qDebug() << "MainWindow::dirListItemFound - aID: " << aID << " - aPath: " << aPath << " - aFileName: " << aFileName << " - dirListCounter: " << dirListCounter;
+
+
+
 
     // ...
 
@@ -439,7 +461,7 @@ void MainWindow::on_helpButton_clicked()
         // Check Test Client
         if (testClient) {
 
-            qDebug() << "#### testClient - Connect";
+            qDebug() << "\n#### testClient - Connect";
 
             // Launch Server Test
             testClient->launchServerTest();
@@ -468,7 +490,7 @@ void MainWindow::on_terminalButton_clicked()
         // Check Test Client
         if (testClient) {
 
-            qDebug() << "#### testClient - Start Test";
+            qDebug() << "\n#### testClient - Start Test";
 
             // Start Test Operation
             testClient->startTestOperation();
@@ -497,7 +519,7 @@ void MainWindow::on_viewButton_clicked()
         // Check Test Client
         if (testClient) {
 
-            qDebug() << "#### testClient - Stop Test";
+            qDebug() << "\n#### testClient - Stop Test";
 
             // Stop Test Operation
             testClient->stopTestOperation();
@@ -524,6 +546,15 @@ void MainWindow::on_editButton_clicked()
         // Trigger Edit Action
         //ui->actionEdit->trigger();
 
+        // Check Test Client
+        if (testClient) {
+
+            qDebug() << "\n#### testClient - Send Yes";
+
+            // Stop Test Operation
+            testClient->sendResponse(DEFAULT_RESPONSE_YES);
+        }
+
     }
 }
 
@@ -548,10 +579,10 @@ void MainWindow::on_copyButton_clicked()
         // Check Test Client
         if (testClient) {
 
-            qDebug() << "#### testClient - Send Yes";
+            qDebug() << "\n#### testClient - Send No";
 
             // Stop Test Operation
-            testClient->sendTestResponse(DEFAULT_RESPONSE_YES);
+            testClient->sendResponse(DEFAULT_RESPONSE_NO);
         }
 
     }
@@ -575,14 +606,6 @@ void MainWindow::on_moveButton_clicked()
         // Trigger Move Action
         //ui->actionMove->trigger();
 
-        // Check Test Client
-        if (testClient) {
-
-            qDebug() << "#### testClient - Send No";
-
-            // Stop Test Operation
-            testClient->sendTestResponse(DEFAULT_RESPONSE_NO);
-        }
     }
 }
 
@@ -604,6 +627,18 @@ void MainWindow::on_makeDirButton_clicked()
         // Trigger Make Dir Action
         //ui->actionNew_Directory->trigger();
 
+        // Check Test Client
+        if (testClient) {
+
+            qDebug() << "\n#### testClient - Get Dir List";
+
+            // Reset Dir List Counter
+            dirListCounter = 0;
+
+            // Get Dir List
+            //testClient->getDirList(QDir::homePath(), DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_NAME | DEFAULT_SORT_ASC | DEFAULT_SORT_DIRFIRST);
+            testClient->getDirList("/usr/bin", DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_NAME | DEFAULT_SORT_ASC | DEFAULT_SORT_DIRFIRST);
+        }
     }
 }
 
@@ -650,7 +685,7 @@ void MainWindow::on_optionsButton_clicked()
         // Check Test Client
         if (testClient) {
 
-            qDebug() << "#### testClient - Disconnect Test";
+            qDebug() << "\n#### testClient - Disconnect Test";
 
             // Disconnect Test
             testClient->disconnectTest();

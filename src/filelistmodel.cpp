@@ -139,7 +139,7 @@ void FileListModel::fetchDirItems()
     //QSettings settings;
 
     // Fetch Dir Items
-    fileUtil->getDirList(currentDir, DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_NAME | DEFAULT_SORT_ASC | DEFAULT_SORT_DIRFIRST);
+    fileUtil->getDirList(currentDir, DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_DIRFIRST);
 }
 
 //==============================================================================

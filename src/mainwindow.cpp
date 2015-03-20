@@ -636,8 +636,8 @@ void MainWindow::on_makeDirButton_clicked()
             dirListCounter = 0;
 
             // Get Dir List
-            //testClient->getDirList(QDir::homePath(), DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_NAME | DEFAULT_SORT_ASC | DEFAULT_SORT_DIRFIRST);
-            testClient->getDirList("/usr/bin", DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_NAME | DEFAULT_SORT_ASC | DEFAULT_SORT_DIRFIRST);
+            testClient->getDirList(QDir::homePath(), DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_DIRFIRST);
+            //testClient->getDirList("/usr/bin", DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_DIRFIRST);
         }
     }
 }

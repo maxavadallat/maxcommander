@@ -712,10 +712,19 @@ void RemoteFileUtilClient::parseLastBuffer()
             return;
         }
 
-        // Handle Progress
+        // Check Response
+        if (lastDataMap[DEFAULT_KEY_RESPONSE].toString() == QString(DEFAULT_RESPONSE_PROGRESS)) {
+            // Handle Progress
+            handleProgress();
+            return;
+        }
 
-        // Handle Dir Size Scan
-
+        // Check Response
+        if (lastDataMap[DEFAULT_KEY_RESPONSE].toString() == QString(DEFAULT_RESPONSE_DIRSCAN)) {
+            // Handle Dir Size Scan
+            handleDirSizeUpdate();
+            return;
+        }
     }
 
     // ...

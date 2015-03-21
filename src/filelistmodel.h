@@ -122,7 +122,7 @@ protected:
     QString                     currentDir;
 
     // File Info List
-    QList<FileListModelItem*>   fileInfoList;
+    QList<FileListModelItem*>   itemList;
 
     // Remote File Client
     RemoteFileUtilClient*       fileUtil;

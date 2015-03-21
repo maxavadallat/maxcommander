@@ -51,7 +51,6 @@ void FileListModel::init()
 {
     qDebug() << "FileListModel::init";
 
-/*
     // Create File Utin
     fileUtil = new RemoteFileUtilClient();
 
@@ -63,7 +62,6 @@ void FileListModel::init()
 
     // Connect To File Server
     fileUtil->connectToFileServer();
-*/
 
     // ...
 }
@@ -107,9 +105,9 @@ void FileListModel::clear()
     beginResetModel();
 
     // Go Thru File Info List
-    while (fileInfoList.count() > 0) {
+    while (itemList.count() > 0) {
         // Get File Info List Item
-        FileListModelItem* item = fileInfoList.takeLast();
+        FileListModelItem* item = itemList.takeLast();
         // Check Item
         if (item) {
             // Delete Item
@@ -203,12 +201,19 @@ void FileListModel::dirListItemFound(const unsigned int& aID,
     // ...
 
     // Create New File List Item
+    FileListModelItem* newItem = new FileListModelItem(aPath, aFileName);
+
+    // Get Count
+    int count = rowCount();
 
     // Begin Insert Row
+    beginInsertRows(QModelIndex(), count, count);
 
-    // Add Item
+    // Add Item To Item List
+    itemList << newItem;
 
     // End Insert Row
+    endInsertRows();
 }
 
 //==============================================================================
@@ -233,6 +238,10 @@ QHash<int, QByteArray> FileListModel::roleNames() const
     roles[FileDateTime]     = "fileDate";
     // File Name
     roles[FileOwner]        = "fileOwner";
+    // File Permissions
+    roles[FilePerms]        = "fileParms";
+    // File Selected
+    roles[FileSelected]     = "fileSelected";
 
     return roles;
 }
@@ -244,7 +253,7 @@ int FileListModel::rowCount(const QModelIndex& aParent) const
 {
     Q_UNUSED(aParent);
 
-    return fileInfoList.count();
+    return itemList.count();
 }
 
 //==============================================================================
@@ -320,7 +329,7 @@ bool FileListModel::setData(const QModelIndex& aIndex, const QVariant& aValue, i
         //qDebug() << "FileListModel::setData - row: " << aIndex.row() << " - aValue: " << aValue << " - aRole: " << aRole;
 
         // Get Item
-        FileListModelItem* item = fileInfoList[aIndex.row()];
+        FileListModelItem* item = itemList[aIndex.row()];
 
         // Switch Role
         switch (aRole) {
@@ -383,6 +392,13 @@ FileListModel::~FileListModel()
 {
     // Clear
     clear();
+
+    // Check File Util
+    if (fileUtil) {
+        // Delete File Util
+        delete fileUtil;
+        fileUtil = NULL;
+    }
 
     // ...
 

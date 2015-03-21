@@ -79,9 +79,9 @@ void MainWindow::init()
     qDebug() << "MainWindow::init";
 
     // Set Panel Name
-    leftPanel->panelName = DEFAULT_PANEL_NAME_LEFT;
+    leftPanel->setPanelName(DEFAULT_PANEL_NAME_LEFT);
     // Set Panel Name
-    rightPanel->panelName = DEFAULT_PANEL_NAME_RIGHT;
+    rightPanel->setPanelName(DEFAULT_PANEL_NAME_RIGHT);
 
     // Connect Signals
     connect(leftPanel, SIGNAL(exitKeyReleased()), this, SLOT(quitApp()));
@@ -123,7 +123,10 @@ void MainWindow::restoreUI()
     // ...
 
 
-    // Check Last Focused Panel
+    // Restore Left Panel UI
+    leftPanel->restoreUI();
+    // Restore Right Panel UI
+    rightPanel->restoreUI();
 
     // Set Focus
     leftPanel->setPanelFocus(true);
@@ -415,7 +418,7 @@ void MainWindow::dirListItemFound(const unsigned int& aID,
     // Inc Dir List Counter
     dirListCounter++;
 
-    //qDebug() << "MainWindow::dirListItemFound - aID: " << aID << " - aPath: " << aPath << " - aFileName: " << aFileName << " - dirListCounter: " << dirListCounter;
+    qDebug() << "MainWindow::dirListItemFound - aID: " << aID << " - aPath: " << aPath << " - aFileName: " << aFileName << " - dirListCounter: " << dirListCounter;
 
 
 
@@ -429,6 +432,7 @@ void MainWindow::dirListItemFound(const unsigned int& aID,
 //==============================================================================
 void MainWindow::fileOpQueueItemFound(const unsigned int& aID,
                                       const QString& aOp,
+                                      const QString& aPath,
                                       const QString& aSource,
                                       const QString& aTarget)
 {
@@ -437,6 +441,20 @@ void MainWindow::fileOpQueueItemFound(const unsigned int& aID,
     // ...
 
 }
+
+//==============================================================================
+// File Search Result Item Found Slot
+//==============================================================================
+void MainWindow::fileSearchResultItemFound(const unsigned int& aID,
+                                           const QString& aOp,
+                                           const QString& aFilePath)
+{
+    qDebug() << "MainWindow::fileOpQueueItemFound - aID: " << aID << " - aOp: " << aOp << " - aFilePath";
+
+    // ...
+
+}
+
 
 //==============================================================================
 // Help Button Clicked Slot

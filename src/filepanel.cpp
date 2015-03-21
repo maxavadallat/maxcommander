@@ -63,7 +63,6 @@ FilePanel::FilePanel(QWidget* aParent)
 
     // Update Available Space Label
     updateAvailableSpaceLabel();
-
 }
 
 //==============================================================================
@@ -103,6 +102,20 @@ void FilePanel::setCurrentDir(const QString& aCurrentDir)
 QString FilePanel::getPanelName()
 {
     return panelName;
+}
+
+//==============================================================================
+// Set Panel Name
+//==============================================================================
+void FilePanel::setPanelName(const QString& aPanelName)
+{
+    // Check Panel Name
+    if (panelName != aPanelName) {
+        // Set Panel Name
+        panelName = aPanelName;
+
+        // ...
+    }
 }
 
 //==============================================================================
@@ -150,7 +163,10 @@ void FilePanel::setPanelFocus(const bool& aFocus)
 //==============================================================================
 void FilePanel::gotoHome()
 {
+    qDebug() << "FilePanel::gotoHome - panelName: " << panelName;
 
+    // Set Current Dir
+    setCurrentDir(QDir::homePath());
 }
 
 //==============================================================================
@@ -158,7 +174,10 @@ void FilePanel::gotoHome()
 //==============================================================================
 void FilePanel::gotoRoot()
 {
+    qDebug() << "FilePanel::gotoRoot - panelName: " << panelName;
 
+    // Set Current Dir
+    setCurrentDir("/");
 }
 
 //==============================================================================
@@ -166,7 +185,7 @@ void FilePanel::gotoRoot()
 //==============================================================================
 void FilePanel::gotoDrive(const int& aDriveIndex)
 {
-    Q_UNUSED(aDriveIndex);
+    qDebug() << "FilePanel::goUp - panelName: " << panelName << " - aDriveIndex: " << aDriveIndex;
 
     // ...
 }
@@ -176,6 +195,7 @@ void FilePanel::gotoDrive(const int& aDriveIndex)
 //==============================================================================
 void FilePanel::goUp()
 {
+    qDebug() << "FilePanel::goUp - panelName: " << panelName;
 
 }
 
@@ -184,6 +204,7 @@ void FilePanel::goUp()
 //==============================================================================
 void FilePanel::goNext()
 {
+    qDebug() << "FilePanel::goNext - panelName: " << panelName;
 
 }
 
@@ -192,6 +213,7 @@ void FilePanel::goNext()
 //==============================================================================
 void FilePanel::goPrev()
 {
+    qDebug() << "FilePanel::goPrev - panelName: " << panelName;
 
 }
 
@@ -200,6 +222,7 @@ void FilePanel::goPrev()
 //==============================================================================
 void FilePanel::pageUp()
 {
+    qDebug() << "FilePanel::pageUp - panelName: " << panelName;
 
 }
 
@@ -208,6 +231,7 @@ void FilePanel::pageUp()
 //==============================================================================
 void FilePanel::pageDown()
 {
+    qDebug() << "FilePanel::pageDown - panelName: " << panelName;
 
 }
 
@@ -216,6 +240,7 @@ void FilePanel::pageDown()
 //==============================================================================
 void FilePanel::goFirst()
 {
+    qDebug() << "FilePanel::goFirst - panelName: " << panelName;
 
 }
 
@@ -224,6 +249,7 @@ void FilePanel::goFirst()
 //==============================================================================
 void FilePanel::goLast()
 {
+    qDebug() << "FilePanel::goLast - panelName: " << panelName;
 
 }
 
@@ -232,6 +258,7 @@ void FilePanel::goLast()
 //==============================================================================
 void FilePanel::clear()
 {
+    qDebug() << "FilePanel::clear - panelName: " << panelName;
 
 }
 
@@ -240,6 +267,10 @@ void FilePanel::clear()
 //==============================================================================
 void FilePanel::restoreUI()
 {
+    qDebug() << "FilePanel::restoreUI - panelName: " << panelName;
+
+    // Init Settings
+    QSettings settings;
 
 }
 
@@ -248,6 +279,11 @@ void FilePanel::restoreUI()
 //==============================================================================
 void FilePanel::saveSettings()
 {
+    qDebug() << "FilePanel::saveSettings - panelName: " << panelName;
+
+    // Init Settings
+    QSettings settings;
+
 
 }
 

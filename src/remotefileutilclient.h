@@ -62,8 +62,14 @@ public:
     // File Operation Queue Item Found
     virtual void fileOpQueueItemFound(const unsigned int& aID,
                                       const QString& aOp,
+                                      const QString& aPath,
                                       const QString& aSource,
                                       const QString& aTarget) = 0;
+
+    // File Search Result Item Found
+    virtual void fileSearchResultItemFound(const unsigned int& aID,
+                                           const QString& aOp,
+                                           const QString& aFilePath) = 0;
 
 };
 
@@ -118,6 +124,8 @@ public:
     void setFileOwner(const QString& aFilePath, const QString& aOwner);
     // Set File Permissions
     void setFilePermissions(const QString& aFilePath, const int& aPermissions);
+    // Set File Date Time
+    void setFileDateTime(const QString& aFilePath, const QDateTime& aDateTime);
 
     // Search File
     void searchFile(const QString& aName, const QString& aDirPath, const QString& aContent, const int& aOptions);
@@ -201,8 +209,14 @@ signals:
     // File Operation Queue Item Found Signal
     void fileOpQueueItemFound(const unsigned int& aID,
                               const QString& aOp,
+                              const QString& aPath,
                               const QString& aSource,
                               const QString& aTarget);
+
+    // File Search Result Item Found Signal
+    void fileSearchResultItemFound(const unsigned int& aID,
+                                   const QString& aOp,
+                                   const QString& aFilePath);
 
 protected slots:
 

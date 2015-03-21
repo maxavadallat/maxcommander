@@ -124,8 +124,14 @@ protected slots: // Remote File Util Client
     // File Operation Queue Item Found Slot
     void fileOpQueueItemFound(const unsigned int& aID,
                               const QString& aOp,
+                              const QString& aPath,
                               const QString& aSource,
                               const QString& aTarget);
+
+    // File Search Result Item Found Slot
+    void fileSearchResultItemFound(const unsigned int& aID,
+                                   const QString& aOp,
+                                   const QString& aFilePath);
 
 protected slots: // Actions & Button
 

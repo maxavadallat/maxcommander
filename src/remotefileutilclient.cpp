@@ -94,11 +94,11 @@ void RemoteFileUtilClient::getDirList(const QString& aDirPath, const int& aFilte
     QVariantMap newData;
 
     // Set Up New Data
-    newData[DEFAULT_KEY_CID]        = cID;
-    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_OPERATION_LIST_DIR);
-    newData[DEFAULT_KEY_PATH]       = aDirPath;
-    newData[DEFAULT_KEY_FILTERS]    = aFilters;
-    newData[DEFAULT_KEY_FLAGS]      = aSortFlags;
+    newData[DEFAULT_KEY_CID]            = cID;
+    newData[DEFAULT_KEY_OPERATION]      = QString(DEFAULT_OPERATION_LIST_DIR);
+    newData[DEFAULT_KEY_PATH]           = aDirPath;
+    newData[DEFAULT_KEY_FILTERS]        = aFilters;
+    newData[DEFAULT_KEY_FLAGS]          = aSortFlags;
 
     // ...
 
@@ -115,9 +115,9 @@ void RemoteFileUtilClient::createDir(const QString& aDirPath)
     QVariantMap newData;
 
     // Set Up New Data
-    newData[DEFAULT_KEY_CID]        = cID;
-    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_OPERATION_MAKE_DIR);
-    newData[DEFAULT_KEY_PATH]       = aDirPath;
+    newData[DEFAULT_KEY_CID]            = cID;
+    newData[DEFAULT_KEY_OPERATION]      = QString(DEFAULT_OPERATION_MAKE_DIR);
+    newData[DEFAULT_KEY_PATH]           = aDirPath;
 
     // ...
 
@@ -134,9 +134,9 @@ void RemoteFileUtilClient::deleteFile(const QString& aFilePath)
     QVariantMap newData;
 
     // Set Up New Data
-    newData[DEFAULT_KEY_CID]        = cID;
-    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_OPERATION_DELETE_FILE);
-    newData[DEFAULT_KEY_PATH]       = aFilePath;
+    newData[DEFAULT_KEY_CID]            = cID;
+    newData[DEFAULT_KEY_OPERATION]      = QString(DEFAULT_OPERATION_DELETE_FILE);
+    newData[DEFAULT_KEY_PATH]           = aFilePath;
 
     // ...
 
@@ -153,9 +153,9 @@ void RemoteFileUtilClient::scanDirSize(const QString& aDirPath)
     QVariantMap newData;
 
     // Set Up New Data
-    newData[DEFAULT_KEY_CID]        = cID;
-    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_OPERATION_SCAN_DIR);
-    newData[DEFAULT_KEY_PATH]       = aDirPath;
+    newData[DEFAULT_KEY_CID]            = cID;
+    newData[DEFAULT_KEY_OPERATION]      = QString(DEFAULT_OPERATION_SCAN_DIR);
+    newData[DEFAULT_KEY_PATH]           = aDirPath;
 
     // ...
 
@@ -172,9 +172,9 @@ void RemoteFileUtilClient::scanDirTree(const QString& aDirPath)
     QVariantMap newData;
 
     // Set Up New Data
-    newData[DEFAULT_KEY_CID]        = cID;
-    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_OPERATION_TREE_DIR);
-    newData[DEFAULT_KEY_PATH]       = aDirPath;
+    newData[DEFAULT_KEY_CID]            = cID;
+    newData[DEFAULT_KEY_OPERATION]      = QString(DEFAULT_OPERATION_TREE_DIR);
+    newData[DEFAULT_KEY_PATH]           = aDirPath;
 
     // ...
 
@@ -191,10 +191,10 @@ void RemoteFileUtilClient::copyFile(const QString& aSource, const QString& aTarg
     QVariantMap newData;
 
     // Set Up New Data
-    newData[DEFAULT_KEY_CID]        = cID;
-    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_OPERATION_COPY_FILE);
-    newData[DEFAULT_KEY_SOURCE]     = aSource;
-    newData[DEFAULT_KEY_TARGET]     = aTarget;
+    newData[DEFAULT_KEY_CID]            = cID;
+    newData[DEFAULT_KEY_OPERATION]      = QString(DEFAULT_OPERATION_COPY_FILE);
+    newData[DEFAULT_KEY_SOURCE]         = aSource;
+    newData[DEFAULT_KEY_TARGET]         = aTarget;
 
     // ...
 
@@ -211,10 +211,10 @@ void RemoteFileUtilClient::moveFile(const QString& aSource, const QString& aTarg
     QVariantMap newData;
 
     // Set Up New Data
-    newData[DEFAULT_KEY_CID]        = cID;
-    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_OPERATION_MOVE_FILE);
-    newData[DEFAULT_KEY_SOURCE]     = aSource;
-    newData[DEFAULT_KEY_TARGET]     = aTarget;
+    newData[DEFAULT_KEY_CID]            = cID;
+    newData[DEFAULT_KEY_OPERATION]      = QString(DEFAULT_OPERATION_MOVE_FILE);
+    newData[DEFAULT_KEY_SOURCE]         = aSource;
+    newData[DEFAULT_KEY_TARGET]         = aTarget;
 
     // ...
 
@@ -227,21 +227,20 @@ void RemoteFileUtilClient::moveFile(const QString& aSource, const QString& aTarg
 //==============================================================================
 void RemoteFileUtilClient::setFileAttributes(const QString& aFilePath, const int& aAttrib)
 {
-/*
     // Init New Data
     QVariantMap newData;
 
     // Set Up New Data
-    newData[DEFAULT_KEY_CID]        = cID;
-    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_OPERATION_ATTRIBUTES);
-    newData[DEFAULT_KEY_PATH]       = aFilePath;
-    newData[DEFAULT_KEY_TARGET]     = aAttrib;
+    newData[DEFAULT_KEY_CID]            = cID;
+    newData[DEFAULT_KEY_OPERATION]      = QString(DEFAULT_OPERATION_ATTRIBUTES);
+    newData[DEFAULT_KEY_PATH]           = aFilePath;
+    newData[DEFAULT_KEY_ATTRIB]         = aAttrib;
 
     // ...
 
     // Write Data
     wirteData(newData);
-*/
+
 }
 
 //==============================================================================
@@ -249,7 +248,19 @@ void RemoteFileUtilClient::setFileAttributes(const QString& aFilePath, const int
 //==============================================================================
 void RemoteFileUtilClient::setFileOwner(const QString& aFilePath, const QString& aOwner)
 {
+    // Init New Data
+    QVariantMap newData;
 
+    // Set Up New Data
+    newData[DEFAULT_KEY_CID]            = cID;
+    newData[DEFAULT_KEY_OPERATION]      = QString(DEFAULT_OPERATION_OWNER);
+    newData[DEFAULT_KEY_PATH]           = aFilePath;
+    newData[DEFAULT_KEY_OWNER]          = aOwner;
+
+    // ...
+
+    // Write Data
+    wirteData(newData);
 }
 
 //==============================================================================
@@ -257,7 +268,39 @@ void RemoteFileUtilClient::setFileOwner(const QString& aFilePath, const QString&
 //==============================================================================
 void RemoteFileUtilClient::setFilePermissions(const QString& aFilePath, const int& aPermissions)
 {
+    // Init New Data
+    QVariantMap newData;
 
+    // Set Up New Data
+    newData[DEFAULT_KEY_CID]            = cID;
+    newData[DEFAULT_KEY_OPERATION]      = QString(DEFAULT_OPERATION_PERMISSIONS);
+    newData[DEFAULT_KEY_PATH]           = aFilePath;
+    newData[DEFAULT_KEY_PERMISSIONS]    = aPermissions;
+
+    // ...
+
+    // Write Data
+    wirteData(newData);
+}
+
+//==============================================================================
+// Set File Date Time
+//==============================================================================
+void RemoteFileUtilClient::setFileDateTime(const QString& aFilePath, const QDateTime& aDateTime)
+{
+    // Init New Data
+    QVariantMap newData;
+
+    // Set Up New Data
+    newData[DEFAULT_KEY_CID]            = cID;
+    newData[DEFAULT_KEY_OPERATION]      = QString(DEFAULT_OPERATION_DATETIME);
+    newData[DEFAULT_KEY_PATH]           = aFilePath;
+    newData[DEFAULT_KEY_DATETIME]       = aDateTime;
+
+    // ...
+
+    // Write Data
+    wirteData(newData);
 }
 
 //==============================================================================
@@ -269,12 +312,12 @@ void RemoteFileUtilClient::searchFile(const QString& aName, const QString& aDirP
     QVariantMap newData;
 
     // Set Up New Data
-    newData[DEFAULT_KEY_CID]        = cID;
-    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_OPERATION_SEARCH_FILE);
-    newData[DEFAULT_KEY_FILENAME]   = aName;
-    newData[DEFAULT_KEY_PATH]       = aDirPath;
-    newData[DEFAULT_KEY_CONTENT]    = aContent;
-    newData[DEFAULT_KEY_OPTIONS]    = aOptions;
+    newData[DEFAULT_KEY_CID]            = cID;
+    newData[DEFAULT_KEY_OPERATION]      = QString(DEFAULT_OPERATION_SEARCH_FILE);
+    newData[DEFAULT_KEY_FILENAME]       = aName;
+    newData[DEFAULT_KEY_PATH]           = aDirPath;
+    newData[DEFAULT_KEY_CONTENT]        = aContent;
+    newData[DEFAULT_KEY_OPTIONS]        = aOptions;
 
     // ...
 
@@ -355,15 +398,13 @@ void RemoteFileUtilClient::sendResponse(const int& aResponse, const QString& aNe
     QVariantMap newData;
 
     // Set Up New Data
-    newData[DEFAULT_KEY_CID]        = cID;
-    newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_OPERATION_RESP);
-    newData[DEFAULT_KEY_PATH]       = aNewPath;
-    newData[DEFAULT_KEY_RESPONSE]   = aResponse;
+    newData[DEFAULT_KEY_CID]            = cID;
+    newData[DEFAULT_KEY_OPERATION]      = QString(DEFAULT_OPERATION_RESP);
+    newData[DEFAULT_KEY_PATH]           = aNewPath;
+    newData[DEFAULT_KEY_RESPONSE]       = aResponse;
 
     // Write Data
     wirteData(newData);
-
-    // ...
 }
 
 //==============================================================================
@@ -812,6 +853,7 @@ void RemoteFileUtilClient::handleQueueItem()
 {
     // Emit File Operation Queue Item Found Signal
     emit fileOpQueueItemFound(cID,
+                              lastDataMap[DEFAULT_KEY_OPERATION].toString(),
                               lastDataMap[DEFAULT_KEY_PATH].toString(),
                               lastDataMap[DEFAULT_KEY_SOURCE].toString(),
                               lastDataMap[DEFAULT_KEY_TARGET].toString());

@@ -20,7 +20,7 @@ class FilePanel : public QFrame
     Q_OBJECT
 
     Q_PROPERTY(QString currentDir READ getCurrentDir WRITE setCurrentDir NOTIFY currentDirChanged)
-    Q_PROPERTY(QString panelName READ getPanelName)
+    Q_PROPERTY(QString panelName READ getPanelName WRITE setPanelName)
 
     Q_PROPERTY(bool panelHasFocus READ getPanelFocus WRITE setPanelFocus NOTIFY panelFocusChanged)
 
@@ -36,6 +36,9 @@ public:
 
     // Get Panel Name
     QString getPanelName();
+
+    // Set Panel Name
+    void setPanelName(const QString& aPanelName);
 
     // Get Panel Focus
     bool getPanelFocus();

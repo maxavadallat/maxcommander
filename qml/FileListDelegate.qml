@@ -12,6 +12,28 @@ Rectangle {
     property alias fileTypeText: fileTypeLabel.text
     property alias fileSizeText: fileSizeLabel.text
     property alias fileDateText: fileDateLabel.text
+    property alias fileOwnerText: fileOwnerLabel.text
+    property alias filePermsText: filePermsLabel.text
+    property alias fileAttrsText: fileAttrsLabel.text
+
+    property alias nameVisible : fileNameContainer.visible
+    property alias extVisible  : fileExtContainer.visible
+    property alias typeVisible : fileTypeContainer.visible
+    property alias sizeVisible : fileSizeContainer.visible
+    property alias dateVisible : fileDateContainer.visible
+    property alias ownerVisible: fileOwnerContainer.visible
+    property alias permsVisible: filePermsContainer.visible
+    property alias attrVisible : fileAttrContainer.visible
+
+    property alias nameWidth : fileNameContainer.width
+    property alias extWidth  : fileExtContainer.width
+    property alias typeWidth : fileTypeContainer.width
+    property alias sizeWidth : fileSizeContainer.width
+    property alias dateWidth : fileDateContainer.width
+    property alias ownerWidth: fileOwnerContainer.width
+    property alias permsWidth: filePermsContainer.width
+    property alias attrWidth : fileAttrContainer.width
+
 
     width: 320
     height: 32
@@ -19,35 +41,84 @@ Rectangle {
     color: "transparent"
 
     Row {
-        id: fileListDelegateContainerRow
+        id: fileListDelegateItemsContainerRow
         anchors.fill: parent
-        Image {
-            id: fileIconImage
-            width: parent.height
-            height: parent.height
-            fillMode: Image.PreserveAspectFit
-            asynchronous: true
+
+        FileListDelegateItem {
+            id: fileNameContainer
+            width: 152
+            // Icon
+            Image {
+                id: fileIconImage
+                width: parent.height
+                height: parent.height
+                fillMode: Image.PreserveAspectFit
+                asynchronous: true
+            }
+            // File Name
+            FileListText {
+                id: fileNameLabel
+                anchors.leftMargin: fileIconImage.width + 1
+                horizontalAlignment: Text.AlignLeft
+            }
         }
-        FileListText {
-            id: fileNameLabel
-            width: 120
-        }
-        FileListText {
-            id: fileExtLabel
+
+        FileListDelegateItem {
+            id: fileExtContainer
             width: 40
+            FileListText {
+                id: fileExtLabel
+                horizontalAlignment: Text.AlignRight
+            }
         }
-        FileListText {
-            id: fileTypeLabel
+
+        FileListDelegateItem {
+            id: fileTypeContainer
             width: 120
-            visible: false
+            FileListText {
+                id: fileTypeLabel
+            }
         }
-        FileListText {
-            id: fileSizeLabel
+
+        FileListDelegateItem {
+            id: fileSizeContainer
             width: 60
+            FileListText {
+                id: fileSizeLabel
+                horizontalAlignment: text === Const.DEFAULT_DIR_SIZE_TITLE_LABEL_TEXT ? Text.AlignHCenter : Text.AlignRight
+            }
         }
-        FileListText {
-            id: fileDateLabel
+
+        FileListDelegateItem {
+            id: fileDateContainer
             width: 120
+            FileListText {
+                id: fileDateLabel
+            }
+        }
+
+        FileListDelegateItem {
+            id: fileOwnerContainer
+            width: 60
+            FileListText {
+                id: fileOwnerLabel
+            }
+        }
+
+        FileListDelegateItem {
+            id: filePermsContainer
+            width: 100
+            FileListText {
+                id: filePermsLabel
+            }
+        }
+
+        FileListDelegateItem {
+            id: fileAttrContainer
+            width: 60
+            FileListText {
+                id: fileAttrsLabel
+            }
         }
     }
 }

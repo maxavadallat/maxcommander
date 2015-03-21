@@ -22,12 +22,15 @@
 FilePanel::FilePanel(QWidget* aParent)
     : QFrame(aParent)
     , ui(new Ui::FilePanel)
-    , currentDir(QDir::homePath())
+    , currentDir("")
     , panelName("")
     , panelHasFocus(false)
     , fileListModel(NULL)
     , fileListImageProvider(NULL)
     , modifierKeys(Qt::NoModifier)
+    , currentIndex(-1)
+    , visualItemsCount(-1)
+    , lastDirName("")
 {
     // Setup UI
     ui->setupUi(this);
@@ -36,6 +39,9 @@ FilePanel::FilePanel(QWidget* aParent)
 
     // Create File List Model
     fileListModel = new FileListModel();
+
+    // Connect Signals
+    connect(fileListModel, SIGNAL(dirFetchFinished()), this, SLOT(fileModelDirFetchFinished()));
 
     // Set Context Properties
     QQmlContext* ctx = ui->fileListWidget->rootContext();
@@ -62,7 +68,7 @@ FilePanel::FilePanel(QWidget* aParent)
     connect(ui->fileListWidget, SIGNAL(focusChanged(bool)), this, SLOT(setPanelFocus(bool)));
 
     // Update Available Space Label
-    updateAvailableSpaceLabel();
+    //updateAvailableSpaceLabel();
 }
 
 //==============================================================================
@@ -82,17 +88,50 @@ void FilePanel::setCurrentDir(const QString& aCurrentDir)
     if (currentDir != aCurrentDir) {
         // Init New Dir Info
         QFileInfo newDirInfo(aCurrentDir);
-        // Check New Dir Info
-        if (newDirInfo.exists() && (newDirInfo.isDir() || newDirInfo.isBundle())) {
-            // Set Current Dir
-            currentDir = aCurrentDir;
 
+        // Check If Exists
+        if (!newDirInfo.exists()) {
 
             // ...
 
-            // Emit Current dir Changed Signal
-            emit currentDirChanged(currentDir);
+            return;
         }
+
+        // Check If Is Dir
+        if (!(newDirInfo.isDir() || newDirInfo.isBundle())) {
+
+            // ...
+
+            return;
+        }
+
+        // Check Access
+        if (!(newDirInfo.permissions() & QFileDevice::ReadUser)) {
+
+            // ...
+
+            return;
+        }
+
+        // Set Current Dir
+        currentDir = aCurrentDir;
+
+        // Check Model
+        if (fileListModel) {
+            // Set Current Dir
+            fileListModel->setCurrentDir(currentDir);
+        }
+
+        // ...
+
+        // Set Text
+        ui->currDirLabel->setText(currentDir);
+
+        // Update Available Space Label
+        updateAvailableSpaceLabel();
+
+        // Emit Current dir Changed Signal
+        emit currentDirChanged(currentDir);
     }
 }
 
@@ -124,6 +163,22 @@ void FilePanel::setPanelName(const QString& aPanelName)
 bool FilePanel::getPanelFocus()
 {
     return panelHasFocus;
+}
+
+//==============================================================================
+// Get Current Index
+//==============================================================================
+int FilePanel::getCurrentIndex()
+{
+    return currentIndex;
+}
+
+//==============================================================================
+// Get Visual Items Count
+//==============================================================================
+int FilePanel::getvisualItemsCount()
+{
+    return visualItemsCount;
 }
 
 //==============================================================================
@@ -159,6 +214,36 @@ void FilePanel::setPanelFocus(const bool& aFocus)
 }
 
 //==============================================================================
+// Set Current Index
+//==============================================================================
+void FilePanel::setCurrentIndex(const int& aCurrentIndex)
+{
+    // Check Current Index
+    if (currentIndex != aCurrentIndex) {
+        // Set Current Index
+        currentIndex = qBound(0, aCurrentIndex, fileListModel ? fileListModel->rowCount()-1 : 0);
+
+        // Emit Current Index Changed Signal
+        emit currentIndexChanged(currentIndex);
+    }
+}
+
+//==============================================================================
+// Set Visual Items Count
+//==============================================================================
+void FilePanel::setVisualItemsCount(const int& aVisualCount)
+{
+    // Check Current Index
+    if (visualItemsCount != aVisualCount) {
+        // Set Current Index
+        visualItemsCount = aVisualCount;
+
+        // Emit Visual Items Count Changed Signal
+        emit visualItemsCountChanged(visualItemsCount);
+    }
+}
+
+//==============================================================================
 // Go To Home Directory
 //==============================================================================
 void FilePanel::gotoHome()
@@ -167,6 +252,8 @@ void FilePanel::gotoHome()
 
     // Set Current Dir
     setCurrentDir(QDir::homePath());
+    // Set Current Index
+    setCurrentIndex(0);
 }
 
 //==============================================================================
@@ -178,6 +265,8 @@ void FilePanel::gotoRoot()
 
     // Set Current Dir
     setCurrentDir("/");
+    // Set Current Index
+    setCurrentIndex(0);
 }
 
 //==============================================================================
@@ -195,8 +284,19 @@ void FilePanel::gotoDrive(const int& aDriveIndex)
 //==============================================================================
 void FilePanel::goUp()
 {
-    qDebug() << "FilePanel::goUp - panelName: " << panelName;
+    // Get Parent Dir
+    QString parentDir = getParentDir(currentDir);
 
+    // Check Parent Dir
+    if (!parentDir.isEmpty()) {
+        // Get Last Dir Name to Jump
+        lastDirName = getDirName(currentDir);
+
+        qDebug() << "FilePanel::goUp - panelName: " << panelName << " - parentDir: " << parentDir;
+
+        // Set Current Dir
+        setCurrentDir(parentDir);
+    }
 }
 
 //==============================================================================
@@ -204,8 +304,10 @@ void FilePanel::goUp()
 //==============================================================================
 void FilePanel::goNext()
 {
-    qDebug() << "FilePanel::goNext - panelName: " << panelName;
+    //qDebug() << "FilePanel::goNext - panelName: " << panelName;
 
+    // Set Current Index
+    setCurrentIndex(currentIndex + 1);
 }
 
 //==============================================================================
@@ -213,8 +315,10 @@ void FilePanel::goNext()
 //==============================================================================
 void FilePanel::goPrev()
 {
-    qDebug() << "FilePanel::goPrev - panelName: " << panelName;
+    //qDebug() << "FilePanel::goPrev - panelName: " << panelName;
 
+    // Set Current Index
+    setCurrentIndex(currentIndex - 1);
 }
 
 //==============================================================================
@@ -222,8 +326,10 @@ void FilePanel::goPrev()
 //==============================================================================
 void FilePanel::pageUp()
 {
-    qDebug() << "FilePanel::pageUp - panelName: " << panelName;
+    //qDebug() << "FilePanel::pageUp - panelName: " << panelName;
 
+    // Set Current Index
+    setCurrentIndex(currentIndex - visualItemsCount);
 }
 
 //==============================================================================
@@ -231,8 +337,10 @@ void FilePanel::pageUp()
 //==============================================================================
 void FilePanel::pageDown()
 {
-    qDebug() << "FilePanel::pageDown - panelName: " << panelName;
+    //qDebug() << "FilePanel::pageDown - panelName: " << panelName;
 
+    // Set Current Index
+    setCurrentIndex(currentIndex + visualItemsCount);
 }
 
 //==============================================================================
@@ -240,8 +348,10 @@ void FilePanel::pageDown()
 //==============================================================================
 void FilePanel::goFirst()
 {
-    qDebug() << "FilePanel::goFirst - panelName: " << panelName;
+    //qDebug() << "FilePanel::goFirst - panelName: " << panelName;
 
+    // Set Current Index
+    setCurrentIndex(0);
 }
 
 //==============================================================================
@@ -249,8 +359,57 @@ void FilePanel::goFirst()
 //==============================================================================
 void FilePanel::goLast()
 {
-    qDebug() << "FilePanel::goLast - panelName: " << panelName;
+    //qDebug() << "FilePanel::goLast - panelName: " << panelName;
 
+    // Set Current Index
+    setCurrentIndex(fileListModel ? fileListModel->rowCount()-1 : 0);
+}
+
+//==============================================================================
+// Handle Item Select
+//==============================================================================
+void FilePanel::handleItemSelect()
+{
+    // Check File List Model
+    if (!fileListModel) {
+        qWarning() << "FilePanel::handleItemSelect - panelName: " << panelName << " - NO FILE LIST MODEL!!";
+        return;
+    }
+
+    qDebug() << "FilePanel::handleItemSelect - panelName: " << panelName;
+
+    // Get File Info
+    QFileInfo fileInfo = fileListModel->getFileInfo(currentIndex);
+
+    // Check If Dir
+    if (fileInfo.isDir() || fileInfo.isBundle()) {
+        // Check File Name
+        if (fileInfo.fileName() == QString("..")) {
+            // Go Up
+            goUp();
+        } else {
+            // Set Current Dir
+            setCurrentDir(fileInfo.absoluteFilePath());
+            // Set Current Index
+            setCurrentIndex(0);
+        }
+    } else {
+
+        // Handle Files
+
+    }
+
+    // ...
+}
+
+//==============================================================================
+// Rename
+//==============================================================================
+void FilePanel::renameCurrent()
+{
+    qDebug() << "FilePanel::renameCurrent - panelName: " << panelName;
+
+    // ...
 }
 
 //==============================================================================
@@ -272,6 +431,10 @@ void FilePanel::restoreUI()
     // Init Settings
     QSettings settings;
 
+    // Get Current Dir
+
+    // Set Current Dir
+    setCurrentDir(QDir::homePath());
 }
 
 //==============================================================================
@@ -297,6 +460,24 @@ void FilePanel::updateAvailableSpaceLabel()
 
     // Set Text
     ui->availableSpaceLabel->setText(availableSpace);
+}
+
+//==============================================================================
+// File Model Fetch Ready
+//==============================================================================
+void FilePanel::fileModelDirFetchFinished()
+{
+    qDebug() << "FilePanel::fileModelFetchready - panelName: " << panelName;
+
+    // Check Last Dir Name
+    if (!lastDirName.isEmpty()) {
+        // Find Index
+        int lastDirIndex = fileListModel ? fileListModel->findIndex(lastDirName) : 0;
+        // Reset Last Dir Name
+        lastDirName = "";
+        // Set Current Index
+        setCurrentIndex(lastDirIndex);
+    }
 }
 
 //==============================================================================
@@ -362,31 +543,33 @@ void FilePanel::keyPressEvent(QKeyEvent* aEvent)
     if (aEvent) {
         // Switch Key
         switch (aEvent->key()) {
+            case Qt::Key_Escape:
+
+            break;
             case Qt::Key_Tab:
                 //qDebug() << "FilePanel::keyPressEvent - key: TAB";
 
             break;
 
+            case Qt::Key_Return:
+            case Qt::Key_Enter:
+
+            break;
+
+            case Qt::Key_Space:
+
+
+            break;
+
             case Qt::Key_Up:
-                // Check If Auto Repeat
-                if (aEvent->isAutoRepeat()) {
-                    // Accept
-                    aEvent->accept();
-                    // Go Prev
-                    goPrev();
-                }
+
             break;
 
             case Qt::Key_Down:
-                // Check If Auto Repeat
-                if (aEvent->isAutoRepeat()) {
-                    // Accept
-                    aEvent->accept();
-                    // Go Next
-                    goNext();
-                }
+
             break;
 
+            case Qt::Key_Backspace:
             case Qt::Key_Left:
                 // Check If Auto Repeat
                 if (aEvent->isAutoRepeat()) {
@@ -421,9 +604,17 @@ void FilePanel::keyPressEvent(QKeyEvent* aEvent)
             break;
 
             case Qt::Key_Home:
+                // Check If Auto Repeat
+                if (aEvent->isAutoRepeat()) {
+
+                }
             break;
 
             case Qt::Key_End:
+                // Check If Auto Repeat
+                if (aEvent->isAutoRepeat()) {
+
+                }
             break;
 
             case Qt::Key_Shift:
@@ -499,85 +690,73 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
     if (aEvent) {
         // Switch Key
         switch (aEvent->key()) {
+            case Qt::Key_Escape:
+
+            break;
+
             case Qt::Key_Tab:
-                //qDebug() << "FilePanel::keyReleaseEvent - key: TAB";
+
+            break;
+
+            case Qt::Key_Return:
+            case Qt::Key_Enter:
+                // Handle Item Selection
+                handleItemSelect();
+            break;
+
+            case Qt::Key_Space:
 
             break;
 
             case Qt::Key_Up:
-                // Check If Accepted
-                if (!aEvent->isAccepted()) {
-                    // Accept
-                    aEvent->accept();
-                    // Go Prev
-                    goPrev();
-                }
             break;
 
             case Qt::Key_Down:
-                // Check If Accepted
-                if (!aEvent->isAccepted()) {
-                    // Accept
-                    aEvent->accept();
-                    // Go Next
-                    goNext();
-                }
             break;
 
+            case Qt::Key_Backspace:
             case Qt::Key_Left:
-                // Check If Accepted
-                if (!aEvent->isAccepted()) {
-                    // Accept
-                    aEvent->accept();
-                    // Go Up
-                    goUp();
-                }
+                // Go Up
+                goUp();
             break;
 
             case Qt::Key_Right:
-
-                // Check If Dir
-
+                // Check If Is Dir
+                if (fileListModel) {
+                    // Get File Info
+                    QFileInfo fileInfo = fileListModel->getFileInfo(currentIndex);
+                    // Check File Info
+                    if ((fileInfo.isDir() || fileInfo.isBundle()) && fileInfo.fileName() != QString("..")) {
+                        // Set Current Dir
+                        setCurrentDir(fileInfo.absoluteFilePath());
+                        // Set Current Index
+                        setCurrentIndex(0);
+                    }
+                }
             break;
 
             case Qt::Key_PageUp:
-                // Check If Accepted
-                if (!aEvent->isAccepted()) {
-                    // Accept
-                    aEvent->accept();
-                    // Page Up
-                    pageUp();
-                }
+                // Page Up
+                pageUp();
             break;
 
             case Qt::Key_PageDown:
-                // Check If Accepted
-                if (!aEvent->isAccepted()) {
-                    // Accept
-                    aEvent->accept();
-                    // Page Down
-                    pageDown();
-                }
+                // Page Down
+                pageDown();
             break;
 
             case Qt::Key_Home:
-                // Check If Accepted
-                if (!aEvent->isAccepted()) {
-                    // Accept
-                    aEvent->accept();
-                    // Go First
-                    goFirst();
-                }
+                // Go First
+                goFirst();
             break;
 
             case Qt::Key_End:
-                // Check If Accepted
-                if (!aEvent->isAccepted()) {
-                    // Accept
-                    aEvent->accept();
-                    // Go Last
-                    goLast();
-                }
+                // Go Last
+                goLast();
+            break;
+
+            case Qt::Key_F6:
+                // Rename
             break;
 
             case Qt::Key_Shift:

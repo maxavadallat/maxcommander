@@ -102,7 +102,7 @@ void MainWindow::init()
     connect(testClient, SIGNAL(fileOpError(uint,QString,QString,QString,QString,int)), this, SLOT(fileOpError(uint,QString,QString,QString,QString,int)));
     connect(testClient, SIGNAL(fileOpNeedConfirm(uint,QString,int,QString,QString,QString)), this, SLOT(fileOpNeedConfirm(uint,QString,int,QString,QString,QString)));
 
-    connect(testClient, SIGNAL(fileOpQueueItemFound(uint,QString,QString,QString)), this, SLOT(fileOpQueueItemFound(uint,QString,QString,QString)));
+    connect(testClient, SIGNAL(fileOpQueueItemFound(uint,QString,QString,QString,QString)), this, SLOT(fileOpQueueItemFound(uint,QString,QString,QString,QString)));
 
     connect(testClient, SIGNAL(dirListItemFound(uint,QString,QString)), this, SLOT(dirListItemFound(uint,QString,QString)));
     connect(testClient, SIGNAL(dirSizeScanProgress(uint,QString,quint64,quint64,quint64)), this, SLOT(dirSizeScanProgress(uint,QString,quint64,quint64,quint64)));
@@ -341,7 +341,7 @@ void MainWindow::fileOpProgress(const unsigned int& aID,
                                 const quint64& aOverallTotal,
                                 const int& aSpeed)
 {
-    qDebug() << "MainWindow::fileOpProgress - aID: " << aID << " - aOp: " << aOp;
+    qDebug() << "MainWindow::fileOpProgress - aID: " << aID << " - aOp: " << aOp << " - aCurrFilePath: " << aCurrFilePath;
 
     // ...
 }
@@ -436,7 +436,7 @@ void MainWindow::fileOpQueueItemFound(const unsigned int& aID,
                                       const QString& aSource,
                                       const QString& aTarget)
 {
-    qDebug() << "MainWindow::fileOpQueueItemFound - aID: " << aID << " - aOp: " << aOp;
+    qDebug() << "MainWindow::fileOpQueueItemFound - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath;
 
     // ...
 
@@ -449,7 +449,7 @@ void MainWindow::fileSearchResultItemFound(const unsigned int& aID,
                                            const QString& aOp,
                                            const QString& aFilePath)
 {
-    qDebug() << "MainWindow::fileOpQueueItemFound - aID: " << aID << " - aOp: " << aOp << " - aFilePath";
+    qDebug() << "MainWindow::fileOpQueueItemFound - aID: " << aID << " - aOp: " << aOp << " - aFilePath: " << aFilePath;
 
     // ...
 

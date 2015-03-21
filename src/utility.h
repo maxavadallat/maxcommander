@@ -3,6 +3,7 @@
 
 #include <QString>
 #include <QFileInfo>
+#include <QDateTime>
 
 
 // File Sorting Type
@@ -33,6 +34,22 @@ bool checkRemoteFileServerRunning();
 
 // Launch File Server
 int launchRemoteFileServer(const bool& asRoot = false, const QString& aRootPass = "");
+
+// Format Data Time
+QString formatDateTime(const QDateTime& aDateTime);
+
+// Has Parent Dir
+bool hasParentDir(const QString& aDirPath);
+
+// Get Parent Dir
+QString getParentDir(const QString& aDirPath);
+
+// Get Dir Name
+QString getDirName(const QString& aDirPath);
+
+// Check If Have Access To List Dir
+bool haveAccessToDir(const QString& aDirPath);
+
 
 #endif // UTILITY
 

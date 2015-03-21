@@ -1,5 +1,6 @@
 #include <QDir>
 #include <QSettings>
+#include <QDateTime>
 #include <QDebug>
 
 #include <mcwinterface.h>
@@ -57,7 +58,7 @@ void FileListModel::init()
     // Connect Signals
     connect(fileUtil, SIGNAL(clientConnectionChanged(int,bool)), this, SLOT(clientConnectionChanged(int,bool)));
     connect(fileUtil, SIGNAL(dirListItemFound(uint,QString,QString)), this, SLOT(dirListItemFound(uint,QString,QString)));
-    connect(fileUtil, SIGNAL(fileOpFinished(uint,QString,QString,QString,QString,int)), this, SLOT(fileOpFinished(uint,QString,QString,QString,QString,int)));
+    connect(fileUtil, SIGNAL(fileOpFinished(uint,QString,QString,QString,QString)), this, SLOT(fileOpFinished(uint,QString,QString,QString,QString)));
     connect(fileUtil, SIGNAL(fileOpError(uint,QString,QString,QString,QString,int)), this, SLOT(fileOpError(uint,QString,QString,QString,QString,int)));
 
     // Connect To File Server
@@ -88,6 +89,7 @@ void FileListModel::setCurrentDir(const QString& aCurrentDir)
         clear();
 
         // Fetch Current Dir Items
+        fetchDirItems();
 
         // ...
 
@@ -133,9 +135,6 @@ void FileListModel::fetchDirItems()
 
     qDebug() << "FileListModel::fetchDirItems - currentDir: " << currentDir;
 
-    // Init Settings
-    //QSettings settings;
-
     // Fetch Dir Items
     fileUtil->getDirList(currentDir, DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_DIRFIRST);
 }
@@ -169,6 +168,9 @@ void FileListModel::fileOpFinished(const unsigned int& aID,
     qDebug() << "FileListModel::fileOpFinished - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath;
 
     // ...
+
+    // Emit Dir Fetch Finished Signal
+    emit dirFetchFinished();
 }
 
 //==============================================================================
@@ -196,7 +198,8 @@ void FileListModel::dirListItemFound(const unsigned int& aID,
                                      const QString& aPath,
                                      const QString& aFileName)
 {
-    qDebug() << "FileListModel::dirListItemFound - aID: " << aID << " - aPath: " << aPath << " - aFileName: " << aFileName;
+    Q_UNUSED(aID);
+    //qDebug() << "FileListModel::dirListItemFound - aID: " << aID << " - aPath: " << aPath << " - aFileName: " << aFileName;
 
     // ...
 
@@ -242,6 +245,10 @@ QHash<int, QByteArray> FileListModel::roleNames() const
     roles[FilePerms]        = "fileParms";
     // File Selected
     roles[FileSelected]     = "fileSelected";
+    // File Is Hidden
+    roles[FileIsHidden]     = "fileIsHidden";
+    // File Is Link
+    roles[FileIsLink]       = "fileIsLink";
 
     return roles;
 }
@@ -273,18 +280,37 @@ QVariant FileListModel::data(const QModelIndex& aIndex, int aRole) const
 {
     // Check Index
     if (aIndex.row() >= 0 && aIndex.row() < rowCount()) {
+        // Get Model Item
+        FileListModelItem* item = itemList[aIndex.row()];
+
         // Switch Role
         switch (aRole) {
             case FileName: {
+                // Check Base Name
+                if (item->fileInfo.baseName().isEmpty() ||
+                    item->fileInfo.isDir()              ||
+                    item->fileInfo.isBundle()) {
+                    return item->fileInfo.fileName();
+                }
+
+                return item->fileInfo.baseName();
 
             } break;
 
             case FileExtension: {
+                // Check Base Name
+                if (item->fileInfo.baseName().isEmpty() ||
+                    item->fileInfo.isDir()              ||
+                    item->fileInfo.isBundle()) {
+                    return QString("");
+                }
+
+                return item->fileInfo.suffix();
 
             } break;
 
             case FileType: {
-
+                return QString("");
             } break;
 
             case FileAttributes: {
@@ -292,31 +318,26 @@ QVariant FileListModel::data(const QModelIndex& aIndex, int aRole) const
             } break;
 
             case FileSize: {
+                // Check File Info
+                if (item->fileInfo.isDir() || item->fileInfo.isBundle()) {
+                    return QString("[DIR]");
+                }
 
+                return item->fileInfo.size();
             } break;
 
-            case FileDateTime: {
-
-            } break;
-
-            case FileOwner: {
-
-            } break;
-
-            case FilePerms: {
-
-            } break;
-
-            case FileSelected: {
-
-            } break;
+            case FileDateTime:      return formatDateTime(item->fileInfo.lastModified());
+            case FileOwner:         return item->fileInfo.owner();
+            case FilePerms:         return (int)item->fileInfo.permissions();
+            case FileSelected:      return item->selected;
 
             default:
+
             break;
         }
     }
 
-    return QVariant::fromValue(NULL);
+    return QString("");
 }
 
 //==============================================================================
@@ -377,9 +398,72 @@ bool FileListModel::setData(const QModelIndex& aIndex, const QVariant& aValue, i
                 }
             } break;
 
-            default:
-            break;
+            case FileIsHidden: {
+
+            } break;
+
+            case FileIsLink: {
+
+            } break;
+
+            default: {
+
+            } break;
         }
+    }
+
+    return false;
+}
+
+//==============================================================================
+// Find Index
+//==============================================================================
+int FileListModel::findIndex(const QString& aFileName)
+{
+    // Get Count
+    int flmCount = itemList.count();
+
+    // Go Thru List
+    for (int i=0; i<flmCount; ++i) {
+        // Get Item
+        FileListModelItem* item = itemList[i];
+
+        // Check Item
+        if (item->fileInfo.fileName() == aFileName) {
+            return i;
+        }
+    }
+
+    return 0;
+}
+
+//==============================================================================
+// Get File Info
+//==============================================================================
+QFileInfo FileListModel::getFileInfo(const int& aIndex)
+{
+    // Check Index
+    if (aIndex >= 0 && aIndex < rowCount()) {
+        // Get Item
+        FileListModelItem* item = itemList[aIndex];
+        // Return File Info
+        return item->fileInfo;
+    }
+
+    return QFileInfo("/");
+}
+
+//==============================================================================
+// Check If Is Dir
+//==============================================================================
+bool FileListModel::isDir(const int& aIndex)
+{
+    // Check Index
+    if (aIndex >= 0 && aIndex < rowCount()) {
+        // Get Item
+        FileListModelItem* item = itemList[aIndex];
+        // Return File Info
+        return item->fileInfo.isDir() || item->fileInfo.isBundle();
     }
 
     return false;

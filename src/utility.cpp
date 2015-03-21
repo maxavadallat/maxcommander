@@ -1,3 +1,4 @@
+#include <QDir>
 #include <QFileInfo>
 #include <QPaintDevice>
 #include <QImage>
@@ -432,8 +433,83 @@ int launchRemoteFileServer(const bool& asRoot, const QString& aRootPass)
     return result;
 }
 
+//==============================================================================
+// Format Data Time
+//==============================================================================
+QString formatDateTime(const QDateTime& aDateTime)
+{
+    return QString(DEFAULT_DATE_FORMAT_STRING).arg(aDateTime.date().year())
+                                              .arg(aDateTime.date().month(), 2, 10, QChar('0'))
+                                              .arg(aDateTime.date().day(), 2, 10, QChar('0'))
+                                              .arg(aDateTime.time().hour(), 2, 10, QChar('0'))
+                                              .arg(aDateTime.time().minute(), 2, 10, QChar('0'))
+                                              .arg(aDateTime.time().second(), 2, 10, QChar('0'));
+}
 
+//==============================================================================
+// Has Parent Dir
+//==============================================================================
+bool hasParentDir(const QString& aDirPath)
+{
+    // Init File Info
+    QFileInfo dirInfo(aDirPath);
+    // Check If Exists
+    if (dirInfo.exists()) {
+        // Check Canonical Path
+        return dirInfo.canonicalPath() != aDirPath;
+    }
 
+    return false;
+}
+
+//==============================================================================
+// Get Parent Dir
+//==============================================================================
+QString getParentDir(const QString& aDirPath)
+{
+    // Init File Info
+    QFileInfo dirInfo(aDirPath);
+    // Check If Exists
+    if (dirInfo.exists()) {
+        // Return Canonical Path
+        return dirInfo.absolutePath();
+    }
+
+    return QString("");
+}
+
+//==============================================================================
+// Get Dir Name
+//==============================================================================
+QString getDirName(const QString& aDirPath)
+{
+    // Init File Info
+    QFileInfo dirInfo(aDirPath);
+
+    // Check If Exists
+    if (dirInfo.exists()) {
+        // Return Canonical Path
+        return dirInfo.fileName();
+    }
+
+    return QString("");
+}
+
+//==============================================================================
+// Check If Have Access To List Dir
+//==============================================================================
+bool haveAccessToDir(const QString& aDirPath)
+{
+    // Init Dir Info
+    QFileInfo dirInfo(aDirPath);
+
+    // Check If Exists
+    if (dirInfo.exists() && (dirInfo.isDir() || dirInfo.isBundle())) {
+        return dirInfo.permissions() & QFileDevice::ReadUser;
+    }
+
+    return false;
+}
 
 
 

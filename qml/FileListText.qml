@@ -7,6 +7,10 @@ Text {
     id: fileListTextRoot
     height: parent.height
     verticalAlignment: Text.AlignVCenter
-    font.pixelSize: 11
+    horizontalAlignment: Text.AlignHCenter
+    font.pixelSize: Const.DEFAULT_FILE_LIST_FONT_SIZE
+    anchors.fill: parent
+    anchors.rightMargin: Const.DEFAULT_FILE_LIST_HEADER_SEPARATOR_WIDTH + 1
+    visible: parent.width > Const.DEFAULT_FILE_LIST_HEADER_SEPARATOR_WIDTH
 }
 

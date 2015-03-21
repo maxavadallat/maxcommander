@@ -6,7 +6,7 @@ import "qrc:/qml/js/constants.js" as Const
 Rectangle {
     id: fileListRoot
 
-    color: "transparent"
+    color: Const.DEFAULT_FILE_LIST_BACKGROUND_COLOR
 
     width: 480
     height: 640
@@ -28,25 +28,51 @@ Rectangle {
         snapMode: ListView.SnapToItem
         focus: true
         highlightMoveDuration: 50
+        highlightFollowsCurrentItem: true
 
+        property int delegateHeight: 32
+        property int visualItemsCount: Math.floor((fileListView.height + fileListView.spacing) / fileListView.delegateHeight);
+
+        // Model
         model: fileListModel
 
+        // Delegate
         delegate: FileListDelegate {
             id: fileListDelegateRoot
             width: fileListView.width
-            height: 32
+            height: fileListView.delegateHeight
+
             fileIconSource: Const.DEFAULT_FILE_ICON_PREFIX + fileName
             fileNameText: fileName
-            fileExtText:  fileExt
+            fileExtText : fileExt
             fileTypeText: fileType
             fileSizeText: fileSize
             fileDateText: fileDate
 
+            nameWidth   : fileListHeader.nameWidth
+            extWidth    : fileListHeader.extWidth
+            typeWidth   : fileListHeader.typeWidth
+            sizeWidth   : fileListHeader.sizeWidth
+            dateWidth   : fileListHeader.dateWidth
+            ownerWidth  : fileListHeader.ownerWidth
+            permsWidth  : fileListHeader.permsWidth
+            attrWidth   : fileListHeader.attrWidth
+
+            nameVisible : fileListHeader.nameVisible
+            extVisible  : fileListHeader.extVisible
+            typeVisible : fileListHeader.typeVisible
+            sizeVisible : fileListHeader.sizeVisible
+            dateVisible : fileListHeader.dateVisible
+            ownerVisible: fileListHeader.ownerVisible
+            permsVisible: fileListHeader.permsVisible
+            attrVisible : fileListHeader.attrVisible
+
+            // Mouse Area
             MouseArea {
                 anchors.fill: parent
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 onClicked: {
-                    console.log("fileListDelegateRoot.MouseArea.onClicked - index: " + index);
+                    //console.log("fileListDelegateRoot.MouseArea.onClicked - index: " + index);
 
                     // Check Button
                     if (mouse.button === Qt.LeftButton) {
@@ -58,36 +84,59 @@ Rectangle {
                 }
 
                 onPressed: {
-                    console.log("fileListDelegateRoot.MouseArea.onPressed - index: " + index);
+                    //console.log("fileListDelegateRoot.MouseArea.onPressed - index: " + index);
 
                     // ...
                 }
 
                 onReleased: {
-                    console.log("fileListDelegateRoot.MouseArea.onReleased - index: " + index);
+                    //console.log("fileListDelegateRoot.MouseArea.onReleased - index: " + index);
 
                     // ...
                 }
             }
         }
 
+        // Highlight
         highlight: FileListHightLight {
             width: fileListView.delegate.width
             height: fileListView.delegate.height
         }
-    }
 
+        // On Current Index Changed
+        onCurrentIndexChanged: {
+            //console.log("fileListView.onCurrentIndexChanged - currentIndex: " + fileListView.currentIndex);
+            // Set Main Controller Current Index
+            mainController.currentIndex = fileListView.currentIndex;
+        }
+
+        // On Visual Items Count Changed
+        onVisualItemsCountChanged: {
+            //console.log("fileListView.onVisualItemCountChanged - visualItemsCount: " + fileListView.visualItemsCount);
+            // Set Main Controller Visual Items Count
+            mainController.visualItemsCount = fileListView.visualItemsCount;
+        }
+
+        // On Width Changed
+        onWidthChanged: {
+            console.log("fileListView.onWidthChanged - width: " + fileListView.width);
+            // Init Rest Of The Header Items Width
+            //var restWidth = 0;
+            // Set Name Width
+            //fileListHeader.nameWidth = fileListView.width - restWidth;
+        }
+    }
 
     // On Focus Changed
     onFocusChanged: {
         //console.log("fileListRoot.onFocusChanged");
     }
 
-
     // On Completed
     Component.onCompleted: {
-        //console.log("fileListRoot.onCompleted");
-
+        //console.log("fileListRoot.onCompleted - visualItemsCount: " + fileListView.visualItemsCount);
+        // Set Visual Items Count
+        mainController.visualItemsCount = fileListView.visualItemsCount;
     }
 
     // On Destruction
@@ -99,7 +148,17 @@ Rectangle {
     // Connections
     Connections {
         target: mainController
-
+        // On Current Index Changed
+        onCurrentIndexChanged: {
+            //console.log("fileListRoot.Connections.mainController.onCurrentIndexChanged - aIndex: " + aIndex);
+            // Check List View Current Index
+            if (fileListView.currentIndex != aIndex) {
+                // Set File List View Current Index
+                fileListView.currentIndex = aIndex;
+                // Position View
+                fileListView.positionViewAtIndex(aIndex + 1, ListView.Center);
+            }
+        }
     }
 }
 

@@ -19,10 +19,11 @@ class FilePanel : public QFrame
 {
     Q_OBJECT
 
-    Q_PROPERTY(QString currentDir READ getCurrentDir WRITE setCurrentDir NOTIFY currentDirChanged)
-    Q_PROPERTY(QString panelName READ getPanelName WRITE setPanelName)
-
+    Q_PROPERTY(QString currentDir READ getCurrentDir NOTIFY currentDirChanged)
+    Q_PROPERTY(int currentIndex READ getCurrentIndex WRITE setCurrentIndex NOTIFY currentIndexChanged)
+    Q_PROPERTY(QString panelName READ getPanelName)
     Q_PROPERTY(bool panelHasFocus READ getPanelFocus WRITE setPanelFocus NOTIFY panelFocusChanged)
+    Q_PROPERTY(int visualItemsCount READ getvisualItemsCount WRITE setVisualItemsCount NOTIFY visualItemsCountChanged)
 
 public:
     // Constructor
@@ -30,18 +31,20 @@ public:
 
     // Get Current Dir
     QString getCurrentDir();
-
     // Set Current Dir
     void setCurrentDir(const QString& aCurrentDir);
 
     // Get Panel Name
     QString getPanelName();
-
     // Set Panel Name
     void setPanelName(const QString& aPanelName);
 
     // Get Panel Focus
     bool getPanelFocus();
+    // Get Current Index
+    int getCurrentIndex();
+    // Get Visual Items Count
+    int getvisualItemsCount();
 
     // Destructor
     virtual ~FilePanel();
@@ -69,8 +72,17 @@ public slots:
     // Go To End Of The List
     void goLast();
 
+    // Handle Item Select
+    void handleItemSelect();
+    // Rename
+    void renameCurrent();
+
     // Set Panel Focus
     void setPanelFocus(const bool& aFocus);
+    // Set Current Index
+    void setCurrentIndex(const int& aCurrentIndex);
+    // Set Visual Items Count
+    void setVisualItemsCount(const int& aVisualCount);
 
 signals:
 
@@ -85,6 +97,11 @@ signals:
     // Exit Key Released Signal
     void exitKeyReleased();
 
+    // Current Index Changed Signal
+    void currentIndexChanged(const int& aIndex);
+    // Visual Items Count Changed
+    void visualItemsCountChanged(const int& aVisualCount);
+
 protected slots:
 
     // Clear
@@ -95,6 +112,11 @@ protected slots:
     void saveSettings();
     // Update Available Space Label
     void updateAvailableSpaceLabel();
+
+protected slots: // From File Model
+
+    // File Model Fetch Ready
+    void fileModelDirFetchFinished();
 
 private slots:
 
@@ -139,6 +161,15 @@ private:
 
     // Modifier Keys
     int                     modifierKeys;
+
+    // Current Index
+    int                     currentIndex;
+
+    // Visual Items Count
+    int                     visualItemsCount;
+
+    // Last Directory Name To Jump After CD UP
+    QString                 lastDirName;
 };
 
 #endif // FILEPANEL_H

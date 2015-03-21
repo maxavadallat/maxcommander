@@ -47,6 +47,8 @@ public:
         FileOwner,
         FilePerms,
         FileSelected,
+        FileIsHidden,
+        FileIsLink,
 
         FileRolesCount
     };
@@ -70,6 +72,14 @@ public:
     // Set Data
     virtual bool setData(const QModelIndex& aIndex, const QVariant& aValue, int aRole = Qt::EditRole);
 
+    // Find Index
+    int findIndex(const QString& aFileName);
+
+    // Get File Info
+    QFileInfo getFileInfo(const int& aIndex);
+    // Check If Is Dir
+    bool isDir(const int& aIndex);
+
     // Destructor
     virtual ~FileListModel();
 
@@ -82,6 +92,8 @@ signals:
 
     // Current Dir Changed Signal
     void currentDirChanged(const QString& aCurrentDir);
+    // Dir Fetch Finished Signal
+    void dirFetchFinished();
 
 protected slots:
 

@@ -8,5 +8,7 @@
         <file>qml/js/constants.js</file>
         <file>qml/FileListHightLight.qml</file>
         <file>qml/FileListText.qml</file>
+        <file>qml/FileListHeaderItemSeparator.qml</file>
+        <file>qml/FileListDelegateItem.qml</file>
     </qresource>
 </RCC>

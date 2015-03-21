@@ -123,7 +123,8 @@
 // Default File Server Launch Delay
 #define DEFAULT_FILE_SERVER_LAUNCH_DELAY                    200
 
-
+// Date Format String
+#define DEFAULT_DATE_FORMAT_STRING                          "%1-%2-%3 %4:%5:%6"
 
 
 

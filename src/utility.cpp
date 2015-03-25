@@ -218,7 +218,7 @@ OSStatus convertMacIcon(const IconRef& aMacIconref, QImage& aIconImage)
 //==============================================================================
 // Get File Icon Pixmap
 //==============================================================================
-QImage getFileIconImage(const QFileInfo& aInfo, const int& aWidth, const int& aHeight)
+QImage getFileIconImage(const QString& aFilePath, const int& aWidth, const int& aHeight)
 {
     // Init New Image
     QImage newImage(aWidth, aHeight, QImage::Format_ARGB32_Premultiplied);
@@ -238,7 +238,7 @@ QImage getFileIconImage(const QFileInfo& aInfo, const int& aWidth, const int& aH
 
     do {
         // Get file System Reference
-        status = FSPathMakeRef(reinterpret_cast<const UInt8*>(aInfo.canonicalFilePath().toUtf8().constData()), &macRef, 0);
+        status = FSPathMakeRef(reinterpret_cast<const UInt8*>(aFilePath.toUtf8().constData()), &macRef, 0);
 
         // Check Status
         if (status != noErr) {

@@ -126,7 +126,9 @@
 // Date Format String
 #define DEFAULT_DATE_FORMAT_STRING                          "%1-%2-%3 %4:%5:%6"
 
-
+// Default Icon Size
+#define DEFAULT_ICON_WIDTH_32                               32
+#define DEFAULT_ICON_HEIGHT_32                              32
 
 
 

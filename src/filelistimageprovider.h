@@ -1,6 +1,7 @@
 #ifndef FILELISTIMAGEPROVIDER_H
 #define FILELISTIMAGEPROVIDER_H
 
+#include <QThread>
 #include <QQuickImageProvider>
 
 //==============================================================================
@@ -19,6 +20,19 @@ protected: // From QQuickImageProvider
 
     // Request Image
     virtual QImage requestImage(const QString& aID, QSize* aSize, const QSize& aRequestedSize);
+
+protected: // Data
+
+    // Icon Width
+    int                 iconWidth;
+    // Icon Height
+    int                 iconHeight;
+
+    // Supported Image Formats
+    QList<QByteArray>   supportedFormats;
+
+    // Image Provider Thread
+    QThread             providerThread;
 };
 
 #endif // FILELISTIMAGEPROVIDER_H

@@ -5,6 +5,7 @@
 #include <QKeyEvent>
 #include <QQmlContext>
 #include <QQmlEngine>
+#include <QImageReader>
 #include <QDebug>
 
 #include "mainwindow.h"
@@ -31,14 +32,26 @@ FilePanel::FilePanel(QWidget* aParent)
     , currentIndex(-1)
     , visualItemsCount(-1)
     , lastDirName("")
+    , lastIndex(-1)
+    , showHidden(true)
 {
     // Setup UI
     ui->setupUi(this);
 
+    // Get Supported Image Formats Bye Array
+    QList<QByteArray> formats = QImageReader::supportedImageFormats();
+    // Get Count
+    int flCount = formats.count();
+    // Go Thru Formats
+    for (int i=0; i<flCount; ++i) {
+        // Add Format String
+        supportedImageFormats << QString(formats[i]);
+    }
+
     // ...
 
     // Create File List Model
-    fileListModel = new FileListModel();
+    //fileListModel = new FileListModel();
 
     // Connect Signals
     connect(fileListModel, SIGNAL(dirFetchFinished()), this, SLOT(fileModelDirFetchFinished()));
@@ -182,6 +195,40 @@ int FilePanel::getvisualItemsCount()
 }
 
 //==============================================================================
+// Get Show Hidden
+//==============================================================================
+bool FilePanel::getShowHidden()
+{
+    return showHidden;
+}
+
+//==============================================================================
+// Set Show Hidden
+//==============================================================================
+void FilePanel::setShowHidden(const bool& aHidden)
+{
+    // Check Show Hidden
+    if (showHidden != aHidden) {
+        qDebug() << "FilePanel::setShowHidden - panelName: " << panelName << " - aHidden: " << aHidden;
+        // Set Show Hidden
+        showHidden = aHidden;
+
+        // Init Settings
+        QSettings settings;
+        // Set Value
+        settings.setValue(SETTINGS_KEY_SHOW_HIDDEN_FILES, showHidden);
+        // Sync
+        settings.sync();
+
+        // Reload
+        reload(0);
+
+        // Emit Show Hidden Changed Signal
+        emit showHiddenChanged(showHidden);
+    }
+}
+
+//==============================================================================
 // Set Panel Has Focus
 //==============================================================================
 void FilePanel::setPanelFocus(const bool& aFocus)
@@ -199,6 +246,10 @@ void FilePanel::setPanelFocus(const bool& aFocus)
             ui->currDirLabel->setStyleSheet(DEFAULT_PANEL_TRASPARENT_STYLE_SHEET);
             // Set Style Sheet
             ui->availableSpaceLabel->setStyleSheet(DEFAULT_PANEL_TRASPARENT_STYLE_SHEET);
+
+            // Emit Focused Panle Has Changed
+            emit focusedPanelChanged(this);
+
         } else {
             // Set Style Sheet
             setStyleSheet("");
@@ -244,11 +295,35 @@ void FilePanel::setVisualItemsCount(const int& aVisualCount)
 }
 
 //==============================================================================
+// Get Supported Image Formats
+//==============================================================================
+QStringList FilePanel::getSupportedImageFormats()
+{
+    return supportedImageFormats;
+}
+
+//==============================================================================
+// Reload
+//==============================================================================
+void FilePanel::reload(const int& aIndex)
+{
+    // Get Last Index
+    lastIndex = aIndex;
+
+    // Check File List Model
+    if (fileListModel) {
+        //qDebug() << "FilePanel::reload - panelName: " << panelName;
+        // Reload
+        fileListModel->reload();
+    }
+}
+
+//==============================================================================
 // Go To Home Directory
 //==============================================================================
 void FilePanel::gotoHome()
 {
-    qDebug() << "FilePanel::gotoHome - panelName: " << panelName;
+    //qDebug() << "FilePanel::gotoHome - panelName: " << panelName;
 
     // Set Current Dir
     setCurrentDir(QDir::homePath());
@@ -261,7 +336,7 @@ void FilePanel::gotoHome()
 //==============================================================================
 void FilePanel::gotoRoot()
 {
-    qDebug() << "FilePanel::gotoRoot - panelName: " << panelName;
+    //qDebug() << "FilePanel::gotoRoot - panelName: " << panelName;
 
     // Set Current Dir
     setCurrentDir("/");
@@ -292,7 +367,7 @@ void FilePanel::goUp()
         // Get Last Dir Name to Jump
         lastDirName = getDirName(currentDir);
 
-        qDebug() << "FilePanel::goUp - panelName: " << panelName << " - parentDir: " << parentDir;
+        //qDebug() << "FilePanel::goUp - panelName: " << panelName << " - parentDir: " << parentDir;
 
         // Set Current Dir
         setCurrentDir(parentDir);
@@ -376,7 +451,7 @@ void FilePanel::handleItemSelect()
         return;
     }
 
-    qDebug() << "FilePanel::handleItemSelect - panelName: " << panelName;
+    //qDebug() << "FilePanel::handleItemSelect - panelName: " << panelName;
 
     // Get File Info
     QFileInfo fileInfo = fileListModel->getFileInfo(currentIndex);
@@ -417,8 +492,13 @@ void FilePanel::renameCurrent()
 //==============================================================================
 void FilePanel::clear()
 {
-    qDebug() << "FilePanel::clear - panelName: " << panelName;
+    //qDebug() << "FilePanel::clear - panelName: " << panelName;
 
+    // Check File List Model
+    if (fileListModel) {
+        // Clear
+        fileListModel->clear();
+    }
 }
 
 //==============================================================================
@@ -431,10 +511,17 @@ void FilePanel::restoreUI()
     // Init Settings
     QSettings settings;
 
-    // Get Current Dir
+    // Get Saved Current Dir
+    QString savedDir = settings.value(panelName + SETTINGS_KEY_PANEL_DIR, QDir::homePath()).toString();
+
+    // Get Show Hidden
+    showHidden = settings.value(SETTINGS_KEY_SHOW_HIDDEN_FILES, true).toBool();
 
     // Set Current Dir
-    setCurrentDir(QDir::homePath());
+    setCurrentDir(savedDir);
+
+    // ...
+
 }
 
 //==============================================================================
@@ -447,7 +534,15 @@ void FilePanel::saveSettings()
     // Init Settings
     QSettings settings;
 
+    // Set Value - Current Dir
+    settings.setValue(panelName + SETTINGS_KEY_PANEL_DIR, currentDir);
+    // Set Value - Show Hidden
+    settings.setValue(SETTINGS_KEY_SHOW_HIDDEN_FILES, showHidden);
 
+    // ...
+
+    // Sync
+    settings.sync();
 }
 
 //==============================================================================
@@ -467,7 +562,7 @@ void FilePanel::updateAvailableSpaceLabel()
 //==============================================================================
 void FilePanel::fileModelDirFetchFinished()
 {
-    qDebug() << "FilePanel::fileModelFetchready - panelName: " << panelName;
+    qDebug() << "FilePanel::fileModelDirFetchFinished - panelName: " << panelName;
 
     // Check Last Dir Name
     if (!lastDirName.isEmpty()) {
@@ -477,6 +572,11 @@ void FilePanel::fileModelDirFetchFinished()
         lastDirName = "";
         // Set Current Index
         setCurrentIndex(lastDirIndex);
+    } else if (lastIndex != -1) {
+        // Set Current Index
+        setCurrentIndex(lastIndex);
+        // Reset LAst Index
+        lastIndex = -1;
     }
 }
 
@@ -505,7 +605,7 @@ void FilePanel::focusInEvent(QFocusEvent* aEvent)
 {
     // Check Event
     if (aEvent) {
-        //qDebug() << "FilePanel::focusInEvent - panel: " << panelName;
+        qDebug() << "FilePanel::focusInEvent - panel: " << panelName;
 
         // Set Style Sheet
         setStyleSheet(DEFAULT_PANEL_FOCUSED_STYLE_SHEET);
@@ -513,6 +613,9 @@ void FilePanel::focusInEvent(QFocusEvent* aEvent)
         ui->currDirLabel->setStyleSheet(DEFAULT_PANEL_TRASPARENT_STYLE_SHEET);
         // Set Style Sheet
         ui->availableSpaceLabel->setStyleSheet(DEFAULT_PANEL_TRASPARENT_STYLE_SHEET);
+
+        // Emit Focused Panel Changed Signal
+        emit focusedPanelChanged(this);
     }
 }
 
@@ -523,7 +626,7 @@ void FilePanel::focusOutEvent(QFocusEvent* aEvent)
 {
     // Check Event
     if (aEvent) {
-        //qDebug() << "FilePanel::focusOutEvent - panel: " << panelName;
+        qDebug() << "FilePanel::focusOutEvent - panel: " << panelName;
 
         // Reset Style Sheet
         setStyleSheet("");
@@ -543,9 +646,14 @@ void FilePanel::keyPressEvent(QKeyEvent* aEvent)
     if (aEvent) {
         // Switch Key
         switch (aEvent->key()) {
+            case Qt::Key_R:
+
+            break;
+
             case Qt::Key_Escape:
 
             break;
+
             case Qt::Key_Tab:
                 //qDebug() << "FilePanel::keyPressEvent - key: TAB";
 
@@ -690,6 +798,19 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
     if (aEvent) {
         // Switch Key
         switch (aEvent->key()) {
+            case Qt::Key_R:
+/*
+                // Check If Control Pressed
+                if (modifierKeys & Qt::ControlModifier) {
+                    // Check File List Model
+                    if (fileListModel) {
+                        // Reload
+                        fileListModel->reload();
+                    }
+                }
+*/
+            break;
+
             case Qt::Key_Escape:
 
             break;

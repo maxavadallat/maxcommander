@@ -24,6 +24,7 @@ class FilePanel : public QFrame
     Q_PROPERTY(QString panelName READ getPanelName)
     Q_PROPERTY(bool panelHasFocus READ getPanelFocus WRITE setPanelFocus NOTIFY panelFocusChanged)
     Q_PROPERTY(int visualItemsCount READ getvisualItemsCount WRITE setVisualItemsCount NOTIFY visualItemsCountChanged)
+    Q_PROPERTY(bool showHidden READ getShowHidden WRITE setShowHidden NOTIFY showHiddenChanged)
 
 public:
     // Constructor
@@ -45,6 +46,11 @@ public:
     int getCurrentIndex();
     // Get Visual Items Count
     int getvisualItemsCount();
+
+    // Get Show Hidden
+    bool getShowHidden();
+    // Set Show Hidden
+    void setShowHidden(const bool& aHidden);
 
     // Destructor
     virtual ~FilePanel();
@@ -84,7 +90,16 @@ public slots:
     // Set Visual Items Count
     void setVisualItemsCount(const int& aVisualCount);
 
+    // Get Supported Image Formats
+    QStringList getSupportedImageFormats();
+
+    // Reload
+    void reload(const int& aIndex);
+
 signals:
+
+    // Focused Panel Changed Signal
+    void focusedPanelChanged(FilePanel* aFocusedPanel);
 
     // Current Dir Changed Signal
     void currentDirChanged(const QString& aCurrentDir);
@@ -101,6 +116,9 @@ signals:
     void currentIndexChanged(const int& aIndex);
     // Visual Items Count Changed
     void visualItemsCountChanged(const int& aVisualCount);
+
+    // Show Hidden Changed Signal
+    void showHiddenChanged(const bool& aHidden);
 
 protected slots:
 
@@ -170,6 +188,14 @@ private:
 
     // Last Directory Name To Jump After CD UP
     QString                 lastDirName;
+    // Last Index Before Reload
+    int                     lastIndex;
+
+    // Supported Image Formats
+    QStringList             supportedImageFormats;
+
+    // Show Hidden Files
+    bool                    showHidden;
 };
 
 #endif // FILEPANEL_H

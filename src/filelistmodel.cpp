@@ -57,8 +57,10 @@ void FileListModel::init()
 
     // Connect Signals
     connect(fileUtil, SIGNAL(clientConnectionChanged(int,bool)), this, SLOT(clientConnectionChanged(int,bool)));
+    connect(fileUtil, SIGNAL(clientStatusChanged(int, ClientStatusType)), this, SLOT(clientStatusChanged(int, int)));
     connect(fileUtil, SIGNAL(dirListItemFound(uint,QString,QString)), this, SLOT(dirListItemFound(uint,QString,QString)));
     connect(fileUtil, SIGNAL(fileOpFinished(uint,QString,QString,QString,QString)), this, SLOT(fileOpFinished(uint,QString,QString,QString,QString)));
+    connect(fileUtil, SIGNAL(fileOpAborted(uint,QString,QString,QString,QString)), this, SLOT(fileOpAborted(uint,QString,QString,QString,QString)));
     connect(fileUtil, SIGNAL(fileOpError(uint,QString,QString,QString,QString,int)), this, SLOT(fileOpError(uint,QString,QString,QString,QString,int)));
 
     // Connect To File Server
@@ -82,6 +84,8 @@ void FileListModel::setCurrentDir(const QString& aCurrentDir)
 {
     // Check Current Dir
     if (currentDir != aCurrentDir) {
+        //qDebug() << "FileListModel::setCurrentDir - aCurrentDir: " << aCurrentDir;
+
         // Set Current Dir
         currentDir = aCurrentDir;
 
@@ -103,6 +107,8 @@ void FileListModel::setCurrentDir(const QString& aCurrentDir)
 //==============================================================================
 void FileListModel::clear()
 {
+    //qDebug() << "FileListModel::clear";
+
     // Begin Reset Model
     beginResetModel();
 
@@ -123,6 +129,20 @@ void FileListModel::clear()
 }
 
 //==============================================================================
+// Reload
+//==============================================================================
+void FileListModel::reload()
+{
+    qDebug() << "FileListModel::reload";
+
+    // Clear
+    clear();
+
+    // Fetch Dir Items
+    fetchDirItems();
+}
+
+//==============================================================================
 // Fetch Dir
 //==============================================================================
 void FileListModel::fetchDirItems()
@@ -135,8 +155,21 @@ void FileListModel::fetchDirItems()
 
     qDebug() << "FileListModel::fetchDirItems - currentDir: " << currentDir;
 
+    // Init Settings
+    QSettings settings;
+
+    // Init Filters
+    int filters = settings.value(SETTINGS_KEY_SHOW_HIDDEN_FILES, true).toBool() ? DEFAULT_FILTER_SHOW_HIDDEN : 0;
+
+    // ...
+
+    // Init Sort Flags
+    int sortFlags = settings.value(SETTINGS_KEY_DIRFIRST, true).toBool() ? DEFAULT_SORT_DIRFIRST : 0;
+
+    // ...
+
     // Fetch Dir Items
-    fileUtil->getDirList(currentDir, DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_DIRFIRST);
+    fileUtil->getDirList(currentDir, filters, sortFlags);
 }
 
 //==============================================================================
@@ -151,6 +184,15 @@ void FileListModel::clientConnectionChanged(const int& aID, const bool& aConnect
         // Fetch Dir Items
         fetchDirItems();
     }
+}
+
+//==============================================================================
+// Client Status Changed Slot
+//==============================================================================
+void FileListModel::clientStatusChanged(const int& aID, const int& aStatus)
+{
+    qDebug() << "FileListModel::clientStatusChanged - aID: " << aID << " - aStatus: " << aStatus;
+
 }
 
 //==============================================================================
@@ -171,6 +213,24 @@ void FileListModel::fileOpFinished(const unsigned int& aID,
 
     // Emit Dir Fetch Finished Signal
     emit dirFetchFinished();
+}
+
+//==============================================================================
+// File Operation Aborted Slot
+//==============================================================================
+void FileListModel::fileOpAborted(const unsigned int& aID,
+                                  const QString& aOp,
+                                  const QString& aPath,
+                                  const QString& aSource,
+                                  const QString& aTarget)
+{
+    Q_UNUSED(aSource);
+    Q_UNUSED(aTarget);
+
+    qDebug() << "FileListModel::fileOpAborted - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath;
+
+    // ...
+
 }
 
 //==============================================================================
@@ -244,11 +304,13 @@ QHash<int, QByteArray> FileListModel::roleNames() const
     // File Permissions
     roles[FilePerms]        = "fileParms";
     // File Selected
-    roles[FileSelected]     = "fileSelected";
+    roles[FileSelected]     = "fileIsSelected";
     // File Is Hidden
     roles[FileIsHidden]     = "fileIsHidden";
     // File Is Link
     roles[FileIsLink]       = "fileIsLink";
+    // Full File Name
+    roles[FileFullName]     = "fileFullName";
 
     return roles;
 }
@@ -286,6 +348,11 @@ QVariant FileListModel::data(const QModelIndex& aIndex, int aRole) const
         // Switch Role
         switch (aRole) {
             case FileName: {
+                // Check File Info
+                if (item->fileInfo.isBundle()) {
+                    return item->fileInfo.baseName();
+                }
+
                 // Check Base Name
                 if (item->fileInfo.baseName().isEmpty() ||
                     item->fileInfo.isDir()              ||
@@ -319,7 +386,12 @@ QVariant FileListModel::data(const QModelIndex& aIndex, int aRole) const
 
             case FileSize: {
                 // Check File Info
-                if (item->fileInfo.isDir() || item->fileInfo.isBundle()) {
+                if (item->fileInfo.isBundle()) {
+                    return QString("");
+                }
+
+                // Check File Info
+                if (item->fileInfo.isDir()) {
                     return QString("[DIR]");
                 }
 
@@ -330,9 +402,11 @@ QVariant FileListModel::data(const QModelIndex& aIndex, int aRole) const
             case FileOwner:         return item->fileInfo.owner();
             case FilePerms:         return (int)item->fileInfo.permissions();
             case FileSelected:      return item->selected;
+            case FileFullName:      return item->fileInfo.fileName();
+            case FileIsHidden:      return item->fileInfo.isHidden();
+            case FileIsLink:        return item->fileInfo.isSymLink();
 
             default:
-
             break;
         }
     }
@@ -463,10 +537,35 @@ bool FileListModel::isDir(const int& aIndex)
         // Get Item
         FileListModelItem* item = itemList[aIndex];
         // Return File Info
-        return item->fileInfo.isDir() || item->fileInfo.isBundle();
+        return item->fileInfo.isDir();
     }
 
     return false;
+}
+
+//==============================================================================
+// Check If Is Bundle
+//==============================================================================
+bool FileListModel::isBundle(const int& aIndex)
+{
+    // Check Index
+    if (aIndex >= 0 && aIndex < rowCount()) {
+        // Get Item
+        FileListModelItem* item = itemList[aIndex];
+        // Return File Info
+        return item->fileInfo.isBundle();
+    }
+
+    return false;
+}
+
+//==============================================================================
+// Get Busy
+//==============================================================================
+bool FileListModel::getBusy()
+{
+    return fileUtil ? (fileUtil->getStatus() == ECSTBusy) || (fileUtil->getStatus() == ECSTAborting)
+                    : false;
 }
 
 //==============================================================================
@@ -479,6 +578,8 @@ FileListModel::~FileListModel()
 
     // Check File Util
     if (fileUtil) {
+        fileUtil->close();
+
         // Delete File Util
         delete fileUtil;
         fileUtil = NULL;

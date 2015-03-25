@@ -34,6 +34,27 @@ Rectangle {
     property alias permsWidth: filePermsContainer.width
     property alias attrWidth : fileAttrContainer.width
 
+    property bool fileHidden: false
+    property bool fileSelected: false
+    property bool fileSymLink: false
+
+
+    property string textColor: {
+        // Check If Selected
+        if (fileListDelegateRoot.fileSelected) {
+            return Const.DEFAULT_FILE_LIST_SELECTED_TEXT_COLOR;
+        }
+
+        if (fileListDelegateRoot.fileHidden) {
+            return Const.DEFAULT_FILE_LIST_HIDDEN_TEXT_COLOR;
+        }
+
+        if (fileListDelegateRoot.fileSymLink) {
+            return Const.DEFAULT_FILE_LIST_LINK_TEXT_COLOR;
+        }
+
+        return Const.DEFAULT_FILE_LIST_TEXT_COLOR;
+    }
 
     width: 320
     height: 32
@@ -53,13 +74,16 @@ Rectangle {
                 width: parent.height
                 height: parent.height
                 fillMode: Image.PreserveAspectFit
+                cache: false
+                smooth: false
                 asynchronous: true
             }
             // File Name
             FileListText {
                 id: fileNameLabel
-                anchors.leftMargin: fileIconImage.width + 1
+                anchors.leftMargin: fileIconImage.width + 2
                 horizontalAlignment: Text.AlignLeft
+                color: fileListDelegateRoot.textColor
             }
         }
 

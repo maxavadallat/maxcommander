@@ -52,6 +52,7 @@ MainWindow::MainWindow(QWidget* aParent)
     , ui(new Ui::MainWindow)
     , leftPanel(NULL)
     , rightPanel(NULL)
+    , focusedPanel(NULL)
     , modifierKeys(Qt::NoModifier)
     , testClient(NULL)
 {
@@ -90,6 +91,8 @@ void MainWindow::init()
     connect(leftPanel, SIGNAL(modifierKeysChanged(int)), this, SLOT(modifierKeysChanged(int)));
     connect(rightPanel, SIGNAL(modifierKeysChanged(int)), this, SLOT(modifierKeysChanged(int)));
 
+    connect(leftPanel, SIGNAL(focusedPanelChanged(FilePanel*)), this, SLOT(focusedPanelChanged(FilePanel*)));
+    connect(rightPanel, SIGNAL(focusedPanelChanged(FilePanel*)), this, SLOT(focusedPanelChanged(FilePanel*)));
 
     // Create Test Client
     testClient = new RemoteFileUtilClient();
@@ -99,6 +102,7 @@ void MainWindow::init()
 
     connect(testClient, SIGNAL(fileOpProgress(uint,QString,QString,quint64,quint64,quint64,quint64,int)), this, SLOT(fileOpProgress(uint,QString,QString,quint64,quint64,quint64,quint64,int)));
     connect(testClient, SIGNAL(fileOpFinished(uint,QString,QString,QString,QString)), this, SLOT(fileOpFinished(uint,QString,QString,QString,QString)));
+    connect(testClient, SIGNAL(fileOpAborted(uint,QString,QString,QString,QString)), this, SLOT(fileOpAborted(uint,QString,QString,QString,QString)));
     connect(testClient, SIGNAL(fileOpError(uint,QString,QString,QString,QString,int)), this, SLOT(fileOpError(uint,QString,QString,QString,QString,int)));
     connect(testClient, SIGNAL(fileOpNeedConfirm(uint,QString,int,QString,QString,QString)), this, SLOT(fileOpNeedConfirm(uint,QString,int,QString,QString,QString)));
 
@@ -305,7 +309,7 @@ void MainWindow::updateFunctionKeys()
         ui->exitButton->setText(tr("Exit"));
 */
         // Set Button Text
-        ui->helpButton->setText(tr("File Server"));
+        ui->helpButton->setText(tr("Connect"));
         ui->terminalButton->setText(tr("Start Test"));
         ui->viewButton->setText(tr("Stop Test"));
         ui->editButton->setText(tr("Send Yes"));
@@ -317,6 +321,41 @@ void MainWindow::updateFunctionKeys()
         ui->exitButton->setText(tr("Exit"));
 
     }
+}
+
+//==============================================================================
+// Toggle Hidden Files
+//==============================================================================
+void MainWindow::toggleHiddenFile()
+{
+    qDebug() << "MainWindow::toggleHiddenFile";
+
+    // Get Show Hidden
+    bool showHidden = focusedPanel ? focusedPanel->getShowHidden() : true;
+
+    // Check Left Panel
+    if (leftPanel) {
+        // Set Show Hidden
+        leftPanel->setShowHidden(!showHidden);
+    }
+
+    // Check Right Panel
+    if (rightPanel) {
+        // Set Show Hidden
+        rightPanel->setShowHidden(!showHidden);
+    }
+
+}
+
+//==============================================================================
+// Focused Panel Changed Slot
+//==============================================================================
+void MainWindow::focusedPanelChanged(FilePanel* aFocusedPanel)
+{
+    //qDebug() << "MainWindow::focusedPanelChanged";
+
+    // Set Focused Panel
+    focusedPanel = aFocusedPanel;
 }
 
 //==============================================================================
@@ -341,7 +380,7 @@ void MainWindow::fileOpProgress(const unsigned int& aID,
                                 const quint64& aOverallTotal,
                                 const int& aSpeed)
 {
-    qDebug() << "MainWindow::fileOpProgress - aID: " << aID << " - aOp: " << aOp << " - aCurrFilePath: " << aCurrFilePath;
+    qDebug() << "MainWindow::fileOpProgress - aID: " << aID << " - aOp: " << aOp << " - aCurrFilePath: " << aCurrFilePath << " - aCurrProgress: " << aCurrProgress << " - aCurrTotal: " << aCurrTotal;
 
     // ...
 }
@@ -359,6 +398,20 @@ void MainWindow::fileOpFinished(const unsigned int& aID,
 
     // ...
 
+}
+
+//==============================================================================
+// File Operation Aborted Slot
+//==============================================================================
+void MainWindow::fileOpAborted(const unsigned int& aID,
+                               const QString& aOp,
+                               const QString& aPath,
+                               const QString& aSource,
+                               const QString& aTarget)
+{
+    qDebug() << "MainWindow::fileOpAborted - aID: " << aID << " - aOp: " << aOp << " - dirListCounter: " << dirListCounter;
+
+    // ...
 }
 
 //==============================================================================
@@ -482,6 +535,7 @@ void MainWindow::on_helpButton_clicked()
             qDebug() << "\n#### testClient - Connect";
 
             // Launch Server Test
+            //testClient->launchServerTest(true, "Duzzasztott");
             testClient->launchServerTest();
         }
     }
@@ -654,8 +708,9 @@ void MainWindow::on_makeDirButton_clicked()
             dirListCounter = 0;
 
             // Get Dir List
-            testClient->getDirList(QDir::homePath(), DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_DIRFIRST);
+            //testClient->getDirList(QDir::homePath(), DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_DIRFIRST);
             //testClient->getDirList("/usr/bin", DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_DIRFIRST);
+            testClient->getDirList("/dev", DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_DIRFIRST);
         }
     }
 }
@@ -864,7 +919,8 @@ void MainWindow::on_actionSort_by_Permissions_triggered()
 //==============================================================================
 void MainWindow::on_actionShow_Hide_Hiden_triggered()
 {
-
+    // Toggle Show Hidden
+    toggleHiddenFile();
 }
 
 //==============================================================================
@@ -909,6 +965,18 @@ void MainWindow::on_actionQuit_triggered()
 }
 
 //==============================================================================
+// Actrion Reload Triggered Slot
+//==============================================================================
+void MainWindow::on_actionReload_triggered()
+{
+    // Check Focused Panel
+    if (focusedPanel) {
+        // Reload Focused Panel
+        focusedPanel->reload(focusedPanel->currentIndex);
+    }
+}
+
+//==============================================================================
 // Action Exit Triggered Slot
 //==============================================================================
 void MainWindow::on_actionExit_triggered()
@@ -933,6 +1001,4 @@ MainWindow::~MainWindow()
 
     qDebug() << "MainWindow::~MainWindow";
 }
-
-
 

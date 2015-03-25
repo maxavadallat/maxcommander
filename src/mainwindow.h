@@ -71,7 +71,13 @@ protected slots:
     // Update Function Keys
     void updateFunctionKeys();
 
+    // Toggle Hidden Files
+    void toggleHiddenFile();
+
 protected slots: // Remote File Util Client
+
+    // Focused Panel Changed Slot
+    void focusedPanelChanged(FilePanel* aFocusedPanel);
 
     // Client Connection Changed Slot
     void clientConnectionChanged(const int& aID, const bool& aConnected);
@@ -92,6 +98,13 @@ protected slots: // Remote File Util Client
                         const QString& aPath,
                         const QString& aSource,
                         const QString& aTarget);
+
+    // File Operation Aborted Slot
+    void fileOpAborted(const unsigned int& aID,
+                       const QString& aOp,
+                       const QString& aPath,
+                       const QString& aSource,
+                       const QString& aTarget);
 
     // File Operation Error Slot
     void fileOpError(const unsigned int& aID,
@@ -200,6 +213,10 @@ protected slots: // Actions & Button
     void on_actionDelete_File_triggered();
     // Action About Triggered Slot
     void on_actionCreate_Link_triggered();
+
+    // Action Reload Triggered Slot
+    void on_actionReload_triggered();
+
     // Action Exit Triggered Slot
     void on_actionExit_triggered();
 
@@ -217,6 +234,9 @@ private:
 
     // Right Panel
     FilePanel*              rightPanel;
+
+    // Focused Panel
+    FilePanel*              focusedPanel;
 
     // Modifier Keys Pressed
     int                     modifierKeys;

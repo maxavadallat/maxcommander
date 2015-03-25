@@ -7,12 +7,20 @@
 #include <QMutex>
 
 
+
 //==============================================================================
 // Remote File Util Client Observer Class
 //==============================================================================
 class RemoteFileUtilClientObserver
 {
 public:
+
+    // File Operation Started
+    virtual void fileOpStarted(const unsigned int& aID,
+                               const QString& aOp,
+                               const QString& aPath,
+                               const QString& aSource,
+                               const QString& aTarget) = 0;
 
     // File Progress - Copy/Move/Rename/Delete
     virtual void fileOpProgress(const unsigned int& aID,
@@ -30,6 +38,13 @@ public:
                                 const QString& aPath,
                                 const QString& aSource,
                                 const QString& aTarget) = 0;
+
+    // File Operation Aborted
+    virtual void fileOpAborted(const unsigned int& aID,
+                               const QString& aOp,
+                               const QString& aPath,
+                               const QString& aSource,
+                               const QString& aTarget) = 0;
 
     // File Operation Error
     virtual void fileOpError(const unsigned int& aID,
@@ -78,6 +93,19 @@ public:
 
 
 
+//==============================================================================
+// Client Status Type
+//==============================================================================
+enum ClientStatusType
+{
+    ECSTCreated     = 0,
+    ECSTIdle,
+    ECSTBusy,
+    ECSTAborting,
+    ECSTAborted,
+    ECSTWaiting,
+    ECSTError
+};
 
 
 
@@ -99,6 +127,9 @@ public:
 
     // Is Client Connected
     bool isConnected();
+
+    // Get Status
+    ClientStatusType getStatus();
 
     // Get Dir List
     void getDirList(const QString& aDirPath, const int& aFilters, const int& aSortFlags);
@@ -142,7 +173,6 @@ public:
     // Send Response
     void sendResponse(const int& aResponse, const QString& aNewPath = "");
 
-
     // Launch Server Test
     void launchServerTest(const bool& asRoot = false, const QString& aRootPass = "");
     // Start Test Operation
@@ -152,7 +182,6 @@ public:
     // Disconnect Test
     void disconnectTest();
 
-
     // Destructor
     virtual ~RemoteFileUtilClient();
 
@@ -160,6 +189,16 @@ signals:
 
     // Client Connection Changed Signal
     void clientConnectionChanged(const int& aID, const bool& aConnected);
+
+    // Client Status Changed Signal
+    void clientStatusChanged(const int& aID, const ClientStatusType& aStatus);
+
+    // File Operation Started
+    void fileOpStarted(const unsigned int& aID,
+                       const QString& aOp,
+                       const QString& aPath,
+                       const QString& aSource,
+                       const QString& aTarget);
 
     // File Operation Progress Signal
     void fileOpProgress(const unsigned int& aID,
@@ -177,6 +216,13 @@ signals:
                         const QString& aPath,
                         const QString& aSource,
                         const QString& aTarget);
+
+    // File Operation Aborted Signal
+    void fileOpAborted(const unsigned int& aID,
+                       const QString& aOp,
+                       const QString& aPath,
+                       const QString& aSource,
+                       const QString& aTarget);
 
     // File Operation Error Signal
     void fileOpError(const unsigned int& aID,
@@ -226,6 +272,9 @@ protected slots:
     // Shut Down
     void shutDown();
 
+    // Set Status
+    void setStatus(const ClientStatusType& aStatus);
+
     // Check If File Server Running
     bool checkFileServerRunning();
 
@@ -241,6 +290,8 @@ protected slots:
     void handleConfirm();
     // Handle Finished
     void handleFinished();
+    // Handle Aborted
+    void handleAbort();
     // Handle Error
     void handleError();
     // Handle Dir List Item
@@ -280,6 +331,9 @@ private:
 
     // Client ID
     unsigned int                    cID;
+
+    // Status
+    ClientStatusType                status;
 
     // Client Socket
     QLocalSocket*                   client;

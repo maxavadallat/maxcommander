@@ -14,6 +14,7 @@
 RemoteFileUtilClient::RemoteFileUtilClient(RemoteFileUtilClientObserver* aObserver, QObject* aParent)
     : QObject(aParent)
     , cID(0)
+    , status(ECSTCreated)
     , client(NULL)
     , observer(aObserver)
     , reconnectAsRoot(false)
@@ -66,7 +67,11 @@ void RemoteFileUtilClient::connectToFileServer(const bool& asRoot, const QString
 
         // Launch REmote File Server
         startFileServer(asRoot, aRootPass);
+    }
 
+    // Check Client Status
+    if (client->state() == QLocalSocket::ConnectingState || client->state() == QLocalSocket::ConnectedState) {
+        return;
     }
 
     qDebug() << "RemoteFileUtilClient::connectToFileServer";
@@ -84,10 +89,31 @@ bool RemoteFileUtilClient::isConnected()
 }
 
 //==============================================================================
+// Get Status
+//==============================================================================
+ClientStatusType RemoteFileUtilClient::getStatus()
+{
+    return status;
+}
+
+//==============================================================================
 // Get Dir List
 //==============================================================================
 void RemoteFileUtilClient::getDirList(const QString& aDirPath, const int& aFilters, const int& aSortFlags)
 {
+    // Check If Connected
+    if (!isConnected()) {
+        qDebug() << "RemoteFileUtilClient::getDirList - cID: " << cID << " - CLIENT NOT CONNECTED!!";
+        return;
+    }
+
+    // Check Status
+    if (status == ECSTBusy) {
+        qDebug() << "#### RemoteFileUtilClient::getDirList - cID: " << cID << " - BUSY!!";
+
+        // ...
+    }
+
     qDebug() << "RemoteFileUtilClient::getDirList - aDirPath: " << aDirPath << " - aFilters: " << aFilters << " - aSortFlags: " << aSortFlags;
 
     // Init New Data
@@ -104,6 +130,9 @@ void RemoteFileUtilClient::getDirList(const QString& aDirPath, const int& aFilte
 
     // Write Data
     wirteData(newData);
+
+    // Set Status
+    setStatus(ECSTBusy);
 }
 
 //==============================================================================
@@ -330,8 +359,11 @@ void RemoteFileUtilClient::searchFile(const QString& aName, const QString& aDirP
 //==============================================================================
 void RemoteFileUtilClient::abort()
 {
-    // Check Client
-    if (client && cID > 0) {
+    // Check Client & Status
+    if (client && cID > 0 && (status == ECSTBusy || status == ECSTWaiting)) {
+        // Set Status
+        setStatus(ECSTAborting);
+
         qDebug() << "RemoteFileUtilClient::abort - cID: " << cID;
 
         // Init New Data
@@ -346,8 +378,8 @@ void RemoteFileUtilClient::abort()
 
         // ...
 
-        // Abort
-        //client->abort();
+    } else {
+        //qDebug() << "RemoteFileUtilClient::abort - cID: " << cID << " - NOT BUSY, NOTHING TO ABORT!";
     }
 }
 
@@ -441,6 +473,9 @@ void RemoteFileUtilClient::startTestOperation()
     // Write Data
     wirteData(newData);
 
+    // Set Status
+    setStatus(ECSTBusy);
+
     // ...
 }
 
@@ -487,6 +522,25 @@ void RemoteFileUtilClient::shutDown()
     close();
 
     qDebug() << "RemoteFileUtilClient::shutDown - cID: " << cID;
+}
+
+//==============================================================================
+// Set Status
+//==============================================================================
+void RemoteFileUtilClient::setStatus(const ClientStatusType& aStatus)
+{
+    // Check Status
+    if (status != aStatus) {
+        qDebug() << "RemoteFileUtilClient::setStatus - cID: " << cID << " - aStatus: " << aStatus;
+
+        // Set Status
+        status = aStatus;
+
+        // ...
+
+        // Emit Client Status Changed
+        emit clientStatusChanged(cID, status);
+    }
 }
 
 //==============================================================================
@@ -695,6 +749,9 @@ void RemoteFileUtilClient::parseLastBuffer()
 
         qDebug() << "RemoteFileUtilClient::parseLastBuffer - cID: " << cID << " - Client ID is SET!!";
 
+        // Set Status
+        setStatus(ECSTIdle);
+
         // Emit Client Connection Changed Signal
         emit clientConnectionChanged(cID, true);
 
@@ -722,6 +779,19 @@ void RemoteFileUtilClient::parseLastBuffer()
         if (lastDataMap[DEFAULT_KEY_RESPONSE].toString() == QString(DEFAULT_RESPONSE_ERROR)) {
             // Handle Error
             handleError();
+            return;
+        }
+
+        // Check Aborted
+        if (lastDataMap[DEFAULT_KEY_RESPONSE].toString() == QString(DEFAULT_RESPONSE_ABORT)) {
+            // Handle Abort
+            handleAbort();
+            return;
+        }
+
+        // Check If Aborting
+        if (status == ECSTAborting || status == ECSTAborted) {
+            qDebug() << "#### RemoteFileUtilClient::parseLastBuffer - cID: " << cID << " - ABORTING!!";
             return;
         }
 
@@ -796,6 +866,9 @@ void RemoteFileUtilClient::handleProgress()
 //==============================================================================
 void RemoteFileUtilClient::handleConfirm()
 {
+    // Set Status
+    setStatus(ECSTWaiting);
+
     // Emit File Operation Need Confirm Signal
     emit fileOpNeedConfirm(cID,
                            lastDataMap[DEFAULT_KEY_OPERATION].toString(),
@@ -810,6 +883,9 @@ void RemoteFileUtilClient::handleConfirm()
 //==============================================================================
 void RemoteFileUtilClient::handleFinished()
 {
+    // Set Status
+    setStatus(ECSTIdle);
+
     // Emit File Operation Finished Signal
     emit fileOpFinished(cID,
                         lastDataMap[DEFAULT_KEY_OPERATION].toString(),
@@ -819,10 +895,32 @@ void RemoteFileUtilClient::handleFinished()
 }
 
 //==============================================================================
+// Handle Abort
+//==============================================================================
+void RemoteFileUtilClient::handleAbort()
+{
+    // Set Status
+    setStatus(ECSTAborted);
+
+    // Emit File Operation Aborted Signal
+    emit fileOpAborted(cID,
+                       lastDataMap[DEFAULT_KEY_OPERATION].toString(),
+                       lastDataMap[DEFAULT_KEY_PATH].toString(),
+                       lastDataMap[DEFAULT_KEY_SOURCE].toString(),
+                       lastDataMap[DEFAULT_KEY_TARGET].toString());
+
+    // Set Status
+    //setStatus(ECSTIdle);
+}
+
+//==============================================================================
 // Handle Error
 //==============================================================================
 void RemoteFileUtilClient::handleError()
 {
+    // Set Status
+    setStatus(ECSTError);
+
     // Emit Error Signal
     emit fileOpError(cID,
                      lastDataMap[DEFAULT_KEY_OPERATION].toString(),

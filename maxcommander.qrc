@@ -10,5 +10,6 @@
         <file>qml/FileListText.qml</file>
         <file>qml/FileListHeaderItemSeparator.qml</file>
         <file>qml/FileListDelegateItem.qml</file>
+        <file>qml/js/utility.js</file>
     </qresource>
 </RCC>

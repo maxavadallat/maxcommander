@@ -2,6 +2,7 @@ import QtQuick 2.0
 
 import "qrc:/qml"
 import "qrc:/qml/js/constants.js" as Const
+import "qrc:/qml/js/utility.js" as Utility
 
 Rectangle {
     id: fileListRoot
@@ -23,6 +24,7 @@ Rectangle {
         id: fileListView
         anchors.fill: parent
         anchors.topMargin: fileListHeader.height
+        anchors.bottomMargin: 1 // I don't no why the fuck fileListRoot is not properly sized X (
         spacing: 1
         clip: true
         snapMode: ListView.SnapToItem
@@ -42,12 +44,23 @@ Rectangle {
             width: fileListView.width
             height: fileListView.delegateHeight
 
-            fileIconSource: Const.DEFAULT_FILE_ICON_PREFIX + fileName
+            fileIconSource: {
+                // Check File Name
+                if (Utility.isImage(fileFullName)) {
+                    Const.DEFAULT_FILE_PREFIX + mainController.currentDir + "/" + fileFullName
+                } else {
+                    // Image Provider
+                    Const.DEFAULT_FILE_ICON_PREFIX + mainController.currentDir + "/" + fileFullName
+                }
+            }
+
             fileNameText: fileName
             fileExtText : fileExt
             fileTypeText: fileType
             fileSizeText: fileSize
             fileDateText: fileDate
+            fileHidden  : fileIsHidden
+            fileSelected: fileIsSelected
 
             nameWidth   : fileListHeader.nameWidth
             extWidth    : fileListHeader.extWidth
@@ -66,6 +79,8 @@ Rectangle {
             ownerVisible: fileListHeader.ownerVisible
             permsVisible: fileListHeader.permsVisible
             attrVisible : fileListHeader.attrVisible
+
+            //color: (Math.floor(index / 2) == index / 2) ? "transparent" : "#77FFFFFF"
 
             // Mouse Area
             MouseArea {
@@ -93,6 +108,15 @@ Rectangle {
                     //console.log("fileListDelegateRoot.MouseArea.onReleased - index: " + index);
 
                     // ...
+                }
+
+                onDoubleClicked: {
+                    //console.log("fileListDelegateRoot.MouseArea.onDoubleClicked - index: " + index);
+
+                    // ...
+
+                    // Handle Item Select
+                    mainController.handleItemSelect();
                 }
             }
         }

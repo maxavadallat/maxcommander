@@ -24,7 +24,7 @@ qint64 getTotalSpace(const QString& aDirPath);
 qint64 getFreeSpace(const QString& aDirPath);
 
 // Get File Icon Image
-QImage getFileIconImage(const QFileInfo& aInfo, const int& aWidth, const int& aHeight);
+QImage getFileIconImage(const QString& aFilePath, const int& aWidth, const int& aHeight);
 
 // Execute Shell Command
 int execShellCommand(const QString& aCommand, const bool& asRoot = false, const QString& aRootPass = "");

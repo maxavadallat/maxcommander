@@ -334,6 +334,7 @@
     <addaction name="actionNew_File"/>
     <addaction name="separator"/>
     <addaction name="actionDelete_File"/>
+    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -364,6 +365,8 @@
     <addaction name="actionEdit"/>
     <addaction name="actionCopy"/>
     <addaction name="actionMove"/>
+    <addaction name="separator"/>
+    <addaction name="actionReload"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -428,6 +431,9 @@
   <action name="actionSelect_all">
    <property name="text">
     <string>Select All</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+A</string>
    </property>
   </action>
   <action name="actionSelect_None">
@@ -497,6 +503,9 @@
    </property>
    <property name="text">
     <string>Show/Hide Hiden</string>
+   </property>
+   <property name="shortcut">
+    <string>Meta+H</string>
    </property>
   </action>
   <action name="actionNew_Directory">
@@ -577,6 +586,14 @@
    </property>
    <property name="shortcut">
     <string>F10</string>
+   </property>
+  </action>
+  <action name="actionReload">
+   <property name="text">
+    <string>Reload</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
    </property>
   </action>
  </widget>

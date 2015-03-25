@@ -535,7 +535,6 @@ void MainWindow::on_helpButton_clicked()
             qDebug() << "\n#### testClient - Connect";
 
             // Launch Server Test
-            //testClient->launchServerTest(true, "Duzzasztott");
             testClient->launchServerTest();
         }
     }

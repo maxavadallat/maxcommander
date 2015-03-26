@@ -166,7 +166,7 @@
       <string notr="true">background-color: #00000000</string>
      </property>
      <property name="text">
-      <string>0 of 0 bytes free</string>
+      <string>0 files, 0 of 0 bytes free</string>
      </property>
     </widget>
    </item>

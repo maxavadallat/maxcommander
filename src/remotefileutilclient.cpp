@@ -109,7 +109,10 @@ void RemoteFileUtilClient::getDirList(const QString& aDirPath, const int& aFilte
 
     // Check Status
     if (status == ECSTBusy) {
+
+        qDebug() << "#########################################################################";
         qDebug() << "#### RemoteFileUtilClient::getDirList - cID: " << cID << " - BUSY!!";
+        qDebug() << "#########################################################################";
 
         // ...
     }

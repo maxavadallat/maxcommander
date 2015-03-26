@@ -74,7 +74,7 @@ Rectangle {
                 width: parent.height
                 height: parent.height
                 fillMode: Image.PreserveAspectFit
-                cache: false
+                cache: true
                 smooth: false
                 asynchronous: true
             }

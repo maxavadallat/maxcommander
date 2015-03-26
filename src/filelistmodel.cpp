@@ -84,7 +84,7 @@ void FileListModel::setCurrentDir(const QString& aCurrentDir)
 {
     // Check Current Dir
     if (currentDir != aCurrentDir) {
-        //qDebug() << "FileListModel::setCurrentDir - aCurrentDir: " << aCurrentDir;
+        qDebug() << "FileListModel::setCurrentDir - aCurrentDir: " << aCurrentDir;
 
         // Set Current Dir
         currentDir = aCurrentDir;
@@ -259,7 +259,15 @@ void FileListModel::dirListItemFound(const unsigned int& aID,
                                      const QString& aFileName)
 {
     Q_UNUSED(aID);
+
     //qDebug() << "FileListModel::dirListItemFound - aID: " << aID << " - aPath: " << aPath << " - aFileName: " << aFileName;
+
+    // Check Current Dir vs Path
+    if (currentDir != aPath) {
+        qWarning() << "FileListModel::dirListItemFound - aID: " << aID << " - aPath: " << aPath << " - INVALID PATH!!";
+
+        return;
+    }
 
     // ...
 

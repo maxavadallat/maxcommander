@@ -101,7 +101,7 @@
 #define DEFAULT_PANEL_FOCUSED_STYLE_SHEET                   "background-color: #11000077"
 #define DEFAULT_PANEL_TRASPARENT_STYLE_SHEET                "background-color: #00000000"
 
-#define DEFAULT_AVAILABLE_SPACE_FORMAT_STRING               "%1 of %2 Kbytes free"
+#define DEFAULT_AVAILABLE_SPACE_FORMAT_STRING               "%1 files, %2 of %3 Kbytes free"
 
 #define DEFAULT_MAIN_CONTROLLER_NAME                        "mainController"
 #define DEFAULT_FILE_LIST_MODEL_NAME                        "fileListModel"

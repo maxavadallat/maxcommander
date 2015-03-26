@@ -314,7 +314,7 @@ void MainWindow::updateFunctionKeys()
         ui->viewButton->setText(tr("Stop Test"));
         ui->editButton->setText(tr("Send Yes"));
         ui->copyButton->setText(tr("Send No"));
-        ui->moveButton->setText(tr(""));
+        ui->moveButton->setText(tr("Scan Dir Size"));
         ui->makeDirButton->setText(tr("Get Dir List"));
         ui->delButton->setText(tr(""));
         ui->optionsButton->setText(tr("Disconnect"));
@@ -471,7 +471,7 @@ void MainWindow::dirListItemFound(const unsigned int& aID,
     // Inc Dir List Counter
     dirListCounter++;
 
-    qDebug() << "MainWindow::dirListItemFound - aID: " << aID << " - aPath: " << aPath << " - aFileName: " << aFileName << " - dirListCounter: " << dirListCounter;
+    //qDebug() << "MainWindow::dirListItemFound - aID: " << aID << " - aPath: " << aPath << " - aFileName: " << aFileName << " - dirListCounter: " << dirListCounter;
 
 
 
@@ -677,6 +677,19 @@ void MainWindow::on_moveButton_clicked()
         // Trigger Move Action
         //ui->actionMove->trigger();
 
+        // Check Test Client
+        if (testClient) {
+
+            qDebug() << "\n#### testClient - Scan Dir Size";
+
+            // Reset Dir List Counter
+            dirListCounter = 0;
+
+            // Get Dir List
+            //testClient->getDirList(QDir::homePath(), DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_DIRFIRST);
+            //testClient->getDirList("/usr/bin", DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_DIRFIRST);
+            testClient->scanDirSize("/dev");
+        }
     }
 }
 

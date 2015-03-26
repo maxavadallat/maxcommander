@@ -41,6 +41,7 @@ Rectangle {
         // Delegate
         delegate: FileListDelegate {
             id: fileListDelegateRoot
+
             width: fileListView.width
             height: fileListView.delegateHeight
 

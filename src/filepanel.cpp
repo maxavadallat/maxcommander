@@ -51,7 +51,7 @@ FilePanel::FilePanel(QWidget* aParent)
     // ...
 
     // Create File List Model
-    //fileListModel = new FileListModel();
+    fileListModel = new FileListModel();
 
     // Connect Signals
     connect(fileListModel, SIGNAL(dirFetchFinished()), this, SLOT(fileModelDirFetchFinished()));
@@ -141,7 +141,7 @@ void FilePanel::setCurrentDir(const QString& aCurrentDir)
         ui->currDirLabel->setText(currentDir);
 
         // Update Available Space Label
-        updateAvailableSpaceLabel();
+        //updateAvailableSpaceLabel();
 
         // Emit Current dir Changed Signal
         emit currentDirChanged(currentDir);
@@ -551,7 +551,9 @@ void FilePanel::saveSettings()
 void FilePanel::updateAvailableSpaceLabel()
 {
     // Format Available Space Text
-    QString availableSpace = QString(DEFAULT_AVAILABLE_SPACE_FORMAT_STRING).arg((getFreeSpace(currentDir) >> 10)).arg((getTotalSpace(currentDir) >> 10));
+    QString availableSpace = QString(DEFAULT_AVAILABLE_SPACE_FORMAT_STRING).arg(fileListModel ? fileListModel->rowCount() : 0)
+                                                                           .arg((getFreeSpace(currentDir) >> 10))
+                                                                           .arg((getTotalSpace(currentDir) >> 10));
 
     // Set Text
     ui->availableSpaceLabel->setText(availableSpace);
@@ -578,6 +580,9 @@ void FilePanel::fileModelDirFetchFinished()
         // Reset LAst Index
         lastIndex = -1;
     }
+
+    // Update Available Space Label
+    updateAvailableSpaceLabel();
 }
 
 //==============================================================================

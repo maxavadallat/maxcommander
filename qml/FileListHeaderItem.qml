@@ -16,6 +16,12 @@ Rectangle {
 
     clip: true
 
+    // Set Separator Position
+    function setSeparatorPosition(xPos) {
+        // Set Separator Position
+        headerItemSeparator.setPositionX(xPos);
+    }
+
     // Text
     FileListText {
         id: headerItemLabel

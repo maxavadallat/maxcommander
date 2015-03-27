@@ -109,7 +109,9 @@ Rectangle {
             width: 60
             FileListText {
                 id: fileSizeLabel
-                horizontalAlignment: text === Const.DEFAULT_DIR_SIZE_TITLE_LABEL_TEXT ? Text.AlignHCenter : Text.AlignRight
+                horizontalAlignment: {
+                    text === Const.DEFAULT_DIR_SIZE_TITLE_LABEL_TEXT_DIR || text === Const.DEFAULT_DIR_SIZE_TITLE_LABEL_TEXT_BUNDLE ? Text.AlignHCenter : Text.AlignRight
+                }
             }
         }
 

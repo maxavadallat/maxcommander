@@ -46,9 +46,12 @@ Rectangle {
             height: fileListView.delegateHeight
 
             fileIconSource: {
+                //"/resources/images/icons/default_file.png"
+
                 // Check File Name
                 if (Utility.isImage(fileFullName)) {
                     Const.DEFAULT_FILE_PREFIX + mainController.currentDir + "/" + fileFullName
+                    //"/resources/images/icons/default_file.png"
                 } else {
                     // Image Provider
                     Const.DEFAULT_FILE_ICON_PREFIX + mainController.currentDir + "/" + fileFullName
@@ -144,11 +147,62 @@ Rectangle {
 
         // On Width Changed
         onWidthChanged: {
-            console.log("fileListView.onWidthChanged - width: " + fileListView.width);
+            //console.log("fileListView.onWidthChanged - width: " + fileListView.width);
             // Init Rest Of The Header Items Width
             //var restWidth = 0;
             // Set Name Width
             //fileListHeader.nameWidth = fileListView.width - restWidth;
+
+            // Init Remaining Width
+            var remainingWidth = fileListView.width;
+
+            // Check Header Visibility
+            if (fileListHeader.extVisible) {
+                // Adjust Remaining Width
+                remainingWidth -= fileListHeader.extWidth;
+            }
+
+            // Check Header Visibility
+            if (fileListHeader.typeVisible) {
+                // Adjust Remaining Width
+                remainingWidth -= fileListHeader.typeWidth;
+            }
+
+            // Check Header Visibility
+            if (fileListHeader.sizeVisible) {
+                // Adjust Remaining Width
+                remainingWidth -= fileListHeader.sizeWidth;
+            }
+
+            // Check Header Visibility
+            if (fileListHeader.dateVisible) {
+                // Adjust Remaining Width
+                remainingWidth -= fileListHeader.dateWidth;
+            }
+
+            // Check Header Visibility
+            if (fileListHeader.ownerVisible) {
+                // Adjust Remaining Width
+                remainingWidth -= fileListHeader.ownerWidth;
+            }
+
+            // Check Header Visibility
+            if (fileListHeader.permsVisible) {
+                // Adjust Remaining Width
+                remainingWidth -= fileListHeader.permsWidth;
+            }
+
+            // Check Header Visibility
+            if (fileListHeader.attrVisible) {
+                // Adjust Remaining Width
+                remainingWidth -= fileListHeader.attrWidth;
+            }
+
+            //console.log("fileListView.onWidthChanged - width: " + fileListView.width + " - remainingWidth: " + remainingWidth);
+
+            // Set Name Header Sizer Position
+            fileListHeader.setNameHeaderSeparatorPosition(remainingWidth - Const.DEFAULT_FILE_LIST_HEADER_SEPARATOR_WIDTH);
+
         }
     }
 

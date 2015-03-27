@@ -7,6 +7,7 @@
 #include <QProcess>
 #include <QApplication>
 #include <QThread>
+#include <QSettings>
 #include <QDebug>
 
 #if defined(Q_OS_WIN)
@@ -419,10 +420,11 @@ bool checkRemoteFileServerRunning()
 //==============================================================================
 int launchRemoteFileServer(const bool& asRoot, const QString& aRootPass)
 {
-    // Init File Server Command Line
-    QString fileServerCommandLine = asRoot ? QString("./%1 %2").arg(DEFAULT_FILE_SERVER_EXEC_NAME)
-                                                               .arg(DEFAULT_OPTION_RUNASROOT)
-                                           : QString("./%1").arg(DEFAULT_FILE_SERVER_EXEC_NAME);
+    QString fileServerCommandLine = asRoot ? QString(getAppExecPath() + "/%1 %2").arg(DEFAULT_FILE_SERVER_EXEC_NAME)
+                                                                                 .arg(DEFAULT_OPTION_RUNASROOT)
+                                           : QString(getAppExecPath() + "/%1").arg(DEFAULT_FILE_SERVER_EXEC_NAME);
+
+    qDebug() << "launchRemoteFileServer - fileServerCommandLine: " << QDir::currentPath();
 
     // Exec Shell Command
     int result = execShellCommand(fileServerCommandLine, asRoot, aRootPass);
@@ -511,7 +513,31 @@ bool haveAccessToDir(const QString& aDirPath)
     return false;
 }
 
+//==============================================================================
+// Store App Exec Path
+//==============================================================================
+void storeAppExecPath(const char* aPath)
+{
+    // Init Exe Info
+    QFileInfo exeInfo(aPath);
+    // Init Settings
+    QSettings settings;
+    // Set Value
+    settings.setValue(SETTINGS_KEY_EXEC_PATH, exeInfo.absolutePath());
+    // Sync/Save Settings
+    settings.sync();
+}
 
+//==============================================================================
+// Get App Exec Path
+//==============================================================================
+QString getAppExecPath()
+{
+    // Init Settings
+    QSettings settings;
+
+    return settings.value(SETTINGS_KEY_EXEC_PATH).toString();
+}
 
 
 

@@ -122,6 +122,8 @@ signals:
 
 protected slots:
 
+    // Init
+    void init();
     // Clear
     void clear();
     // Restore UI
@@ -130,6 +132,8 @@ protected slots:
     void saveSettings();
     // Update Available Space Label
     void updateAvailableSpaceLabel();
+    // Update Supported Image Formates
+    void updateSupportedImageFormats();
 
 protected slots: // From File Model
 

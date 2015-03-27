@@ -1,5 +1,13 @@
+
+#include <QHostAddress>
 #include <QMutexLocker>
 #include <QDebug>
+
+#include <cstdio>
+#include <stdio.h>
+#include <stdlib.h>
+#include <iostream>
+#include <unistd.h>
 
 #include <mcwinterface.h>
 
@@ -11,12 +19,11 @@
 //==============================================================================
 // Constructor
 //==============================================================================
-RemoteFileUtilClient::RemoteFileUtilClient(RemoteFileUtilClientObserver* aObserver, QObject* aParent)
+RemoteFileUtilClient::RemoteFileUtilClient(QObject* aParent)
     : QObject(aParent)
     , cID(0)
     , status(ECSTCreated)
     , client(NULL)
-    , observer(aObserver)
     , reconnectAsRoot(false)
     , needReconnect(false)
 {
@@ -34,17 +41,27 @@ void RemoteFileUtilClient::init()
     qDebug() << "RemoteFileUtilClient::init";
 
     // Create Client
-    client = new QLocalSocket();
+    client = new QTcpSocket();
 
     // Connect Signals
+    connect(client, SIGNAL(hostFound()), this, SLOT(socketHostFound()));
     connect(client, SIGNAL(connected()), this, SLOT(socketConnected()));
     connect(client, SIGNAL(disconnected()), this, SLOT(socketDisconnected()));
     connect(client, SIGNAL(aboutToClose()), this, SLOT(socketAboutToClose()));
     connect(client, SIGNAL(bytesWritten(qint64)), this, SLOT(socketBytesWritten(qint64)));
-    connect(client, SIGNAL(error(QLocalSocket::LocalSocketError)), this, SLOT(socketError(QLocalSocket::LocalSocketError)));
+    connect(client, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(socketError(QAbstractSocket::SocketError)));
     connect(client, SIGNAL(readChannelFinished()), this, SLOT(socketReadChannelFinished()));
     connect(client, SIGNAL(readyRead()), this, SLOT(socketReadyRead()));
-    connect(client, SIGNAL(stateChanged(QLocalSocket::LocalSocketState)), this, SLOT(socketStateChanged(QLocalSocket::LocalSocketState)));
+    connect(client, SIGNAL(stateChanged(QAbstractSocket::SocketState)), this, SLOT(socketStateChanged(QAbstractSocket::SocketState)));
+
+    // Set Buffer Size
+    //client->setReadBufferSize(8192);
+
+    // Init Frame Pattern
+    framePattern.append(DEFAULT_DATA_FRAME_PATTERN_CHAR_1);
+    framePattern.append(DEFAULT_DATA_FRAME_PATTERN_CHAR_2);
+    framePattern.append(DEFAULT_DATA_FRAME_PATTERN_CHAR_3);
+    framePattern.append(DEFAULT_DATA_FRAME_PATTERN_CHAR_4);
 
     // ...
 }
@@ -70,14 +87,14 @@ void RemoteFileUtilClient::connectToFileServer(const bool& asRoot, const QString
     }
 
     // Check Client Status
-    if (client->state() == QLocalSocket::ConnectingState || client->state() == QLocalSocket::ConnectedState) {
+    if (client->state() == QAbstractSocket::ConnectingState || client->state() == QAbstractSocket::ConnectedState) {
         return;
     }
 
-    qDebug() << "RemoteFileUtilClient::connectToFileServer";
+    qDebug() << "RemoteFileUtilClient::connectToFileServer - host: " << DEFAULT_WORKER_HOST_NAME << ":" << (asRoot ? DEFAULT_FILE_SERVER_ROOT_HOST_PORT : DEFAULT_FILE_SERVER_HOST_PORT);
 
-    // Connect To Server
-    client->connectToServer(asRoot ? DEFAULT_SERVER_LISTEN_ROOT_PATH : DEFAULT_SERVER_LISTEN_PATH);
+    // Connect To Host
+    client->connectToHost(DEFAULT_WORKER_HOST_NAME, asRoot ? DEFAULT_FILE_SERVER_ROOT_HOST_PORT : DEFAULT_FILE_SERVER_HOST_PORT);
 }
 
 //==============================================================================
@@ -85,7 +102,7 @@ void RemoteFileUtilClient::connectToFileServer(const bool& asRoot, const QString
 //==============================================================================
 bool RemoteFileUtilClient::isConnected()
 {
-    return client ? client->state() == QLocalSocket::ConnectedState : false;
+    return client ? client->state() == QAbstractSocket::ConnectedState : false;
 }
 
 //==============================================================================
@@ -398,8 +415,8 @@ void RemoteFileUtilClient::close()
     if (client && cID > 0) {
         qDebug() << "RemoteFileUtilClient::close - cID: " << cID;
 
-        // Disconnect From Server
-        client->disconnectFromServer();
+        // Disconnect From Host
+        client->disconnectFromHost();
         // Close Client
         client->close();
     }
@@ -618,6 +635,16 @@ void RemoteFileUtilClient::wirteData(const QVariantMap& aData)
 }
 
 //==============================================================================
+// Socket Host Found
+//==============================================================================
+void RemoteFileUtilClient::socketHostFound()
+{
+    qDebug() << "RemoteFileUtilClient::socketHostFound";
+
+    // ...
+}
+
+//==============================================================================
 // Socket Connected Slot
 //==============================================================================
 void RemoteFileUtilClient::socketConnected()
@@ -649,7 +676,7 @@ void RemoteFileUtilClient::socketDisconnected()
 //==============================================================================
 // Socket Error Slot
 //==============================================================================
-void RemoteFileUtilClient::socketError(QLocalSocket::LocalSocketError socketError)
+void RemoteFileUtilClient::socketError(QAbstractSocket::SocketError socketError)
 {
     qDebug() << "RemoteFileUtilClient::socketError - cID: " << cID << " - socketError: " << socketError << " - error: " << client->errorString();
 
@@ -659,7 +686,7 @@ void RemoteFileUtilClient::socketError(QLocalSocket::LocalSocketError socketErro
 //==============================================================================
 // Socket State Changed Slot
 //==============================================================================
-void RemoteFileUtilClient::socketStateChanged(QLocalSocket::LocalSocketState socketState)
+void RemoteFileUtilClient::socketStateChanged(QAbstractSocket::SocketState socketState)
 {
     Q_UNUSED(socketState);
 
@@ -709,9 +736,7 @@ void RemoteFileUtilClient::socketReadyRead()
     // Read Data
     lastBuffer = client ? client->readAll() : QByteArray();
 
-    //qDebug() << "RemoteFileUtilClient::socketReadyRead - bytesAvailable: " << client->bytesAvailable();
-
-    //qDebug() << "RemoteFileUtilClient::socketReadyRead - cID: " << cID << " - lastBuffer: " << lastBuffer;
+    qDebug() << "RemoteFileUtilClient::socketReadyRead - cID: " << cID << " - lastBuffer.size: " << lastBuffer.size();
 
     // Parse Last Buffer
     parseLastBuffer();
@@ -760,89 +785,200 @@ void RemoteFileUtilClient::parseLastBuffer()
 
     } else {
 
-        // Init New Data Stream
-        QDataStream newDataStream(lastBuffer);
+        qDebug() << "RemoteFileUtilClient::parseLastBuffer - cID: " << cID << " - lastBuffer.size: " << lastBuffer.size();
+/*
+        // Get Last Buffer Size
+        int lbSize = lastBuffer.size();
 
-        // Clear Last Variant Map
-        lastDataMap.clear();
+        // Go Thru Last Buffer
+        for (int i=0, n=0; i<lbSize; ++i, n++) {
 
-        // Red Data Stream To Data Map
-        newDataStream >> lastDataMap;
+            std::cout << QString("0x%1 ").arg(lastBuffer[i], 2, 16, QChar('0')).toLocal8Bit().data();
 
-        // Get Last Data Map Client ID
-        unsigned int rcID = lastDataMap[DEFAULT_KEY_CID].toInt();
+            // Check n
+            if (n >= 15) {
+                std::cout << "\n";
+                // Reset n
+                n = 0;
+            }
 
-        // Check Client ID
-        if (cID != rcID) {
-            qWarning() << "RemoteFileUtilClient::parseLastBuffer - cID: " << cID << " - INVALID CLIENT ID: " << rcID;
-            return;
+            fflush(stdout);
+
+//            std::cout << lastBuffer[i];
+//            fflush(stdout);
+
         }
 
-        // Check Error
-        if (lastDataMap[DEFAULT_KEY_RESPONSE].toString() == QString(DEFAULT_RESPONSE_ERROR)) {
-            // Handle Error
-            handleError();
-            return;
-        }
+        qDebug() << " ";
+*/
+        // ...
 
-        // Check Aborted
-        if (lastDataMap[DEFAULT_KEY_RESPONSE].toString() == QString(DEFAULT_RESPONSE_ABORT)) {
-            // Handle Abort
-            handleAbort();
-            return;
-        }
+        // Init Buffer Pos
+        int bPos = 0;
+        // Init Frame Pattern Pos
+        int fpPos = 0;
+        // Get Last Buffer Size
+        int bSize = lastBuffer.size();
 
-        // Check If Aborting
-        if (status == ECSTAborting || status == ECSTAborted) {
-            qDebug() << "#### RemoteFileUtilClient::parseLastBuffer - cID: " << cID << " - ABORTING!!";
-            return;
-        }
+        qDebug() << "RemoteFileUtilClient::parseLastBuffer - cID: " << cID << " - lastBuffer.size: " << lastBuffer.size();
 
-        // Check Response
-        if (lastDataMap[DEFAULT_KEY_RESPONSE].toString() == QString(DEFAULT_RESPONSE_DIRITEM)) {
-            // Handle Dir List Item
-            handleDirListItem();
-            return;
-        }
+        // Go Thru Last Buffer - Buffer Pos
+        while (bPos < bSize) {
+            // Get Frame Pattern Pos
+            fpPos = lastBuffer.indexOf(framePattern, bPos);
 
-        // Check Response
-        if (lastDataMap[DEFAULT_KEY_RESPONSE].toString() == QString(DEFAULT_RESPONSE_QUEUE)) {
-            // Handle Queue Item
-            handleQueueItem();
-            return;
-        }
+            // Check Frame Pattern Pos
+            if (fpPos >= 0) {
+                // Update Buffer Pos
+                bPos = fpPos + framePattern.size();
+            }
 
-        // Check Response
-        if (lastDataMap[DEFAULT_KEY_RESPONSE].toString() == QString(DEFAULT_RESPONSE_CONFIRM)) {
-            // Handle Confirm
-            handleConfirm();
-            return;
-        }
+            // Get Next Frame Pattern Pos
+            int nextFPPos = lastBuffer.indexOf(framePattern, bPos);
+            // Check Next Frame Pattern Pos
+            if (nextFPPos < 0) {
+                // Adjust Next Frame Pattern Post
+                nextFPPos = bSize;
+            }
 
-        // Check Response
-        if (lastDataMap[DEFAULT_KEY_RESPONSE].toString() == QString(DEFAULT_RESPONSE_READY)) {
-            // Handle Finished
-            handleFinished();
-            return;
-        }
+            // Init New Data Stream
+            QDataStream newDataStream(lastBuffer.mid(bPos, nextFPPos - bPos));
 
-        // Check Response
-        if (lastDataMap[DEFAULT_KEY_RESPONSE].toString() == QString(DEFAULT_RESPONSE_PROGRESS)) {
-            // Handle Progress
-            handleProgress();
-            return;
-        }
+            // Clear Last Variant Map
+            lastDataMap.clear();
 
-        // Check Response
-        if (lastDataMap[DEFAULT_KEY_RESPONSE].toString() == QString(DEFAULT_RESPONSE_DIRSCAN)) {
-            // Handle Dir Size Scan
-            handleDirSizeUpdate();
-            return;
+            // Red Data Stream To Data Map
+            newDataStream >> lastDataMap;
+
+            //qDebug() << lastDataMap;
+
+            // Get Next Buffer Pos
+            bPos = nextFPPos + framePattern.size();
+
+            // Parse Last Data Map
+            parseLastDataMap();
         }
     }
+}
+
+//==============================================================================
+// Parse Last data Map
+//==============================================================================
+void RemoteFileUtilClient::parseLastDataMap()
+{
+    //qDebug() << ">>>> RemoteFileUtilClient::parseLastDataMap";
+
+    // Get Last Data Map Client ID
+    unsigned int rcID = lastDataMap[DEFAULT_KEY_CID].toInt();
+
+    // Check Client ID
+    if (cID != rcID) {
+        qWarning() << "RemoteFileUtilClient::parseLastBuffer - cID: " << cID << " - INVALID CLIENT ID: " << rcID;
+        //return;
+        goto finished;
+    }
+
+    // Check Error
+    if (lastDataMap[DEFAULT_KEY_RESPONSE].toString() == QString(DEFAULT_RESPONSE_ERROR)) {
+        // Handle Error
+        handleError();
+        //return;
+        goto finished;
+    }
+
+    // Check Aborted
+    if (lastDataMap[DEFAULT_KEY_RESPONSE].toString() == QString(DEFAULT_RESPONSE_ABORT)) {
+        // Handle Abort
+        handleAbort();
+        //return;
+        goto finished;
+    }
+
+    // Check If Aborting
+    if (status == ECSTAborting || status == ECSTAborted) {
+        qDebug() << "#### RemoteFileUtilClient::parseLastBuffer - cID: " << cID << " - ABORTING!!";
+        //return;
+        goto finished;
+    }
+
+    // Check Response
+    if (lastDataMap[DEFAULT_KEY_RESPONSE].toString() == QString(DEFAULT_RESPONSE_TEST)) {
+        // Handle Test
+        handleTest();
+        //return;
+        goto finished;
+    }
+
+    // Check Response
+    if (lastDataMap[DEFAULT_KEY_RESPONSE].toString() == QString(DEFAULT_RESPONSE_DIRITEM)) {
+        // Handle Dir List Item
+        handleDirListItem();
+        //return;
+        goto finished;
+    }
+
+    // Check Response
+    if (lastDataMap[DEFAULT_KEY_RESPONSE].toString() == QString(DEFAULT_RESPONSE_QUEUE)) {
+        // Handle Queue Item
+        handleQueueItem();
+        //return;
+        goto finished;
+    }
+
+    // Check Response
+    if (lastDataMap[DEFAULT_KEY_RESPONSE].toString() == QString(DEFAULT_RESPONSE_CONFIRM)) {
+        // Handle Confirm
+        handleConfirm();
+        //return;
+        goto finished;
+    }
+
+    // Check Response
+    if (lastDataMap[DEFAULT_KEY_RESPONSE].toString() == QString(DEFAULT_RESPONSE_READY)) {
+        // Handle Finished
+        handleFinished();
+        //return;
+        goto finished;
+    }
+
+    // Check Response
+    if (lastDataMap[DEFAULT_KEY_RESPONSE].toString() == QString(DEFAULT_RESPONSE_PROGRESS)) {
+        // Handle Progress
+        handleProgress();
+        //return;
+        goto finished;
+    }
+
+    // Check Response
+    if (lastDataMap[DEFAULT_KEY_RESPONSE].toString() == QString(DEFAULT_RESPONSE_DIRSCAN)) {
+        // Handle Dir Size Scan
+        handleDirSizeUpdate();
+        //return;
+        goto finished;
+    }
+
+    qDebug() << "RemoteFileUtilClient::parseLastBuffer - WTF?!??";
+
+finished:
+
+    //qDebug() << "<<<< RemoteFileUtilClient::parseLastDataMap";
+
+    return;
+}
+
+//==============================================================================
+// Handle Test
+//==============================================================================
+void RemoteFileUtilClient::handleTest()
+{
+    qDebug() << "RemoteFileUtilClient::handleTest - custom data: " << lastDataMap[DEFAULT_KEY_CUSTOM].toString();
 
     // ...
 
+//    std::cout << ".";
+//    fflush(stdout);
+
+    // ...
 }
 
 //==============================================================================

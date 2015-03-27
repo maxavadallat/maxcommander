@@ -57,7 +57,7 @@ void FileListModel::init()
 
     // Connect Signals
     connect(fileUtil, SIGNAL(clientConnectionChanged(int,bool)), this, SLOT(clientConnectionChanged(int,bool)));
-    connect(fileUtil, SIGNAL(clientStatusChanged(int, ClientStatusType)), this, SLOT(clientStatusChanged(int, int)));
+    connect(fileUtil, SIGNAL(clientStatusChanged(int, int)), this, SLOT(clientStatusChanged(int, int)));
     connect(fileUtil, SIGNAL(dirListItemFound(uint,QString,QString)), this, SLOT(dirListItemFound(uint,QString,QString)));
     connect(fileUtil, SIGNAL(fileOpFinished(uint,QString,QString,QString,QString)), this, SLOT(fileOpFinished(uint,QString,QString,QString,QString)));
     connect(fileUtil, SIGNAL(fileOpAborted(uint,QString,QString,QString,QString)), this, SLOT(fileOpAborted(uint,QString,QString,QString,QString)));
@@ -358,13 +358,14 @@ QVariant FileListModel::data(const QModelIndex& aIndex, int aRole) const
             case FileName: {
                 // Check File Info
                 if (item->fileInfo.isBundle()) {
-                    return item->fileInfo.baseName();
+                    if (!item->fileInfo.bundleName().isEmpty())
+                        return item->fileInfo.bundleName();
+
+                    return item->fileInfo.fileName();
                 }
 
                 // Check Base Name
-                if (item->fileInfo.baseName().isEmpty() ||
-                    item->fileInfo.isDir()              ||
-                    item->fileInfo.isBundle()) {
+                if (item->fileInfo.baseName().isEmpty() || item->fileInfo.isDir()) {
                     return item->fileInfo.fileName();
                 }
 
@@ -395,7 +396,7 @@ QVariant FileListModel::data(const QModelIndex& aIndex, int aRole) const
             case FileSize: {
                 // Check File Info
                 if (item->fileInfo.isBundle()) {
-                    return QString("");
+                    return QString("[BUNDLE]");
                 }
 
                 // Check File Info

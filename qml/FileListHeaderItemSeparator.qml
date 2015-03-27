@@ -7,14 +7,19 @@ Rectangle {
     width: Const.DEFAULT_FILE_LIST_HEADER_SEPARATOR_WIDTH
     height: target.height
 
-    //anchors.right: parent.right
-
     property variant target: parent
 
     color: Const.DEFAULT_FILE_LIST_HEADER_SEPARATOR_COLOR
 
     border.color: Const.DEFAULT_FILE_LIST_HEADER_ITEM_BORDER_COLOR
     border.width: 1
+
+    // Set Pos X
+    function setPositionX(xPos) {
+        //console.log("separatorRoot.setPositionX - xPos: " + xPos);
+        // Set Position
+        separatorRoot.x = xPos;
+    }
 
     MouseArea {
         anchors.fill: parent
@@ -35,7 +40,7 @@ Rectangle {
 
     // N Completed
     Component.onCompleted: {
-        x = target.width - Const.DEFAULT_FILE_LIST_HEADER_SEPARATOR_WIDTH + 1;
+        separatorRoot.x = target.width - Const.DEFAULT_FILE_LIST_HEADER_SEPARATOR_WIDTH + 1;
     }
 }
 

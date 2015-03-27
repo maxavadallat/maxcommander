@@ -9,7 +9,8 @@ var DEFAULT_FILE_PREFIX                                 = "file://";
 
 var DEFAULT_FILE_ICON_PREFIX                            = "image://fileicon/";
 
-var DEFAULT_DIR_SIZE_TITLE_LABEL_TEXT                   = "[DIR]";
+var DEFAULT_DIR_SIZE_TITLE_LABEL_TEXT_DIR               = "[DIR]";
+var DEFAULT_DIR_SIZE_TITLE_LABEL_TEXT_BUNDLE            = "[BUNDLE]";
 
 var DEFAULT_FILE_LIST_FONT_SIZE                         = 11;
 
@@ -26,5 +27,7 @@ var DEFAULT_FILE_LIST_TEXT_COLOR                        = "black";
 var DEFAULT_FILE_LIST_HIDDEN_TEXT_COLOR                 = "#AA444444";
 var DEFAULT_FILE_LIST_SELECTED_TEXT_COLOR               = "red";
 var DEFAULT_FILE_LIST_LINK_TEXT_COLOR                   = "blue";
+
+var DEFAULT_FILE_LIST_HEADER_ITEM_NAME_MIN_WIDTH        = 60;
 
 

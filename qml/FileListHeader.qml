@@ -28,6 +28,12 @@ Rectangle {
     property alias permsWidth: permsHeader.width
     property alias attrWidth : attribsHeader.width
 
+    // Set Name Header Separator Position
+    function setNameHeaderSeparatorPosition(xPos) {
+        // Set Separator Position
+        nameHeader.setSeparatorPosition(xPos);
+    }
+
     color: Const.DEFAULT_FILE_LIST_HEADER_BACKGROUND_COLOR
 
     Row {

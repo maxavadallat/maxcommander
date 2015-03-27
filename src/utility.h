@@ -50,6 +50,12 @@ QString getDirName(const QString& aDirPath);
 // Check If Have Access To List Dir
 bool haveAccessToDir(const QString& aDirPath);
 
+// Store App Exec Path
+void storeAppExecPath(const char* aPath);
+
+// Get App Exec Path
+QString getAppExecPath();
+
 
 #endif // UTILITY
 

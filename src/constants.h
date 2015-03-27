@@ -13,6 +13,8 @@
 #define DEFAULT_ORGANIZATION_DOMAIN                         "mysoft.com"
 
 
+#define DEFAULT_WORKER_HOST_NAME                            "localhost"
+
 // QML Context Properties
 
 #define MAIN_VIEW_CONTROLLER                                "mainViewController"
@@ -33,6 +35,7 @@
 // Settings Keys
 
 // Main
+#define SETTINGS_KEY_EXEC_PATH                              SETTINGS_GROUP_MAIN"/execpath"
 
 #define SETTINGS_KEY_MAIN_MAXIMIZED                         SETTINGS_GROUP_MAIN"/maximized"
 

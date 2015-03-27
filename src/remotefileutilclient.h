@@ -2,94 +2,10 @@
 #define REMOTEFILEUTILCLIENT_H
 
 #include <QLocalSocket>
+#include <QTcpSocket>
 #include <QByteArray>
 #include <QObject>
 #include <QMutex>
-
-
-
-//==============================================================================
-// Remote File Util Client Observer Class
-//==============================================================================
-class RemoteFileUtilClientObserver
-{
-public:
-
-    // File Operation Started
-    virtual void fileOpStarted(const unsigned int& aID,
-                               const QString& aOp,
-                               const QString& aPath,
-                               const QString& aSource,
-                               const QString& aTarget) = 0;
-
-    // File Progress - Copy/Move/Rename/Delete
-    virtual void fileOpProgress(const unsigned int& aID,
-                                const QString& aOp,
-                                const QString& aCurrFilePath,
-                                const quint64& aCurrProgress,
-                                const quint64& aCurrTotal,
-                                const quint64& aOverallProgress,
-                                const quint64& aOverallTotal,
-                                const int& aSpeed) = 0;
-
-    // File Operation Finished
-    virtual void fileOpFinished(const unsigned int& aID,
-                                const QString& aOp,
-                                const QString& aPath,
-                                const QString& aSource,
-                                const QString& aTarget) = 0;
-
-    // File Operation Aborted
-    virtual void fileOpAborted(const unsigned int& aID,
-                               const QString& aOp,
-                               const QString& aPath,
-                               const QString& aSource,
-                               const QString& aTarget) = 0;
-
-    // File Operation Error
-    virtual void fileOpError(const unsigned int& aID,
-                             const QString& aOp,
-                             const QString& aPath,
-                             const QString& aSource,
-                             const QString& aTarget,
-                             const int& aError) = 0;
-
-    // Need Confirmation
-    virtual void fileOpNeedConfirm(const unsigned int& aID,
-                                   const QString& aOp,
-                                   const int& aCode,
-                                   const QString& aPath,
-                                   const QString& aSource,
-                                   const QString& aTarget) = 0;
-
-    // Dir Size Scan Progress
-    virtual void dirSizeScanProgress(const unsigned int& aID,
-                                     const QString& aPath,
-                                     const quint64& aNumDirs,
-                                     const quint64& aNumFiles,
-                                     const quint64& aScannedSize) = 0;
-
-    // Dir List Item Found
-    virtual void dirListItemFound(const unsigned int& aID,
-                                  const QString& aPath,
-                                  const QString& aFileName) = 0;
-
-    // File Operation Queue Item Found
-    virtual void fileOpQueueItemFound(const unsigned int& aID,
-                                      const QString& aOp,
-                                      const QString& aPath,
-                                      const QString& aSource,
-                                      const QString& aTarget) = 0;
-
-    // File Search Result Item Found
-    virtual void fileSearchResultItemFound(const unsigned int& aID,
-                                           const QString& aOp,
-                                           const QString& aFilePath) = 0;
-
-};
-
-
-
 
 
 
@@ -120,7 +36,7 @@ class RemoteFileUtilClient : public QObject
 public:
 
     // Constructor
-    explicit RemoteFileUtilClient(RemoteFileUtilClientObserver* aObserver = NULL, QObject* aParent = NULL);
+    explicit RemoteFileUtilClient(QObject* aParent = NULL);
 
     // Connect To File Server
     void connectToFileServer(const bool& asRoot = false, const QString& aRootPass = "");
@@ -191,7 +107,7 @@ signals:
     void clientConnectionChanged(const int& aID, const bool& aConnected);
 
     // Client Status Changed Signal
-    void clientStatusChanged(const int& aID, const ClientStatusType& aStatus);
+    void clientStatusChanged(const int& aID, const int& aStatus);
 
     // File Operation Started
     void fileOpStarted(const unsigned int& aID,
@@ -283,6 +199,11 @@ protected slots:
 
     // Parse Last Buffer
     void parseLastBuffer();
+    // Parse Last data Map
+    void parseLastDataMap();
+
+    // Handle Test
+    void handleTest();
 
     // Handle Preogress
     void handleProgress();
@@ -306,14 +227,17 @@ protected slots:
     // Write Data
     void wirteData(const QVariantMap& aData);
 
+    // Socket Host Found
+    void socketHostFound();
+
     // Socket Connected Slot
     void socketConnected();
     // Socket Disconnected Slot
     void socketDisconnected();
     // Socket Error Slot
-    void socketError(QLocalSocket::LocalSocketError socketError);
+    void socketError(QAbstractSocket::SocketError socketError);
     // Socket State Changed Slot
-    void socketStateChanged(QLocalSocket::LocalSocketState socketState);
+    void socketStateChanged(QAbstractSocket::SocketState socketState);
 
     // Socket About To Close Slot
     void socketAboutToClose();
@@ -336,13 +260,13 @@ private:
     ClientStatusType                status;
 
     // Client Socket
-    QLocalSocket*                   client;
-
-    // Observer
-    RemoteFileUtilClientObserver*   observer;
+    //QLocalSocket*                   client;
+    QTcpSocket*                     client;
 
     // Last Buffer
     QByteArray                      lastBuffer;
+    // Frame Pattern
+    QByteArray                      framePattern;
 
     // Last Data Map
     QVariantMap                     lastDataMap;

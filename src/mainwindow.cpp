@@ -294,7 +294,7 @@ void MainWindow::updateFunctionKeys()
         ui->exitButton->setText(tr(""));
 
     } else {
-        qDebug() << "MainWindow::updateFunctionKeys";
+        //qDebug() << "MainWindow::updateFunctionKeys";
 /*
         // Set Button Text
         ui->helpButton->setText(tr("Help"));
@@ -440,7 +440,7 @@ void MainWindow::fileOpNeedConfirm(const unsigned int& aID,
                                    const QString& aSource,
                                    const QString& aTarget)
 {
-    qDebug() << "MainWindow::fileOpNeedConfirm - aID: " << aID << " - aOp: " << aOp << " - aCode: " << aCode;
+    qDebug() << "MainWindow::fileOpNeedConfirm - aID: " << aID << " - aOp: " << aOp << " - aCode: " << aCode << " - dirListCounter: " << dirListCounter;
 
     // ...
 
@@ -563,6 +563,9 @@ void MainWindow::on_terminalButton_clicked()
 
             qDebug() << "\n#### testClient - Start Test";
 
+            // Reset Counter
+            dirListCounter = 0;
+
             // Start Test Operation
             testClient->startTestOperation();
         }
@@ -622,8 +625,12 @@ void MainWindow::on_editButton_clicked()
 
             qDebug() << "\n#### testClient - Send Yes";
 
+            // Reset Counter
+            dirListCounter = 0;
+
             // Stop Test Operation
             testClient->sendResponse(DEFAULT_RESPONSE_YES);
+
         }
 
     }
@@ -651,6 +658,9 @@ void MainWindow::on_copyButton_clicked()
         if (testClient) {
 
             qDebug() << "\n#### testClient - Send No";
+
+            // Reset Counter
+            dirListCounter = 0;
 
             // Stop Test Operation
             testClient->sendResponse(DEFAULT_RESPONSE_NO);

@@ -38,23 +38,28 @@ FilePanel::FilePanel(QWidget* aParent)
     // Setup UI
     ui->setupUi(this);
 
-    // Get Supported Image Formats Bye Array
-    QList<QByteArray> formats = QImageReader::supportedImageFormats();
-    // Get Count
-    int flCount = formats.count();
-    // Go Thru Formats
-    for (int i=0; i<flCount; ++i) {
-        // Add Format String
-        supportedImageFormats << QString(formats[i]);
-    }
+    // Init
+    init();
+}
+
+//==============================================================================
+// Init
+//==============================================================================
+void FilePanel::init()
+{
+    // Update Supported Image Formats
+    updateSupportedImageFormats();
 
     // ...
 
     // Create File List Model
-    fileListModel = new FileListModel();
+    //fileListModel = new FileListModel();
 
-    // Connect Signals
-    connect(fileListModel, SIGNAL(dirFetchFinished()), this, SLOT(fileModelDirFetchFinished()));
+    // Check File List Model
+    if (fileListModel) {
+        // Connect Signals
+        connect(fileListModel, SIGNAL(dirFetchFinished()), this, SLOT(fileModelDirFetchFinished()));
+    }
 
     // Set Context Properties
     QQmlContext* ctx = ui->fileListWidget->rootContext();
@@ -80,8 +85,8 @@ FilePanel::FilePanel(QWidget* aParent)
     // Connect Signals
     connect(ui->fileListWidget, SIGNAL(focusChanged(bool)), this, SLOT(setPanelFocus(bool)));
 
-    // Update Available Space Label
-    //updateAvailableSpaceLabel();
+    // ...
+
 }
 
 //==============================================================================
@@ -367,7 +372,7 @@ void FilePanel::goUp()
         // Get Last Dir Name to Jump
         lastDirName = getDirName(currentDir);
 
-        //qDebug() << "FilePanel::goUp - panelName: " << panelName << " - parentDir: " << parentDir;
+        qDebug() << "FilePanel::goUp - panelName: " << panelName << " - parentDir: " << parentDir << " - lastDirName: " << lastDirName;
 
         // Set Current Dir
         setCurrentDir(parentDir);
@@ -560,11 +565,27 @@ void FilePanel::updateAvailableSpaceLabel()
 }
 
 //==============================================================================
+// Update Supported Image Formates
+//==============================================================================
+void FilePanel::updateSupportedImageFormats()
+{
+    // Get Supported Image Formats Bye Array
+    QList<QByteArray> formats = QImageReader::supportedImageFormats();
+    // Get Count
+    int flCount = formats.count();
+    // Go Thru Formats
+    for (int i=0; i<flCount; ++i) {
+        // Add Format String
+        supportedImageFormats << QString(formats[i]);
+    }
+}
+
+//==============================================================================
 // File Model Fetch Ready
 //==============================================================================
 void FilePanel::fileModelDirFetchFinished()
 {
-    qDebug() << "FilePanel::fileModelDirFetchFinished - panelName: " << panelName;
+    qDebug() << "FilePanel::fileModelDirFetchFinished - panelName: " << panelName << " - lastDirName: " << lastDirName;
 
     // Check Last Dir Name
     if (!lastDirName.isEmpty()) {

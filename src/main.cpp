@@ -2,7 +2,10 @@
 #include <QApplication>
 #include <QDebug>
 
+#include <mcwinterface.h>
+
 #include "mainwindow.h"
+#include "utility.h"
 #include "constants.h"
 
 
@@ -21,13 +24,14 @@ int main(int argc, char* argv[])
     // Set Organization Domain
     app.setOrganizationDomain(DEFAULT_ORGANIZATION_DOMAIN);
 
+    // Store App Exec Path
+    storeAppExecPath(argv[0]);
+
     // Init Main Window
     MainWindow* mainWindow = MainWindow::getInstance();
 
     // Show Main Window
     mainWindow->showWindow();
-
-    // ...
 
     // Execute App
     int result = app.exec();
@@ -37,3 +41,5 @@ int main(int argc, char* argv[])
 
     return result;
 }
+
+

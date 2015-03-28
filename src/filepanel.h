@@ -35,6 +35,17 @@ class FilePanel : public QFrame
     Q_PROPERTY(bool permsVisible READ getPermsVisible WRITE setPermsVisible NOTIFY permsVisibleChanged)
     Q_PROPERTY(bool attrsVisible READ getAttrsVisible WRITE setAttrsVisible NOTIFY attrsVisibleChanged)
 
+    Q_PROPERTY(int extWidth READ getExtWidth WRITE setExtWidth NOTIFY extWidthChanged)
+    Q_PROPERTY(int typeWidth READ getTypeWidth WRITE setTypeWidth NOTIFY typeWidthChanged)
+    Q_PROPERTY(int sizeWidth READ getSizeWidth WRITE setSizeWidth NOTIFY sizeWidthChanged)
+    Q_PROPERTY(int dateWidth READ getDateWidth WRITE setDateWidth NOTIFY dateWidthChanged)
+    Q_PROPERTY(int ownerWidth READ getOwnerWidth WRITE setOwnerWidth NOTIFY ownerWidthChanged)
+    Q_PROPERTY(int permsWidth READ getPermsWidth WRITE setPermsWidth NOTIFY permsWidthChanged)
+    Q_PROPERTY(int attrsWidth READ getAttrsWidth WRITE setAttrsWidth NOTIFY attrsWidthChanged)
+
+    Q_PROPERTY(int sorting READ getSorting WRITE setSorting NOTIFY sortingChanged)
+    Q_PROPERTY(bool reverseOrder READ getReverseOrder WRITE setReverseOrder NOTIFY reverseOrderChanged)
+
 public:
     // Constructor
     explicit FilePanel(QWidget* aParent = NULL);
@@ -95,6 +106,52 @@ public:
     bool getAttrsVisible();
     // Set Attributes Visible
     void setAttrsVisible(const bool& aAttrsVisible);
+
+    // Get Extensions Column Width
+    int getExtWidth();
+    // Set Extensions Column Width
+    void setExtWidth(const int& aWidth);
+
+    // Get Type Column Width
+    int getTypeWidth();
+    // Set Type Column Width
+    void setTypeWidth(const int& aWidth);
+
+    // Get Size Column Width
+    int getSizeWidth();
+    // Set Size Column Width
+    void setSizeWidth(const int& aWidth);
+
+    // Get Date Column Width
+    int getDateWidth();
+    // Set Date Column Width
+    void setDateWidth(const int& aWidth);
+
+    // Get Owner Column Width
+    int getOwnerWidth();
+    // Set Owner Column Width
+    void setOwnerWidth(const int& aWidth);
+
+    // Get Permissions Column Width
+    int getPermsWidth();
+    // Set Permissions Column Width
+    void setPermsWidth(const int& aWidth);
+
+    // Get Attributes Column Width
+    int getAttrsWidth();
+    // Set Attributes Column Width
+    void setAttrsWidth(const int& aWidth);
+
+    // Get Sorting
+    int getSorting();
+    // Set Sorting
+    void setSorting(const int& aSorting);
+
+    // Get Reversed Order
+    bool getReverseOrder();
+    // Set Reversed Order
+    void setReverseOrder(const bool& aReverse);
+
 
     // Destructor
     virtual ~FilePanel();
@@ -179,6 +236,26 @@ signals:
     // Attributes Visible Changed Signal
     void attrsVisibleChanged(const bool& aAttrsVisible);
 
+    // Extension Width Changed Signal
+    void extWidthChanged(const int& aExtWidth);
+    // Type Width Changed Signal
+    void typeWidthChanged(const int& aTypeWidth);
+    // Size Width Changed Signal
+    void sizeWidthChanged(const int& aSizeWidth);
+    // Date Width Changed Signal
+    void dateWidthChanged(const int& aDateWidth);
+    // Owner Width Changed Signal
+    void ownerWidthChanged(const int& aOwnerWidth);
+    // Permissions Width Changed Signal
+    void permsWidthChanged(const int& aPermsWidth);
+    // Attributes Width Changed Signal
+    void attrsWidthChanged(const int& aAttrsWidth);
+
+    // Sorting Changed Signal
+    void sortingChanged(const int& aSorting);
+    // Reverse Order Changed Signal
+    void reverseOrderChanged(const bool& aReverseOrder);
+
 protected slots:
 
     // Init
@@ -260,20 +337,40 @@ private:
     // Show Hidden Files
     bool                    showHidden;
 
-    // Extensions Visible
+    // Extensions Column Visible
     bool                    extVisible;
-    // Type Visible
+    // Type Column Visible
     bool                    typeVisible;
-    // Size Visible
+    // Size Column Visible
     bool                    sizeVisible;
-    // Date Visible
+    // Date Column Visible
     bool                    dateVisible;
-    // Owner Visible
+    // Owner Column Visible
     bool                    ownerVisible;
-    // Permissions Visible
+    // Permissions Column Visible
     bool                    permsVisible;
-    // Attributes Visible
+    // Attributes Column Visible
     bool                    attrsVisible;
+
+    // Extensions Column Width
+    int                     extWidth;
+    // Type Column Width
+    int                     typeWidth;
+    // Size Column Width
+    int                     sizeWidth;
+    // Date Column Width
+    int                     dateWidth;
+    // Owner Column Width
+    int                     ownerWidth;
+    // Permissions Column Width
+    int                     permsWidth;
+    // Attributes Column Width
+    int                     attrsWidth;
+
+    // Sorting
+    int                     sorting;
+    // Reverse Order
+    bool                    reverseOrder;
 };
 
 #endif // FILEPANEL_H

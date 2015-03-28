@@ -42,74 +42,93 @@ Rectangle {
     Row {
         id: itemsContainer
         anchors.fill: parent
-        //color: "transparent"
 
         // Header Item - Name
         FileListHeaderItem {
             id: nameHeader
             width: 152
-            height: parent.height
             itemText: "Filename"
+            itemSorting: Const.DEFAULT_SORT_NAME
         }
 
         // Header Item - Ext
         FileListHeaderItem {
             id: extHeader
-            height: parent.height
             itemText: "Ext"
-            width: 40
+            itemSorting: Const.DEFAULT_SORT_EXT
             visible: mainController.extVisible
+            onWidthChanged: {
+                // Set Extensions Column Width
+                mainController.extWidth = extHeader.width;
+            }
         }
 
         // Header Item - Type
         FileListHeaderItem {
             id: typeHeader
-            width: 120
-            height: parent.height
             itemText: "Type"
+            itemSorting: Const.DEFAULT_SORT_TYPE
             visible: mainController.typeVisible
+            onWidthChanged: {
+                // Set Type Column Width
+                mainController.typeWidth = typeHeader.width;
+            }
         }
 
         FileListHeaderItem {
             id: sizeHeader
-            width: 60
-            height: parent.height
             itemText: "Size"
             visible: mainController.sizeVisible
+            itemSorting: Const.DEFAULT_SORT_SIZE
+            onWidthChanged: {
+                // Set Size Column Width
+                mainController.sizeWidth = sizeHeader.width;
+            }
         }
 
         FileListHeaderItem {
             id: dateHeader
-            width: 128
-            height: parent.height
             itemText: "Date"
             visible: mainController.dateVisible
+            itemSorting: Const.DEFAULT_SORT_DATE
+            onWidthChanged: {
+                // Set Date Column Width
+                mainController.dateWidth = dateHeader.width;
+            }
         }
 
         FileListHeaderItem {
             id: ownerHeader
-            width: 60
-            height: parent.height
             itemText: "Owner"
             visible: mainController.ownerVisible
+            itemSorting: Const.DEFAULT_SORT_OWNER
+            onWidthChanged: {
+                // Set Owner Column Width
+                mainController.ownerWidth = ownerHeader.width;
+            }
         }
 
         FileListHeaderItem {
             id: permsHeader
-            width: 100
-            height: parent.height
             itemText: "Perms"
             visible: mainController.permsVisible
+            itemSorting: Const.DEFAULT_SORT_PERMS
+            onWidthChanged: {
+                // Set Permissions Column Width
+                mainController.permsWidth = permsHeader.width;
+            }
         }
 
         FileListHeaderItem {
             id: attribsHeader
-            width: 60
-            height: parent.height
-            itemText: "Attrs"
+            itemText: "Attribs"
             visible: mainController.attrsVisible
+            itemSorting: Const.DEFAULT_SORT_ATTRS
+            onWidthChanged: {
+                // Set Attributes Column Width
+                mainController.attrsWidth = attribsHeader.width;
+            }
         }
-
     }
 
     MouseArea {
@@ -126,6 +145,87 @@ Rectangle {
     // Connections - Main Controller
     Connections {
         target: mainController
+        // On Extension Column Width Changed
+        onExtWidthChanged: {
+            // Check Extensions Header Width
+            if (extHeader.width != mainController.extWidth) {
+                // Set Extensions Header Position - Will Trigger Column Width Change
+                extHeader.setSeparatorPosition(mainController.extWidth - Const.DEFAULT_FILE_LIST_HEADER_SEPARATOR_WIDTH);
+            }
+        }
+
+        // On Type Column Width Changed
+        onTypeWidthChanged: {
+            // Check Type Header Width
+            if (typeHeader.width != mainController.extWidth) {
+                // Set Type Header Position - Will Trigger Column Width Change
+                typeHeader.setSeparatorPosition(mainController.typeWidth - Const.DEFAULT_FILE_LIST_HEADER_SEPARATOR_WIDTH);
+            }
+        }
+
+        // On Size Column Width Changed
+        onSizeWidthChanged: {
+            // Check Size Header Width
+            if (sizeHeader.width != mainController.extWidth) {
+                // Set Size Header Position - Will Trigger Column Width Change
+                sizeHeader.setSeparatorPosition(mainController.sizeWidth - Const.DEFAULT_FILE_LIST_HEADER_SEPARATOR_WIDTH);
+            }
+        }
+
+        // On Date Column Width Changed
+        onDateWidthChanged: {
+            // Check Date Header Width
+            if (dateHeader.width != mainController.extWidth) {
+                // Set Date Header Position - Will Trigger Column Width Change
+                dateHeader.setSeparatorPosition(mainController.dateWidth - Const.DEFAULT_FILE_LIST_HEADER_SEPARATOR_WIDTH);
+            }
+        }
+
+        // On Owner Column Width Changed
+        onOwnerWidthChanged: {
+            // Check Owner Header Width
+            if (ownerHeader.width != mainController.extWidth) {
+                // Set Owner Header Position - Will Trigger Column Width Change
+                ownerHeader.setSeparatorPosition(mainController.ownerWidth - Const.DEFAULT_FILE_LIST_HEADER_SEPARATOR_WIDTH);
+            }
+        }
+
+        // On Permissions Column Width Changed
+        onPermsWidthChanged: {
+            // Check Permissions Header Width
+            if (permsHeader.width != mainController.extWidth) {
+                // Set Permissions Header Position - Will Trigger Column Width Change
+                permsHeader.setSeparatorPosition(mainController.permsWidth - Const.DEFAULT_FILE_LIST_HEADER_SEPARATOR_WIDTH);
+            }
+        }
+
+        // On Attributes Column Width Changed
+        onAttrsWidthChanged: {
+            // Check Attributes Header Width
+            if (attribsHeader.width != mainController.extWidth) {
+                // Set Attributes Header Position - Will Trigger Column Width Change
+                attribsHeader.setSeparatorPosition(mainController.attrsWidth - Const.DEFAULT_FILE_LIST_HEADER_SEPARATOR_WIDTH);
+            }
+        }
+
+        // On Sorting Changed
+        onSortingChanged: {
+
+        }
+
+        // On Reverse Order Changed
+        onReverseOrderChanged: {
+
+
+        }
+    }
+
+    // On Completed
+    Component.onCompleted: {
+        //console.log("fileListHeaderRoot.onCompleted - extWidth: " + mainController.extWidth);
+
+        // ...
+
     }
 }
 

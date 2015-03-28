@@ -56,6 +56,11 @@ void storeAppExecPath(const char* aPath);
 // Get App Exec Path
 QString getAppExecPath();
 
+// Get File Name WithOut Extension From Full File Name
+QString getFileNameFromFullName(const QString& aFullFileName);
+// Get File Extension From Full File Name
+QString getExtensionFromFullName(const QString& aFullFileName);
+
 
 #endif // UTILITY
 

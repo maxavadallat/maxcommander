@@ -36,6 +36,8 @@ FileListModel::FileListModel(QObject* aParent)
     : QAbstractListModel(aParent)
     , currentDir(QDir::homePath())
     , fileUtil(NULL)
+    , sorting(0)
+    , reverseOrder(false)
 {
     qDebug() << "FileListModel::FileListModel";
 
@@ -103,6 +105,38 @@ void FileListModel::setCurrentDir(const QString& aCurrentDir)
 }
 
 //==============================================================================
+// Set Sorting Order
+//==============================================================================
+void FileListModel::setSorting(const int& aSorting)
+{
+    // Check Sorting
+    if (sorting != aSorting) {
+        // Set Sorting
+        sorting = aSorting;
+
+        // ...
+
+
+    }
+}
+
+//==============================================================================
+// Set Reverse Mode
+//==============================================================================
+void FileListModel::setReverse(const bool& aReverse)
+{
+    // Check Reverse
+    if (reverseOrder != aReverse) {
+        // Ser Reverse Order
+        reverseOrder = aReverse;
+
+        // ...
+
+
+    }
+}
+
+//==============================================================================
 // Clear
 //==============================================================================
 void FileListModel::clear()
@@ -165,6 +199,14 @@ void FileListModel::fetchDirItems()
 
     // Init Sort Flags
     int sortFlags = settings.value(SETTINGS_KEY_DIRFIRST, true).toBool() ? DEFAULT_SORT_DIRFIRST : 0;
+
+    // Adding Sorting Method
+    sortFlags |= sorting;
+
+    // Check Reverse Order
+    if (reverseOrder) {
+        sortFlags |= DEFAULT_SORT_REVERSE;
+    }
 
     // ...
 
@@ -369,7 +411,7 @@ QVariant FileListModel::data(const QModelIndex& aIndex, int aRole) const
                     return item->fileInfo.fileName();
                 }
 
-                return item->fileInfo.baseName();
+                return getFileNameFromFullName(item->fileInfo.fileName());
 
             } break;
 
@@ -381,7 +423,7 @@ QVariant FileListModel::data(const QModelIndex& aIndex, int aRole) const
                     return QString("");
                 }
 
-                return item->fileInfo.suffix();
+                return getExtensionFromFullName(item->fileInfo.fileName());
 
             } break;
 

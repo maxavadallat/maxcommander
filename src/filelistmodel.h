@@ -57,6 +57,11 @@ public:
     // Get Busy
     bool getBusy();
 
+    // Set Sorting Order
+    void setSorting(const int& aSorting);
+    // Set Reverse Mode
+    void setReverse(const bool& aReverse);
+
     // Destructor
     virtual ~FileListModel();
 
@@ -64,7 +69,6 @@ public slots:
 
     // Clear
     void clear();
-
     // Reload
     void reload();
 
@@ -162,6 +166,12 @@ protected:
 
     // Remote File Client
     RemoteFileUtilClient*       fileUtil;
+
+    // Sorting Mode
+    int                         sorting;
+
+    // Reverse Order
+    bool                        reverseOrder;
 
     // ...
 };

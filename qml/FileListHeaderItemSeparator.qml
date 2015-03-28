@@ -27,6 +27,13 @@ Rectangle {
         drag.axis: Drag.XAxis
         drag.minimumX: 0
         cursorShape: Qt.SplitHCursor
+        hoverEnabled: true
+        onEntered: {
+            parent.color = "red";
+        }
+        onExited: {
+            parent.color = Const.DEFAULT_FILE_LIST_HEADER_SEPARATOR_COLOR;
+        }
     }
 
     // On X Changed

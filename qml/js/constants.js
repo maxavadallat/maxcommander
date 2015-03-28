@@ -51,5 +51,13 @@ var DEFAULT_POPUP_BACKGROUND_COLOR                      = "#CC000000";
 var DEFAULT_TRANSITION_DURATION                         = 200;
 
 
-
+// Sorting Methods - MUST BE IN SYNC WITH MCWINTERFACE.H
+var DEFAULT_SORT_NAME                                   = 0;
+var DEFAULT_SORT_EXT                                    = 1;
+var DEFAULT_SORT_TYPE                                   = 2;
+var DEFAULT_SORT_SIZE                                   = 3;
+var DEFAULT_SORT_DATE                                   = 4;
+var DEFAULT_SORT_OWNER                                  = 5;
+var DEFAULT_SORT_PERMS                                  = 6;
+var DEFAULT_SORT_ATTRS                                  = 7;
 

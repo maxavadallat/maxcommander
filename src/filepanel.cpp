@@ -8,6 +8,8 @@
 #include <QImageReader>
 #include <QDebug>
 
+#include <mcwinterface.h>
+
 #include "mainwindow.h"
 #include "filepanel.h"
 #include "filelistmodel.h"
@@ -41,6 +43,13 @@ FilePanel::FilePanel(QWidget* aParent)
     , ownerVisible(false)
     , permsVisible(false)
     , attrsVisible(false)
+    , extWidth(40)
+    , typeWidth(120)
+    , sizeWidth(60)
+    , dateWidth(130)
+    , ownerWidth(60)
+    , permsWidth(100)
+    , attrsWidth(60)
 
 {
     // Setup UI
@@ -225,14 +234,14 @@ void FilePanel::setShowHidden(const bool& aHidden)
         qDebug() << "FilePanel::setShowHidden - panelName: " << panelName << " - aHidden: " << aHidden;
         // Set Show Hidden
         showHidden = aHidden;
-
+/*
         // Init Settings
         QSettings settings;
         // Set Value
         settings.setValue(SETTINGS_KEY_SHOW_HIDDEN_FILES, showHidden);
         // Sync
         settings.sync();
-
+*/
         // Reload
         reload(0);
 
@@ -394,6 +403,230 @@ void FilePanel::setAttrsVisible(const bool& aAttrsVisible)
         attrsVisible = aAttrsVisible;
         // Emit Attributes Visible Changed Signal
         emit attrsVisibleChanged(attrsVisible);
+    }
+}
+
+//==============================================================================
+// Get Extensions Column Width
+//==============================================================================
+int FilePanel::getExtWidth()
+{
+    return extWidth;
+}
+
+//==============================================================================
+// Set Extensions Column Width
+//==============================================================================
+void FilePanel::setExtWidth(const int& aWidth)
+{
+    // Check Extensions Width
+    if (extWidth != aWidth) {
+        // Set Width
+        extWidth = aWidth;
+        // Emit Width Changed Signal
+        emit extWidthChanged(extWidth);
+    }
+}
+
+//==============================================================================
+// Get Type Column Width
+//==============================================================================
+int FilePanel::getTypeWidth()
+{
+    return typeWidth;
+}
+
+//==============================================================================
+// Set Type Column Width
+//==============================================================================
+void FilePanel::setTypeWidth(const int& aWidth)
+{
+    // Check Type Width
+    if (typeWidth != aWidth) {
+        // Set Width
+        typeWidth = aWidth;
+        // Emit Width Changed Signal
+        emit typeWidthChanged(typeWidth);
+    }
+}
+
+//==============================================================================
+// Get Size Column Width
+//==============================================================================
+int FilePanel::getSizeWidth()
+{
+    return sizeWidth;
+}
+
+//==============================================================================
+// Set Size Column Width
+//==============================================================================
+void FilePanel::setSizeWidth(const int& aWidth)
+{
+    // Check Size Width
+    if (sizeWidth != aWidth) {
+        // Set Width
+        sizeWidth = aWidth;
+        // Emit Width Changed Signal
+        emit sizeWidthChanged(sizeWidth);
+    }
+}
+
+//==============================================================================
+// Get Date Column Width
+//==============================================================================
+int FilePanel::getDateWidth()
+{
+    return dateWidth;
+}
+
+//==============================================================================
+// Set Date Column Width
+//==============================================================================
+void FilePanel::setDateWidth(const int& aWidth)
+{
+    // Check Date Width
+    if (dateWidth != aWidth) {
+        // Set Width
+        dateWidth = aWidth;
+        // Emit Width Changed Signal
+        emit dateWidthChanged(dateWidth);
+    }
+}
+
+//==============================================================================
+// Get Owner Column Width
+//==============================================================================
+int FilePanel::getOwnerWidth()
+{
+    return ownerWidth;
+}
+
+//==============================================================================
+// Set Owner Column Width
+//==============================================================================
+void FilePanel::setOwnerWidth(const int& aWidth)
+{
+    // Check Owner Width
+    if (ownerWidth != aWidth) {
+        // Set Width
+        ownerWidth = aWidth;
+        // Emit Width Changed Signal
+        emit ownerWidthChanged(ownerWidth);
+    }
+}
+
+//==============================================================================
+// Get Permissions Column Width
+//==============================================================================
+int FilePanel::getPermsWidth()
+{
+    return permsWidth;
+}
+
+//==============================================================================
+// Set Permissions Column Width
+//==============================================================================
+void FilePanel::setPermsWidth(const int& aWidth)
+{
+    // Check Permissions Width
+    if (permsWidth != aWidth) {
+        // Set Width
+        permsWidth = aWidth;
+        // Emit Width Changed Signal
+        emit permsWidthChanged(permsWidth);
+    }
+}
+
+//==============================================================================
+// Get Attributes Column Width
+//==============================================================================
+int FilePanel::getAttrsWidth()
+{
+    return attrsWidth;
+}
+
+//==============================================================================
+// Set Attributes Column Width
+//==============================================================================
+void FilePanel::setAttrsWidth(const int& aWidth)
+{
+    // Check Attributes Width
+    if (attrsWidth != aWidth) {
+        // Set Width
+        attrsWidth = aWidth;
+        // Emit Width Changed Signal
+        emit attrsWidthChanged(attrsWidth);
+    }
+}
+
+//==============================================================================
+// Get Sorting
+//==============================================================================
+int FilePanel::getSorting()
+{
+    return sorting;
+}
+
+//==============================================================================
+// Set Sorting
+//==============================================================================
+void FilePanel::setSorting(const int& aSorting)
+{
+    // Check Sorting
+    if (sorting != aSorting) {
+        qDebug() << "FilePanel::setSorting - aSorting: " << aSorting;
+        // Set Sorting
+        sorting = aSorting;
+        // Reset Reverse Order
+        reverseOrder = false;
+
+        // Check Model
+        if (fileListModel) {
+            // Set Sorting Method
+            fileListModel->setSorting(sorting);
+            // Set Reverse Order
+            fileListModel->setReverse(reverseOrder);
+        }
+
+        // Reload
+        reload(0);
+
+        // Emit Sorting Changed Signal
+        emit sortingChanged(sorting);
+    }
+}
+
+//==============================================================================
+// Get Reversed Order
+//==============================================================================
+bool FilePanel::getReverseOrder()
+{
+    return reverseOrder;
+}
+
+//==============================================================================
+// Set Reversed Order
+//==============================================================================
+void FilePanel::setReverseOrder(const bool& aReverse)
+{
+    // Check Reverse Order
+    if (reverseOrder != aReverse) {
+        qDebug() << "FilePanel::setReverseOrder - aReverse: " << aReverse;
+        // Set Reverse Order
+        reverseOrder = aReverse;
+
+        // Check Model
+        if (fileListModel) {
+            // Set Reverse Order
+            fileListModel->setReverse(reverseOrder);
+        }
+
+        // Reload
+        reload(0);
+
+        // Emit Reverse Order Changed Signal
+        emit reverseOrderChanged(reverseOrder);
     }
 }
 
@@ -675,7 +908,7 @@ void FilePanel::clear()
 //==============================================================================
 void FilePanel::restoreUI()
 {
-    qDebug() << "FilePanel::restoreUI - panelName: " << panelName;
+    qDebug() << "#### FilePanel::restoreUI - panelName: " << panelName;
 
     // Init Settings
     QSettings settings;
@@ -701,6 +934,40 @@ void FilePanel::restoreUI()
     // Set Attributes Visible
     setAttrsVisible(settings.value(panelName + SETTINGS_KEY_PANEL_COL_ENABLED_ATTR, false).toBool());
 
+    // Set Extensions Column Width
+    setExtWidth(settings.value(panelName + SETTINGS_KEY_PANEL_COL_WIDTH_EXT, extWidth).toInt());
+    // Set Extensions Column Width
+    setTypeWidth(settings.value(panelName + SETTINGS_KEY_PANEL_COL_WIDTH_TYPE, typeWidth).toInt());
+    // Set Extensions Column Width
+    setSizeWidth(settings.value(panelName + SETTINGS_KEY_PANEL_COL_WIDTH_SIZE, sizeWidth).toInt());
+    // Set Extensions Column Width
+    setDateWidth(settings.value(panelName + SETTINGS_KEY_PANEL_COL_WIDTH_DATE, dateWidth).toInt());
+    // Set Extensions Column Width
+    setOwnerWidth(settings.value(panelName + SETTINGS_KEY_PANEL_COL_WIDTH_OWNER, ownerWidth).toInt());
+    // Set Extensions Column Width
+    setPermsWidth(settings.value(panelName + SETTINGS_KEY_PANEL_COL_WIDTH_PERMS, permsWidth).toInt());
+    // Set Extensions Column Width
+    setAttrsWidth(settings.value(panelName + SETTINGS_KEY_PANEL_COL_WIDTH_ATTR, attrsWidth).toInt());
+
+    // Set Sorting
+    //setSorting(settings.value(panelName + SETTINGS_KEY_PANEL_SORTTYPE, DEFAULT_SORT_NAME).toInt());
+    sorting = settings.value(panelName + SETTINGS_KEY_PANEL_SORTTYPE, DEFAULT_SORT_NAME).toInt();
+    // Emit Sorting Changed Signal
+    emit sortingChanged(sorting);
+    // Set Reverse Order
+    //setSorting(settings.value(panelName + SETTINGS_KEY_PANEL_REVERSE, false).toBool());
+    reverseOrder = settings.value(panelName + SETTINGS_KEY_PANEL_REVERSE, false).toBool();
+    // Emit Reverse Order Changed signal
+    emit reverseOrderChanged(reverseOrder);
+
+    // Check File List Model
+    if (fileListModel) {
+        // Set Sorting
+        fileListModel->setSorting(sorting);
+        // Set Reverse Order
+        fileListModel->setReverse(reverseOrder);
+    }
+
     // Set Current Dir
     setCurrentDir(savedDir);
 
@@ -713,7 +980,7 @@ void FilePanel::restoreUI()
 //==============================================================================
 void FilePanel::saveSettings()
 {
-    qDebug() << "FilePanel::saveSettings - panelName: " << panelName;
+    qDebug() << "#### FilePanel::saveSettings - panelName: " << panelName;
 
     // Init Settings
     QSettings settings;
@@ -737,6 +1004,27 @@ void FilePanel::saveSettings()
     settings.setValue(panelName + SETTINGS_KEY_PANEL_COL_ENABLED_PERMS, permsVisible);
     // Set Value - Attributes Visible
     settings.setValue(panelName + SETTINGS_KEY_PANEL_COL_ENABLED_ATTR, attrsVisible);
+
+    // Set Value - Extensions Width
+    settings.setValue(panelName + SETTINGS_KEY_PANEL_COL_WIDTH_EXT, extWidth);
+    // Set Value - Type Width
+    settings.setValue(panelName + SETTINGS_KEY_PANEL_COL_WIDTH_TYPE, typeWidth);
+    // Set Value - Size Width
+    settings.setValue(panelName + SETTINGS_KEY_PANEL_COL_WIDTH_SIZE, sizeWidth);
+    // Set Value - Date Width
+    settings.setValue(panelName + SETTINGS_KEY_PANEL_COL_WIDTH_DATE, dateWidth);
+    // Set Value - Owner Width
+    settings.setValue(panelName + SETTINGS_KEY_PANEL_COL_WIDTH_OWNER, ownerWidth);
+    // Set Value - Permissions Width
+    settings.setValue(panelName + SETTINGS_KEY_PANEL_COL_WIDTH_PERMS, permsWidth);
+    // Set Value - Attributes Width
+    settings.setValue(panelName + SETTINGS_KEY_PANEL_COL_WIDTH_ATTR, attrsWidth);
+
+    // Set Value - Sorting
+    settings.setValue(panelName + SETTINGS_KEY_PANEL_SORTTYPE, sorting);
+    // Set Value - Reverse Order
+    settings.setValue(panelName + SETTINGS_KEY_PANEL_REVERSE, reverseOrder);
+
 
     // ...
 

@@ -539,6 +539,50 @@ QString getAppExecPath()
     return settings.value(SETTINGS_KEY_EXEC_PATH).toString();
 }
 
+//==============================================================================
+// Get File Name WithOut Extension From Full File Name
+//==============================================================================
+QString getFileNameFromFullName(const QString& aFullFileName)
+{
+    // Get Last Dot Pos
+    int lastDotPos = aFullFileName.lastIndexOf(".");
+
+    // Check Last Dot Pos
+    if (lastDotPos == 0) {
+        return aFullFileName;
+    }
+
+    // Get Specific Extension Positions
+    int tarGzPos = aFullFileName.indexOf(".tar.gz");
+
+    // Check File Full Name
+    if (tarGzPos > 0) {
+        return aFullFileName.left(tarGzPos);
+    }
+
+    return aFullFileName.left(lastDotPos);
+}
+
+//==============================================================================
+// Get File Extension From Full File Name
+//==============================================================================
+QString getExtensionFromFullName(const QString& aFullFileName)
+{
+    // Get Last Dot Pos
+    int lastDotPos = aFullFileName.lastIndexOf(".");
+
+    // Check Last Dot Pos
+    if (lastDotPos <= 0) {
+        return "";
+    }
+
+    // Check Specific Ends
+    if (aFullFileName.endsWith(".tar.gz", Qt::CaseInsensitive)) {
+        return "tar.gz";
+    }
+
+    return aFullFileName.right(aFullFileName.length() - lastDotPos - 1);
+}
 
 
 

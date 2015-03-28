@@ -736,7 +736,7 @@ void RemoteFileUtilClient::socketReadyRead()
     // Read Data
     lastBuffer = client ? client->readAll() : QByteArray();
 
-    qDebug() << "RemoteFileUtilClient::socketReadyRead - cID: " << cID << " - lastBuffer.size: " << lastBuffer.size();
+    //qDebug() << "RemoteFileUtilClient::socketReadyRead - cID: " << cID << " - lastBuffer.size: " << lastBuffer.size();
 
     // Parse Last Buffer
     parseLastBuffer();
@@ -785,7 +785,7 @@ void RemoteFileUtilClient::parseLastBuffer()
 
     } else {
 
-        qDebug() << "RemoteFileUtilClient::parseLastBuffer - cID: " << cID << " - lastBuffer.size: " << lastBuffer.size();
+        //qDebug() << "RemoteFileUtilClient::parseLastBuffer - cID: " << cID << " - lastBuffer.size: " << lastBuffer.size();
 /*
         // Get Last Buffer Size
         int lbSize = lastBuffer.size();
@@ -820,7 +820,7 @@ void RemoteFileUtilClient::parseLastBuffer()
         // Get Last Buffer Size
         int bSize = lastBuffer.size();
 
-        qDebug() << "RemoteFileUtilClient::parseLastBuffer - cID: " << cID << " - lastBuffer.size: " << lastBuffer.size();
+        //qDebug() << "RemoteFileUtilClient::parseLastBuffer - cID: " << cID << " - lastBuffer.size: " << lastBuffer.size();
 
         // Go Thru Last Buffer - Buffer Pos
         while (bPos < bSize) {
@@ -1080,7 +1080,7 @@ void RemoteFileUtilClient::handleDirListItem()
                           lastDataMap[DEFAULT_KEY_FILENAME].toString());
 
     // Send Acknowledge
-    sendAcknowledge();
+    //sendAcknowledge();
 }
 
 //==============================================================================
@@ -1112,7 +1112,7 @@ void RemoteFileUtilClient::handleDirSizeUpdate()
                              lastDataMap[DEFAULT_KEY_DIRSIZE].toULongLong());
 
     // Send Acknowledge
-    sendAcknowledge();
+    //sendAcknowledge();
 }
 
 //==============================================================================

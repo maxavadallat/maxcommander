@@ -12,5 +12,7 @@
         <file>qml/FileListDelegateItem.qml</file>
         <file>qml/js/utility.js</file>
         <file>qml/FileListHeaderPopup.qml</file>
+        <file>qml/FileListPopupItem.qml</file>
+        <file>qml/FileListHeaderPopupItem.qml</file>
     </qresource>
 </RCC>

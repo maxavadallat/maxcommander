@@ -695,10 +695,9 @@ void MainWindow::on_moveButton_clicked()
             // Reset Dir List Counter
             dirListCounter = 0;
 
-            // Get Dir List
-            //testClient->getDirList(QDir::homePath(), DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_DIRFIRST);
-            //testClient->getDirList("/usr/bin", DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_DIRFIRST);
-            testClient->scanDirSize("/dev");
+            // Scan Dir Size
+            //testClient->scanDirSize("/dev");
+            testClient->scanDirSize(QDir::homePath() + "/Music");
         }
     }
 }
@@ -732,7 +731,8 @@ void MainWindow::on_makeDirButton_clicked()
             // Get Dir List
             //testClient->getDirList(QDir::homePath(), DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_DIRFIRST);
             //testClient->getDirList("/usr/bin", DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_DIRFIRST);
-            testClient->getDirList("/dev", DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_DIRFIRST);
+            //testClient->getDirList("/dev", DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_DIRFIRST);
+            testClient->getDirList(QDir::homePath() + "/Pictures/Wallpaperz", DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_DIRFIRST);
         }
     }
 }

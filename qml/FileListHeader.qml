@@ -28,6 +28,8 @@ Rectangle {
     property alias permsWidth: permsHeader.width
     property alias attrWidth : attribsHeader.width
 
+    signal rightClicked(var posX, var posY);
+
     // Set Name Header Separator Position
     function setNameHeaderSeparatorPosition(xPos) {
         // Set Separator Position
@@ -36,6 +38,7 @@ Rectangle {
 
     color: Const.DEFAULT_FILE_LIST_HEADER_BACKGROUND_COLOR
 
+    // Header Row
     Row {
         id: itemsContainer
         anchors.fill: parent
@@ -55,6 +58,7 @@ Rectangle {
             height: parent.height
             itemText: "Ext"
             width: 40
+            visible: mainController.extVisible
         }
 
         // Header Item - Type
@@ -63,7 +67,7 @@ Rectangle {
             width: 120
             height: parent.height
             itemText: "Type"
-            visible: false
+            visible: mainController.typeVisible
         }
 
         FileListHeaderItem {
@@ -71,6 +75,7 @@ Rectangle {
             width: 60
             height: parent.height
             itemText: "Size"
+            visible: mainController.sizeVisible
         }
 
         FileListHeaderItem {
@@ -78,6 +83,7 @@ Rectangle {
             width: 128
             height: parent.height
             itemText: "Date"
+            visible: mainController.dateVisible
         }
 
         FileListHeaderItem {
@@ -85,7 +91,7 @@ Rectangle {
             width: 60
             height: parent.height
             itemText: "Owner"
-            visible: false
+            visible: mainController.ownerVisible
         }
 
         FileListHeaderItem {
@@ -93,7 +99,7 @@ Rectangle {
             width: 100
             height: parent.height
             itemText: "Perms"
-            visible: false
+            visible: mainController.permsVisible
         }
 
         FileListHeaderItem {
@@ -101,9 +107,20 @@ Rectangle {
             width: 60
             height: parent.height
             itemText: "Attrs"
-            visible: false
+            visible: mainController.attrsVisible
         }
 
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        acceptedButtons: Qt.RightButton
+        preventStealing: true
+        // On Clicked
+        onClicked: {
+            // Emit Right Clicked
+            rightClicked(mouse.x, mouse.y);
+        }
     }
 
     // Connections - Main Controller

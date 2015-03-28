@@ -30,4 +30,26 @@ var DEFAULT_FILE_LIST_LINK_TEXT_COLOR                   = "blue";
 
 var DEFAULT_FILE_LIST_HEADER_ITEM_NAME_MIN_WIDTH        = 60;
 
+var DEFAULT_MARGIN_WIDTH                                = 4;
+
+var DEFAULT_POPUP_ITEM_HIGHLIGHT_COLOR                  = "#77FFFFFF";
+
+var DEFAULT_FONT_COLOR                                  = "#FFFFFFFF";
+var DEFAULT_FONT_SHADOW_COLOR                           = "#FF000000";
+
+var DEFAULT_POPUP_WIDTH                                 = 120;
+
+var DEFAULT_POPUP_ITEM_HEIGHT                           = 24;
+
+var DEFAULT_POPUP_RADIUS                                = 8;
+
+var DEFAULT_POPUP_BORDER_COLOR                          = "white";
+var DEFAULT_POPUP_BORDER_WIDTH                          = 2;
+
+var DEFAULT_POPUP_BACKGROUND_COLOR                      = "#CC000000";
+
+var DEFAULT_TRANSITION_DURATION                         = 200;
+
+
+
 

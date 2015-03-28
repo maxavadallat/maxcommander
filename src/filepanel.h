@@ -24,7 +24,16 @@ class FilePanel : public QFrame
     Q_PROPERTY(QString panelName READ getPanelName)
     Q_PROPERTY(bool panelHasFocus READ getPanelFocus WRITE setPanelFocus NOTIFY panelFocusChanged)
     Q_PROPERTY(int visualItemsCount READ getvisualItemsCount WRITE setVisualItemsCount NOTIFY visualItemsCountChanged)
+
     Q_PROPERTY(bool showHidden READ getShowHidden WRITE setShowHidden NOTIFY showHiddenChanged)
+
+    Q_PROPERTY(bool extVisible READ getExtVisible WRITE setExtVisible NOTIFY extVisibleChanged)
+    Q_PROPERTY(bool typeVisible READ getTypeVisible WRITE setTypeVisible NOTIFY typeVisibleChanged)
+    Q_PROPERTY(bool sizeVisible READ getSizeVisible WRITE setSizeVisible NOTIFY sizeVisibleChanged)
+    Q_PROPERTY(bool dateVisible READ getDateVisible WRITE setDateVisible NOTIFY dateVisibleChanged)
+    Q_PROPERTY(bool ownerVisible READ getOwnerVisible WRITE setOwnerVisible NOTIFY ownerVisibleChanged)
+    Q_PROPERTY(bool permsVisible READ getPermsVisible WRITE setPermsVisible NOTIFY permsVisibleChanged)
+    Q_PROPERTY(bool attrsVisible READ getAttrsVisible WRITE setAttrsVisible NOTIFY attrsVisibleChanged)
 
 public:
     // Constructor
@@ -51,6 +60,41 @@ public:
     bool getShowHidden();
     // Set Show Hidden
     void setShowHidden(const bool& aHidden);
+
+    // Get Extension Visible
+    bool getExtVisible();
+    // Set Extension Visible
+    void setExtVisible(const bool& aExtVisible);
+
+    // Get Type Visible
+    bool getTypeVisible();
+    // Set Type Visible
+    void setTypeVisible(const bool& aTypeVisible);
+
+    // Get Size Visible
+    bool getSizeVisible();
+    // Set Size Visible
+    void setSizeVisible(const bool& aSizeVisible);
+
+    // Get Date Visible
+    bool getDateVisible();
+    // Set Date Visible
+    void setDateVisible(const bool& aDateVisible);
+
+    // Get Owner Visible
+    bool getOwnerVisible();
+    // Set Owner Visible
+    void setOwnerVisible(const bool& aOwnerVisible);
+
+    // Get Permissions Visible
+    bool getPermsVisible();
+    // Set Permissions Visible
+    void setPermsVisible(const bool& aPermsVisible);
+
+    // Get Attributes Visible
+    bool getAttrsVisible();
+    // Set Attributes Visible
+    void setAttrsVisible(const bool& aAttrsVisible);
 
     // Destructor
     virtual ~FilePanel();
@@ -119,6 +163,21 @@ signals:
 
     // Show Hidden Changed Signal
     void showHiddenChanged(const bool& aHidden);
+
+    // Extension Visible Changed Signal
+    void extVisibleChanged(const bool& aExtVisible);
+    // Type Visible Changed Signal
+    void typeVisibleChanged(const bool& aTypeVisible);
+    // Size Visible Changed Signal
+    void sizeVisibleChanged(const bool& aSizeVisible);
+    // Date Visible Changed Signal
+    void dateVisibleChanged(const bool& aDateVisible);
+    // Owner Visible Changed Signal
+    void ownerVisibleChanged(const bool& aOwnerVisible);
+    // Perms Visible Changed Signal
+    void permsVisibleChanged(const bool& aPermsVisible);
+    // Attributes Visible Changed Signal
+    void attrsVisibleChanged(const bool& aAttrsVisible);
 
 protected slots:
 
@@ -200,6 +259,21 @@ private:
 
     // Show Hidden Files
     bool                    showHidden;
+
+    // Extensions Visible
+    bool                    extVisible;
+    // Type Visible
+    bool                    typeVisible;
+    // Size Visible
+    bool                    sizeVisible;
+    // Date Visible
+    bool                    dateVisible;
+    // Owner Visible
+    bool                    ownerVisible;
+    // Permissions Visible
+    bool                    permsVisible;
+    // Attributes Visible
+    bool                    attrsVisible;
 };
 
 #endif // FILEPANEL_H

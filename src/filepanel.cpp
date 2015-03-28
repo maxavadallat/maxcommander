@@ -34,6 +34,14 @@ FilePanel::FilePanel(QWidget* aParent)
     , lastDirName("")
     , lastIndex(-1)
     , showHidden(true)
+    , extVisible(true)
+    , typeVisible(false)
+    , sizeVisible(true)
+    , dateVisible(true)
+    , ownerVisible(false)
+    , permsVisible(false)
+    , attrsVisible(false)
+
 {
     // Setup UI
     ui->setupUi(this);
@@ -53,7 +61,7 @@ void FilePanel::init()
     // ...
 
     // Create File List Model
-    //fileListModel = new FileListModel();
+    fileListModel = new FileListModel();
 
     // Check File List Model
     if (fileListModel) {
@@ -230,6 +238,162 @@ void FilePanel::setShowHidden(const bool& aHidden)
 
         // Emit Show Hidden Changed Signal
         emit showHiddenChanged(showHidden);
+    }
+}
+
+//==============================================================================
+// Get Extension Visible
+//==============================================================================
+bool FilePanel::getExtVisible()
+{
+    return extVisible;
+}
+
+//==============================================================================
+// Set Extension Visible
+//==============================================================================
+void FilePanel::setExtVisible(const bool& aExtVisible)
+{
+    // Check Ext Visible
+    if (extVisible != aExtVisible) {
+        // Set Ext Visible
+        extVisible = aExtVisible;
+        // Emit Ext Visible Changed Signal
+        emit extVisibleChanged(extVisible);
+    }
+}
+
+//==============================================================================
+// Get Type Visible
+//==============================================================================
+bool FilePanel::getTypeVisible()
+{
+    return typeVisible;
+}
+
+//==============================================================================
+// Set Type Visible
+//==============================================================================
+void FilePanel::setTypeVisible(const bool& aTypeVisible)
+{
+    // Check Type Visible
+    if (typeVisible != aTypeVisible) {
+        // Set Type Visible
+        typeVisible = aTypeVisible;
+        // Emit Type Visible Changed Signal
+        emit typeVisibleChanged(typeVisible);
+    }
+}
+
+//==============================================================================
+// Get Size Visible
+//==============================================================================
+bool FilePanel::getSizeVisible()
+{
+    return sizeVisible;
+}
+
+//==============================================================================
+// Set Size Visible
+//==============================================================================
+void FilePanel::setSizeVisible(const bool& aSizeVisible)
+{
+    // Check Size Visible
+    if (sizeVisible != aSizeVisible) {
+        // Set Size Visible
+        sizeVisible = aSizeVisible;
+        // Emit Size Visible Changed Signal
+        emit sizeVisibleChanged(sizeVisible);
+    }
+}
+
+//==============================================================================
+// Get Date Visible
+//==============================================================================
+bool FilePanel::getDateVisible()
+{
+    return dateVisible;
+}
+
+//==============================================================================
+// Set Date Visible
+//==============================================================================
+void FilePanel::setDateVisible(const bool& aDateVisible)
+{
+    // Check Date Visible
+    if (dateVisible != aDateVisible) {
+        //qDebug() << "FilePanel::setDateVisible - aDateVisible: " << aDateVisible;
+
+        // Set Date Visible
+        dateVisible = aDateVisible;
+        // Emit Date Visible Changed Signal
+        emit dateVisibleChanged(dateVisible);
+    }
+}
+
+//==============================================================================
+// Get Owner Visible
+//==============================================================================
+bool FilePanel::getOwnerVisible()
+{
+    return ownerVisible;
+}
+
+//==============================================================================
+// Set Owner Visible
+//==============================================================================
+void FilePanel::setOwnerVisible(const bool& aOwnerVisible)
+{
+    // Check Owner Visible
+    if (ownerVisible != aOwnerVisible) {
+        // Set Owner Visible
+        ownerVisible = aOwnerVisible;
+        // Emit Owner Visible Changed Signal
+        emit ownerVisibleChanged(ownerVisible);
+    }
+}
+
+//==============================================================================
+// Get Permissions Visible
+//==============================================================================
+bool FilePanel::getPermsVisible()
+{
+    return permsVisible;
+}
+
+//==============================================================================
+// Set Permissions Visible
+//==============================================================================
+void FilePanel::setPermsVisible(const bool& aPermsVisible)
+{
+    // Check Permissions Visible
+    if (permsVisible != aPermsVisible) {
+        // Set Permissions Visible
+        permsVisible = aPermsVisible;
+        // Emit Permissions Visible Changed Signal
+        emit permsVisibleChanged(permsVisible);
+    }
+}
+
+//==============================================================================
+// Get Attributes Visible
+//==============================================================================
+bool FilePanel::getAttrsVisible()
+{
+    return attrsVisible;
+}
+
+//==============================================================================
+// Set Attributes Visible
+//==============================================================================
+void FilePanel::setAttrsVisible(const bool& aAttrsVisible)
+{
+    // Check Attributes Visible
+    if (attrsVisible != aAttrsVisible) {
+        // Set Attributes Visible
+        attrsVisible = aAttrsVisible;
+        // Emit Attributes Visible Changed Signal
+        emit attrsVisibleChanged(attrsVisible);
     }
 }
 
@@ -522,6 +686,21 @@ void FilePanel::restoreUI()
     // Get Show Hidden
     showHidden = settings.value(SETTINGS_KEY_SHOW_HIDDEN_FILES, true).toBool();
 
+    // Set Ext Visible
+    setExtVisible(settings.value(panelName + SETTINGS_KEY_PANEL_COL_ENABLED_EXT, true).toBool());
+    // Set Type Visible
+    setTypeVisible(settings.value(panelName + SETTINGS_KEY_PANEL_COL_ENABLED_TYPE, false).toBool());
+    // Set Size Visible
+    setSizeVisible(settings.value(panelName + SETTINGS_KEY_PANEL_COL_ENABLED_SIZE, true).toBool());
+    // Set Date Visible
+    setDateVisible(settings.value(panelName + SETTINGS_KEY_PANEL_COL_ENABLED_DATE, true).toBool());
+    // Set Owner Visible
+    setOwnerVisible(settings.value(panelName + SETTINGS_KEY_PANEL_COL_ENABLED_OWNER, false).toBool());
+    // Set Permissions Visible
+    setPermsVisible(settings.value(panelName + SETTINGS_KEY_PANEL_COL_ENABLED_PERMS, false).toBool());
+    // Set Attributes Visible
+    setAttrsVisible(settings.value(panelName + SETTINGS_KEY_PANEL_COL_ENABLED_ATTR, false).toBool());
+
     // Set Current Dir
     setCurrentDir(savedDir);
 
@@ -543,6 +722,21 @@ void FilePanel::saveSettings()
     settings.setValue(panelName + SETTINGS_KEY_PANEL_DIR, currentDir);
     // Set Value - Show Hidden
     settings.setValue(SETTINGS_KEY_SHOW_HIDDEN_FILES, showHidden);
+
+    // Set Value - Extension Visible
+    settings.setValue(panelName + SETTINGS_KEY_PANEL_COL_ENABLED_EXT, extVisible);
+    // Set Value - Type Visible
+    settings.setValue(panelName + SETTINGS_KEY_PANEL_COL_ENABLED_TYPE, typeVisible);
+    // Set Value - Size Visible
+    settings.setValue(panelName + SETTINGS_KEY_PANEL_COL_ENABLED_SIZE, sizeVisible);
+    // Set Value - Date Visible
+    settings.setValue(panelName + SETTINGS_KEY_PANEL_COL_ENABLED_DATE, dateVisible);
+    // Set Value - Owner Visible
+    settings.setValue(panelName + SETTINGS_KEY_PANEL_COL_ENABLED_OWNER, ownerVisible);
+    // Set Value - Permissions Visible
+    settings.setValue(panelName + SETTINGS_KEY_PANEL_COL_ENABLED_PERMS, permsVisible);
+    // Set Value - Attributes Visible
+    settings.setValue(panelName + SETTINGS_KEY_PANEL_COL_ENABLED_ATTR, attrsVisible);
 
     // ...
 

@@ -17,6 +17,23 @@ Rectangle {
         id: fileListHeader
         width: parent.width
         height: Const.DEFAULT_FILE_LIST_HEADER_HEIGHT
+        onRightClicked: {
+            console.log("fileListHeader.onRightClicked - posX: " + posX + " - posY: " + posY);
+
+            // Set File List header Popup Pos
+            fileListHeaderPopup.x = Math.min(posX, fileListRoot.width - fileListHeaderPopup.width - 1);
+            fileListHeaderPopup.y = posY - 4;
+
+            // Show Header Popup
+            fileListHeaderPopup.showPopup();
+        }
+    }
+
+    // File List Header Popup
+    FileListHeaderPopup {
+        id: fileListHeaderPopup
+        opacity: 0.0
+        z: 1.0
     }
 
     // List View
@@ -214,8 +231,12 @@ Rectangle {
     // On Completed
     Component.onCompleted: {
         //console.log("fileListRoot.onCompleted - visualItemsCount: " + fileListView.visualItemsCount);
+
         // Set Visual Items Count
         mainController.visualItemsCount = fileListView.visualItemsCount;
+
+        // ...
+
     }
 
     // On Destruction

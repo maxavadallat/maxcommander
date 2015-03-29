@@ -31,7 +31,13 @@ SOURCES                 += src/main.cpp \
                         src/utility.cpp \
                         src/filelistwidget.cpp \
                         src/filelistimageprovider.cpp \
-                        src/remotefileutilclient.cpp
+                        src/remotefileutilclient.cpp \
+                        src/busyindicator.cpp \
+                        src/createdirdialog.cpp \
+                        src/deletefiledialog.cpp \
+                        src/transferfiledialog.cpp \
+                        src/confirmdialog.cpp \
+                        src/transferprogressdialog.cpp
 
 # Heders
 HEADERS                 += src/constants.h \
@@ -42,7 +48,12 @@ HEADERS                 += src/constants.h \
                         src/filelistwidget.h \
                         src/filelistimageprovider.h \
                         src/remotefileutilclient.h \
-#                        ../MCWorker/src/mcwinterface.h
+                        src/busyindicator.h \
+                        src/createdirdialog.h \
+                        src/deletefiledialog.h \
+                        src/transferfiledialog.h \
+                        src/confirmdialog.h \
+                        src/transferprogressdialog.h
 
 # Include Path
 INCLUDEPATH             += \
@@ -52,7 +63,12 @@ INCLUDEPATH             += \
 # Forms
 FORMS                   += \
                         ui/mainwindow.ui \
-                        ui/filepanel.ui
+                        ui/filepanel.ui \
+                        ui/createdirdialog.ui \
+                        ui/deletefiledialog.ui \
+                        ui/transferfiledialog.ui \
+                        ui/confirmdialog.ui \
+                        ui/transferprogressdialog.ui
 
 # Resources
 RESOURCES               += \

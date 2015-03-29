@@ -11,6 +11,7 @@
 #include <mcwinterface.h>
 
 #include "mainwindow.h"
+#include "busyindicator.h"
 #include "filepanel.h"
 #include "filelistmodel.h"
 #include "filelistimageprovider.h"
@@ -50,6 +51,9 @@ FilePanel::FilePanel(QWidget* aParent)
     , ownerWidth(60)
     , permsWidth(100)
     , attrsWidth(60)
+    , dirWatcherTimerID(-1)
+    , dwDirChanged(false)
+    , dwFileChanged(false)
 
 {
     // Setup UI
@@ -76,6 +80,7 @@ void FilePanel::init()
     if (fileListModel) {
         // Connect Signals
         connect(fileListModel, SIGNAL(dirFetchFinished()), this, SLOT(fileModelDirFetchFinished()));
+        connect(fileListModel, SIGNAL(busyChanged(bool)), this, SIGNAL(busyChanged(bool)));
     }
 
     // Set Context Properties
@@ -92,6 +97,9 @@ void FilePanel::init()
     // Add Image Provider
     engine->addImageProvider(QLatin1String(DEFAULT_FILE_ICON_PROVIDER_ID), new FileListImageProvider());
 
+    // Register Busy Indicator
+    qmlRegisterType<BusyIndicator>("MyCustomComponents", 1, 0, "BusyIndicator");
+
     // Set Resize Mode
     ui->fileListWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
 
@@ -101,6 +109,10 @@ void FilePanel::init()
 
     // Connect Signals
     connect(ui->fileListWidget, SIGNAL(focusChanged(bool)), this, SLOT(setPanelFocus(bool)));
+
+    // Connect Signals - Dir Watcher
+    connect(&dirWatcher, SIGNAL(directoryChanged(QString)), this, SLOT(directoryChanged(QString)));
+    connect(&dirWatcher, SIGNAL(fileChanged(QString)), this, SLOT(fileChanged(QString)));
 
     // ...
 
@@ -234,14 +246,14 @@ void FilePanel::setShowHidden(const bool& aHidden)
         qDebug() << "FilePanel::setShowHidden - panelName: " << panelName << " - aHidden: " << aHidden;
         // Set Show Hidden
         showHidden = aHidden;
-/*
+
         // Init Settings
         QSettings settings;
         // Set Value
         settings.setValue(SETTINGS_KEY_SHOW_HIDDEN_FILES, showHidden);
         // Sync
         settings.sync();
-*/
+
         // Reload
         reload(0);
 
@@ -628,6 +640,20 @@ void FilePanel::setReverseOrder(const bool& aReverse)
         // Emit Reverse Order Changed Signal
         emit reverseOrderChanged(reverseOrder);
     }
+}
+
+//==============================================================================
+// Busy
+//==============================================================================
+bool FilePanel::busy()
+{
+    // Check File List Model
+    if (fileListModel) {
+        // Get File List Model Busy State
+        return fileListModel->getBusy();
+    }
+
+    return false;
 }
 
 //==============================================================================
@@ -1086,6 +1112,89 @@ void FilePanel::fileModelDirFetchFinished()
 
     // Update Available Space Label
     updateAvailableSpaceLabel();
+}
+
+//==============================================================================
+// Start Dir Watcher
+//==============================================================================
+void FilePanel::startDirWatcher()
+{
+    // Check Dir Watcher Timer ID
+    if (dirWatcherTimerID == -1) {
+        qDebug() << "FilePanel::startDirWatcher";
+        // Start Timer
+        dirWatcherTimerID = startTimer(DEFAULT_ONE_SEC);
+
+        // Start Dir Watcher
+        dirWatcher.addPath(currentDir);
+    }
+}
+
+//==============================================================================
+// Stop Dir Watcher
+//==============================================================================
+void FilePanel::stopDirWatcher()
+{
+    // Check Dir Watcher Timer ID
+    if (dirWatcherTimerID != -1) {
+        qDebug() << "FilePanel::stopDirWatcher";
+        // Kill Timer
+        killTimer(dirWatcherTimerID);
+        // Reset Dir Watcher Timer ID
+        dirWatcherTimerID = -1;
+
+        // Get Dir Watcher Directories
+        QStringList dwDirs = dirWatcher.directories();
+        // Get Dir Wathcer Dirs Count
+        int dwdCount = dwDirs.count();
+
+        // Go Thru Dri Watcher Dirs
+        for (int i=0; i<dwdCount; ++i) {
+            // Stop Dir Watcher/ Remove Dir
+            dirWatcher.removePath(dwDirs[i]);
+        }
+    }
+}
+
+//==============================================================================
+// Directory Changed Slot
+//==============================================================================
+void FilePanel::directoryChanged(const QString& aDirPath)
+{
+    // Check Dir Path
+    if (currentDir == aDirPath) {
+        qDebug() << "FilePanel::stopDirWatcher - aDirPath: " << aDirPath;
+        // Set Dir Changed
+        dwDirChanged = true;
+
+        // ...
+    }
+}
+
+//==============================================================================
+// File Changed Slot
+//==============================================================================
+void FilePanel::fileChanged(const QString& aFilePath)
+{
+    // Init File Info
+    QFileInfo fileInfo(aFilePath);
+    // Check File Path
+    if (currentDir == fileInfo.absolutePath()) {
+        qDebug() << "FilePanel::fileChanged - aFilePath: " << aFilePath;
+        // Set File Changed
+        dwFileChanged = true;
+
+        // ...
+    }
+}
+
+//==============================================================================
+// Refresh File List Model
+//==============================================================================
+void FilePanel::refreshFileListModel(const QString& aFilePath)
+{
+    qDebug() << "FilePanel::refreshFileListModel - aFilePath: " << aFilePath;
+
 }
 
 //==============================================================================

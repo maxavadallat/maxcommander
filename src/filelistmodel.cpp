@@ -235,6 +235,14 @@ void FileListModel::clientStatusChanged(const int& aID, const int& aStatus)
 {
     qDebug() << "FileListModel::clientStatusChanged - aID: " << aID << " - aStatus: " << aStatus;
 
+    // Check Status
+    if (aStatus == ECSTBusy || aStatus == ECSTAborting || aStatus == ECSTWaiting) {
+        // Emit Busy Changed Signal
+        emit busyChanged(true);
+    } else {
+        // Emit Busy Changed Signal
+        emit busyChanged(false);
+    }
 }
 
 //==============================================================================

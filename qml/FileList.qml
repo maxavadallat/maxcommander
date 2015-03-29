@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import MyCustomComponents 1.0
 
 import "qrc:/qml"
 import "qrc:/qml/js/constants.js" as Const
@@ -220,6 +221,31 @@ Rectangle {
             // Set Name Header Sizer Position
             fileListHeader.setNameHeaderSeparatorPosition(remainingWidth - Const.DEFAULT_FILE_LIST_HEADER_SEPARATOR_WIDTH);
 
+        }
+    }
+
+    // Busy Indicator
+    BusyIndicator {
+        id: busyIndicator
+
+        width: Const.DEFAULT_BUSY_INDICATOR_WIDTH
+        height: Const.DEFAULT_BUSY_INDICATOR_HEIGHT
+
+        anchors.right: parent.right
+        anchors.rightMargin: Const.DEFAULT_MARGIN_WIDTH
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: Const.DEFAULT_MARGIN_WIDTH
+
+        running: mainController.busy;
+
+        opacity: running ? 1.0 : 0.0
+
+        visible: opacity > 0.0
+
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 500
+            }
         }
     }
 

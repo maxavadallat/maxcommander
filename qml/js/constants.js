@@ -61,3 +61,8 @@ var DEFAULT_SORT_OWNER                                  = 5;
 var DEFAULT_SORT_PERMS                                  = 6;
 var DEFAULT_SORT_ATTRS                                  = 7;
 
+
+
+var DEFAULT_BUSY_INDICATOR_WIDTH                        = 64;
+var DEFAULT_BUSY_INDICATOR_HEIGHT                       = 64;
+

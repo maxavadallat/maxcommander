@@ -3,6 +3,8 @@
 
 #include <QFrame>
 #include <QString>
+#include <QStringList>
+#include <QFileSystemWatcher>
 
 namespace Ui {
 class FilePanel;
@@ -45,6 +47,8 @@ class FilePanel : public QFrame
 
     Q_PROPERTY(int sorting READ getSorting WRITE setSorting NOTIFY sortingChanged)
     Q_PROPERTY(bool reverseOrder READ getReverseOrder WRITE setReverseOrder NOTIFY reverseOrderChanged)
+
+    Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
 
 public:
     // Constructor
@@ -152,6 +156,8 @@ public:
     // Set Reversed Order
     void setReverseOrder(const bool& aReverse);
 
+    // Busy
+    bool busy();
 
     // Destructor
     virtual ~FilePanel();
@@ -256,6 +262,9 @@ signals:
     // Reverse Order Changed Signal
     void reverseOrderChanged(const bool& aReverseOrder);
 
+    // Busy Changed Signal
+    void busyChanged(const bool& aBusy);
+
 protected slots:
 
     // Init
@@ -275,6 +284,20 @@ protected slots: // From File Model
 
     // File Model Fetch Ready
     void fileModelDirFetchFinished();
+    // Start Dir Watcher
+    void startDirWatcher();
+    // Stop Dir Watcher
+    void stopDirWatcher();
+
+protected slots: // From QFileSystemWatcher
+
+    // Directory Changed Slot
+    void directoryChanged(const QString& aDirPath);
+    // File Changed Slot
+    void fileChanged(const QString& aFilePath);
+
+    // Refresh File List Model
+    void refreshFileListModel(const QString& aFilePath);
 
 private slots:
 
@@ -371,6 +394,16 @@ private:
     int                     sorting;
     // Reverse Order
     bool                    reverseOrder;
+
+    // Dir File System Watcher
+    QFileSystemWatcher      dirWatcher;
+    // Dir File System Watcher Timer ID
+    int                     dirWatcherTimerID;
+    // Dir Changed
+    bool                    dwDirChanged;
+    // File Changed
+    bool                    dwFileChanged;
+
 };
 
 #endif // FILEPANEL_H

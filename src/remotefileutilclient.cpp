@@ -785,34 +785,6 @@ void RemoteFileUtilClient::parseLastBuffer()
 
     } else {
 
-        //qDebug() << "RemoteFileUtilClient::parseLastBuffer - cID: " << cID << " - lastBuffer.size: " << lastBuffer.size();
-/*
-        // Get Last Buffer Size
-        int lbSize = lastBuffer.size();
-
-        // Go Thru Last Buffer
-        for (int i=0, n=0; i<lbSize; ++i, n++) {
-
-            std::cout << QString("0x%1 ").arg(lastBuffer[i], 2, 16, QChar('0')).toLocal8Bit().data();
-
-            // Check n
-            if (n >= 15) {
-                std::cout << "\n";
-                // Reset n
-                n = 0;
-            }
-
-            fflush(stdout);
-
-//            std::cout << lastBuffer[i];
-//            fflush(stdout);
-
-        }
-
-        qDebug() << " ";
-*/
-        // ...
-
         // Init Buffer Pos
         int bPos = 0;
         // Init Frame Pattern Pos

@@ -1,7 +1,6 @@
 #ifndef FILELISTIMAGEPROVIDER_H
 #define FILELISTIMAGEPROVIDER_H
 
-#include <QThread>
 #include <QQuickImageProvider>
 
 //==============================================================================
@@ -30,9 +29,7 @@ protected: // Data
 
     // Supported Image Formats
     QList<QByteArray>   supportedFormats;
-
-    // Image Provider Thread
-    QThread             providerThread;
 };
 
 #endif // FILELISTIMAGEPROVIDER_H
+

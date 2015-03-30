@@ -15,6 +15,7 @@ QT                      += qml quick
 QT                      += widgets
 QT                      += network
 QT                      += webkitwidgets
+QT                      += multimedia
 
 macx: {
 # Icon
@@ -43,8 +44,9 @@ SOURCES                 += src/main.cpp \
                         src/transferprogressmodel.cpp \
                         src/aboutdialog.cpp \
                         src/preferencesdialog.cpp \
-                        src/viewerwindow.cpp \
-                        src/helpwindow.cpp
+                        src/helpwindow.cpp \
+                        src/audiotagimageprovider.cpp \
+                        src/viewerwindow.cpp
 
 # Heders
 HEADERS                 += src/constants.h \
@@ -66,8 +68,9 @@ HEADERS                 += src/constants.h \
                         src/transferprogressmodel.h \
                         src/aboutdialog.h \
                         src/preferencesdialog.h \
-                        src/viewerwindow.h \
-                        src/helpwindow.h
+                        src/helpwindow.h \
+                        src/audiotagimageprovider.h \
+                        src/viewerwindow.h
 
 # Include Path
 INCLUDEPATH             += \
@@ -85,8 +88,8 @@ FORMS                   += \
                         ui/deleteprogressdialog.ui \
                         ui/aboutdialog.ui \
                         ui/preferencesdialog.ui \
-                        ui/viewerwindow.ui \
-                        ui/helpwindow.ui
+                        ui/helpwindow.ui \
+                        ui/viewerwindow.ui
 
 # Resources
 RESOURCES               += \

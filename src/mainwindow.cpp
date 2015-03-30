@@ -421,7 +421,6 @@ void MainWindow::shutDown()
 {
     qDebug() << "MainWindow::shutDown";
 
-
     // Abort & Clear Transfer Progress Dialogs
     while (transferProgressDialogs.count() > 0) {
         // Take Last Dialog
@@ -446,15 +445,13 @@ void MainWindow::shutDown()
     while (viewerWindows.count() > 0) {
         // Take Last
         ViewerWindow* lastWindow = viewerWindows.takeLast();
-        // Try To Close
-        if (lastWindow->close()) {
-            // Can't Close
+        try {
+            // Delete Last Window
+            delete lastWindow;
+        } catch (...) {
+            qCritical() << "#### MainWindow::shutDown - ERROR DELETING VIEWER WINDOW!";
         }
-
-        // Delete Last Window
-        delete lastWindow;
     }
-
 
     // Check Test Client
     if (fileUtil) {
@@ -634,8 +631,13 @@ void MainWindow::viewerWindowClosed(ViewerWindow* aViewer)
             if (window == aViewer) {
                 // Remove From Window List
                 viewerWindows.removeAt(i);
-                // Delete Viewer Window
-                delete window;
+
+                try {
+                    // Delete Viewer Window
+                    delete window;
+                } catch (...) {
+                    qCritical() << "#### MainWindow::viewerWindowClosed - ERROR DELETING WIEVER WINDOW!!";
+                }
 
                 return;
             }

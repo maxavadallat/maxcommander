@@ -30,7 +30,6 @@ FilePanel::FilePanel(QWidget* aParent)
     , panelName("")
     , panelHasFocus(false)
     , fileListModel(NULL)
-    , fileListImageProvider(NULL)
     , modifierKeys(Qt::NoModifier)
     , currentIndex(-1)
     , visualItemsCount(-1)
@@ -93,7 +92,6 @@ void FilePanel::init()
 
     // Get Engine
     QQmlEngine* engine = ui->fileListWidget->engine();
-
     // Add Image Provider
     engine->addImageProvider(QLatin1String(DEFAULT_FILE_ICON_PROVIDER_ID), new FileListImageProvider());
 
@@ -173,9 +171,6 @@ void FilePanel::setCurrentDir(const QString& aCurrentDir)
 
         // Set Text
         ui->currDirLabel->setText(currentDir);
-
-        // Update Available Space Label
-        //updateAvailableSpaceLabel();
 
         // Emit Current dir Changed Signal
         emit currentDirChanged(currentDir);
@@ -1006,7 +1001,7 @@ void FilePanel::clear()
 //==============================================================================
 void FilePanel::restoreUI()
 {
-    qDebug() << "#### FilePanel::restoreUI - panelName: " << panelName;
+    qDebug() << "FilePanel::restoreUI - panelName: " << panelName;
 
     // Init Settings
     QSettings settings;
@@ -1078,7 +1073,7 @@ void FilePanel::restoreUI()
 //==============================================================================
 void FilePanel::saveSettings()
 {
-    qDebug() << "#### FilePanel::saveSettings - panelName: " << panelName;
+    qDebug() << "FilePanel::saveSettings - panelName: " << panelName;
 
     // Init Settings
     QSettings settings;
@@ -1630,13 +1625,6 @@ FilePanel::~FilePanel()
         // Delete File List Model
         delete fileListModel;
         fileListModel = NULL;
-    }
-
-    // Check File List Image Provider
-    if (fileListImageProvider) {
-        // Delete File List Image Provider
-        delete fileListImageProvider;
-        fileListImageProvider = NULL;
     }
 }
 

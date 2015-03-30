@@ -3,7 +3,9 @@
 
 #include <QString>
 #include <QWidget>
+#include <QMainWindow>
 #include <QCloseEvent>
+#include <QKeyEvent>
 
 namespace Ui {
 class ViewerWindow;
@@ -15,13 +17,18 @@ class RemoteFileUtilClient;
 //==============================================================================
 // Internal File Viewer Window Class
 //==============================================================================
-class ViewerWindow : public QWidget
+class ViewerWindow : public QMainWindow
 {
     Q_OBJECT
+
+    Q_PROPERTY(QString contentSource READ getContentSource NOTIFY contentSourceChanged)
 
 public:
     // Constructor
     explicit ViewerWindow(QWidget* aParent = NULL);
+
+    // Get Content Source
+    QString getContentSource();
 
     // Destructor
     virtual ~ViewerWindow();
@@ -46,6 +53,9 @@ signals:
     // Viewer Closed Signal
     void viewerClosed(ViewerWindow* aViewer);
 
+    // Content Source changed Signal
+    void contentSourceChanged(const QString& aContentSource);
+
 protected slots:
 
     // Init
@@ -54,6 +64,9 @@ protected slots:
     void restoreUI();
     // Save Settings
     void saveSettings();
+
+    // Toggle Wrap Mode
+    void toggleWrapMode();
 
 protected slots: // For QTextEdit
 
@@ -64,6 +77,10 @@ protected: // From QWidget
 
     // Close Event
     virtual void closeEvent(QCloseEvent* aEvent);
+    // Key Press Event
+    virtual void keyPressEvent(QKeyEvent* aEvent);
+    // Key Release Event
+    virtual void keyReleaseEvent(QKeyEvent* aEvent);
 
 private:
     // UI

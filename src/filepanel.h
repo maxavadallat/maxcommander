@@ -350,9 +350,6 @@ private:
     // File List Model
     FileListModel*          fileListModel;
 
-    // File List image Provider
-    FileListImageProvider*  fileListImageProvider;
-
     // Modifier Keys
     int                     modifierKeys;
 

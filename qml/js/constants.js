@@ -9,6 +9,8 @@ var DEFAULT_FILE_PREFIX                                 = "file://";
 
 var DEFAULT_FILE_ICON_PREFIX                            = "image://fileicon/";
 
+var DEFAULT_AUDIO_TAG_PREFIX                            = "image://audiotag/";
+
 var DEFAULT_DIR_SIZE_TITLE_LABEL_TEXT_DIR               = "[DIR]";
 var DEFAULT_DIR_SIZE_TITLE_LABEL_TEXT_BUNDLE            = "[BUNDLE]";
 
@@ -65,4 +67,20 @@ var DEFAULT_SORT_ATTRS                                  = 7;
 
 var DEFAULT_BUSY_INDICATOR_WIDTH                        = 64;
 var DEFAULT_BUSY_INDICATOR_HEIGHT                       = 64;
+
+var DEFAULT_IMAGE_VIEWER_WIDTH                          = 800;
+var DEFAULT_IMAGE_VIEWER_HEIGHT                         = 600;
+
+var DEFAULT_VIDEO_VIEWER_WIDTH                          = 800;
+var DEFAULT_VIDEO_VIEWER_HEIGHT                         = 600;
+
+
+
+
+
+
+
+
+
+
 

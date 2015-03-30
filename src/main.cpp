@@ -1,6 +1,5 @@
 
 #include <QApplication>
-#include <QDebug>
 
 #include <mcwinterface.h>
 

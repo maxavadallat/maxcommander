@@ -42,8 +42,8 @@ void HelpWindow::closeWindow()
 {
     // Save Settings
     saveSettings();
-    // Hide
-    hide();
+    // Close
+    close();
 }
 
 //==============================================================================
@@ -65,6 +65,7 @@ void HelpWindow::saveSettings()
 {
     // Init Settings
     QSettings settings;
+
 
     // ...
 

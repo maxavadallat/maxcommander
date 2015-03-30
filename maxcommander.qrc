@@ -14,5 +14,8 @@
         <file>qml/FileListHeaderPopup.qml</file>
         <file>qml/FileListPopupItem.qml</file>
         <file>qml/FileListHeaderPopupItem.qml</file>
+        <file>qml/ImageViewer.qml</file>
+        <file>qml/VideoViewer.qml</file>
     </qresource>
 </RCC>
+

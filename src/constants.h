@@ -30,6 +30,7 @@
 #define SETTINGS_GROUP_RIGHTPANEL                           "rightpanel"
 #define SETTINGS_GROUP_PANEL_COMMON                         "panelCommon"
 #define SETTINGS_GROUP_UI                                   "ui"
+#define SETTINGS_GROUP_VIEWER                               "viewer"
 
 
 // Settings Keys
@@ -91,11 +92,22 @@
 
 
 
+// Viewer
+
+#define SETTINGS_KEY_VIEWER_WIDTH                           SETTINGS_GROUP_VIEWER"/width"
+#define SETTINGS_KEY_VIEWER_HEIGHT                          SETTINGS_GROUP_VIEWER"/height"
+
+#define SETTINGS_KEY_VIEWER_WORDWRAP                        SETTINGS_GROUP_VIEWER"/wordwrap"
+
+
+
+#define DEFAULT_MIME_PREFIX_TEXT                            "text/"
+#define DEFAULT_MIME_PREFIX_IMAGE                           "image/"
+#define DEFAULT_MIME_PREFIX_AUDIO                           "audio/"
+#define DEFAULT_MIME_PREFIX_VIDEO                           "video/"
+
+
 // Default Settings
-
-
-
-
 
 
 // Constants
@@ -108,8 +120,11 @@
 
 #define DEFAULT_MAIN_CONTROLLER_NAME                        "mainController"
 #define DEFAULT_FILE_LIST_MODEL_NAME                        "fileListModel"
+#define DEFAULT_IMAGE_VIEWER_CONTROLLER                     "viewerController"
+#define DEFAULT_IMAGE_VIEWER_CONTENT                        "viewerContent"
 
 #define DEFAULT_FILE_ICON_PROVIDER_ID                       "fileicon"
+#define DEFAULT_AUDIO_TAG_PROVIDER_ID                       "audiotag"
 
 // Bits Per Color Components
 #define DEFAULT_BITS_PER_COMPONENTS                         8
@@ -138,6 +153,11 @@
 #define DEFAULT_ANIM_PIECES_MAX                             3
 
 
+#define DEFAULT_AUDIO_TAG_IMAGE_WIDTH                       256
+#define DEFAULT_AUDIO_TAG_IMAGE_HEIGHT                      256
+
+
+#define DEFAULT_STATUS_BAR_MESSAGE_TIMEOUT                  3000
 
 
 #endif // CONSTANTS_H

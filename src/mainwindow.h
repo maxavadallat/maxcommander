@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QList>
 
 namespace Ui {
 class MainWindow;
@@ -9,6 +10,15 @@ class MainWindow;
 
 class FilePanel;
 class RemoteFileUtilClient;
+class AboutDialog;
+class PreferencesDialog;
+class CreateDirDialog;
+class DeleteFileDialog;
+class TransferFileDialog;
+class ViewerWindow;
+class HelpWindow;
+class DeleteProgressDialog;
+class TransferProgressDialog;
 
 //==============================================================================
 // Main Window Class
@@ -32,18 +42,30 @@ public slots:
 
     // Show About
     void showAbout();
-
     // Show Preferences
     void showPreferences();
+    // Show Help
+    void showHelp();
+
+    // Launch Delete
+    void launchDelete();
+    // Launch File Copy
+    void launchFileCopy();
+    // Launch File Move/REname
+    void launchFileMove();
+    // Launch Create Dir
+    void launchCreateDir();
+    // Launch Viewer
+    void launchViewer();
+    // Launch Editor
+    void launchEditor();
 
     // Quit Application
     void quitApp();
-
     // Shut Down
     void shutDown();
 
 signals:
-
 
 
 protected:
@@ -223,29 +245,50 @@ protected slots: // Actions & Button
 private:
 
     // UI
-    Ui::MainWindow*         ui;
+    Ui::MainWindow*                 ui;
 
     // Left Drive Buttons - Windows
 
     // Right Drive Buttons - Windows
 
     // Left Panel
-    FilePanel*              leftPanel;
+    FilePanel*                      leftPanel;
 
     // Right Panel
-    FilePanel*              rightPanel;
+    FilePanel*                      rightPanel;
 
     // Focused Panel
-    FilePanel*              focusedPanel;
+    FilePanel*                      focusedPanel;
 
     // Modifier Keys Pressed
-    int                     modifierKeys;
+    int                             modifierKeys;
 
     // Test Remote File Util Client
-    RemoteFileUtilClient*   testClient;
+    RemoteFileUtilClient*           testClient;
 
     // Dir List Counter
-    int                     dirListCounter;
+    int                             dirListCounter;
+
+    // About Dialog
+    AboutDialog*                    aboutDialog;
+    // Preferences Dialog
+    PreferencesDialog*              preferencesDialog;
+    // Create Dir Dialog
+    CreateDirDialog*                createDirDialog;
+    // Delete File Dialog
+    DeleteFileDialog*               deleteFileDialog;
+    // Transfer File Dialog
+    TransferFileDialog*             transferFileDialog;
+    // Help Window
+    HelpWindow*                     helpWindow;
+
+    // Transfer Progress Dialogs
+    QList<TransferProgressDialog*>  transferProgressDialogs;
+    // Delete Progress Dialogs
+    QList<DeleteProgressDialog*>    deleteProgressDialogs;
+    // Viewer Windows
+    QList<ViewerWindow*>            viewerWindows;
+
 };
 
 #endif // MAINWINDOW_H

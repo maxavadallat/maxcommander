@@ -9,6 +9,15 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "aboutdialog.h"
+#include "preferencesdialog.h"
+#include "createdirdialog.h"
+#include "deletefiledialog.h"
+#include "deleteprogressdialog.h"
+#include "transferfiledialog.h"
+#include "transferprogressdialog.h"
+#include "helpwindow.h"
+#include "viewerwindow.h"
 #include "remotefileutilclient.h"
 #include "utility.h"
 #include "constants.h"
@@ -55,6 +64,13 @@ MainWindow::MainWindow(QWidget* aParent)
     , focusedPanel(NULL)
     , modifierKeys(Qt::NoModifier)
     , testClient(NULL)
+    , aboutDialog(NULL)
+    , preferencesDialog(NULL)
+    , createDirDialog(NULL)
+    , deleteFileDialog(NULL)
+    , transferFileDialog(NULL)
+    , helpWindow(NULL)
+
 {
     qDebug() << "MainWindow::MainWindow";
 
@@ -169,6 +185,14 @@ void MainWindow::showAbout()
 {
     qDebug() << "MainWindow::showAbout";
 
+    // Check About Dialog
+    if (!aboutDialog) {
+        // Create About Dialog
+        aboutDialog = new AboutDialog();
+    }
+
+    // Exec About Dialog
+    aboutDialog->exec();
 }
 
 //==============================================================================
@@ -178,6 +202,198 @@ void MainWindow::showPreferences()
 {
     qDebug() << "MainWindow::showPreferences";
 
+    // Check Preferences Dialog
+    if (!preferencesDialog) {
+        // Create Preferences Dialog
+        preferencesDialog = new PreferencesDialog();
+    }
+
+    // Show Dialog
+    preferencesDialog->execDialog();
+}
+
+//==============================================================================
+// Show Help
+//==============================================================================
+void MainWindow::showHelp()
+{
+    qDebug() << "MainWindow::showHelp";
+
+    // Check Help Window
+    if (!helpWindow) {
+        // Ceate Help Window
+        helpWindow = new HelpWindow();
+    }
+
+    // Load Content
+    //helpWindow->loadContent();
+
+    // Show Help Window
+    helpWindow->showWindow();
+}
+
+//==============================================================================
+// Launch Delete
+//==============================================================================
+void MainWindow::launchDelete()
+{
+    qDebug() << "MainWindow::launchDelete";
+
+    // Check Delete File Dialog
+    if (!deleteFileDialog) {
+        // Create Delete File Dialog
+        deleteFileDialog = new DeleteFileDialog();
+    }
+
+    // Setup Delete File Dialog
+
+    // ...
+
+    // Launch Dialog
+    if (deleteFileDialog->exec()) {
+
+        // Create Delete Progress Dialog
+
+        // Add To Delete Progress Dialog List
+
+        // Show
+
+        // Build Queue
+
+        // Process Queueu
+
+    }
+}
+
+//==============================================================================
+// Launch File Copy
+//==============================================================================
+void MainWindow::launchFileCopy()
+{
+    qDebug() << "MainWindow::launchFileCopy";
+
+    // Check Transfer File Dialog
+    if (!transferFileDialog) {
+        // Create Transfer File Dialog
+        transferFileDialog = new TransferFileDialog();
+    }
+
+    // Setup Delete File Dialog - Copy
+
+    // ...
+
+    // Launch Dialog
+    if (transferFileDialog->exec()) {
+
+        // Create Transfer Progress Dialog
+
+        // Add To Transfer Progress Dialog List
+
+        // Show
+
+        // Build Queue
+
+        // Process Queueu
+    }
+}
+
+//==============================================================================
+// Launch File Move/REname
+//==============================================================================
+void MainWindow::launchFileMove()
+{
+    qDebug() << "MainWindow::launchFileMove";
+
+    // Check Transfer File Dialog
+    if (!transferFileDialog) {
+        // Create Transfer File Dialog
+        transferFileDialog = new TransferFileDialog();
+    }
+
+    // Setup Delete File Dialog - Move
+
+    // ...
+
+    // Launch Dialog
+    if (transferFileDialog->exec()) {
+
+        // Create Transfer Progress Dialog
+
+        // Add To Transfer Progress Dialog List
+
+        // Show
+
+        // Build Queue
+
+        // Process Queueu
+    }
+}
+
+//==============================================================================
+// Launch Create Dir
+//==============================================================================
+void MainWindow::launchCreateDir()
+{
+    qDebug() << "MainWindow::launchCreateDir";
+
+    // Check CreateDirDialog
+    if (!createDirDialog) {
+        // Create Create Dir Dialog
+        createDirDialog = new CreateDirDialog();
+    }
+
+    // Setup Dialog
+
+    // ...
+
+    // Launch Dialog
+    if (createDirDialog->exec()) {
+
+        // Create Directory
+
+    }
+}
+
+//==============================================================================
+// Launch Viewer
+//==============================================================================
+void MainWindow::launchViewer()
+{
+    qDebug() << "MainWindow::launchViewer";
+
+    // Create New Viewer Window
+    ViewerWindow* newViewer = new ViewerWindow();
+
+    // Load File
+
+    // Setup Viewer Window
+
+    // ...
+
+    // Add To Viewer List
+    viewerWindows << newViewer;
+}
+
+//==============================================================================
+// Launch Editor
+//==============================================================================
+void MainWindow::launchEditor()
+{
+    qDebug() << "MainWindow::launchEditor";
+
+    // Create New Viewer Window
+    ViewerWindow* newViewer = new ViewerWindow();
+
+    // Load File
+
+    // Setup Viewer Window
+
+    // Set Edit Mode
+
+    // ...
+
+    // Add To Viewer List
+    viewerWindows << newViewer;
 }
 
 //==============================================================================
@@ -197,6 +413,41 @@ void MainWindow::quitApp()
 void MainWindow::shutDown()
 {
     qDebug() << "MainWindow::shutDown";
+
+
+    // Abort & Clear Transfer Progress Dialogs
+    while (transferProgressDialogs.count() > 0) {
+        // Take Last Dialog
+        TransferProgressDialog* lastDialog = transferProgressDialogs.takeLast();
+        // Abort
+        lastDialog->abort();
+        // Delete Last Dialog
+        delete lastDialog;
+    }
+
+    // Abort & Clear Delete Progress Dialogs
+    while (deleteProgressDialogs.count() > 0) {
+        // Take Last Dialog
+        DeleteProgressDialog* lastDialog = deleteProgressDialogs.takeLast();
+        // Abort
+        lastDialog->abort();
+        // Delete Last Dialog
+        delete lastDialog;
+    }
+
+    // Close Viewer Windows
+    while (viewerWindows.count() > 0) {
+        // Take Last
+        ViewerWindow* lastWindow = viewerWindows.takeLast();
+        // Try To Close
+        if (lastWindow->close()) {
+            // Can't Close
+        }
+
+        // Delete Last Window
+        delete lastWindow;
+    }
+
 
     // Check Test Client
     if (testClient) {
@@ -832,6 +1083,7 @@ void MainWindow::on_actionPreferences_triggered()
 void MainWindow::on_actionHelp_triggered()
 {
     // Show Help
+    showHelp();
 }
 
 //==============================================================================
@@ -839,7 +1091,8 @@ void MainWindow::on_actionHelp_triggered()
 //==============================================================================
 void MainWindow::on_actionOptions_triggered()
 {
-    // Show Options
+    // Show Preferences
+    showPreferences();
 }
 
 //==============================================================================
@@ -855,7 +1108,11 @@ void MainWindow::on_actionCompare_Files_triggered()
 //==============================================================================
 void MainWindow::on_actionSelect_all_triggered()
 {
-    // Select All Files In Focused Panel
+    // Check Focused Panel
+    if (focusedPanel) {
+        // Select All Files In Focused Panel
+        focusedPanel->selectAllFiles();
+    }
 }
 
 //==============================================================================
@@ -863,7 +1120,11 @@ void MainWindow::on_actionSelect_all_triggered()
 //==============================================================================
 void MainWindow::on_actionSelect_None_triggered()
 {
-    // Deselect All Files In Focused Panel
+    // Check Focused Panel
+    if (focusedPanel) {
+        // Deselect All Files In Focused Panel
+        focusedPanel->deselectAllFiles();
+    }
 }
 
 //==============================================================================
@@ -1020,6 +1281,49 @@ MainWindow::~MainWindow()
 
     // Delete UI
     delete ui;
+
+    // Check About Dialog
+    if (aboutDialog) {
+        // Delete Dialog
+        delete aboutDialog;
+        aboutDialog = NULL;
+    }
+
+    // Check Preferences Dialog
+    if (preferencesDialog) {
+        // Delete Dialog
+        delete preferencesDialog;
+        preferencesDialog = NULL;
+    }
+
+    // Check Create Dir Dialog
+    if (createDirDialog) {
+        // Delete Dialog
+        delete createDirDialog;
+        createDirDialog = NULL;
+    }
+
+    // Check Delete File Dialog
+    if (deleteFileDialog) {
+        // Delete Dialog
+        delete deleteFileDialog;
+        deleteFileDialog = NULL;
+    }
+
+    // Check Transfer File Dialog
+    if (transferFileDialog) {
+        // Delete Dialog
+        delete transferFileDialog;
+        transferFileDialog = NULL;
+    }
+
+    // Check Help Window
+    if (helpWindow) {
+        // Delete Dialog
+        delete helpWindow;
+        helpWindow = NULL;
+    }
+
 
     qDebug() << "MainWindow::~MainWindow";
 }

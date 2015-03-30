@@ -8,7 +8,7 @@ class CreateDirDialog;
 }
 
 //==============================================================================
-// Create Dialog Class
+// Create Dir Dialog Class
 //==============================================================================
 class CreateDirDialog : public QDialog
 {
@@ -19,6 +19,8 @@ public:
     explicit CreateDirDialog(QWidget* aParent = NULL);
     // Get Directory Name
     QString getDirectory();
+    // Set Directory Path
+    void setDirPath(const QString& aDirPath);
     // Destructor
     virtual ~CreateDirDialog();
 

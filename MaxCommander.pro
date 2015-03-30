@@ -14,6 +14,7 @@ QT                      += quickwidgets
 QT                      += qml quick
 QT                      += widgets
 QT                      += network
+QT                      += webkitwidgets
 
 macx: {
 # Icon
@@ -39,7 +40,11 @@ SOURCES                 += src/main.cpp \
                         src/transferprogressdialog.cpp \
                         src/deleteprogressdialog.cpp \
                         src/deleteprogressmodel.cpp \
-                        src/transferprogressmodel.cpp
+                        src/transferprogressmodel.cpp \
+                        src/aboutdialog.cpp \
+                        src/preferencesdialog.cpp \
+                        src/viewerwindow.cpp \
+                        src/helpwindow.cpp
 
 # Heders
 HEADERS                 += src/constants.h \
@@ -58,12 +63,15 @@ HEADERS                 += src/constants.h \
                         src/transferprogressdialog.h \
                         src/deleteprogressdialog.h \
                         src/deleteprogressmodel.h \
-                        src/transferprogressmodel.h
+                        src/transferprogressmodel.h \
+                        src/aboutdialog.h \
+                        src/preferencesdialog.h \
+                        src/viewerwindow.h \
+                        src/helpwindow.h
 
 # Include Path
 INCLUDEPATH             += \
-                        /usr/local/include/mcw \
-                        ../MCWorker/src
+                        /usr/local/include/mcw
 
 # Forms
 FORMS                   += \
@@ -74,7 +82,11 @@ FORMS                   += \
                         ui/transferfiledialog.ui \
                         ui/confirmdialog.ui \
                         ui/transferprogressdialog.ui \
-                        ui/deleteprogressdialog.ui
+                        ui/deleteprogressdialog.ui \
+                        ui/aboutdialog.ui \
+                        ui/preferencesdialog.ui \
+                        ui/viewerwindow.ui \
+                        ui/helpwindow.ui
 
 # Resources
 RESOURCES               += \

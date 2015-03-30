@@ -177,6 +177,96 @@ void FileListModel::reload()
 }
 
 //==============================================================================
+// Get Selected
+//==============================================================================
+bool FileListModel::getSelected(const int& aIndex)
+{
+    // Check Index
+    if (aIndex >=0 && aIndex < itemList.count()) {
+        return itemList[aIndex]->selected;
+    }
+
+    return false;
+}
+
+//==============================================================================
+// Set Selected
+//==============================================================================
+void FileListModel::setSelected(const int& aIndex, const bool& aSelected)
+{
+    // Check Index
+    if (aIndex >=0 && aIndex < itemList.count()) {
+        // Check If Item Selected
+        if (itemList[aIndex]->selected != aSelected) {
+            // Set Item Selected
+            itemList[aIndex]->selected = aSelected;
+            // Create Model Index
+            QModelIndex index = createIndex(aIndex, 0);
+            // Emit Data Changed Signal
+            emit dataChanged(index, index);
+        }
+    }
+}
+
+//==============================================================================
+// Select All
+//==============================================================================
+void FileListModel::selectAll()
+{
+    // Get Item List Count
+    int ilCount = itemList.count();
+    // Go Thru Item List
+    for (int i=0; i<ilCount; ++i) {
+        // Set Item Selected
+        itemList[i]->selected = true;
+        // Create Model Index
+        QModelIndex index = createIndex(i, 0);
+        // Emit Data Changed Signal
+        emit dataChanged(index, index);
+    }
+}
+
+//==============================================================================
+// Deselect All
+//==============================================================================
+void FileListModel::deselectAll()
+{
+    // Get Item List Count
+    int ilCount = itemList.count();
+    // Go Thru Item List
+    for (int i=0; i<ilCount; ++i) {
+        // Set Item Selected
+        itemList[i]->selected = true;
+        // Create Model Index
+        QModelIndex index = createIndex(i, 0);
+        // Emit Data Changed Signal
+        emit dataChanged(index, index);
+    }
+}
+
+//==============================================================================
+// Get All Selected Files
+//==============================================================================
+QStringList FileListModel::getAllSelected()
+{
+    // Init Result
+    QStringList result;
+
+    // Get Item List Count
+    int ilCount = itemList.count();
+    // Go Thru Item List
+    for (int i=0; i<ilCount; ++i) {
+        // Check Selected
+        if (itemList[i]->selected) {
+            // Add File Name To Result
+            result << itemList[i]->fileInfo.fileName();
+        }
+    }
+
+    return result;
+}
+
+//==============================================================================
 // Fetch Dir
 //==============================================================================
 void FileListModel::fetchDirItems()

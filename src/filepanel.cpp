@@ -747,6 +747,64 @@ void FilePanel::reload(const int& aIndex)
 }
 
 //==============================================================================
+// Select All Files
+//==============================================================================
+void FilePanel::selectAllFiles()
+{
+    // Check File List Model
+    if (fileListModel) {
+        // Select All Items
+        fileListModel->selectAll();
+    }
+}
+
+//==============================================================================
+// Deselect All Files
+//==============================================================================
+void FilePanel::deselectAllFiles()
+{
+    // Check File List Model
+    if (fileListModel) {
+        // Deselect All Items
+        fileListModel->deselectAll();
+    }
+}
+
+//==============================================================================
+// Toggle Current File Selection
+//==============================================================================
+void FilePanel::toggleCurrentFileSelection()
+{
+    // Check File List Model
+    if (fileListModel) {
+        // Set Item Selection
+        fileListModel->setSelected(currentIndex, !fileListModel->getSelected(currentIndex));
+    }
+}
+
+//==============================================================================
+// Get Selected Files
+//==============================================================================
+QStringList FilePanel::getSelectedFiles()
+{
+    // Check File List Model
+    if (fileListModel) {
+        // Get Selected
+        QStringList result = fileListModel->getAllSelected();
+
+        // Check Result
+        if (result.count() <= 0) {
+            // Add Current File
+            result << fileListModel->getFileInfo(currentIndex).fileName();
+        }
+
+        return result;
+    }
+
+    return QStringList();
+}
+
+//==============================================================================
 // Go To Home Directory
 //==============================================================================
 void FilePanel::gotoHome()

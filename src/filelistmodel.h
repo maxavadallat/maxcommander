@@ -72,6 +72,19 @@ public slots:
     // Reload
     void reload();
 
+    // Get Selected
+    bool getSelected(const int& aIndex);
+    // Set Selected
+    void setSelected(const int& aIndex, const bool& aSelected);
+
+    // Select All
+    void selectAll();
+    // Deselect All
+    void deselectAll();
+
+    // Get All Selected Files
+    QStringList getAllSelected();
+
 signals:
 
     // Current Dir Changed Signal

@@ -3,5 +3,6 @@
         <file>resources/images/icons/default_file.png</file>
         <file>resources/images/arrow-down-128.png</file>
         <file>resources/images/arrow-up-128.png</file>
+        <file>resources/images/icons/MaxCommander_256x256.png</file>
     </qresource>
 </RCC>

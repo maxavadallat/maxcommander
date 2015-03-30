@@ -203,6 +203,15 @@ public slots:
     // Reload
     void reload(const int& aIndex);
 
+    // Select All Files
+    void selectAllFiles();
+    // Deselect All Files
+    void deselectAllFiles();
+    // Toggle Current File Selection
+    void toggleCurrentFileSelection();
+    // Get Selected Files
+    QStringList getSelectedFiles();
+
 signals:
 
     // Focused Panel Changed Signal

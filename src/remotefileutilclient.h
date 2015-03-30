@@ -109,7 +109,7 @@ signals:
     // Client Status Changed Signal
     void clientStatusChanged(const int& aID, const int& aStatus);
 
-    // File Operation Started
+    // File Operation Started Signal
     void fileOpStarted(const unsigned int& aID,
                        const QString& aOp,
                        const QString& aPath,

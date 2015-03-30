@@ -20,6 +20,15 @@ QString CreateDirDialog::getDirectory()
 }
 
 //==============================================================================
+// Set Directory Path
+//==============================================================================
+void CreateDirDialog::setDirPath(const QString& aDirPath)
+{
+    // Set Text
+    ui->directoryPathEdit->setText(aDirPath);
+}
+
+//==============================================================================
 // Destructor
 //==============================================================================
 CreateDirDialog::~CreateDirDialog()

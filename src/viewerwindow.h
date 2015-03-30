@@ -9,6 +9,8 @@ namespace Ui {
 class ViewerWindow;
 }
 
+class ConfirmDialog;
+class RemoteFileUtilClient;
 
 //==============================================================================
 // Internal File Viewer Window Class
@@ -39,7 +41,12 @@ public slots:
     // Set Edit Mode Enabled
     void setEditModeEnabled(const bool& aEnabled);
 
-protected:
+signals:
+
+    // Viewer Closed Signal
+    void viewerClosed(ViewerWindow* aViewer);
+
+protected slots:
 
     // Init
     void init();
@@ -47,6 +54,11 @@ protected:
     void restoreUI();
     // Save Settings
     void saveSettings();
+
+protected slots: // For QTextEdit
+
+    // Text Changed Slot
+    void textChanged();
 
 protected: // From QWidget
 

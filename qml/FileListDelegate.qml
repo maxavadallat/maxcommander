@@ -93,6 +93,7 @@ Rectangle {
             FileListText {
                 id: fileExtLabel
                 horizontalAlignment: Text.AlignRight
+                color: fileListDelegateRoot.textColor
             }
         }
 
@@ -101,6 +102,7 @@ Rectangle {
             width: 120
             FileListText {
                 id: fileTypeLabel
+                color: fileListDelegateRoot.textColor
             }
         }
 
@@ -112,6 +114,7 @@ Rectangle {
                 horizontalAlignment: {
                     text === Const.DEFAULT_DIR_SIZE_TITLE_LABEL_TEXT_DIR || text === Const.DEFAULT_DIR_SIZE_TITLE_LABEL_TEXT_BUNDLE ? Text.AlignHCenter : Text.AlignRight
                 }
+                color: fileListDelegateRoot.textColor
             }
         }
 
@@ -120,6 +123,7 @@ Rectangle {
             width: 120
             FileListText {
                 id: fileDateLabel
+                color: fileListDelegateRoot.textColor
             }
         }
 
@@ -128,6 +132,7 @@ Rectangle {
             width: 60
             FileListText {
                 id: fileOwnerLabel
+                color: fileListDelegateRoot.textColor
             }
         }
 
@@ -136,6 +141,7 @@ Rectangle {
             width: 100
             FileListText {
                 id: filePermsLabel
+                color: fileListDelegateRoot.textColor
             }
         }
 
@@ -144,6 +150,7 @@ Rectangle {
             width: 60
             FileListText {
                 id: fileAttrsLabel
+                color: fileListDelegateRoot.textColor
             }
         }
     }

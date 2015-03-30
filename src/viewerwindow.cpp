@@ -1,8 +1,12 @@
 #include <QSettings>
+#include <QFile>
+#include <QTextStream>
 #include <QDebug>
 
 #include "viewerwindow.h"
 #include "ui_viewerwindow.h"
+#include "confirmdialog.h"
+#include "remotefileutilclient.h"
 
 //==============================================================================
 // Constructor
@@ -33,6 +37,9 @@ void ViewerWindow::init()
     // Set Read Only Mode
     ui->textEdit->setReadOnly(!editMode);
 
+    // Connect Signal
+    connect(ui->textEdit, SIGNAL(textChanged()), this, SLOT(textChanged()));
+
     // ...
 }
 
@@ -43,6 +50,25 @@ void ViewerWindow::loadFile(const QString& aFileName)
 {
     qDebug() << "ViewerWindow::loadFile - aFileName: " << aFileName;
 
+    // Init File
+    QFile file(aFileName);
+
+    // Open File
+    if (file.open(QIODevice::ReadOnly)) {
+        // Init Text Stream
+        QTextStream textStream(&file);
+
+        // Load From File
+        ui->textEdit->setText(textStream.readAll());
+
+        // Reset Dirty Flag
+        dirty = false;
+
+        // Close File
+        file.close();
+    }
+
+    // ...
 }
 
 //==============================================================================
@@ -52,6 +78,9 @@ void ViewerWindow::saveFileAs(const QString& aFileName)
 {
     qDebug() << "ViewerWindow::saveFileAs - aFileName: " << aFileName;
 
+    // Save To File
+
+    // ...
 }
 
 //==============================================================================
@@ -110,6 +139,9 @@ void ViewerWindow::restoreUI()
 
     // Check If Settings Have Key
 
+    // Set Word Wrap Mode
+    ui->textEdit->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
+
     // ...
 }
 
@@ -127,6 +159,17 @@ void ViewerWindow::saveSettings()
 }
 
 //==============================================================================
+// Text Changed Slot
+//==============================================================================
+void ViewerWindow::textChanged()
+{
+    qDebug() << "#### ViewerWindow::textChanged";
+
+    // Mark Dirty
+    dirty = true;
+}
+
+//==============================================================================
 // Close Event
 //==============================================================================
 void ViewerWindow::closeEvent(QCloseEvent* aEvent)
@@ -138,15 +181,19 @@ void ViewerWindow::closeEvent(QCloseEvent* aEvent)
         if (dirty) {
             qDebug() << "ViewerWindow::​closeEvent - IGNORE!";
 
+            // Ask For Save
+
             // Ignore Event
             aEvent->ignore();
-
 
         } else {
             qDebug() << "ViewerWindow::​closeEvent";
 
             // Accept Event
             aEvent->accept();
+
+            // Emit Viewer Closed Signal
+            emit viewerClosed(this);
         }
     }
 }

@@ -11,6 +11,7 @@ class MainWindow;
 class FilePanel;
 class RemoteFileUtilClient;
 class AboutDialog;
+class ConfirmDialog;
 class PreferencesDialog;
 class CreateDirDialog;
 class DeleteFileDialog;
@@ -56,9 +57,10 @@ public slots:
     // Launch Create Dir
     void launchCreateDir();
     // Launch Viewer
-    void launchViewer();
-    // Launch Editor
-    void launchEditor();
+    void launchViewer(const bool& aEditMode = false);
+
+    // Launch Terminal
+    void launchTerminal(const QString& aDirPath);
 
     // Quit Application
     void quitApp();
@@ -93,8 +95,18 @@ protected slots:
     // Update Function Keys
     void updateFunctionKeys();
 
+    // Update Menu
+    void updateMenu();
+
     // Toggle Hidden Files
     void toggleHiddenFile();
+
+    // Viewer Window Closed Slot
+    void viewerWindowClosed(ViewerWindow* aViewer);
+    // Delete Progress Window Closed Slot
+    void deleteProgressClosed(DeleteProgressDialog* aDeleteProgressDialog);
+    // Transfer Progress Window Closed Slot
+    void transferProgressClosed(TransferProgressDialog* aTransferProgressDialog);
 
 protected slots: // Remote File Util Client
 
@@ -239,8 +251,14 @@ protected slots: // Actions & Button
     // Action Reload Triggered Slot
     void on_actionReload_triggered();
 
+    // Action View Triggered Slot
+    void on_actionView_triggered();
+    // Action Edit Triggered Slot
+    void on_actionEdit_triggered();
+
     // Action Exit Triggered Slot
     void on_actionExit_triggered();
+
 
 private:
 
@@ -263,8 +281,8 @@ private:
     // Modifier Keys Pressed
     int                             modifierKeys;
 
-    // Test Remote File Util Client
-    RemoteFileUtilClient*           testClient;
+    // Remote File Util Client
+    RemoteFileUtilClient*           fileUtil;
 
     // Dir List Counter
     int                             dirListCounter;

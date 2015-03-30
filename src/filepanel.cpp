@@ -643,6 +643,20 @@ void FilePanel::setReverseOrder(const bool& aReverse)
 }
 
 //==============================================================================
+// Get Current File Info
+//==============================================================================
+QFileInfo FilePanel::getCurrFileInfo()
+{
+    // Check File List Model
+    if (fileListModel) {
+        // Get Current File Info
+        return fileListModel->getFileInfo(currentIndex);
+    }
+
+    return QFileInfo();
+}
+
+//==============================================================================
 // Busy
 //==============================================================================
 bool FilePanel::busy()

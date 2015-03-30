@@ -63,7 +63,7 @@ MainWindow::MainWindow(QWidget* aParent)
     , rightPanel(NULL)
     , focusedPanel(NULL)
     , modifierKeys(Qt::NoModifier)
-    , testClient(NULL)
+    , fileUtil(NULL)
     , aboutDialog(NULL)
     , preferencesDialog(NULL)
     , createDirDialog(NULL)
@@ -111,21 +111,21 @@ void MainWindow::init()
     connect(rightPanel, SIGNAL(focusedPanelChanged(FilePanel*)), this, SLOT(focusedPanelChanged(FilePanel*)));
 
     // Create Test Client
-    testClient = new RemoteFileUtilClient();
+    fileUtil = new RemoteFileUtilClient();
 
     // Connect Signals
-    connect(testClient, SIGNAL(clientConnectionChanged(int,bool)), this, SLOT(clientConnectionChanged(int,bool)));
+    connect(fileUtil, SIGNAL(clientConnectionChanged(int,bool)), this, SLOT(clientConnectionChanged(int,bool)));
 
-    connect(testClient, SIGNAL(fileOpProgress(uint,QString,QString,quint64,quint64,quint64,quint64,int)), this, SLOT(fileOpProgress(uint,QString,QString,quint64,quint64,quint64,quint64,int)));
-    connect(testClient, SIGNAL(fileOpFinished(uint,QString,QString,QString,QString)), this, SLOT(fileOpFinished(uint,QString,QString,QString,QString)));
-    connect(testClient, SIGNAL(fileOpAborted(uint,QString,QString,QString,QString)), this, SLOT(fileOpAborted(uint,QString,QString,QString,QString)));
-    connect(testClient, SIGNAL(fileOpError(uint,QString,QString,QString,QString,int)), this, SLOT(fileOpError(uint,QString,QString,QString,QString,int)));
-    connect(testClient, SIGNAL(fileOpNeedConfirm(uint,QString,int,QString,QString,QString)), this, SLOT(fileOpNeedConfirm(uint,QString,int,QString,QString,QString)));
+    connect(fileUtil, SIGNAL(fileOpProgress(uint,QString,QString,quint64,quint64,quint64,quint64,int)), this, SLOT(fileOpProgress(uint,QString,QString,quint64,quint64,quint64,quint64,int)));
+    connect(fileUtil, SIGNAL(fileOpFinished(uint,QString,QString,QString,QString)), this, SLOT(fileOpFinished(uint,QString,QString,QString,QString)));
+    connect(fileUtil, SIGNAL(fileOpAborted(uint,QString,QString,QString,QString)), this, SLOT(fileOpAborted(uint,QString,QString,QString,QString)));
+    connect(fileUtil, SIGNAL(fileOpError(uint,QString,QString,QString,QString,int)), this, SLOT(fileOpError(uint,QString,QString,QString,QString,int)));
+    connect(fileUtil, SIGNAL(fileOpNeedConfirm(uint,QString,int,QString,QString,QString)), this, SLOT(fileOpNeedConfirm(uint,QString,int,QString,QString,QString)));
 
-    connect(testClient, SIGNAL(fileOpQueueItemFound(uint,QString,QString,QString,QString)), this, SLOT(fileOpQueueItemFound(uint,QString,QString,QString,QString)));
+    connect(fileUtil, SIGNAL(fileOpQueueItemFound(uint,QString,QString,QString,QString)), this, SLOT(fileOpQueueItemFound(uint,QString,QString,QString,QString)));
 
-    connect(testClient, SIGNAL(dirListItemFound(uint,QString,QString)), this, SLOT(dirListItemFound(uint,QString,QString)));
-    connect(testClient, SIGNAL(dirSizeScanProgress(uint,QString,quint64,quint64,quint64)), this, SLOT(dirSizeScanProgress(uint,QString,quint64,quint64,quint64)));
+    connect(fileUtil, SIGNAL(dirListItemFound(uint,QString,QString)), this, SLOT(dirListItemFound(uint,QString,QString)));
+    connect(fileUtil, SIGNAL(dirSizeScanProgress(uint,QString,quint64,quint64,quint64)), this, SLOT(dirSizeScanProgress(uint,QString,quint64,quint64,quint64)));
 
 
     // ...
@@ -334,66 +334,73 @@ void MainWindow::launchFileMove()
 //==============================================================================
 void MainWindow::launchCreateDir()
 {
-    qDebug() << "MainWindow::launchCreateDir";
+    // Check Focused Panel
+    if (focusedPanel) {
+        qDebug() << "MainWindow::launchCreateDir";
 
-    // Check CreateDirDialog
-    if (!createDirDialog) {
-        // Create Create Dir Dialog
-        createDirDialog = new CreateDirDialog();
-    }
+        // Check CreateDirDialog
+        if (!createDirDialog) {
+            // Create Create Dir Dialog
+            createDirDialog = new CreateDirDialog();
+        }
 
-    // Setup Dialog
+        // Setup Dialog
 
-    // ...
+        // ...
 
-    // Launch Dialog
-    if (createDirDialog->exec()) {
+        // Launch Dialog
+        if (createDirDialog->exec()) {
 
-        // Create Directory
+            // Create Directory
 
+        }
     }
 }
 
 //==============================================================================
 // Launch Viewer
 //==============================================================================
-void MainWindow::launchViewer()
+void MainWindow::launchViewer(const bool& aEditMode)
 {
-    qDebug() << "MainWindow::launchViewer";
+    // Check Focused Panel
+    if (focusedPanel) {
+        qDebug() << "MainWindow::launchViewer - aEditMode: " << aEditMode;
 
-    // Create New Viewer Window
-    ViewerWindow* newViewer = new ViewerWindow();
+        // Create New Viewer Window
+        ViewerWindow* newViewer = new ViewerWindow();
 
-    // Load File
+        // Load File
+        newViewer->loadFile(focusedPanel->getCurrFileInfo().absoluteFilePath());
 
-    // Setup Viewer Window
+        // Setup Viewer Window
 
-    // ...
+        // Set Edit Mode
+        newViewer->setEditModeEnabled(aEditMode);
 
-    // Add To Viewer List
-    viewerWindows << newViewer;
+        // ...
+
+        // Connect Signal
+        connect(newViewer, SIGNAL(viewerClosed(ViewerWindow*)), this, SLOT(viewerWindowClosed(ViewerWindow*)));
+
+        // Add To Viewer List
+        viewerWindows << newViewer;
+
+        // Show Window
+        newViewer->showWindow();
+    }
 }
 
 //==============================================================================
-// Launch Editor
+// Launch Terminal
 //==============================================================================
-void MainWindow::launchEditor()
+void MainWindow::launchTerminal(const QString& aDirPath)
 {
-    qDebug() << "MainWindow::launchEditor";
+    // Check Focused Panel
+    if (focusedPanel) {
+        qDebug() << "MainWindow::launchTerminal - aDirPath: " << aDirPath;
 
-    // Create New Viewer Window
-    ViewerWindow* newViewer = new ViewerWindow();
-
-    // Load File
-
-    // Setup Viewer Window
-
-    // Set Edit Mode
-
-    // ...
-
-    // Add To Viewer List
-    viewerWindows << newViewer;
+        // ...
+    }
 }
 
 //==============================================================================
@@ -450,12 +457,12 @@ void MainWindow::shutDown()
 
 
     // Check Test Client
-    if (testClient) {
+    if (fileUtil) {
         // Close
-        testClient->close();
+        fileUtil->close();
         // Delete Test Client
-        delete testClient;
-        testClient = NULL;
+        delete fileUtil;
+        fileUtil = NULL;
     }
 }
 
@@ -546,7 +553,7 @@ void MainWindow::updateFunctionKeys()
 
     } else {
         //qDebug() << "MainWindow::updateFunctionKeys";
-/*
+
         // Set Button Text
         ui->helpButton->setText(tr("Help"));
         ui->terminalButton->setText(tr("Terminal"));
@@ -558,7 +565,8 @@ void MainWindow::updateFunctionKeys()
         ui->delButton->setText(tr("Delete"));
         ui->optionsButton->setText(tr("Options"));
         ui->exitButton->setText(tr("Exit"));
-*/
+
+/*
         // Set Button Text
         ui->helpButton->setText(tr("Connect"));
         ui->terminalButton->setText(tr("Start Test"));
@@ -570,8 +578,17 @@ void MainWindow::updateFunctionKeys()
         ui->delButton->setText(tr(""));
         ui->optionsButton->setText(tr("Disconnect"));
         ui->exitButton->setText(tr("Exit"));
-
+*/
     }
+}
+
+//==============================================================================
+// Update Menu
+//==============================================================================
+void MainWindow::updateMenu()
+{
+    qDebug() << "MainWindow::updateMenu";
+
 }
 
 //==============================================================================
@@ -596,6 +613,56 @@ void MainWindow::toggleHiddenFile()
         rightPanel->setShowHidden(!showHidden);
     }
 
+}
+
+//==============================================================================
+// Viewer Window Closed Slot
+//==============================================================================
+void MainWindow::viewerWindowClosed(ViewerWindow* aViewer)
+{
+    // Check Viewer
+    if (aViewer) {
+        qDebug() << "MainWindow::viewerWindowClosed - aViewer: " << aViewer;
+
+        // Get Viewer Windows Count
+        int vwCount = viewerWindows.count();
+        // Go Thru Viewer Windows
+        for (int i=0; i<vwCount; ++i) {
+            // Get Viewer Window
+            ViewerWindow* window = viewerWindows[i];
+            // Check Window
+            if (window == aViewer) {
+                // Remove From Window List
+                viewerWindows.removeAt(i);
+                // Delete Viewer Window
+                delete window;
+
+                return;
+            }
+        }
+    }
+}
+
+//==============================================================================
+// Delete Progress Window Closed Slot
+//==============================================================================
+void MainWindow::deleteProgressClosed(DeleteProgressDialog* aDeleteProgressDialog)
+{
+    // Check Progress Dialog
+    if (aDeleteProgressDialog) {
+
+    }
+}
+
+//==============================================================================
+// Transfer Progress Window Closed Slot
+//==============================================================================
+void MainWindow::transferProgressClosed(TransferProgressDialog* aTransferProgressDialog)
+{
+    // Check Progress Dialog
+    if (aTransferProgressDialog) {
+
+    }
 }
 
 //==============================================================================
@@ -778,16 +845,14 @@ void MainWindow::on_helpButton_clicked()
 
     } else {
         // Trigger Help Action
-        //ui->actionHelp->trigger();
+        ui->actionHelp->trigger();
 
-        // Check Test Client
-        if (testClient) {
-
-            qDebug() << "\n#### testClient - Connect";
-
-            // Launch Server Test
-            testClient->launchServerTest();
-        }
+//        // Check Test Client
+//        if (testClient) {
+//            qDebug() << "\n#### testClient - Connect";
+//            // Launch Server Test
+//            testClient->launchServerTest();
+//        }
     }
 }
 
@@ -807,19 +872,16 @@ void MainWindow::on_terminalButton_clicked()
 
     } else {
         // Trigger Terminal Action
-        //ui->actionTerminal->trigger();
+        ui->actionTerminal->trigger();
 
-        // Check Test Client
-        if (testClient) {
-
-            qDebug() << "\n#### testClient - Start Test";
-
-            // Reset Counter
-            dirListCounter = 0;
-
-            // Start Test Operation
-            testClient->startTestOperation();
-        }
+//        // Check Test Client
+//        if (testClient) {
+//            qDebug() << "\n#### testClient - Start Test";
+//            // Reset Counter
+//            dirListCounter = 0;
+//            // Start Test Operation
+//            testClient->startTestOperation();
+//        }
     }
 }
 
@@ -839,17 +901,14 @@ void MainWindow::on_viewButton_clicked()
 
     } else {
         // Trigger View Action
-        //ui->actionView->trigger();
+        ui->actionView->trigger();
 
-        // Check Test Client
-        if (testClient) {
-
-            qDebug() << "\n#### testClient - Stop Test";
-
-            // Stop Test Operation
-            testClient->stopTestOperation();
-        }
-
+//        // Check Test Client
+//        if (testClient) {
+//            qDebug() << "\n#### testClient - Stop Test";
+//            // Stop Test Operation
+//            testClient->stopTestOperation();
+//        }
     }
 }
 
@@ -869,20 +928,16 @@ void MainWindow::on_editButton_clicked()
 
     } else {
         // Trigger Edit Action
-        //ui->actionEdit->trigger();
+        ui->actionEdit->trigger();
 
-        // Check Test Client
-        if (testClient) {
-
-            qDebug() << "\n#### testClient - Send Yes";
-
-            // Reset Counter
-            dirListCounter = 0;
-
-            // Stop Test Operation
-            testClient->sendResponse(DEFAULT_RESPONSE_YES);
-
-        }
+//        // Check Test Client
+//        if (testClient) {
+//            qDebug() << "\n#### testClient - Send Yes";
+//            // Reset Counter
+//            dirListCounter = 0;
+//            // Stop Test Operation
+//            testClient->sendResponse(DEFAULT_RESPONSE_YES);
+//        }
 
     }
 }
@@ -903,20 +958,16 @@ void MainWindow::on_copyButton_clicked()
 
     } else {
         // Trigger Copy Action
-        //ui->actionCopy->trigger();
+        ui->actionCopy->trigger();
 
-        // Check Test Client
-        if (testClient) {
-
-            qDebug() << "\n#### testClient - Send No";
-
-            // Reset Counter
-            dirListCounter = 0;
-
-            // Stop Test Operation
-            testClient->sendResponse(DEFAULT_RESPONSE_NO);
-        }
-
+//        // Check Test Client
+//        if (testClient) {
+//            qDebug() << "\n#### testClient - Send No";
+//            // Reset Counter
+//            dirListCounter = 0;
+//            // Stop Test Operation
+//            testClient->sendResponse(DEFAULT_RESPONSE_NO);
+//        }
     }
 }
 
@@ -936,20 +987,17 @@ void MainWindow::on_moveButton_clicked()
 
     } else {
         // Trigger Move Action
-        //ui->actionMove->trigger();
+        ui->actionMove->trigger();
 
-        // Check Test Client
-        if (testClient) {
-
-            qDebug() << "\n#### testClient - Scan Dir Size";
-
-            // Reset Dir List Counter
-            dirListCounter = 0;
-
-            // Scan Dir Size
-            //testClient->scanDirSize("/dev");
-            testClient->scanDirSize(QDir::homePath() + "/Music");
-        }
+//        // Check Test Client
+//        if (testClient) {
+//            qDebug() << "\n#### testClient - Scan Dir Size";
+//            // Reset Dir List Counter
+//            dirListCounter = 0;
+//            // Scan Dir Size
+//            //testClient->scanDirSize("/dev");
+//            testClient->scanDirSize(QDir::homePath() + "/Music");
+//        }
     }
 }
 
@@ -969,22 +1017,19 @@ void MainWindow::on_makeDirButton_clicked()
 
     } else {
         // Trigger Make Dir Action
-        //ui->actionNew_Directory->trigger();
+        ui->actionNew_Directory->trigger();
 
-        // Check Test Client
-        if (testClient) {
-
-            qDebug() << "\n#### testClient - Get Dir List";
-
-            // Reset Dir List Counter
-            dirListCounter = 0;
-
-            // Get Dir List
-            //testClient->getDirList(QDir::homePath(), DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_DIRFIRST);
-            //testClient->getDirList("/usr/bin", DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_DIRFIRST);
-            //testClient->getDirList("/dev", DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_DIRFIRST);
-            testClient->getDirList(QDir::homePath() + "/Pictures/Wallpaperz", DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_DIRFIRST);
-        }
+//        // Check Test Client
+//        if (testClient) {
+//            qDebug() << "\n#### testClient - Get Dir List";
+//            // Reset Dir List Counter
+//            dirListCounter = 0;
+//            // Get Dir List
+//            //testClient->getDirList(QDir::homePath(), DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_DIRFIRST);
+//            //testClient->getDirList("/usr/bin", DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_DIRFIRST);
+//            //testClient->getDirList("/dev", DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_DIRFIRST);
+//            testClient->getDirList(QDir::homePath() + "/Pictures/Wallpaperz", DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_DIRFIRST);
+//        }
     }
 }
 
@@ -1004,9 +1049,7 @@ void MainWindow::on_delButton_clicked()
 
     } else {
         // Trigger Delete Action
-        //ui->actionDelete_File->trigger();
-
-
+        ui->actionDelete_File->trigger();
     }
 }
 
@@ -1026,16 +1069,14 @@ void MainWindow::on_optionsButton_clicked()
 
     } else {
         // Trigger Options Action
-        //ui->actionPreferences->trigger();
+        ui->actionPreferences->trigger();
 
-        // Check Test Client
-        if (testClient) {
-
-            qDebug() << "\n#### testClient - Disconnect Test";
-
-            // Disconnect Test
-            testClient->disconnectTest();
-        }
+//        // Check Test Client
+//        if (testClient) {
+//            qDebug() << "\n#### testClient - Disconnect Test";
+//            // Disconnect Test
+//            testClient->disconnectTest();
+//        }
     }
 }
 
@@ -1211,7 +1252,8 @@ void MainWindow::on_actionShow_Hide_Hiden_triggered()
 //==============================================================================
 void MainWindow::on_actionNew_Directory_triggered()
 {
-
+    // Launch Create Dir
+    launchCreateDir();
 }
 
 //==============================================================================
@@ -1219,7 +1261,25 @@ void MainWindow::on_actionNew_Directory_triggered()
 //==============================================================================
 void MainWindow::on_actionNew_File_triggered()
 {
+    //
+}
 
+//==============================================================================
+// Action View File Triggered Slot
+//==============================================================================
+void MainWindow::on_actionView_triggered()
+{
+    // Launch Viewer
+    launchViewer(false);
+}
+
+//==============================================================================
+// Action Edit File Triggered Slot
+//==============================================================================
+void MainWindow::on_actionEdit_triggered()
+{
+    // Launch Viewer
+    launchViewer(true);
 }
 
 //==============================================================================
@@ -1227,7 +1287,8 @@ void MainWindow::on_actionNew_File_triggered()
 //==============================================================================
 void MainWindow::on_actionDelete_File_triggered()
 {
-
+    // Launch Delete Dir
+    launchDelete();
 }
 
 //==============================================================================
@@ -1327,4 +1388,5 @@ MainWindow::~MainWindow()
 
     qDebug() << "MainWindow::~MainWindow";
 }
+
 

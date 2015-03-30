@@ -217,12 +217,18 @@ void FileListModel::selectAll()
     int ilCount = itemList.count();
     // Go Thru Item List
     for (int i=0; i<ilCount; ++i) {
-        // Set Item Selected
-        itemList[i]->selected = true;
-        // Create Model Index
-        QModelIndex index = createIndex(i, 0);
-        // Emit Data Changed Signal
-        emit dataChanged(index, index);
+        // Check File Name
+        if (itemList[i]->fileInfo.fileName() != QString("..") && itemList[i]->fileInfo.fileName() != QString(".")) {
+            // Check Selected
+            if (!itemList[i]->selected) {
+                // Set Item Selected
+                itemList[i]->selected = true;
+                // Create Model Index
+                QModelIndex index = createIndex(i, 0);
+                // Emit Data Changed Signal
+                emit dataChanged(index, index);
+            }
+        }
     }
 }
 
@@ -235,12 +241,15 @@ void FileListModel::deselectAll()
     int ilCount = itemList.count();
     // Go Thru Item List
     for (int i=0; i<ilCount; ++i) {
-        // Set Item Selected
-        itemList[i]->selected = true;
-        // Create Model Index
-        QModelIndex index = createIndex(i, 0);
-        // Emit Data Changed Signal
-        emit dataChanged(index, index);
+        // Check Selected
+        if (itemList[i]->selected) {
+            // Set Item Selected
+            itemList[i]->selected = false;
+            // Create Model Index
+            QModelIndex index = createIndex(i, 0);
+            // Emit Data Changed Signal
+            emit dataChanged(index, index);
+        }
     }
 }
 
@@ -552,7 +561,7 @@ QVariant FileListModel::data(const QModelIndex& aIndex, int aRole) const
             case FilePerms:         return (int)item->fileInfo.permissions();
             case FileSelected:      return item->selected;
             case FileFullName:      return item->fileInfo.fileName();
-            case FileIsHidden:      return item->fileInfo.isHidden();
+            case FileIsHidden:      return (item->fileInfo.fileName() == QString("..") ? false : item->fileInfo.isHidden());
             case FileIsLink:        return item->fileInfo.isSymLink();
 
             default:
@@ -611,7 +620,7 @@ bool FileListModel::setData(const QModelIndex& aIndex, const QVariant& aValue, i
 
             case FileSelected: {
                 // Check Item
-                if (item) {
+                if (item && item->fileInfo.fileName() != QString("..") && item->fileInfo.fileName() != QString(".")) {
                     // Set Selected
                     item->selected = aValue.toBool();
                     // Emit Data Changed Signal

@@ -4,6 +4,7 @@
 #include <QFrame>
 #include <QString>
 #include <QStringList>
+#include <QFileInfo>
 #include <QFileSystemWatcher>
 
 namespace Ui {
@@ -155,6 +156,9 @@ public:
     bool getReverseOrder();
     // Set Reversed Order
     void setReverseOrder(const bool& aReverse);
+
+    // Get Current File Info
+    QFileInfo getCurrFileInfo();
 
     // Busy
     bool busy();

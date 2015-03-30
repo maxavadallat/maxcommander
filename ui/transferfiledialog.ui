@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>384</width>
-    <height>186</height>
+    <width>376</width>
+    <height>169</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,24 +18,59 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>0</width>
-    <height>186</height>
+    <width>376</width>
+    <height>169</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>16777215</width>
-    <height>186</height>
+    <height>169</height>
    </size>
   </property>
   <property name="windowTitle">
    <string>Copy File(s)</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
-    <widget class="QLabel" name="label">
+   <property name="leftMargin">
+    <number>8</number>
+   </property>
+   <property name="topMargin">
+    <number>8</number>
+   </property>
+   <property name="rightMargin">
+    <number>8</number>
+   </property>
+   <property name="bottomMargin">
+    <number>8</number>
+   </property>
+   <property name="verticalSpacing">
+    <number>8</number>
+   </property>
+   <item row="5" column="0">
+    <widget class="QFrame" name="frame">
+     <property name="frameShape">
+      <enum>QFrame::HLine</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Sunken</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="targetTitleLabel">
      <property name="text">
-      <string>Source File(s):</string>
+      <string>Target File(s):</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>
@@ -55,13 +90,6 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="0">
-    <widget class="QLabel" name="label_2">
-     <property name="text">
-      <string>Target Files:</string>
-     </property>
-    </widget>
-   </item>
    <item row="3" column="0">
     <widget class="QLineEdit" name="targetFileEdit">
      <property name="sizePolicy">
@@ -78,25 +106,25 @@
      </property>
     </widget>
    </item>
-   <item row="4" column="0">
-    <widget class="QFrame" name="frame">
-     <property name="frameShape">
-      <enum>QFrame::HLine</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Sunken</enum>
+   <item row="0" column="0">
+    <widget class="QLabel" name="sourceTitleLabel">
+     <property name="text">
+      <string>Source File(s):</string>
      </property>
     </widget>
    </item>
-   <item row="5" column="0">
-    <widget class="QDialogButtonBox" name="buttonBox">
+   <item row="4" column="0">
+    <spacer name="verticalSpacer">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Vertical</enum>
      </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>8</height>
+      </size>
      </property>
-    </widget>
+    </spacer>
    </item>
   </layout>
  </widget>

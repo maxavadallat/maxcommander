@@ -1,4 +1,7 @@
-#include "src/transferprogressdialog.h"
+#include <QDebug>
+
+#include "transferprogressdialog.h"
+#include "transferprogressmodel.h"
 #include "ui_transferprogressdialog.h"
 
 //==============================================================================
@@ -7,9 +10,16 @@
 TransferProgressDialog::TransferProgressDialog(QWidget* aParent)
     : QDialog(aParent)
     , ui(new Ui::TransferProgressDialog)
+    , queueModel(NULL)
 {
+    qDebug() << "TransferProgressDialog::TransferProgressDialog";
+
     // Setup UI
     ui->setupUi(this);
+    // Create Queue Model
+    queueModel = new TransferProgressModel();
+    // Set Model
+    ui->transferQueue->setModel(queueModel);
 }
 
 //==============================================================================
@@ -79,4 +89,13 @@ void TransferProgressDialog::setOverallProgress(const quint64& aProgress, const 
 TransferProgressDialog::~TransferProgressDialog()
 {
     delete ui;
+
+    // Check Qeuue Model
+    if (queueModel) {
+        // Delete Queue
+        delete queueModel;
+        queueModel = NULL;
+    }
+
+    qDebug() << "TransferProgressDialog::~TransferProgressDialog";
 }

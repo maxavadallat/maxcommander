@@ -20,6 +20,21 @@
    <string>Confirmation</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
+   <property name="leftMargin">
+    <number>8</number>
+   </property>
+   <property name="topMargin">
+    <number>8</number>
+   </property>
+   <property name="rightMargin">
+    <number>8</number>
+   </property>
+   <property name="bottomMargin">
+    <number>8</number>
+   </property>
+   <property name="verticalSpacing">
+    <number>8</number>
+   </property>
    <item row="0" column="0" colspan="2">
     <widget class="QLabel" name="confirmTextLabel">
      <property name="sizePolicy">

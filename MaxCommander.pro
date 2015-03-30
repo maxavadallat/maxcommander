@@ -15,7 +15,6 @@ QT                      += qml quick
 QT                      += widgets
 QT                      += network
 
-
 macx: {
 # Icon
 ICON                    = resources/images/icons/MaxCommander.icns
@@ -37,7 +36,10 @@ SOURCES                 += src/main.cpp \
                         src/deletefiledialog.cpp \
                         src/transferfiledialog.cpp \
                         src/confirmdialog.cpp \
-                        src/transferprogressdialog.cpp
+                        src/transferprogressdialog.cpp \
+                        src/deleteprogressdialog.cpp \
+                        src/deleteprogressmodel.cpp \
+                        src/transferprogressmodel.cpp
 
 # Heders
 HEADERS                 += src/constants.h \
@@ -53,7 +55,10 @@ HEADERS                 += src/constants.h \
                         src/deletefiledialog.h \
                         src/transferfiledialog.h \
                         src/confirmdialog.h \
-                        src/transferprogressdialog.h
+                        src/transferprogressdialog.h \
+                        src/deleteprogressdialog.h \
+                        src/deleteprogressmodel.h \
+                        src/transferprogressmodel.h
 
 # Include Path
 INCLUDEPATH             += \
@@ -68,7 +73,8 @@ FORMS                   += \
                         ui/deletefiledialog.ui \
                         ui/transferfiledialog.ui \
                         ui/confirmdialog.ui \
-                        ui/transferprogressdialog.ui
+                        ui/transferprogressdialog.ui \
+                        ui/deleteprogressdialog.ui
 
 # Resources
 RESOURCES               += \

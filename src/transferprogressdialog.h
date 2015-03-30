@@ -7,6 +7,8 @@ namespace Ui {
 class TransferProgressDialog;
 }
 
+class TransferProgressModel;
+
 //==============================================================================
 // Transfer Progress Dialog Class
 //==============================================================================
@@ -34,6 +36,9 @@ public:
 private:
     // UI
     Ui::TransferProgressDialog*     ui;
+
+    // Queue Model
+    TransferProgressModel*          queueModel;
 };
 
 #endif // TRANSFERPROGRESSDIALOG_H

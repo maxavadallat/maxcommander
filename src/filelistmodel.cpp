@@ -137,6 +137,18 @@ void FileListModel::setReverse(const bool& aReverse)
 }
 
 //==============================================================================
+// Get File Count
+//==============================================================================
+int FileListModel::getFileCount()
+{
+    // Check First Item
+    if (itemList[0]->fileInfo.fileName() == QString(".."))
+        return itemList.count() - 1;
+
+    return itemList.count();
+}
+
+//==============================================================================
 // Clear
 //==============================================================================
 void FileListModel::clear()

@@ -53,14 +53,10 @@ void ViewerWindow::init()
     ui->quickWidget->setVisible(true);
     // Text Edit Set Visible
     ui->textEdit->setVisible(false);
-    // Status Label Set Visible
-    //ui->statusLabel->setVisible(false);
 
 
     // Set Context Properties
     QQmlContext* ctx = ui->quickWidget->rootContext();
-    // Set Context Properties - Main Controller
-    //ctx->setContextProperty(DEFAULT_IMAGE_VIEWER_CONTROLLER, this);
     // Set Context Properties - Dummy Model
     ctx->setContextProperty(DEFAULT_IMAGE_VIEWER_CONTENT, fileName);
 
@@ -92,7 +88,7 @@ void ViewerWindow::loadFile(const QString& aFileName)
     QMimeDatabase mimeDatabase;
 
     // Get Mime Tpye
-    QString mime = mimeDatabase.mimeTypeForFile(aFileName).name();
+    mime = mimeDatabase.mimeTypeForFile(aFileName).name();
 
     qDebug() << "ViewerWindow::loadFile - aFileName: " << aFileName << " - mime: " << mime;
 
@@ -114,8 +110,6 @@ void ViewerWindow::loadFile(const QString& aFileName)
         ui->quickWidget->setVisible(false);
         // Text Edit Set Visible
         ui->textEdit->setVisible(true);
-        // Status Label Set Visible
-        //ui->statusLabel->setVisible(true);
 
         // Init File
         QFile file(aFileName);
@@ -139,8 +133,6 @@ void ViewerWindow::loadFile(const QString& aFileName)
 
         // Text Edit Set Visible
         ui->textEdit->setVisible(false);
-        // Status Label Set Visible
-        //ui->statusLabel->setVisible(false);
         // Quick Widget Set Visible
         ui->quickWidget->setVisible(true);
 
@@ -151,8 +143,6 @@ void ViewerWindow::loadFile(const QString& aFileName)
 
         // Text Edit Set Visible
         ui->textEdit->setVisible(false);
-        // Status Label Set Visible
-        //ui->statusLabel->setVisible(false);
         // Quick Widget Set Visible
         ui->quickWidget->setVisible(true);
 
@@ -163,8 +153,6 @@ void ViewerWindow::loadFile(const QString& aFileName)
 
         // Text Edit Set Visible
         ui->textEdit->setVisible(false);
-        // Status Label Set Visible
-        //ui->statusLabel->setVisible(false);
         // Quick Widget Set Visible
         ui->quickWidget->setVisible(true);
 
@@ -244,8 +232,6 @@ void ViewerWindow::setEditModeEnabled(const bool& aEnabled)
 //==============================================================================
 void ViewerWindow::restoreUI()
 {
-    qDebug() << "ViewerWindow::restoreUI";
-
     // Init Settings
     QSettings settings;
 
@@ -255,9 +241,11 @@ void ViewerWindow::restoreUI()
     // Get Desktop Widget
     QDesktopWidget* desktop = QApplication::desktop();
 
+    qDebug() << "ViewerWindow::restoreUI - availableGeometry: " << desktop->availableGeometry();
+
     // Calculate Editor Position
-    int viewerPosX = (desktop->size().width() - viewerWidth) / 2;
-    int viewerPosY = (desktop->size().height() - viewerHeight) / 2;
+    int viewerPosX = (desktop->availableGeometry().size().width() - viewerWidth) / 2;
+    int viewerPosY = (desktop->availableGeometry().size().height() - viewerHeight) / 2;
 
     // Set Geometry
     setGeometry(viewerPosX, viewerPosY, viewerWidth, viewerHeight);
@@ -266,27 +254,34 @@ void ViewerWindow::restoreUI()
     if (editMode) {
         // Set Word Wrap Mode
         ui->textEdit->setWordWrapMode(QTextOption::NoWrap);
-        // Set Status Text
-        //ui->statusLabel->setText(tr("Wrap Off"));
+        // Show Message
         ui->statusbar->showMessage(tr("Wrap Off"), DEFAULT_STATUS_BAR_MESSAGE_TIMEOUT);
     } else {
         // Get Wrap Mode
         bool wrapMode = settings.value(SETTINGS_KEY_VIEWER_WORDWRAP, false).toBool();
-        // Check Wrap Mode
-        if (wrapMode) {
-            // Set Word Wrap Mode
-            ui->textEdit->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
-            // Set Status Text
-            //ui->statusLabel->setText(tr("Wrap On"));
-            ui->statusbar->showMessage(tr("Wrap ON"), DEFAULT_STATUS_BAR_MESSAGE_TIMEOUT);
+        // Check Mime - Text Files
+        if (mime.startsWith(DEFAULT_MIME_PREFIX_TEXT)) {
+            // Check Wrap Mode
+            if (wrapMode) {
+                // Set Word Wrap Mode
+                ui->textEdit->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
+                // Show Message
+                ui->statusbar->showMessage(tr("Wrap ON"), DEFAULT_STATUS_BAR_MESSAGE_TIMEOUT);
+            } else {
+                // Set Word Wrap Mode
+                ui->textEdit->setWordWrapMode(QTextOption::NoWrap);
+                // Show Message
+                ui->statusbar->showMessage(tr("Wrap Off"), DEFAULT_STATUS_BAR_MESSAGE_TIMEOUT);
+            }
         } else {
-            // Set Word Wrap Mode
-            ui->textEdit->setWordWrapMode(QTextOption::NoWrap);
-            // Set Status Text
-            //ui->statusLabel->setText(tr("Wrap Off"));
-            ui->statusbar->showMessage(tr("Wrap Off"), DEFAULT_STATUS_BAR_MESSAGE_TIMEOUT);
+
+            // ...
+
         }
     }
+
+    // Set Window Title
+    setWindowTitle(tr("Viewer - ") + fileName);
 
     // ...
 }

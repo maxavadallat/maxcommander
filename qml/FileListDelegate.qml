@@ -38,6 +38,7 @@ Rectangle {
     property bool fileSelected: false
     property bool fileSymLink: false
 
+    property bool mouseHovered: false
 
     property string textColor: {
         // Check If Selected
@@ -59,7 +60,7 @@ Rectangle {
     width: 320
     height: 32
 
-    color: "transparent"
+    color: mouseHovered ? "#07000044" : "transparent"
 
     Row {
         id: fileListDelegateItemsContainerRow

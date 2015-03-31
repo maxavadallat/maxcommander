@@ -21,10 +21,9 @@ Rectangle {
 
     // On Completed
     Component.onCompleted: {
-        console.log("imageViewerRoot.onCompleted - contentSource: " + viewerContent);
+        //console.log("imageViewerRoot.onCompleted - contentSource: " + viewerContent);
 
         // ...
     }
-
 }
 

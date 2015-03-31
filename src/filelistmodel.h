@@ -62,6 +62,9 @@ public:
     // Set Reverse Mode
     void setReverse(const bool& aReverse);
 
+    // Get File Count
+    int getFileCount();
+
     // Destructor
     virtual ~FileListModel();
 

@@ -3,6 +3,7 @@ import QtMultimedia 5.0
 
 import "qrc:/qml"
 import "qrc:/qml/js/constants.js" as Const
+import "qrc:/qml/js/utility.js" as Utility
 
 Rectangle {
     id: videoViewerRoot
@@ -18,18 +19,24 @@ Rectangle {
     Video {
         id: mediaPlayer
         anchors.fill: parent
+        fillMode: VideoOutput.PreserveAspectFit
         autoLoad: true
         autoPlay: true
         source: Const.DEFAULT_FILE_PREFIX + viewerContent
-        volume: 0.3
+        volume: 0.5
 
         onStatusChanged: {
-            console.log("mediaPlayer.onStatusChanged: " + mediaPlayer.status + " - source: " + mediaPlayer.source);
-
+            //console.log("mediaPlayer.onStatusChanged: " + mediaPlayer.status + " - source: " + mediaPlayer.source);
         }
 
         onErrorStringChanged: {
             console.log("mediaPlayer.errorString: " + mediaPlayer.errorString);
+        }
+
+        onHasAudioChanged: {
+            //console.log("mediaPlayer.onHasAudioChanged - metadata: " + mediaPlayer.metaData.title);
+
+            // ...
         }
     }
 
@@ -37,12 +44,75 @@ Rectangle {
     Image {
         id: audioImage
         anchors.centerIn: parent
-        opacity: mediaPlayer.hasVideo ? 0.0 : 1.0
+        opacity: mediaPlayer.hasAudio && !mediaPlayer.hasVideo ? 1.0 : 0.0
         visible: opacity > 0.0
         Behavior on opacity { NumberAnimation { duration: Const.DEFAULT_TRANSITION_DURATION } }
         asynchronous: true
         source: Const.DEFAULT_AUDIO_TAG_PREFIX + viewerContent
     }
+
+    // Playback Progress
+    Rectangle {
+        id: playbackProgressIndicator
+        width: parent.width * 0.8
+        height: Const.DEFAULT_PROGRESS_INDICATOR_HEIGHT
+        anchors.centerIn: parent
+        anchors.verticalCenterOffset: Const.DEFAULT_PROGRESS_INDICATOR_VERTICAL_OFFSET
+
+        color: "#44444444"
+
+        // Position Label
+        Text {
+            id: posLabel
+            width: Const.DEFAULT_PROGRESS_INDICATOR_TEXT_WIDTH
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            horizontalAlignment: Text.AlignHCenter
+            font.pixelSize: Const.DEFAULT_PROGRESS_INDICATOR_TEXT_SIZE
+            //text: Qt.formatTime(mediaPlayer.position, "mm:ss");
+            text: Utility.formatSecs(mediaPlayer.position / 1000)
+            color: Const.DEFAULT_FONT_COLOR
+        }
+
+        // Indicator Bar
+        Rectangle {
+            id: progressIndicatorBar
+            height: Const.DEFAULT_PROGRESS_INDICATOR_BAR_HEIGHT
+            anchors.left: posLabel.right
+            anchors.leftMargin: Const.DEFAULT_MARGIN_WIDTH
+            anchors.right: lengthLabel.left
+            anchors.rightMargin: Const.DEFAULT_MARGIN_WIDTH
+            anchors.verticalCenter: parent.verticalCenter
+            color: Const.DEFAULT_PROGRESS_INDICATOR_BAR_COLOR
+            radius: Const.DEFAULT_MARGIN_WIDTH / 2
+
+            // Position Indicator
+            Rectangle {
+                id: positionIndicator
+                height: progressIndicatorBar.height + 4
+                width: Const.DEFAULT_PROGRESS_INDICATOR_POSITIONER_WIDTH
+                color: Const.DEFAULT_PROGRESS_INDICATOR_POSITIONER_COLOR
+                anchors.horizontalCenter: parent.left
+                anchors.horizontalCenterOffset: parent.width * mediaPlayer.position / mediaPlayer.duration
+                anchors.verticalCenter: parent.verticalCenter
+            }
+        }
+
+
+        // Length Label
+        Text {
+            id: lengthLabel
+            width: Const.DEFAULT_PROGRESS_INDICATOR_TEXT_WIDTH
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.right: parent.right
+            horizontalAlignment: Text.AlignHCenter
+            font.pixelSize: Const.DEFAULT_PROGRESS_INDICATOR_TEXT_SIZE
+            //text: Qt.formatTime(mediaPlayer.duration, "mm:ss");
+            text: Utility.formatSecs(mediaPlayer.duration / 1000)
+            color: Const.DEFAULT_FONT_COLOR
+        }
+    }
+
 
     // Play Icon
     Image {
@@ -52,7 +122,7 @@ Rectangle {
         visible: opacity > 0.0
         Behavior on opacity { NumberAnimation { duration: Const.DEFAULT_TRANSITION_DURATION } }
         asynchronous: true
-        source: ""
+        source: "qrc:/resources/images/play-icon.png"
     }
 
     // Pause Icon
@@ -63,9 +133,10 @@ Rectangle {
         visible: opacity > 0.0
         Behavior on opacity { NumberAnimation { duration: Const.DEFAULT_TRANSITION_DURATION } }
         asynchronous: true
-        source: ""
+        source: "qrc:/resources/images/pause-icon.png"
     }
 
+    // Icon Hide Timer
     Timer {
         id: iconHideTimer
         interval: 1000
@@ -121,7 +192,7 @@ Rectangle {
 
     // On Completed
     Component.onCompleted: {
-        console.log("videoViewerRoot.onCompleted - viewerContent: " + viewerContent);
+        //console.log("videoViewerRoot.onCompleted - viewerContent: " + viewerContent);
 
         // ...
     }

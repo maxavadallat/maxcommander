@@ -91,6 +91,9 @@ private:
     bool                    editMode;
     // Dirty
     bool                    dirty;
+    // Mime
+    QString                 mime;
 };
 
 #endif // VIEWERWINDOW_H
+

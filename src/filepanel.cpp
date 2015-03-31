@@ -1131,7 +1131,7 @@ void FilePanel::saveSettings()
 void FilePanel::updateAvailableSpaceLabel()
 {
     // Format Available Space Text
-    QString availableSpace = QString(DEFAULT_AVAILABLE_SPACE_FORMAT_STRING).arg(fileListModel ? fileListModel->rowCount() : 0)
+    QString availableSpace = QString(DEFAULT_AVAILABLE_SPACE_FORMAT_STRING).arg(fileListModel ? fileListModel->getFileCount() : 0)
                                                                            .arg((getFreeSpace(currentDir) >> 10))
                                                                            .arg((getTotalSpace(currentDir) >> 10));
 

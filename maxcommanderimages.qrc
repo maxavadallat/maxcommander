@@ -6,6 +6,8 @@
         <file>resources/images/icons/MaxCommander_256x256.png</file>
         <file>resources/images/default-audio-icon.png</file>
         <file>resources/images/default-video-icon.png</file>
+        <file>resources/images/pause-icon.png</file>
+        <file>resources/images/play-icon.png</file>
     </qresource>
 </RCC>
 

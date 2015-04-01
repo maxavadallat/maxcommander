@@ -46,6 +46,8 @@ QString getParentDir(const QString& aDirPath);
 
 // Get Dir Name
 QString getDirName(const QString& aDirPath);
+// Get Dir Path
+QString getDirPath(const QString& aDirPath);
 
 // Check If Have Access To List Dir
 bool haveAccessToDir(const QString& aDirPath);

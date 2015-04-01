@@ -163,6 +163,12 @@ public:
     // Busy
     bool busy();
 
+    // Get File Index By File Name
+    int getFileIndex(const QString& aFileName);
+
+    // Create Dir
+    void createDir(const QString& aDirPath);
+
     // Destructor
     virtual ~FilePanel();
 
@@ -213,6 +219,7 @@ public slots:
     void deselectAllFiles();
     // Toggle Current File Selection
     void toggleCurrentFileSelection();
+
     // Get Selected Files
     QStringList getSelectedFiles();
 
@@ -278,6 +285,29 @@ signals:
     // Busy Changed Signal
     void busyChanged(const bool& aBusy);
 
+    // Show Help Signal
+    void showHelp();
+
+    // Launch Terminal Signal
+    void launchTerminal(const QString& aDirPath);
+    // Launch Viewer Signal
+    void launchViewer(const bool& aEditMode = false);
+
+    // Launch File Copy Signal
+    void launchFileCopy();
+    // Launch File Move/Rename Signal
+    void launchFileMove();
+
+    // Launch Create Dir Signal
+    void launchCreateDir();
+
+    // Launch Delete Signal
+    void launchDelete();
+
+    // Show Preferences Signal
+    void showPreferences();
+
+
 protected slots:
 
     // Init
@@ -293,14 +323,17 @@ protected slots:
     // Update Supported Image Formates
     void updateSupportedImageFormats();
 
+    // Start Dir Watcher Slot
+    void startDirWatcher();
+    // Stop Dir Watcher Slot
+    void stopDirWatcher();
+
 protected slots: // From File Model
 
-    // File Model Fetch Ready
+    // File Model Fetch Ready Slot
     void fileModelDirFetchFinished();
-    // Start Dir Watcher
-    void startDirWatcher();
-    // Stop Dir Watcher
-    void stopDirWatcher();
+    // Dir Created Slot
+    void fileModelDirCreated(const QString& aDirPath);
 
 protected slots: // From QFileSystemWatcher
 
@@ -311,6 +344,11 @@ protected slots: // From QFileSystemWatcher
 
     // Refresh File List Model
     void refreshFileListModel(const QString& aFilePath);
+
+    // Handle Modifier Key Press Event
+    bool handleModifierKeyPressEvent(QKeyEvent* aEvent);
+    // Handle Modifier Key Release Event
+    bool handleModifierKeyReleaseEvent(QKeyEvent* aEvent);
 
 private slots:
 
@@ -414,6 +452,8 @@ private:
     // File Changed
     bool                    dwFileChanged;
 
+    // Own Key Press
+    bool                    ownKeyPress;
 };
 
 #endif // FILEPANEL_H

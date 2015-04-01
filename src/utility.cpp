@@ -498,6 +498,22 @@ QString getDirName(const QString& aDirPath)
 }
 
 //==============================================================================
+// Get Dir Path
+//==============================================================================
+QString getDirPath(const QString& aDirPath)
+{
+    // Init File Info
+    QFileInfo dirInfo(aDirPath);
+    // Check If Exists
+    if (dirInfo.exists()) {
+        // Return Canonical Path
+        return dirInfo.absolutePath();
+    }
+
+    return QString("");
+}
+
+//==============================================================================
 // Check If Have Access To List Dir
 //==============================================================================
 bool haveAccessToDir(const QString& aDirPath)

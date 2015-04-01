@@ -63,7 +63,6 @@ MainWindow::MainWindow(QWidget* aParent)
     , rightPanel(NULL)
     , focusedPanel(NULL)
     , modifierKeys(Qt::NoModifier)
-    , fileUtil(NULL)
     , aboutDialog(NULL)
     , preferencesDialog(NULL)
     , createDirDialog(NULL)
@@ -110,23 +109,28 @@ void MainWindow::init()
     connect(leftPanel, SIGNAL(focusedPanelChanged(FilePanel*)), this, SLOT(focusedPanelChanged(FilePanel*)));
     connect(rightPanel, SIGNAL(focusedPanelChanged(FilePanel*)), this, SLOT(focusedPanelChanged(FilePanel*)));
 
-    // Create Test Client
-    fileUtil = new RemoteFileUtilClient();
+    // ...
 
-    // Connect Signals
-    connect(fileUtil, SIGNAL(clientConnectionChanged(int,bool)), this, SLOT(clientConnectionChanged(int,bool)));
+    connect(leftPanel, SIGNAL(launchTerminal(QString)), this, SLOT(launchTerminal(QString)));
+    connect(rightPanel, SIGNAL(launchTerminal(QString)), this, SLOT(launchTerminal(QString)));
 
-    connect(fileUtil, SIGNAL(fileOpProgress(uint,QString,QString,quint64,quint64,quint64,quint64,int)), this, SLOT(fileOpProgress(uint,QString,QString,quint64,quint64,quint64,quint64,int)));
-    connect(fileUtil, SIGNAL(fileOpFinished(uint,QString,QString,QString,QString)), this, SLOT(fileOpFinished(uint,QString,QString,QString,QString)));
-    connect(fileUtil, SIGNAL(fileOpAborted(uint,QString,QString,QString,QString)), this, SLOT(fileOpAborted(uint,QString,QString,QString,QString)));
-    connect(fileUtil, SIGNAL(fileOpError(uint,QString,QString,QString,QString,int)), this, SLOT(fileOpError(uint,QString,QString,QString,QString,int)));
-    connect(fileUtil, SIGNAL(fileOpNeedConfirm(uint,QString,int,QString,QString,QString)), this, SLOT(fileOpNeedConfirm(uint,QString,int,QString,QString,QString)));
+    connect(leftPanel, SIGNAL(launchViewer(bool)), this, SLOT(launchViewer(bool)));
+    connect(rightPanel, SIGNAL(launchViewer(bool)), this, SLOT(launchViewer(bool)));
 
-    connect(fileUtil, SIGNAL(fileOpQueueItemFound(uint,QString,QString,QString,QString)), this, SLOT(fileOpQueueItemFound(uint,QString,QString,QString,QString)));
+    connect(leftPanel, SIGNAL(launchFileCopy()), this, SLOT(launchFileCopy()));
+    connect(rightPanel, SIGNAL(launchFileCopy()), this, SLOT(launchFileCopy()));
 
-    connect(fileUtil, SIGNAL(dirListItemFound(uint,QString,QString)), this, SLOT(dirListItemFound(uint,QString,QString)));
-    connect(fileUtil, SIGNAL(dirSizeScanProgress(uint,QString,quint64,quint64,quint64)), this, SLOT(dirSizeScanProgress(uint,QString,quint64,quint64,quint64)));
+    connect(leftPanel, SIGNAL(launchFileMove()), this, SLOT(launchFileMove()));
+    connect(rightPanel, SIGNAL(launchFileMove()), this, SLOT(launchFileMove()));
 
+    connect(leftPanel, SIGNAL(launchCreateDir()), this, SLOT(launchCreateDir()));
+    connect(rightPanel, SIGNAL(launchCreateDir()), this, SLOT(launchCreateDir()));
+
+    connect(leftPanel, SIGNAL(launchDelete()), this, SLOT(launchDelete()));
+    connect(rightPanel, SIGNAL(launchDelete()), this, SLOT(launchDelete()));
+
+    connect(leftPanel, SIGNAL(showPreferences()), this, SLOT(showPreferences()));
+    connect(rightPanel, SIGNAL(showPreferences()), this, SLOT(showPreferences()));
 
     // ...
 }
@@ -138,10 +142,7 @@ void MainWindow::restoreUI()
 {
     qDebug() << "MainWindow::restoreUI";
 
-
-
     // ...
-
 
     // Restore Left Panel UI
     leftPanel->restoreUI();
@@ -237,31 +238,34 @@ void MainWindow::showHelp()
 //==============================================================================
 void MainWindow::launchDelete()
 {
-    qDebug() << "MainWindow::launchDelete";
+    // Check Focused Panel
+    if (focusedPanel) {
+        qDebug() << "MainWindow::launchDelete";
 
-    // Check Delete File Dialog
-    if (!deleteFileDialog) {
-        // Create Delete File Dialog
-        deleteFileDialog = new DeleteFileDialog();
-    }
+        // Check Delete File Dialog
+        if (!deleteFileDialog) {
+            // Create Delete File Dialog
+            deleteFileDialog = new DeleteFileDialog();
+        }
 
-    // Setup Delete File Dialog
+        // Setup Delete File Dialog
 
-    // ...
+        // ...
 
-    // Launch Dialog
-    if (deleteFileDialog->exec()) {
+        // Launch Dialog
+        if (deleteFileDialog->exec()) {
 
-        // Create Delete Progress Dialog
+            // Create Delete Progress Dialog
 
-        // Add To Delete Progress Dialog List
+            // Add To Delete Progress Dialog List
 
-        // Show
+            // Show
 
-        // Build Queue
+            // Build Queue
 
-        // Process Queueu
+            // Process Queueu
 
+        }
     }
 }
 
@@ -344,15 +348,26 @@ void MainWindow::launchCreateDir()
             createDirDialog = new CreateDirDialog();
         }
 
+        // Init Dir Path
+        QString dirPath = focusedPanel->getCurrentDir();
+        // Chekc Dir Path
+        if (!dirPath.endsWith("/")) {
+            // Adjust Dir Path
+            dirPath += "/";
+        }
+
         // Setup Dialog
+        createDirDialog->setDirPath(dirPath);
 
         // ...
 
         // Launch Dialog
         if (createDirDialog->exec()) {
+            // Get Dir Path
+            dirPath = createDirDialog->getDirectory();
 
             // Create Directory
-
+            focusedPanel->createDir(dirPath);
         }
     }
 }
@@ -451,15 +466,6 @@ void MainWindow::shutDown()
         } catch (...) {
             qCritical() << "#### MainWindow::shutDown - ERROR DELETING VIEWER WINDOW!";
         }
-    }
-
-    // Check Test Client
-    if (fileUtil) {
-        // Close
-        fileUtil->close();
-        // Delete Test Client
-        delete fileUtil;
-        fileUtil = NULL;
     }
 }
 
@@ -562,20 +568,6 @@ void MainWindow::updateFunctionKeys()
         ui->delButton->setText(tr("Delete"));
         ui->optionsButton->setText(tr("Options"));
         ui->exitButton->setText(tr("Exit"));
-
-/*
-        // Set Button Text
-        ui->helpButton->setText(tr("Connect"));
-        ui->terminalButton->setText(tr("Start Test"));
-        ui->viewButton->setText(tr("Stop Test"));
-        ui->editButton->setText(tr("Send Yes"));
-        ui->copyButton->setText(tr("Send No"));
-        ui->moveButton->setText(tr("Scan Dir Size"));
-        ui->makeDirButton->setText(tr("Get Dir List"));
-        ui->delButton->setText(tr(""));
-        ui->optionsButton->setText(tr("Disconnect"));
-        ui->exitButton->setText(tr("Exit"));
-*/
     }
 }
 
@@ -679,157 +671,6 @@ void MainWindow::focusedPanelChanged(FilePanel* aFocusedPanel)
 }
 
 //==============================================================================
-// Client Connection Changed Slot
-//==============================================================================
-void MainWindow::clientConnectionChanged(const int& aID, const bool& aConnected)
-{
-    qDebug() << "MainWindow::clientConnectionChanged - aID: " << aID << " - aConnected: " << aConnected;
-
-    // ...
-}
-
-//==============================================================================
-// File Operation Progress Slot
-//==============================================================================
-void MainWindow::fileOpProgress(const unsigned int& aID,
-                                const QString& aOp,
-                                const QString& aCurrFilePath,
-                                const quint64& aCurrProgress,
-                                const quint64& aCurrTotal,
-                                const quint64& aOverallProgress,
-                                const quint64& aOverallTotal,
-                                const int& aSpeed)
-{
-    qDebug() << "MainWindow::fileOpProgress - aID: " << aID << " - aOp: " << aOp << " - aCurrFilePath: " << aCurrFilePath << " - aCurrProgress: " << aCurrProgress << " - aCurrTotal: " << aCurrTotal;
-
-    // ...
-}
-
-//==============================================================================
-// File Operation Finished Slot
-//==============================================================================
-void MainWindow::fileOpFinished(const unsigned int& aID,
-                                const QString& aOp,
-                                const QString& aPath,
-                                const QString& aSource,
-                                const QString& aTarget)
-{
-    qDebug() << "MainWindow::fileOpFinished - aID: " << aID << " - aOp: " << aOp << " - dirListCounter: " << dirListCounter;
-
-    // ...
-
-}
-
-//==============================================================================
-// File Operation Aborted Slot
-//==============================================================================
-void MainWindow::fileOpAborted(const unsigned int& aID,
-                               const QString& aOp,
-                               const QString& aPath,
-                               const QString& aSource,
-                               const QString& aTarget)
-{
-    qDebug() << "MainWindow::fileOpAborted - aID: " << aID << " - aOp: " << aOp << " - dirListCounter: " << dirListCounter;
-
-    // ...
-}
-
-//==============================================================================
-// File Operation Error Slot
-//==============================================================================
-void MainWindow::fileOpError(const unsigned int& aID,
-                             const QString& aOp,
-                             const QString& aPath,
-                             const QString& aSource,
-                             const QString& aTarget,
-                             const int& aError)
-{
-    qDebug() << "MainWindow::fileOpError - aID: " << aID << " - aOp: " << aOp << " - aError: " << aError;
-
-    // ...
-
-}
-
-//==============================================================================
-// Need Confirmation Slot
-//==============================================================================
-void MainWindow::fileOpNeedConfirm(const unsigned int& aID,
-                                   const QString& aOp,
-                                   const int& aCode,
-                                   const QString& aPath,
-                                   const QString& aSource,
-                                   const QString& aTarget)
-{
-    qDebug() << "MainWindow::fileOpNeedConfirm - aID: " << aID << " - aOp: " << aOp << " - aCode: " << aCode << " - dirListCounter: " << dirListCounter;
-
-    // ...
-
-}
-
-//==============================================================================
-// Dir Size Scan Progress Slot
-//==============================================================================
-void MainWindow::dirSizeScanProgress(const unsigned int& aID,
-                                     const QString& aPath,
-                                     const quint64& aNumDirs,
-                                     const quint64& aNumFiles,
-                                     const quint64& aScannedSize)
-{
-    qDebug() << "MainWindow::dirSizeScanProgress - aID: " << aID << " - aPath: " << aPath << " - aNumDirs: " << aNumDirs << " - aNumFiles: " << aNumFiles << " - aScannedSize: " << aScannedSize;
-
-    // ...
-
-}
-
-//==============================================================================
-// Dir List Item Found Slot
-//==============================================================================
-void MainWindow::dirListItemFound(const unsigned int& aID,
-                                  const QString& aPath,
-                                  const QString& aFileName)
-{
-    // Inc Dir List Counter
-    dirListCounter++;
-
-    //qDebug() << "MainWindow::dirListItemFound - aID: " << aID << " - aPath: " << aPath << " - aFileName: " << aFileName << " - dirListCounter: " << dirListCounter;
-
-
-
-
-    // ...
-
-}
-
-//==============================================================================
-// File Operation Queue Item Found Slot
-//==============================================================================
-void MainWindow::fileOpQueueItemFound(const unsigned int& aID,
-                                      const QString& aOp,
-                                      const QString& aPath,
-                                      const QString& aSource,
-                                      const QString& aTarget)
-{
-    qDebug() << "MainWindow::fileOpQueueItemFound - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath;
-
-    // ...
-
-}
-
-//==============================================================================
-// File Search Result Item Found Slot
-//==============================================================================
-void MainWindow::fileSearchResultItemFound(const unsigned int& aID,
-                                           const QString& aOp,
-                                           const QString& aFilePath)
-{
-    qDebug() << "MainWindow::fileOpQueueItemFound - aID: " << aID << " - aOp: " << aOp << " - aFilePath: " << aFilePath;
-
-    // ...
-
-}
-
-
-//==============================================================================
 // Help Button Clicked Slot
 //==============================================================================
 void MainWindow::on_helpButton_clicked()
@@ -848,13 +689,6 @@ void MainWindow::on_helpButton_clicked()
     } else {
         // Trigger Help Action
         ui->actionHelp->trigger();
-
-//        // Check Test Client
-//        if (testClient) {
-//            qDebug() << "\n#### testClient - Connect";
-//            // Launch Server Test
-//            testClient->launchServerTest();
-//        }
     }
 }
 
@@ -875,15 +709,6 @@ void MainWindow::on_terminalButton_clicked()
     } else {
         // Trigger Terminal Action
         ui->actionTerminal->trigger();
-
-//        // Check Test Client
-//        if (testClient) {
-//            qDebug() << "\n#### testClient - Start Test";
-//            // Reset Counter
-//            dirListCounter = 0;
-//            // Start Test Operation
-//            testClient->startTestOperation();
-//        }
     }
 }
 
@@ -904,13 +729,6 @@ void MainWindow::on_viewButton_clicked()
     } else {
         // Trigger View Action
         ui->actionView->trigger();
-
-//        // Check Test Client
-//        if (testClient) {
-//            qDebug() << "\n#### testClient - Stop Test";
-//            // Stop Test Operation
-//            testClient->stopTestOperation();
-//        }
     }
 }
 
@@ -931,16 +749,6 @@ void MainWindow::on_editButton_clicked()
     } else {
         // Trigger Edit Action
         ui->actionEdit->trigger();
-
-//        // Check Test Client
-//        if (testClient) {
-//            qDebug() << "\n#### testClient - Send Yes";
-//            // Reset Counter
-//            dirListCounter = 0;
-//            // Stop Test Operation
-//            testClient->sendResponse(DEFAULT_RESPONSE_YES);
-//        }
-
     }
 }
 
@@ -961,15 +769,6 @@ void MainWindow::on_copyButton_clicked()
     } else {
         // Trigger Copy Action
         ui->actionCopy->trigger();
-
-//        // Check Test Client
-//        if (testClient) {
-//            qDebug() << "\n#### testClient - Send No";
-//            // Reset Counter
-//            dirListCounter = 0;
-//            // Stop Test Operation
-//            testClient->sendResponse(DEFAULT_RESPONSE_NO);
-//        }
     }
 }
 
@@ -990,16 +789,6 @@ void MainWindow::on_moveButton_clicked()
     } else {
         // Trigger Move Action
         ui->actionMove->trigger();
-
-//        // Check Test Client
-//        if (testClient) {
-//            qDebug() << "\n#### testClient - Scan Dir Size";
-//            // Reset Dir List Counter
-//            dirListCounter = 0;
-//            // Scan Dir Size
-//            //testClient->scanDirSize("/dev");
-//            testClient->scanDirSize(QDir::homePath() + "/Music");
-//        }
     }
 }
 
@@ -1020,18 +809,6 @@ void MainWindow::on_makeDirButton_clicked()
     } else {
         // Trigger Make Dir Action
         ui->actionNew_Directory->trigger();
-
-//        // Check Test Client
-//        if (testClient) {
-//            qDebug() << "\n#### testClient - Get Dir List";
-//            // Reset Dir List Counter
-//            dirListCounter = 0;
-//            // Get Dir List
-//            //testClient->getDirList(QDir::homePath(), DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_DIRFIRST);
-//            //testClient->getDirList("/usr/bin", DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_DIRFIRST);
-//            //testClient->getDirList("/dev", DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_DIRFIRST);
-//            testClient->getDirList(QDir::homePath() + "/Pictures/Wallpaperz", DEFAULT_FILTER_SHOW_HIDDEN, DEFAULT_SORT_DIRFIRST);
-//        }
     }
 }
 
@@ -1072,13 +849,6 @@ void MainWindow::on_optionsButton_clicked()
     } else {
         // Trigger Options Action
         ui->actionPreferences->trigger();
-
-//        // Check Test Client
-//        if (testClient) {
-//            qDebug() << "\n#### testClient - Disconnect Test";
-//            // Disconnect Test
-//            testClient->disconnectTest();
-//        }
     }
 }
 

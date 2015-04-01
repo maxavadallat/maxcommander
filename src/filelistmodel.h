@@ -46,6 +46,8 @@ public:
 
     // Find Index
     int findIndex(const QString& aFileName);
+    // Insert Item by File Name - For Newly Create Directory
+    void insertItem(const QString& aFileName);
 
     // Get File Info
     QFileInfo getFileInfo(const int& aIndex);
@@ -64,6 +66,15 @@ public:
 
     // Get File Count
     int getFileCount();
+
+    // Get File Index By FileName
+    int getFileIndex(const QString& aFileName);
+
+    // Create Dir
+    void createDir(const QString& aDirPath);
+
+    // Has Selection
+    bool hasSelection();
 
     // Destructor
     virtual ~FileListModel();
@@ -94,6 +105,8 @@ signals:
     void currentDirChanged(const QString& aCurrentDir);
     // Dir Fetch Finished Signal
     void dirFetchFinished();
+    // Dir Created Signal
+    void dirCreated(const QString& aDirPath);
 
     // Busy State Changed Signal
     void busyChanged(const bool& aBusy);
@@ -115,9 +128,11 @@ protected slots:
 
     // Init
     void init();
-
     // Fetch Dir
     void fetchDirItems();
+
+    // Delete Item
+    void deleteItem(const int& aIndex);
 
 protected slots: // For Remote File Client
 
@@ -179,6 +194,8 @@ protected:
 
     // File Info List
     QList<FileListModelItem*>   itemList;
+    // File Name List - For Quicker Search
+    QStringList                 fileNameList;
 
     // Remote File Client
     RemoteFileUtilClient*       fileUtil;
@@ -188,6 +205,9 @@ protected:
 
     // Reverse Order
     bool                        reverseOrder;
+
+    // Selected Count
+    int                         selectedCount;
 
     // ...
 };

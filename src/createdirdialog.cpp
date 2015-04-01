@@ -8,6 +8,7 @@ CreateDirDialog::CreateDirDialog(QWidget* aParent)
     : QDialog(aParent)
     , ui(new Ui::CreateDirDialog)
 {
+    // Setup UI
     ui->setupUi(this);
 }
 
@@ -26,6 +27,8 @@ void CreateDirDialog::setDirPath(const QString& aDirPath)
 {
     // Set Text
     ui->directoryPathEdit->setText(aDirPath);
+    // Set Cursor Position
+    ui->directoryPathEdit->setCursorPosition(aDirPath.length());
 }
 
 //==============================================================================
@@ -35,3 +38,4 @@ CreateDirDialog::~CreateDirDialog()
 {
     delete ui;
 }
+

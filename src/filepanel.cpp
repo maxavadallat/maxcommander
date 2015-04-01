@@ -53,6 +53,7 @@ FilePanel::FilePanel(QWidget* aParent)
     , dirWatcherTimerID(-1)
     , dwDirChanged(false)
     , dwFileChanged(false)
+    , ownKeyPress(false)
 
 {
     // Setup UI
@@ -78,8 +79,9 @@ void FilePanel::init()
     // Check File List Model
     if (fileListModel) {
         // Connect Signals
-        connect(fileListModel, SIGNAL(dirFetchFinished()), this, SLOT(fileModelDirFetchFinished()));
         connect(fileListModel, SIGNAL(busyChanged(bool)), this, SIGNAL(busyChanged(bool)));
+        connect(fileListModel, SIGNAL(dirFetchFinished()), this, SLOT(fileModelDirFetchFinished()));
+        connect(fileListModel, SIGNAL(dirCreated(QString)), this, SLOT(fileModelDirCreated(QString)));
     }
 
     // Set Context Properties
@@ -666,6 +668,32 @@ bool FilePanel::busy()
 }
 
 //==============================================================================
+// Get File Index By File Name
+//==============================================================================
+int FilePanel::getFileIndex(const QString& aFileName)
+{
+    // Check File List Model
+    if (fileListModel) {
+        // Get Index
+        return fileListModel->getFileIndex(aFileName);
+    }
+
+    return -1;
+}
+
+//==============================================================================
+// Create Dir
+//==============================================================================
+void FilePanel::createDir(const QString& aDirPath)
+{
+    // Check File List Model
+    if (fileListModel) {
+        // Create Dir
+        fileListModel->createDir(aDirPath);
+    }
+}
+
+//==============================================================================
 // Set Panel Has Focus
 //==============================================================================
 void FilePanel::setPanelFocus(const bool& aFocus)
@@ -1182,6 +1210,31 @@ void FilePanel::fileModelDirFetchFinished()
 }
 
 //==============================================================================
+// Dir Created Slot
+//==============================================================================
+void FilePanel::fileModelDirCreated(const QString& aDirPath)
+{
+    // Get Path
+    QString path = getDirPath(aDirPath);
+
+    // Check Path
+    if (path == currentDir) {
+        qDebug() << "FilePanel::fileModelDirCreated - panelName: " << panelName << " - aDirPath: " << aDirPath;
+
+        // Get Dir Name
+        QString dirName = getDirName(aDirPath);
+
+        // Insert Dir Name
+        if (fileListModel) {
+            // Insert Dir Name
+            fileListModel->insertItem(dirName);
+            // Set Current Index
+            setCurrentIndex(fileListModel->findIndex(dirName));
+        }
+    }
+}
+
+//==============================================================================
 // Start Dir Watcher
 //==============================================================================
 void FilePanel::startDirWatcher()
@@ -1265,6 +1318,134 @@ void FilePanel::refreshFileListModel(const QString& aFilePath)
 }
 
 //==============================================================================
+// Handle Modifier Key Press Event
+//==============================================================================
+bool FilePanel::handleModifierKeyPressEvent(QKeyEvent* aEvent)
+{
+    // Check Event
+    if (aEvent) {
+        // Switch Key
+        switch (aEvent->key()) {
+            case Qt::Key_Shift:
+                //qDebug() << "FilePanel::keyPressEvent - key: SHIFT";
+                // Check If Auto Repeat
+                if (!aEvent->isAutoRepeat()) {
+                    // Accept
+                    aEvent->accept();
+                    // Update Modifier Keys
+                    modifierKeys |= Qt::ShiftModifier;
+                    // Emit Modifier Keys Changed Signal
+                    emit modifierKeysChanged(modifierKeys);
+
+                    return true;
+                }
+            break;
+
+            case Qt::Key_Control:
+                //qDebug() << "FilePanel::keyPressEvent - key: CONTROL";
+                // Check If Auto Repeat
+                if (!aEvent->isAutoRepeat()) {
+                    // Accept
+                    aEvent->accept();
+                    // Update Modifier Keys
+                    modifierKeys |= Qt::ControlModifier;
+                    // Emit Modifier Keys Changed Signal
+                    emit modifierKeysChanged(modifierKeys);
+
+                    return true;
+                }
+            break;
+
+            case Qt::Key_AltGr:
+            case Qt::Key_Alt:
+                //qDebug() << "FilePanel::keyPressEvent - key: ALT";
+                // Check If Auto Repeat
+                if (!aEvent->isAutoRepeat()) {
+                    // Accept
+                    aEvent->accept();
+                    // Update Modifier Keys
+                    modifierKeys |= Qt::AltModifier;
+                    // Emit Modifier Keys Changed Signal
+                    emit modifierKeysChanged(modifierKeys);
+
+                    return true;
+                }
+            break;
+
+            case Qt::Key_Meta:
+                //qDebug() << "FilePanel::keyPressEvent - key: META";
+                // Check If Auto Repeat
+                if (!aEvent->isAutoRepeat()) {
+                    // Accept
+                    aEvent->accept();
+                    // Update Modifier Keys
+                    modifierKeys |= Qt::MetaModifier;
+                    // Emit Modifier Keys Changed Signal
+                    emit modifierKeysChanged(modifierKeys);
+
+                    return true;
+                }
+            break;
+
+            default:
+            break;
+        }
+    }
+
+    return false;
+}
+
+//==============================================================================
+// Handle Modifier Key Release Event
+//==============================================================================
+bool FilePanel::handleModifierKeyReleaseEvent(QKeyEvent* aEvent)
+{
+    // Check Event
+    if (aEvent) {
+        // Switch Key
+        switch (aEvent->key()) {
+            case Qt::Key_Shift:
+                //qDebug() << "FilePanel::keyReleaseEvent - key: SHIFT";
+                // Update Modifier Keys
+                modifierKeys ^= Qt::ShiftModifier;
+                // Emit Modifier Keys Changed Signal
+                emit modifierKeysChanged(modifierKeys);
+            return true;;
+
+            case Qt::Key_Control:
+                //qDebug() << "FilePanel::keyReleaseEvent - key: CONTROL";
+                // Update Modifier Keys
+                modifierKeys = modifierKeys ^ Qt::ControlModifier;
+                // Emit Modifier Keys Changed Signal
+                emit modifierKeysChanged(modifierKeys);
+            return true;;
+
+            case Qt::Key_AltGr:
+            case Qt::Key_Alt:
+                //qDebug() << "FilePanel::keyReleaseEvent - key: ALT";
+                // Update Modifier Keys
+                modifierKeys = modifierKeys ^ Qt::AltModifier;
+                // Emit Modifier Keys Changed Signal
+                emit modifierKeysChanged(modifierKeys);
+            return true;;
+
+            case Qt::Key_Meta:
+                //qDebug() << "FilePanel::keyReleaseEvent - key: META";
+                // Update Modifier Keys
+                modifierKeys = modifierKeys ^ Qt::MetaModifier;
+                // Emit Modifier Keys Changed Signal
+                emit modifierKeysChanged(modifierKeys);
+            return true;;
+
+            default:
+            break;
+        }
+    }
+
+    return false;
+}
+
+//==============================================================================
 // Home Button Clicked Slot
 //==============================================================================
 void FilePanel::on_homeButton_clicked()
@@ -1326,39 +1507,20 @@ void FilePanel::focusOutEvent(QFocusEvent* aEvent)
 //==============================================================================
 void FilePanel::keyPressEvent(QKeyEvent* aEvent)
 {
+    // Handle Modifier Key Press Event
+    if (handleModifierKeyPressEvent(aEvent)) {
+        return;
+    }
+
     // Check Event
     if (aEvent) {
+        // Set Own Key Press
+        ownKeyPress = true;
+
         // Switch Key
         switch (aEvent->key()) {
-            case Qt::Key_R:
-
-            break;
-
             case Qt::Key_Escape:
-
-            break;
-
-            case Qt::Key_Tab:
-                //qDebug() << "FilePanel::keyPressEvent - key: TAB";
-
-            break;
-
-            case Qt::Key_Return:
-            case Qt::Key_Enter:
-
-            break;
-
-            case Qt::Key_Space:
-
-
-            break;
-
-            case Qt::Key_Up:
-
-            break;
-
-            case Qt::Key_Down:
-
+                // Check If Shift Is Pressed -> Tray
             break;
 
             case Qt::Key_Backspace:
@@ -1370,9 +1532,6 @@ void FilePanel::keyPressEvent(QKeyEvent* aEvent)
                     // Go Up
                     goUp();
                 }
-            break;
-
-            case Qt::Key_Right:
             break;
 
             case Qt::Key_PageUp:
@@ -1395,77 +1554,6 @@ void FilePanel::keyPressEvent(QKeyEvent* aEvent)
                 }
             break;
 
-            case Qt::Key_Home:
-                // Check If Auto Repeat
-                if (aEvent->isAutoRepeat()) {
-
-                }
-            break;
-
-            case Qt::Key_End:
-                // Check If Auto Repeat
-                if (aEvent->isAutoRepeat()) {
-
-                }
-            break;
-
-            case Qt::Key_Shift:
-                //qDebug() << "FilePanel::keyPressEvent - key: SHIFT";
-                // Check If Auto Repeat
-                if (!aEvent->isAutoRepeat()) {
-                    // Accept
-                    aEvent->accept();
-                    // Update Modifier Keys
-                    modifierKeys |= Qt::ShiftModifier;
-                    // Emit Modifier Keys Changed Signal
-                    emit modifierKeysChanged(modifierKeys);
-                }
-            break;
-
-            case Qt::Key_Control:
-                //qDebug() << "FilePanel::keyPressEvent - key: CONTROL";
-                // Check If Auto Repeat
-                if (!aEvent->isAutoRepeat()) {
-                    // Accept
-                    aEvent->accept();
-                    // Update Modifier Keys
-                    modifierKeys |= Qt::ControlModifier;
-                    // Emit Modifier Keys Changed Signal
-                    emit modifierKeysChanged(modifierKeys);
-                }
-            break;
-
-            case Qt::Key_AltGr:
-            case Qt::Key_Alt:
-                //qDebug() << "FilePanel::keyPressEvent - key: ALT";
-                // Check If Auto Repeat
-                if (!aEvent->isAutoRepeat()) {
-                    // Accept
-                    aEvent->accept();
-                    // Update Modifier Keys
-                    modifierKeys |= Qt::AltModifier;
-                    // Emit Modifier Keys Changed Signal
-                    emit modifierKeysChanged(modifierKeys);
-                }
-            break;
-
-            case Qt::Key_Meta:
-                //qDebug() << "FilePanel::keyPressEvent - key: META";
-                // Check If Auto Repeat
-                if (!aEvent->isAutoRepeat()) {
-                    // Accept
-                    aEvent->accept();
-                    // Update Modifier Keys
-                    modifierKeys |= Qt::MetaModifier;
-                    // Emit Modifier Keys Changed Signal
-                    emit modifierKeysChanged(modifierKeys);
-                }
-            break;
-
-            case Qt::Key_F10:
-                //qDebug() << "FilePanel::keyPressEvent - key: F10";
-            break;
-
             default:
                 qDebug() << "FilePanel::keyPressEvent - key: " << aEvent->key();
             break;
@@ -1478,29 +1566,26 @@ void FilePanel::keyPressEvent(QKeyEvent* aEvent)
 //==============================================================================
 void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
 {
+    // Handle Modifier Key Release Event
+    if (handleModifierKeyReleaseEvent(aEvent)) {
+        return;
+    }
+
+    // Check Own Keypress
+    if (!ownKeyPress) {
+        //qDebug() << "FilePanel::keyReleaseEvent - NOT OWN KEY EVENT!!";
+        return;
+    }
+
+    // Reset Own Key Press
+    ownKeyPress = false;
+
     // Check Event
     if (aEvent) {
         // Switch Key
         switch (aEvent->key()) {
-            case Qt::Key_R:
-/*
-                // Check If Control Pressed
-                if (modifierKeys & Qt::ControlModifier) {
-                    // Check File List Model
-                    if (fileListModel) {
-                        // Reload
-                        fileListModel->reload();
-                    }
-                }
-*/
-            break;
-
             case Qt::Key_Escape:
-
-            break;
-
-            case Qt::Key_Tab:
-
+                // Check If Shift Is Pressed -> Tray
             break;
 
             case Qt::Key_Return:
@@ -1510,13 +1595,7 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
             break;
 
             case Qt::Key_Space:
-
-            break;
-
-            case Qt::Key_Up:
-            break;
-
-            case Qt::Key_Down:
+                // Scan Dir
             break;
 
             case Qt::Key_Backspace:
@@ -1560,47 +1639,95 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
                 goLast();
             break;
 
+            case Qt::Key_F1:
+                // Check Modifier Keys
+                if (modifierKeys == Qt::NoModifier) {
+                    // Emit Show Help
+                    emit showHelp();
+                }
+            break;
+
+            case Qt::Key_F2:
+                // Check Modifier Keys
+                if (modifierKeys == Qt::NoModifier) {
+                    // Emit Launch Terminal
+                    emit launchTerminal(currentDir);
+                }
+            break;
+
+            case Qt::Key_F3:
+                // Check Modifier Keys
+                if (modifierKeys == Qt::NoModifier) {
+                    // Get File info
+                    QFileInfo fileInfo = getCurrFileInfo();
+                    // Check File Type
+                    if (!fileInfo.isDir() && !fileInfo.isBundle() && !fileInfo.isSymLink()) {
+                        // Emit Launch Viewer
+                        emit launchViewer(false);
+                    }
+                }
+            break;
+
+            case Qt::Key_F4:
+                // Check Modifier Keys
+                if (modifierKeys == Qt::NoModifier) {
+                    // Get File info
+                    QFileInfo fileInfo = getCurrFileInfo();
+                    // Check File Type
+                    if (!fileInfo.isDir() && !fileInfo.isBundle() && !fileInfo.isSymLink()) {
+                        // Emit Launch Viewer
+                        emit launchViewer(true);
+                    }
+                }
+            break;
+
+            case Qt::Key_F5:
+                // Check Modifier Keys
+                if (modifierKeys == Qt::NoModifier) {
+                    // Emit Launch File Copy
+                    emit launchFileCopy();
+                }
+            break;
+
             case Qt::Key_F6:
-                // Rename
+                // Check Modifier Keys
+                if (modifierKeys == Qt::NoModifier) {
+                    // Emit Launch File Move/Rename
+                    emit launchFileMove();
+                }
             break;
 
-            case Qt::Key_Shift:
-                //qDebug() << "FilePanel::keyReleaseEvent - key: SHIFT";
-                // Update Modifier Keys
-                modifierKeys ^= Qt::ShiftModifier;
-                // Emit Modifier Keys Changed Signal
-                emit modifierKeysChanged(modifierKeys);
+            case Qt::Key_F7:
+                // Check Modifier Keys
+                if (modifierKeys == Qt::NoModifier) {
+                    // Emit Launch Create Dir
+                    emit launchCreateDir();
+                }
             break;
 
-            case Qt::Key_Control:
-                //qDebug() << "FilePanel::keyReleaseEvent - key: CONTROL";
-                // Update Modifier Keys
-                modifierKeys = modifierKeys ^ Qt::ControlModifier;
-                // Emit Modifier Keys Changed Signal
-                emit modifierKeysChanged(modifierKeys);
+            case Qt::Key_F8:
+                // Check Modifier Keys
+                if (modifierKeys == Qt::NoModifier) {
+                    // Emit Launch Delete
+                    emit launchDelete();
+                }
             break;
 
-            case Qt::Key_AltGr:
-            case Qt::Key_Alt:
-                //qDebug() << "FilePanel::keyReleaseEvent - key: ALT";
-                // Update Modifier Keys
-                modifierKeys = modifierKeys ^ Qt::AltModifier;
-                // Emit Modifier Keys Changed Signal
-                emit modifierKeysChanged(modifierKeys);
-            break;
-
-            case Qt::Key_Meta:
-                //qDebug() << "FilePanel::keyReleaseEvent - key: META";
-                // Update Modifier Keys
-                modifierKeys = modifierKeys ^ Qt::MetaModifier;
-                // Emit Modifier Keys Changed Signal
-                emit modifierKeysChanged(modifierKeys);
+            case Qt::Key_F9:
+                // Check Modifier Keys
+                if (modifierKeys == Qt::NoModifier) {
+                    // Emit Show Preferences
+                    emit showPreferences();
+                }
             break;
 
             case Qt::Key_F10:
                 //qDebug() << "FilePanel::keyReleaseEvent - key: F10";
-                // Emit Exit Key Released Signal
-                emit exitKeyReleased();
+                // Check Modifier Keys
+                if (modifierKeys == Qt::NoModifier) {
+                    // Emit Exit Key Released Signal
+                    emit exitKeyReleased();
+                }
             break;
 
             default:

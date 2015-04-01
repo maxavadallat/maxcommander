@@ -38,6 +38,7 @@ FileListModel::FileListModel(QObject* aParent)
     , fileUtil(NULL)
     , sorting(0)
     , reverseOrder(false)
+    , selectedCount(0)
 {
     qDebug() << "FileListModel::FileListModel";
 
@@ -149,6 +150,45 @@ int FileListModel::getFileCount()
 }
 
 //==============================================================================
+// Get File Index By FileName
+//==============================================================================
+int FileListModel::getFileIndex(const QString& aFileName)
+{
+    // Get Item List Count
+    int ilCount = itemList.count();
+
+    // Go Thru Items
+    for (int i=0; i<ilCount; ++i) {
+        // Check Item's File Name
+        if (itemList[i]->fileInfo.fileName() == aFileName) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+//==============================================================================
+// Create Dir
+//==============================================================================
+void FileListModel::createDir(const QString& aDirPath)
+{
+    // Check File Util
+    if (fileUtil) {
+        // Create Dir
+        fileUtil->createDir(aDirPath);
+    }
+}
+
+//==============================================================================
+// Has Selection
+//==============================================================================
+bool FileListModel::hasSelection()
+{
+    return selectedCount > 0;
+}
+
+//==============================================================================
 // Clear
 //==============================================================================
 void FileListModel::clear()
@@ -172,6 +212,12 @@ void FileListModel::clear()
 
     // End Reset Model
     endResetModel();
+
+    // Clear File Name List
+    fileNameList.clear();
+
+    // Reset Selected Count
+    selectedCount = 0;
 }
 
 //==============================================================================
@@ -216,6 +262,14 @@ void FileListModel::setSelected(const int& aIndex, const bool& aSelected)
             QModelIndex index = createIndex(aIndex, 0);
             // Emit Data Changed Signal
             emit dataChanged(index, index);
+            // Check Selected
+            if (itemList[aIndex]->selected) {
+                // Inc Selected Count
+                selectedCount++;
+            } else {
+                // Dec Selected Count
+                selectedCount--;
+            }
         }
     }
 }
@@ -227,6 +281,9 @@ void FileListModel::selectAll()
 {
     // Get Item List Count
     int ilCount = itemList.count();
+    // Reset Selected Count
+    selectedCount = 0;
+
     // Go Thru Item List
     for (int i=0; i<ilCount; ++i) {
         // Check File Name
@@ -239,6 +296,8 @@ void FileListModel::selectAll()
                 QModelIndex index = createIndex(i, 0);
                 // Emit Data Changed Signal
                 emit dataChanged(index, index);
+                // Inc Selected Count
+                selectedCount++;
             }
         }
     }
@@ -263,6 +322,9 @@ void FileListModel::deselectAll()
             emit dataChanged(index, index);
         }
     }
+
+    // Reset Selected Count
+    selectedCount = 0;
 }
 
 //==============================================================================
@@ -326,6 +388,31 @@ void FileListModel::fetchDirItems()
 }
 
 //==============================================================================
+// Delete Item
+//==============================================================================
+void FileListModel::deleteItem(const int& aIndex)
+{
+    // Check Index
+    if (aIndex >= 0  && aIndex < itemList.count()) {
+        qDebug() << "FileListModel::deleteItem - aIndex: " << aIndex;
+
+        // Get File Name
+        QString fileName = itemList[aIndex]->fileInfo.fileName();
+
+        // Delete Item
+        delete itemList.takeAt(aIndex);
+
+        // Find File Name Index
+        int index = fileNameList.indexOf(fileName);
+        // Check Index
+        if (index >= 0 && index < fileNameList.count()) {
+            // Remove File Name
+            fileNameList.removeAt(index);
+        }
+    }
+}
+
+//==============================================================================
 // Client Connection Changed Slot
 //==============================================================================
 void FileListModel::clientConnectionChanged(const int& aID, const bool& aConnected)
@@ -372,8 +459,14 @@ void FileListModel::fileOpFinished(const unsigned int& aID,
 
     // ...
 
-    // Emit Dir Fetch Finished Signal
-    emit dirFetchFinished();
+    // Check Operation
+    if (aOp == DEFAULT_OPERATION_LIST_DIR) {
+        // Emit Dir Fetch Finished Signal
+        emit dirFetchFinished();
+    } else if (aOp == DEFAULT_OPERATION_MAKE_DIR) {
+        // Emit Dir Create Signal
+        emit dirCreated(aPath);
+    }
 }
 
 //==============================================================================
@@ -430,6 +523,12 @@ void FileListModel::dirListItemFound(const unsigned int& aID,
         return;
     }
 
+    // Check File Name
+    if (fileNameList.indexOf(aFileName) >= 0) {
+        qWarning() << "FileListModel::dirListItemFound - aID: " << aID << " - aFileName: " << aFileName << " - DUPLICATE ITEM!!";
+        return;
+    }
+
     // ...
 
     // Create New File List Item
@@ -443,6 +542,9 @@ void FileListModel::dirListItemFound(const unsigned int& aID,
 
     // Add Item To Item List
     itemList << newItem;
+
+    // Add File Name To File Name List
+    fileNameList << aFileName;
 
     // End Insert Row
     endInsertRows();
@@ -678,7 +780,58 @@ int FileListModel::findIndex(const QString& aFileName)
         }
     }
 
-    return 0;
+    return -1;
+}
+
+//==============================================================================
+// Insert Item by File Name - For Newly Create Directory
+//==============================================================================
+void FileListModel::insertItem(const QString& aFileName)
+{
+    // Check File Name
+    if (fileNameList.indexOf(aFileName) >= 0) {
+        qWarning() << "FileListModel::insertItem - aFileName: " << aFileName << " - DUPLICATE ITEM!!";
+        return;
+    }
+
+    // ...
+
+    // Create New File List Item
+    FileListModelItem* newItem = new FileListModelItem(currentDir, aFileName);
+
+    // Get Count
+    int count = rowCount();
+    // Loop Index
+    int i = 0;
+
+    // Check Reverse Order
+    if (reverseOrder) {
+        // Go Thru List
+        while (itemList[i]->fileInfo.fileName() > aFileName && i < count) {
+            // Inc Loop Index
+            i++;
+        }
+    } else {
+        // Go Thru List
+        while (itemList[i]->fileInfo.fileName() < aFileName && i < count) {
+            // Inc Loop Index
+            i++;
+        }
+    }
+
+    // Insert Item
+
+    // Begin Insert Row
+    beginInsertRows(QModelIndex(), i, i);
+
+    // Add Item To Item List
+    itemList.insert(i, newItem);
+
+    // End Insert Row
+    endInsertRows();
+
+    // Add File Name To File Name List
+    fileNameList.insert(i, aFileName);
 }
 
 //==============================================================================
@@ -748,6 +901,7 @@ FileListModel::~FileListModel()
 
     // Check File Util
     if (fileUtil) {
+        // Close
         fileUtil->close();
 
         // Delete File Util

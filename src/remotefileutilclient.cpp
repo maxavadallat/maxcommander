@@ -380,7 +380,7 @@ void RemoteFileUtilClient::searchFile(const QString& aName, const QString& aDirP
 void RemoteFileUtilClient::abort()
 {
     // Check Client & Status
-    if (client && cID > 0 && (status == ECSTBusy || status == ECSTWaiting)) {
+    if (client && cID > 0 && (status == ECSTBusy || status == ECSTWaiting || status == ECSTSuspended)) {
         // Set Status
         setStatus(ECSTAborting);
 
@@ -400,6 +400,64 @@ void RemoteFileUtilClient::abort()
 
     } else {
         //qDebug() << "RemoteFileUtilClient::abort - cID: " << cID << " - NOT BUSY, NOTHING TO ABORT!";
+    }
+}
+
+//==============================================================================
+// Suspend Current Operation
+//==============================================================================
+void RemoteFileUtilClient::suspend()
+{
+    // Check Client & Status
+    if (client && cID > 0 && status == ECSTBusy) {
+        // Set Status
+        setStatus(ECSTSuspended);
+
+        qDebug() << "RemoteFileUtilClient::suspend - cID: " << cID;
+
+        // Init New Data
+        QVariantMap newData;
+
+        // Set Up New Data
+        newData[DEFAULT_KEY_CID]        = cID;
+        newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_OPERATION_PAUSE);
+
+        // Write Data
+        wirteData(newData);
+
+        // ...
+
+    } else {
+        //qDebug() << "RemoteFileUtilClient::suspend - cID: " << cID << " - NOT BUSY, NOTHING TO SUSPEND!";
+    }
+}
+
+//==============================================================================
+// Resume Current Operation
+//==============================================================================
+void RemoteFileUtilClient::resume()
+{
+    // Check Client & Status
+    if (client && cID > 0 && status == ECSTSuspended) {
+        // Set Status
+        setStatus(ECSTBusy);
+
+        qDebug() << "RemoteFileUtilClient::resume - cID: " << cID;
+
+        // Init New Data
+        QVariantMap newData;
+
+        // Set Up New Data
+        newData[DEFAULT_KEY_CID]        = cID;
+        newData[DEFAULT_KEY_OPERATION]  = QString(DEFAULT_OPERATION_RESUME);
+
+        // Write Data
+        wirteData(newData);
+
+        // ...
+
+    } else {
+        //qDebug() << "RemoteFileUtilClient::resume - cID: " << cID << " - NOT SUSPENDED, CANT TO RESUME!";
     }
 }
 

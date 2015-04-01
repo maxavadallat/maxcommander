@@ -411,16 +411,10 @@
    <property name="text">
     <string>Help</string>
    </property>
-   <property name="shortcut">
-    <string>F1</string>
-   </property>
   </action>
   <action name="actionOptions">
    <property name="text">
     <string>Options</string>
-   </property>
-   <property name="shortcut">
-    <string>F9</string>
    </property>
   </action>
   <action name="actionCompare_Files">
@@ -447,9 +441,6 @@
   <action name="actionTerminal">
    <property name="text">
     <string>Terminal</string>
-   </property>
-   <property name="shortcut">
-    <string>F2</string>
    </property>
   </action>
   <action name="actionSort_by_Name">
@@ -515,9 +506,6 @@
    <property name="text">
     <string>New Directory</string>
    </property>
-   <property name="shortcut">
-    <string>F7</string>
-   </property>
   </action>
   <action name="actionNew_File">
    <property name="text">
@@ -530,9 +518,6 @@
   <action name="actionDelete_File">
    <property name="text">
     <string>Delete File</string>
-   </property>
-   <property name="shortcut">
-    <string>F8, Del</string>
    </property>
   </action>
   <action name="actionCreate_Link">
@@ -552,32 +537,20 @@
    <property name="text">
     <string>View</string>
    </property>
-   <property name="shortcut">
-    <string>F3</string>
-   </property>
   </action>
   <action name="actionEdit">
    <property name="text">
     <string>Edit</string>
-   </property>
-   <property name="shortcut">
-    <string>F4</string>
    </property>
   </action>
   <action name="actionCopy">
    <property name="text">
     <string>Copy</string>
    </property>
-   <property name="shortcut">
-    <string>F5</string>
-   </property>
   </action>
   <action name="actionMove">
    <property name="text">
     <string>Move</string>
-   </property>
-   <property name="shortcut">
-    <string>F6</string>
    </property>
   </action>
   <action name="actionExit">

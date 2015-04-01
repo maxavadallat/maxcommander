@@ -17,6 +17,7 @@ enum ClientStatusType
     ECSTCreated     = 0,
     ECSTIdle,
     ECSTBusy,
+    ECSTSuspended,
     ECSTAborting,
     ECSTAborted,
     ECSTWaiting,
@@ -81,6 +82,10 @@ public:
 
     // Abort Current Operation
     void abort();
+    // Suspend Current Operation
+    void suspend();
+    // Resume Current Operation
+    void resume();
     // Close
     void close();
     // Execute Shell Command

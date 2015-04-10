@@ -195,7 +195,6 @@ protected slots: // Actions & Button
     // Action Exit Triggered Slot
     void on_actionExit_triggered();
 
-
 private:
 
     // UI

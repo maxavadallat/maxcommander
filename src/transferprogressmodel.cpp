@@ -89,6 +89,19 @@ void TransferProgressModel::removeItem(const int& aIndex)
 }
 
 //==============================================================================
+// Set Done
+//==============================================================================
+void TransferProgressModel::setDone(const int& aIndex, const bool& aDone)
+{
+    // Check Index
+    if (aIndex >=0 && aIndex < rowCount()) {
+        qDebug() << "TransferProgressModel::setDone - aIndex: " << aIndex;
+        // Set Data
+        setData(createIndex(aIndex, 0), aDone, ERIDDone);
+    }
+}
+
+//==============================================================================
 // Get Role Names
 //==============================================================================
 QHash<int, QByteArray> TransferProgressModel::roleNames() const

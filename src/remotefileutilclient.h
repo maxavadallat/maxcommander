@@ -48,6 +48,9 @@ public:
     // Get Status
     ClientStatusType getStatus();
 
+    // Get Last Operation
+    QString lastOperation();
+
     // Get Dir List
     void getDirList(const QString& aDirPath, const int& aFilters, const int& aSortFlags);
 
@@ -88,11 +91,12 @@ public:
     void resume();
     // Close
     void close();
+
     // Execute Shell Command
     void executeShellCommand(const QString& aCommand, const bool& asRoot = false, const QString& aRootPass = "");
 
-    // Send Response
-    void sendResponse(const int& aResponse, const QString& aNewPath = "");
+    // Send Confirm/Response
+    void sendUserResponse(const int& aResponse, const QString& aNewPath = "");
 
     // Launch Server Test
     void launchServerTest(const bool& asRoot = false, const QString& aRootPass = "");
@@ -103,16 +107,19 @@ public:
     // Disconnect Test
     void disconnectTest();
 
+    // Status To String
+    static QString statusToString(const int& aStatus);
+
     // Destructor
     virtual ~RemoteFileUtilClient();
 
 signals:
 
     // Client Connection Changed Signal
-    void clientConnectionChanged(const int& aID, const bool& aConnected);
+    void clientConnectionChanged(const unsigned int& aID, const bool& aConnected);
 
     // Client Status Changed Signal
-    void clientStatusChanged(const int& aID, const int& aStatus);
+    void clientStatusChanged(const unsigned int& aID, const int& aStatus);
 
     // File Operation Started Signal
     void fileOpStarted(const unsigned int& aID,
@@ -130,6 +137,14 @@ signals:
                         const quint64& aOverallProgress,
                         const quint64& aOverallTotal,
                         const int& aSpeed);
+
+    // åFile Operation Suspended
+    void fileOpSuspended(const unsigned int& aID,
+                         const QString& aOp);
+
+    // File Operation Resumed
+    void fileOpResumed(const unsigned int& aID,
+                       const QString& aOp);
 
     // File Operation Finished Signal
     void fileOpFinished(const unsigned int& aID,
@@ -265,7 +280,6 @@ private:
     ClientStatusType                status;
 
     // Client Socket
-    //QLocalSocket*                   client;
     QTcpSocket*                     client;
 
     // Last Buffer

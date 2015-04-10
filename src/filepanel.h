@@ -14,6 +14,7 @@ class FilePanel;
 class FileListModel;
 class MainWindow;
 class FileListImageProvider;
+class ConfirmDialog;
 
 //==============================================================================
 // File Panel Class
@@ -22,14 +23,20 @@ class FilePanel : public QFrame
 {
     Q_OBJECT
 
+    // Current Dir
     Q_PROPERTY(QString currentDir READ getCurrentDir NOTIFY currentDirChanged)
+    // Current Index
     Q_PROPERTY(int currentIndex READ getCurrentIndex WRITE setCurrentIndex NOTIFY currentIndexChanged)
+    // Panel Name
     Q_PROPERTY(QString panelName READ getPanelName)
+    // Panel Has Focus
     Q_PROPERTY(bool panelHasFocus READ getPanelFocus WRITE setPanelFocus NOTIFY panelFocusChanged)
+    // Visual Items Count
     Q_PROPERTY(int visualItemsCount READ getvisualItemsCount WRITE setVisualItemsCount NOTIFY visualItemsCountChanged)
-
+    // Show Hidden Files
     Q_PROPERTY(bool showHidden READ getShowHidden WRITE setShowHidden NOTIFY showHiddenChanged)
 
+    // Columns Visibility
     Q_PROPERTY(bool extVisible READ getExtVisible WRITE setExtVisible NOTIFY extVisibleChanged)
     Q_PROPERTY(bool typeVisible READ getTypeVisible WRITE setTypeVisible NOTIFY typeVisibleChanged)
     Q_PROPERTY(bool sizeVisible READ getSizeVisible WRITE setSizeVisible NOTIFY sizeVisibleChanged)
@@ -38,6 +45,7 @@ class FilePanel : public QFrame
     Q_PROPERTY(bool permsVisible READ getPermsVisible WRITE setPermsVisible NOTIFY permsVisibleChanged)
     Q_PROPERTY(bool attrsVisible READ getAttrsVisible WRITE setAttrsVisible NOTIFY attrsVisibleChanged)
 
+    // Columns Width
     Q_PROPERTY(int extWidth READ getExtWidth WRITE setExtWidth NOTIFY extWidthChanged)
     Q_PROPERTY(int typeWidth READ getTypeWidth WRITE setTypeWidth NOTIFY typeWidthChanged)
     Q_PROPERTY(int sizeWidth READ getSizeWidth WRITE setSizeWidth NOTIFY sizeWidthChanged)
@@ -46,9 +54,12 @@ class FilePanel : public QFrame
     Q_PROPERTY(int permsWidth READ getPermsWidth WRITE setPermsWidth NOTIFY permsWidthChanged)
     Q_PROPERTY(int attrsWidth READ getAttrsWidth WRITE setAttrsWidth NOTIFY attrsWidthChanged)
 
+    // Sorting Mode
     Q_PROPERTY(int sorting READ getSorting WRITE setSorting NOTIFY sortingChanged)
+    // Reverse Sorting Order
     Q_PROPERTY(bool reverseOrder READ getReverseOrder WRITE setReverseOrder NOTIFY reverseOrderChanged)
 
+    // Busy
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
 
 public:
@@ -307,6 +318,9 @@ signals:
     // Show Preferences Signal
     void showPreferences();
 
+    // Error Occured Signal
+    void error(const QString& aPath, const int& aError);
+
 
 protected slots:
 
@@ -332,8 +346,10 @@ protected slots: // From File Model
 
     // File Model Fetch Ready Slot
     void fileModelDirFetchFinished();
-    // Dir Created Slot
+    // File Model Dir Created Slot
     void fileModelDirCreated(const QString& aDirPath);
+    // File Model Error
+    void fileModelError(const QString& aPath, const int& aError);
 
 protected slots: // From QFileSystemWatcher
 

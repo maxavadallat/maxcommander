@@ -42,8 +42,17 @@ public:
 
     // Add Item
     void addItem(const QString& aFileName);
+    // Insert Item
+    void insertItem(const int& aIndex, const QString& aFileName);
     // Remove Item
     void removeItem(const int& aIndex);
+    // Set Done
+    void setDone(const int& aIndex, const bool& aDone = true);
+
+    // Get File Name
+    QString getFileName(const int& aIndex);
+    // Find Index
+    int findIndex(const QString& aFileName);
 
     // Destructor
     virtual ~DeleteProgressModel();

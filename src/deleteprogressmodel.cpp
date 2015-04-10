@@ -53,6 +53,13 @@ void DeleteProgressModel::init()
 //==============================================================================
 void DeleteProgressModel::addItem(const QString& aFileName)
 {
+    // Check File Name If Already Exists
+    if (findIndex(aFileName) >= 0) {
+        qDebug() << "DeleteProgressModel::addItem - aFileName: " << aFileName << " - ALREADY EXISTS!";
+
+        return;
+    }
+
     qDebug() << "DeleteProgressModel::addItem - aFileName: " << aFileName;
 
     // Create New Item
@@ -63,6 +70,36 @@ void DeleteProgressModel::addItem(const QString& aFileName)
 
     // Append Item
     items << newItem;
+
+    // End Insert Rows
+    endInsertRows();
+}
+
+//==============================================================================
+// Insert Item
+//==============================================================================
+void DeleteProgressModel::insertItem(const int& aIndex, const QString& aFileName)
+{
+    // Check File Name If Already Exists
+    if (findIndex(aFileName) >= 0) {
+        qDebug() << "DeleteProgressModel::insertItem - aFileName: " << aFileName << " - ALREADY EXISTS!";
+
+        return;
+    }
+
+    qDebug() << "DeleteProgressModel::insertItem - aIndex: " << aIndex << " - aFileName: " << aFileName;
+
+    // Create New Item
+    DeleteProgressModelItem* newItem = new DeleteProgressModelItem(aFileName);
+
+    // Init Insertion Index
+    int insertIndex = qBound(0, aIndex, rowCount()-1);
+
+    // Begin Append Rows
+    beginInsertRows(QModelIndex(), insertIndex, insertIndex);
+
+    // Insert Item
+    items.insert(insertIndex, newItem);
 
     // End Insert Rows
     endInsertRows();
@@ -86,6 +123,48 @@ void DeleteProgressModel::removeItem(const int& aIndex)
 }
 
 //==============================================================================
+// Set Done
+//==============================================================================
+void DeleteProgressModel::setDone(const int& aIndex, const bool& aDone)
+{
+    // Check Index
+    if (aIndex >=0 && aIndex < rowCount()) {
+        qDebug() << "DeleteProgressModel::setDone - aIndex: " << aIndex;
+        // Set Data
+        setData(createIndex(aIndex, 0), aDone, ERIDDone);
+    }
+}
+
+//==============================================================================
+// Get File Name
+//==============================================================================
+QString DeleteProgressModel::getFileName(const int& aIndex)
+{
+    return data(createIndex(aIndex, 0), ERIDFileName).toString();
+}
+
+//==============================================================================
+// Find Index
+//==============================================================================
+int DeleteProgressModel::findIndex(const QString& aFileName)
+{
+    // Get Items Count
+    int iCount = items.count();
+
+    // Go Thru Items
+    for (int i=0; i<iCount; ++i) {
+        // Get Item
+        DeleteProgressModelItem* item = items[i];
+        // Check File Name
+        if (item && item->fileName == aFileName) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+//==============================================================================
 // Get Role Names
 //==============================================================================
 QHash<int, QByteArray> DeleteProgressModel::roleNames() const
@@ -93,8 +172,10 @@ QHash<int, QByteArray> DeleteProgressModel::roleNames() const
     // Init Roles
     QHash<int, QByteArray> roles;
 
-    // File Operation
+    // File Name
     roles[ERIDFileName] = "fileName";
+    // Operation Done
+    roles[ERIDDone]     = "done";
 
     return roles;
 
@@ -117,7 +198,7 @@ int DeleteProgressModel::columnCount(const QModelIndex& aParent) const
 {
     Q_UNUSED(aParent);
 
-    return 1;
+    return 2;
 }
 
 //==============================================================================

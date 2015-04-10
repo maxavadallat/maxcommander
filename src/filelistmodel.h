@@ -76,6 +76,12 @@ public:
     // Has Selection
     bool hasSelection();
 
+    // Get Last Operation
+    QString lastOperation();
+
+    // Send User Response
+    void sendUserResponse(const int& aConfirm, const QString& aNewPath = "");
+
     // Destructor
     virtual ~FileListModel();
 
@@ -96,6 +102,9 @@ public slots:
     // Deselect All
     void deselectAll();
 
+    // Toggle All Selection
+    void toggleAllSelection();
+
     // Get All Selected Files
     QStringList getAllSelected();
 
@@ -103,13 +112,18 @@ signals:
 
     // Current Dir Changed Signal
     void currentDirChanged(const QString& aCurrentDir);
+
     // Dir Fetch Finished Signal
     void dirFetchFinished();
+
     // Dir Created Signal
     void dirCreated(const QString& aDirPath);
 
     // Busy State Changed Signal
     void busyChanged(const bool& aBusy);
+
+    // Error
+    void error(const QString& aPath, const int& aError);
 
 public: // From QAbstractListModel
 
@@ -137,10 +151,10 @@ protected slots:
 protected slots: // For Remote File Client
 
     // Client Connection Changed Slot
-    void clientConnectionChanged(const int& aID, const bool& aConnected);
+    void clientConnectionChanged(const unsigned int& aID, const bool& aConnected);
 
     // Client Status Changed Slot
-    void clientStatusChanged(const int& aID, const int& aStatus);
+    void clientStatusChanged(const unsigned int& aID, const int& aStatus);
 
     // File Operation Finished Slot
     void fileOpFinished(const unsigned int& aID,

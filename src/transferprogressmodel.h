@@ -49,6 +49,8 @@ public:
     void addItem(const QString& aOp, const QString& aSource, const QString& aTarget);
     // Remove Item
     void removeItem(const int& aIndex);
+    // Set Completed
+    void setDone(const int& aIndex, const bool& aDone = true);
 
     // Destructor
     virtual ~TransferProgressModel();
@@ -95,3 +97,4 @@ protected:
 };
 
 #endif // TRANSFERPROGRESSMODEL_H
+

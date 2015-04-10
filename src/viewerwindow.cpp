@@ -300,7 +300,11 @@ void ViewerWindow::saveSettings()
     settings.setValue(SETTINGS_KEY_VIEWER_WIDTH, rect().width());
     settings.setValue(SETTINGS_KEY_VIEWER_HEIGHT, rect().height());
 
-    settings.setValue(SETTINGS_KEY_VIEWER_WORDWRAP, ui->textEdit->wordWrapMode() == QTextOption::WrapAtWordBoundaryOrAnywhere);
+    // Check Text Edit Visibility
+    if (ui->textEdit->isVisible()) {
+        // Set Value - Word Wrap
+        settings.setValue(SETTINGS_KEY_VIEWER_WORDWRAP, ui->textEdit->wordWrapMode() == QTextOption::WrapAtWordBoundaryOrAnywhere);
+    }
 
     // ...
 }

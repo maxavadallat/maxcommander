@@ -1,3 +1,5 @@
+#include <QDebug>
+
 #include "createdirdialog.h"
 #include "ui_createdirdialog.h"
 
@@ -29,6 +31,24 @@ void CreateDirDialog::setDirPath(const QString& aDirPath)
     ui->directoryPathEdit->setText(aDirPath);
     // Set Cursor Position
     ui->directoryPathEdit->setCursorPosition(aDirPath.length());
+}
+
+//==============================================================================
+// Exec
+//==============================================================================
+int CreateDirDialog::exec()
+{
+    // Set Selection
+    ui->directoryPathEdit->setSelection(ui->directoryPathEdit->text().length(), ui->directoryPathEdit->text().length());
+    // Clear Focus
+    ui->directoryPathEdit->clearFocus();
+
+    // Exec Dialog
+    int result = QDialog::exec();
+
+    qDebug() << "CreateDirDialog::exec - result: " << result;
+
+    return result;
 }
 
 //==============================================================================

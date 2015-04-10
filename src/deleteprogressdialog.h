@@ -2,6 +2,7 @@
 #define DELETEPROGRESSDIALOG_H
 
 #include <QDialog>
+#include <QCloseEvent>
 
 namespace Ui {
 class DeleteProgressDialog;
@@ -9,6 +10,7 @@ class DeleteProgressDialog;
 
 class DeleteProgressModel;
 class RemoteFileUtilClient;
+class ConfirmDialog;
 
 
 //==============================================================================
@@ -27,6 +29,15 @@ public:
     // Set Current File Progress
     void setCurrentProgress(const quint64& aProgress, const quint64& aTotal);
 
+    // Launch Progress Dialog
+    void launch(const QString& aDirPath, const QStringList& aSelectedFiles);
+    // Get Dir Path
+    QString getDirPath();
+
+    // Suspend
+    void suspend();
+    // Resume
+    void resume();
     // Abort
     void abort();
 
@@ -43,17 +54,22 @@ protected slots:
     // Init
     void init();
 
+    // Build Queue
+    bool buildQueue(const QString& aDirPath, const QStringList& aSelectedFiles);
     // Process Queue
     void processQueue();
-    // Suspend
-    void suspend();
-    // Resume
-    void resume();
+    // Clear Queue
+    void clearQueue();
+
+    // Restore UI
+    void restoreUI();
+    // Save Settings
+    void saveSettings();
 
 protected slots: // for RemoteFileUtilClient
 
     // Client Status Changed Slot
-    void clientStatusChanged(const int& aID, const int& aStatus);
+    void clientStatusChanged(const unsigned int& aID, const int& aStatus);
 
     // File Operation Started Slot
     void fileOpStarted(const unsigned int& aID,
@@ -109,6 +125,11 @@ protected slots: // for RemoteFileUtilClient
                               const QString& aSource,
                               const QString& aTarget);
 
+protected: // From QDialog
+
+    // Close Event
+    virtual void closeEvent(QCloseEvent* aEvent);
+
 private:
     // UI
     Ui::DeleteProgressDialog*   ui;
@@ -116,6 +137,12 @@ private:
     DeleteProgressModel*        queueModel;
     // Remote File Util Client
     RemoteFileUtilClient*       fileUtil;
+    // CLose When Finished
+    bool                        closeWhenFinished;
+    // Queue Index
+    int                         queueIndex;
+    // Dir Path
+    QString                     dirPath;
 };
 
 #endif // DELETEPROGRESSDIALOG_H

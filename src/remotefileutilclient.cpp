@@ -114,6 +114,14 @@ ClientStatusType RemoteFileUtilClient::getStatus()
 }
 
 //==============================================================================
+// Get Last Operation
+//==============================================================================
+QString RemoteFileUtilClient::lastOperation()
+{
+    return lastDataMap[DEFAULT_KEY_OPERATION].toString();
+}
+
+//==============================================================================
 // Get Dir List
 //==============================================================================
 void RemoteFileUtilClient::getDirList(const QString& aDirPath, const int& aFilters, const int& aSortFlags)
@@ -494,7 +502,7 @@ void RemoteFileUtilClient::executeShellCommand(const QString& aCommand, const bo
 //==============================================================================
 // Send Test
 //==============================================================================
-void RemoteFileUtilClient::sendResponse(const int& aResponse, const QString& aNewPath)
+void RemoteFileUtilClient::sendUserResponse(const int& aResponse, const QString& aNewPath)
 {
     // Check If Connected
     if (!isConnected()) {
@@ -509,7 +517,7 @@ void RemoteFileUtilClient::sendResponse(const int& aResponse, const QString& aNe
 
     // Set Up New Data
     newData[DEFAULT_KEY_CID]            = cID;
-    newData[DEFAULT_KEY_OPERATION]      = QString(DEFAULT_OPERATION_RESP);
+    newData[DEFAULT_KEY_OPERATION]      = QString(DEFAULT_OPERATION_USER_RESP);
     newData[DEFAULT_KEY_PATH]           = aNewPath;
     newData[DEFAULT_KEY_RESPONSE]       = aResponse;
 
@@ -1143,6 +1151,28 @@ void RemoteFileUtilClient::handleDirSizeUpdate()
 
     // Send Acknowledge
     //sendAcknowledge();
+}
+
+//==============================================================================
+// Status To String
+//==============================================================================
+QString RemoteFileUtilClient::statusToString(const int& aStatus)
+{
+    switch (aStatus) {
+        case ECSTCreated:   return "ECSTCreated";
+        case ECSTIdle:      return "ECSTIdle";
+        case ECSTBusy:      return "ECSTBusy";
+        case ECSTSuspended: return "ECSTSuspended";
+        case ECSTAborting:  return "ECSTAborting";
+        case ECSTAborted:   return "ECSTAborted";
+        case ECSTWaiting:   return "ECSTWaiting";
+        case ECSTError:     return "ECSTError";
+
+        default:
+        break;
+    }
+
+    return "";
 }
 
 //==============================================================================

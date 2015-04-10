@@ -9,6 +9,9 @@ class TransferProgressDialog;
 
 class TransferProgressModel;
 class RemoteFileUtilClient;
+class ConfirmDialog;
+
+
 
 //==============================================================================
 // Transfer Progress Dialog Class
@@ -19,7 +22,7 @@ class TransferProgressDialog : public QDialog
 
 public:
     // Constructor
-    explicit TransferProgressDialog(QWidget* aParent = NULL);
+    explicit TransferProgressDialog(const QString& aOperation, QWidget* aParent = NULL);
 
     // Set Title
     void setTitle(const QString& aTitle);
@@ -31,6 +34,13 @@ public:
     // Set Overall Progress
     void setOverallProgress(const quint64& aProgress, const quint64& aTotal);
 
+    // Launch Progress Dialog
+    void launch(const QString& aSourcePath, const QString& aTargetPath, const QStringList& aSelectedFiles);
+
+    // Suspend
+    void suspend();
+    // Resume
+    void resume();
     // Abort
     void abort();
 
@@ -47,17 +57,22 @@ protected slots:
     // Init
     void init();
 
+    // Build Queue
+    bool buildQueue(const QString& aSourcePath, const QString& aTargetPath, const QStringList& aSelectedFiles);
     // Process Queue
     void processQueue();
-    // Suspend
-    void suspend();
-    // Resume
-    void resume();
+    // Clear Queue
+    void clearQueue();
+
+    // Restore UI
+    void restoreUI();
+    // Save Settings
+    void saveSettings();
 
 protected slots: // For RemoteFileUtilClient
 
     // Client Status Changed Slot
-    void clientStatusChanged(const int& aID, const int& aStatus);
+    void clientStatusChanged(const unsigned int& aID, const int& aStatus);
 
     // File Operation Started Slot
     void fileOpStarted(const unsigned int& aID,
@@ -113,6 +128,11 @@ protected slots: // For RemoteFileUtilClient
                               const QString& aSource,
                               const QString& aTarget);
 
+protected: // From QDialog
+
+    // Close Event
+    virtual void closeEvent(QCloseEvent* aEvent);
+
 private:
     // UI
     Ui::TransferProgressDialog*     ui;
@@ -120,6 +140,12 @@ private:
     TransferProgressModel*          queueModel;
     // Remote File Util Client
     RemoteFileUtilClient*           fileUtil;
+    // Operation
+    QString                         operation;
+    // CLose When Finished
+    bool                            closeWhenFinished;
+    // Queue Index
+    int                             queueIndex;
 };
 
 #endif // TRANSFERPROGRESSDIALOG_H

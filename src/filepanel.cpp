@@ -15,6 +15,7 @@
 #include "filepanel.h"
 #include "filelistmodel.h"
 #include "filelistimageprovider.h"
+#include "confirmdialog.h"
 #include "ui_filepanel.h"
 #include "utility.h"
 #include "constants.h"
@@ -82,6 +83,7 @@ void FilePanel::init()
         connect(fileListModel, SIGNAL(busyChanged(bool)), this, SIGNAL(busyChanged(bool)));
         connect(fileListModel, SIGNAL(dirFetchFinished()), this, SLOT(fileModelDirFetchFinished()));
         connect(fileListModel, SIGNAL(dirCreated(QString)), this, SLOT(fileModelDirCreated(QString)));
+        connect(fileListModel, SIGNAL(error(QString,int)), this, SLOT(fileModelError(QString,int)));
     }
 
     // Set Context Properties
@@ -831,8 +833,13 @@ QStringList FilePanel::getSelectedFiles()
 
         // Check Result
         if (result.count() <= 0) {
-            // Add Current File
-            result << fileListModel->getFileInfo(currentIndex).fileName();
+            // Get Current File Name
+            QString fileName = fileListModel->getFileInfo(currentIndex).fileName();
+            // Check Current File Name
+            if (fileName != "." && fileName != "..") {
+                // Add Current File
+                result << fileName;
+            }
         }
 
         return result;
@@ -1210,7 +1217,7 @@ void FilePanel::fileModelDirFetchFinished()
 }
 
 //==============================================================================
-// Dir Created Slot
+// File Model Dir Created Slot
 //==============================================================================
 void FilePanel::fileModelDirCreated(const QString& aDirPath)
 {
@@ -1230,6 +1237,65 @@ void FilePanel::fileModelDirCreated(const QString& aDirPath)
             fileListModel->insertItem(dirName);
             // Set Current Index
             setCurrentIndex(fileListModel->findIndex(dirName));
+        }
+    }
+}
+
+//==============================================================================
+// File Model Error
+//==============================================================================
+void FilePanel::fileModelError(const QString& aPath, const int& aError)
+{
+    // Check File List Model
+    if (fileListModel) {
+        qDebug() << "FilePanel::fileModelError - panelName: " << panelName << " - op: " << fileListModel->lastOperation() << " - aPath: " << aPath << " - aError: " << aError;
+
+        // Check Last Operation - List Dir
+        if (fileListModel->lastOperation() == DEFAULT_OPERATION_LIST_DIR) {
+
+
+        // Check Last Operation - Make Dir
+        } else if (fileListModel->lastOperation() == DEFAULT_OPERATION_MAKE_DIR) {
+            // Directory Exists
+            ConfirmDialog confirmDialog;
+            // Clear Buttons
+            //confirmDialog.clearButtons();
+            // Configure Buttons
+            confirmDialog.configureButtons(QDialogButtonBox::Abort);
+
+            // Switch Error
+            switch (aError) {
+                case DEFAULT_ERROR_EXISTS: {
+                    // Set Text
+                    confirmDialog.setConfirmText(tr(DEFAULT_CONFIRM_TEXT_DIRECTORY_EXISTS));
+                    // Add Button
+                    confirmDialog.addButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_RETRY), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_RETRY);
+                    // Set Path
+                    confirmDialog.setPath(aPath);
+                    // Exec Dialog
+                    if (confirmDialog.exec()) {
+                        // Send User Response/Confirm
+                        fileListModel->sendUserResponse(confirmDialog.getActionIndex(), confirmDialog.getPath());
+                    } else {
+                        // Send User Response/Confirm
+                        fileListModel->sendUserResponse(DEFAULT_CONFIRM_ABORT, confirmDialog.getPath());
+                    }
+
+                } break;
+
+                case DEFAULT_ERROR_ACCESS:
+                    // No Access
+
+                break;
+
+                case DEFAULT_ERROR_GENERAL:
+                    // General
+
+                break;
+
+                default:
+                break;
+            }
         }
     }
 }
@@ -1639,6 +1705,31 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
                 goLast();
             break;
 
+            case Qt::Key_Plus:
+                // Check Modifier Keys
+                if (modifierKeys == Qt::AltModifier) {
+
+                }
+            break;
+
+            case Qt::Key_Minus:
+                // Check Modifier Keys
+                if (modifierKeys == Qt::AltModifier) {
+
+                }
+            break;
+
+            case Qt::Key_Asterisk:
+                // Check Modifier Keys
+                if (modifierKeys == Qt::NoModifier) {
+                    // Check File List Model
+                    if (fileListModel) {
+                        // Toggle All Selection
+                        fileListModel->toggleAllSelection();
+                    }
+                }
+            break;
+
             case Qt::Key_F1:
                 // Check Modifier Keys
                 if (modifierKeys == Qt::NoModifier) {
@@ -1705,6 +1796,7 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
                 }
             break;
 
+            case Qt::Key_Delete:
             case Qt::Key_F8:
                 // Check Modifier Keys
                 if (modifierKeys == Qt::NoModifier) {

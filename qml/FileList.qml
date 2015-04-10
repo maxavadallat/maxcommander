@@ -129,8 +129,10 @@ Rectangle {
 
                     // Check Mouse Button
                     if (mouse.button === Qt.RightButton) {
+                        // Set Pressed Inside
+                        delegateMouseArea.pressedInside = true;
                         // Set Prevent Stealing
-                        preventStealing = true;
+                        delegateMouseArea.preventStealing = true;
                     }
 
                     // ...
@@ -140,9 +142,9 @@ Rectangle {
                     //console.log("fileListDelegateRoot.MouseArea.onReleased - index: " + index);
 
                     // Check Pressed Inside
-                    if (pressedInside && mouse.button === Qt.RightButton) {
+                    if (delegateMouseArea.pressedInside && mouse.button === Qt.RightButton) {
                         // Reset Pressed Inside
-                        pressedInside = false;
+                        delegateMouseArea.pressedInside = false;
 
                         // Check Mouse Position
                         if (mouse.x >= 0 && mouse.x < fileListDelegateRoot.width &&
@@ -156,7 +158,7 @@ Rectangle {
                     }
 
                     // Reset Prevent Stealing
-                    preventStealing = false;
+                    delegateMouseArea.preventStealing = false;
 
                     // ...
                 }
@@ -181,6 +183,9 @@ Rectangle {
                     // Set Mouse Hovered
                     //mouseHovered = true;
 
+                    // Reset Prevent Stealing
+                    //delegateMouseArea.preventStealing = true;
+
 //                    // Check Pressed Buttons
 //                    if (delegateMouseArea.pressedButtons & Qt.RightButton) {
 //                        // Toggle File Selected
@@ -202,7 +207,6 @@ Rectangle {
 //                        // ...
 
 //                    }
-
                 }
             }
         }

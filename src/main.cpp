@@ -1,5 +1,6 @@
 
 #include <QApplication>
+#include <QDebug>
 
 #include <mcwinterface.h>
 
@@ -13,6 +14,12 @@
 //==============================================================================
 int main(int argc, char* argv[])
 {
+    qDebug() << " ";
+    qDebug() << "================================================================================";
+    qDebug() << "Starting Max Commander...";
+    qDebug() << "================================================================================";
+    qDebug() << " ";
+
     // Init Application
     QApplication app(argc, argv);
 
@@ -37,6 +44,12 @@ int main(int argc, char* argv[])
 
     // Release Main Window Instance
     mainWindow->release();
+
+    qDebug() << " ";
+    qDebug() << "================================================================================";
+    qDebug() << "Exiting Max Commander...";
+    qDebug() << "================================================================================";
+    qDebug() << " ";
 
     return result;
 }

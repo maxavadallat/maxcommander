@@ -3,7 +3,7 @@
 
 
 // Default Values
-#define MAX_NUMBER_OF_FILE_THREADS                          8
+#define MAX_NUMBER_OF_FILE_THREADS                          10
 
 
 // Application Info
@@ -56,6 +56,7 @@
 
 #define SETTINGS_KEY_FOCUSED_PANEL                          SETTINGS_GROUP_UI"/focusedPanel"
 
+#define SETTINGS_KEY_CLOSE_WHEN_FINISHED                    SETTINGS_GROUP_UI"/closeWhenFinished"
 
 
 // Common
@@ -158,6 +159,25 @@
 
 
 #define DEFAULT_STATUS_BAR_MESSAGE_TIMEOUT                  3000
+
+
+// Localization Constants
+
+#define DEFAULT_CONFIRM_BUTTON_TEXT_YES                     "Yes"
+#define DEFAULT_CONFIRM_BUTTON_TEXT_YESTOALL                "Yes to All"
+#define DEFAULT_CONFIRM_BUTTON_TEXT_NO                      "No"
+#define DEFAULT_CONFIRM_BUTTON_TEXT_NOTOALL                 "No to All"
+#define DEFAULT_CONFIRM_BUTTON_TEXT_SKIP                    "Skip"
+#define DEFAULT_CONFIRM_BUTTON_TEXT_SKIPALL                 "Skip All"
+#define DEFAULT_CONFIRM_BUTTON_TEXT_RETRY                   "Retry"
+#define DEFAULT_CONFIRM_BUTTON_TEXT_ASADMIN                 "As Admin"
+
+
+#define DEFAULT_CONFIRM_TEXT_DIRECTORY_EXISTS               "Directory Exists:"
+#define DEFAULT_CONFIRM_TEXT_FILE_DOESNT_EXIST              "File Doesn't Exist:"
+#define DEFAULT_CONFIRM_TEXT_FILE_EXISTS                    "File Exists: %1 Overwrite?"
+#define DEFAULT_CONFIRM_TEXT_CANT_CREATE_DIRECTORY          "Can Not Create Directory:"
+#define DEFAULT_CONFIRM_TEXT_CANT_DELETE_FILE               "Can Not Delete File:"
 
 
 #endif // CONSTANTS_H

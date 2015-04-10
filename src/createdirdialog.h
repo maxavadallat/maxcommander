@@ -21,6 +21,10 @@ public:
     QString getDirectory();
     // Set Directory Path
     void setDirPath(const QString& aDirPath);
+
+    // Exec
+    virtual int exec();
+
     // Destructor
     virtual ~CreateDirDialog();
 

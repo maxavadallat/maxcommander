@@ -59,8 +59,8 @@ void FileListModel::init()
     fileUtil = new RemoteFileUtilClient();
 
     // Connect Signals
-    connect(fileUtil, SIGNAL(clientConnectionChanged(int,bool)), this, SLOT(clientConnectionChanged(int,bool)));
-    connect(fileUtil, SIGNAL(clientStatusChanged(int, int)), this, SLOT(clientStatusChanged(int, int)));
+    connect(fileUtil, SIGNAL(clientConnectionChanged(uint,bool)), this, SLOT(clientConnectionChanged(uint,bool)));
+    connect(fileUtil, SIGNAL(clientStatusChanged(uint, int)), this, SLOT(clientStatusChanged(uint, int)));
     connect(fileUtil, SIGNAL(dirListItemFound(uint,QString,QString)), this, SLOT(dirListItemFound(uint,QString,QString)));
     connect(fileUtil, SIGNAL(fileOpFinished(uint,QString,QString,QString,QString)), this, SLOT(fileOpFinished(uint,QString,QString,QString,QString)));
     connect(fileUtil, SIGNAL(fileOpAborted(uint,QString,QString,QString,QString)), this, SLOT(fileOpAborted(uint,QString,QString,QString,QString)));
@@ -186,6 +186,32 @@ void FileListModel::createDir(const QString& aDirPath)
 bool FileListModel::hasSelection()
 {
     return selectedCount > 0;
+}
+
+//==============================================================================
+// Get Last Operation
+//==============================================================================
+QString FileListModel::lastOperation()
+{
+    // Check File Util
+    if (fileUtil) {
+        // Get Last Operation
+        return fileUtil->lastOperation();
+    }
+
+    return "";
+}
+
+//==============================================================================
+// Send User Response/Confirmation Code
+//==============================================================================
+void FileListModel::sendUserResponse(const int& aConfirm, const QString& aNewPath)
+{
+    // Check File Util
+    if (fileUtil) {
+        // Send Confirm/Response
+        fileUtil->sendUserResponse(aConfirm, aNewPath);
+    }
 }
 
 //==============================================================================
@@ -328,6 +354,37 @@ void FileListModel::deselectAll()
 }
 
 //==============================================================================
+// Toggle All Selection
+//==============================================================================
+void FileListModel::toggleAllSelection()
+{
+    // Get Item List Count
+    int ilCount = itemList.count();
+
+    // Reset Selected Count
+    selectedCount = 0;
+
+    // Go Thru Item List
+    for (int i=0; i<ilCount; ++i) {
+
+        // Check File Name
+        if (itemList[i]->fileInfo.fileName() != QString("..") && itemList[i]->fileInfo.fileName() != QString(".")) {
+            // Set Item Selected
+            itemList[i]->selected = !itemList[i]->selected;
+            // Check If Selected
+            if (itemList[i]->selected) {
+                // Inc Selected Count
+                selectedCount++;
+            }
+            // Create Model Index
+            QModelIndex index = createIndex(i, 0);
+            // Emit Data Changed Signal
+            emit dataChanged(index, index);
+        }
+    }
+}
+
+//==============================================================================
 // Get All Selected Files
 //==============================================================================
 QStringList FileListModel::getAllSelected()
@@ -340,7 +397,7 @@ QStringList FileListModel::getAllSelected()
     // Go Thru Item List
     for (int i=0; i<ilCount; ++i) {
         // Check Selected
-        if (itemList[i]->selected) {
+        if (itemList[i]->selected && itemList[i]->fileInfo.fileName() != "." && itemList[i]->fileInfo.fileName() != "..") {
             // Add File Name To Result
             result << itemList[i]->fileInfo.fileName();
         }
@@ -415,7 +472,7 @@ void FileListModel::deleteItem(const int& aIndex)
 //==============================================================================
 // Client Connection Changed Slot
 //==============================================================================
-void FileListModel::clientConnectionChanged(const int& aID, const bool& aConnected)
+void FileListModel::clientConnectionChanged(const unsigned int& aID, const bool& aConnected)
 {
     qDebug() << "FileListModel::clientConnectionChanged - aID: " << aID << " - aConnected: " << aConnected;
 
@@ -429,7 +486,7 @@ void FileListModel::clientConnectionChanged(const int& aID, const bool& aConnect
 //==============================================================================
 // Client Status Changed Slot
 //==============================================================================
-void FileListModel::clientStatusChanged(const int& aID, const int& aStatus)
+void FileListModel::clientStatusChanged(const unsigned int& aID, const int& aStatus)
 {
     qDebug() << "FileListModel::clientStatusChanged - aID: " << aID << " - aStatus: " << aStatus;
 
@@ -501,6 +558,9 @@ void FileListModel::fileOpError(const unsigned int& aID,
     Q_UNUSED(aTarget);
 
     qDebug() << "FileListModel::fileOpError - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath << " - aError: " << aError;
+
+    // Emit Error Signal
+    emit error(aPath, aError);
 
     // ...
 }

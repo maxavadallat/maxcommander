@@ -197,23 +197,6 @@ void MainWindow::showAbout()
 }
 
 //==============================================================================
-// Show Preferences
-//==============================================================================
-void MainWindow::showPreferences()
-{
-    qDebug() << "MainWindow::showPreferences";
-
-    // Check Preferences Dialog
-    if (!preferencesDialog) {
-        // Create Preferences Dialog
-        preferencesDialog = new PreferencesDialog();
-    }
-
-    // Show Dialog
-    preferencesDialog->execDialog();
-}
-
-//==============================================================================
 // Show Help
 //==============================================================================
 void MainWindow::showHelp()
@@ -234,38 +217,48 @@ void MainWindow::showHelp()
 }
 
 //==============================================================================
-// Launch Delete
+// Launch Terminal
 //==============================================================================
-void MainWindow::launchDelete()
+void MainWindow::launchTerminal(const QString& aDirPath)
 {
     // Check Focused Panel
     if (focusedPanel) {
-        qDebug() << "MainWindow::launchDelete";
+        qDebug() << "MainWindow::launchTerminal - aDirPath: " << aDirPath;
 
-        // Check Delete File Dialog
-        if (!deleteFileDialog) {
-            // Create Delete File Dialog
-            deleteFileDialog = new DeleteFileDialog();
-        }
+        // ...
+    }
+}
 
-        // Setup Delete File Dialog
+//==============================================================================
+// Launch Viewer
+//==============================================================================
+void MainWindow::launchViewer(const bool& aEditMode)
+{
+    // Check Focused Panel
+    if (focusedPanel) {
+        qDebug() << "MainWindow::launchViewer - aEditMode: " << aEditMode;
+
+        // Create New Viewer Window
+        ViewerWindow* newViewer = new ViewerWindow();
+
+        // Load File
+        newViewer->loadFile(focusedPanel->getCurrFileInfo().absoluteFilePath());
+
+        // Setup Viewer Window
+
+        // Set Edit Mode
+        newViewer->setEditModeEnabled(aEditMode);
 
         // ...
 
-        // Launch Dialog
-        if (deleteFileDialog->exec()) {
+        // Connect Signal
+        connect(newViewer, SIGNAL(viewerClosed(ViewerWindow*)), this, SLOT(viewerWindowClosed(ViewerWindow*)));
 
-            // Create Delete Progress Dialog
+        // Add To Viewer List
+        viewerWindows << newViewer;
 
-            // Add To Delete Progress Dialog List
-
-            // Show
-
-            // Build Queue
-
-            // Process Queueu
-
-        }
+        // Show Window
+        newViewer->showWindow();
     }
 }
 
@@ -373,49 +366,99 @@ void MainWindow::launchCreateDir()
 }
 
 //==============================================================================
-// Launch Viewer
+// Launch Delete
 //==============================================================================
-void MainWindow::launchViewer(const bool& aEditMode)
+void MainWindow::launchDelete()
 {
+    // Get Number Of Transfer Progress Dialogs
+    int numTransferProgressDialogs = transferProgressDialogs.count();
+    // Get number Of Delete Progress Dialogs
+    int numDeleteProgressDialogs = deleteProgressDialogs.count();
+
+    // Check Number Of Progress Dialogs
+    if ((numTransferProgressDialogs + numDeleteProgressDialogs) >= MAX_NUMBER_OF_FILE_THREADS) {
+        qWarning() << "MainWindow::launchDelete - MAX NUMBER OF THREADS REACHED!!";
+
+        return;
+    }
+
     // Check Focused Panel
     if (focusedPanel) {
-        qDebug() << "MainWindow::launchViewer - aEditMode: " << aEditMode;
 
-        // Create New Viewer Window
-        ViewerWindow* newViewer = new ViewerWindow();
+        // Check Active Delete Progress Dialogs Path
 
-        // Load File
-        newViewer->loadFile(focusedPanel->getCurrFileInfo().absoluteFilePath());
 
-        // Setup Viewer Window
+        // Check Delete File Dialog
+        if (!deleteFileDialog) {
+            // Create Delete File Dialog
+            deleteFileDialog = new DeleteFileDialog();
+        }
 
-        // Set Edit Mode
-        newViewer->setEditModeEnabled(aEditMode);
+        // Get Selected File List
+        QStringList selectedFileList = focusedPanel->getSelectedFiles();
+
+        // Check Selected File List
+        if (selectedFileList.count() == 0) {
+            qDebug() << "MainWindow::launchDelete - NO SELECTED FILE!";
+
+            return;
+        }
+
+        qDebug() << "MainWindow::launchDelete";
+
+        // Get Focused Panel Current Dir
+        QString currDir = focusedPanel->getCurrentDir();
+
+        // Check Current Dir
+        if (!currDir.endsWith("/")) {
+            // Adjust Current Dir
+            currDir += "/";
+        }
+
+        // Check Selected File List
+        if (selectedFileList.count() == 1) {
+            // Setup Delete File Dialog
+            deleteFileDialog->setFileName(currDir + selectedFileList[0]);
+        } else {
+            // Setup Delete File Dialog
+            deleteFileDialog->setFileName(currDir);
+        }
 
         // ...
 
-        // Connect Signal
-        connect(newViewer, SIGNAL(viewerClosed(ViewerWindow*)), this, SLOT(viewerWindowClosed(ViewerWindow*)));
+        // Launch Dialog
+        if (deleteFileDialog->exec()) {
 
-        // Add To Viewer List
-        viewerWindows << newViewer;
+            // Create Delete Progress Dialog
+            DeleteProgressDialog* newDialog = new DeleteProgressDialog();
 
-        // Show Window
-        newViewer->showWindow();
+            // Connect Signal
+            connect(newDialog, SIGNAL(dialogClosed(DeleteProgressDialog*)), this, SLOT(deleteProgressClosed(DeleteProgressDialog*)));
+
+            // Add To Delete Progress Dialog List
+            deleteProgressDialogs << newDialog;
+
+            // Launch
+            newDialog->launch(focusedPanel->getCurrentDir(), focusedPanel->getSelectedFiles());
+        }
     }
 }
 
 //==============================================================================
-// Launch Terminal
+// Show Preferences
 //==============================================================================
-void MainWindow::launchTerminal(const QString& aDirPath)
+void MainWindow::showPreferences()
 {
-    // Check Focused Panel
-    if (focusedPanel) {
-        qDebug() << "MainWindow::launchTerminal - aDirPath: " << aDirPath;
+    qDebug() << "MainWindow::showPreferences";
 
-        // ...
+    // Check Preferences Dialog
+    if (!preferencesDialog) {
+        // Create Preferences Dialog
+        preferencesDialog = new PreferencesDialog();
     }
+
+    // Show Dialog
+    preferencesDialog->execDialog();
 }
 
 //==============================================================================
@@ -644,7 +687,24 @@ void MainWindow::deleteProgressClosed(DeleteProgressDialog* aDeleteProgressDialo
 {
     // Check Progress Dialog
     if (aDeleteProgressDialog) {
+        qDebug() << "MainWindow::deleteProgressClosed - aDeleteProgressDialog: " << aDeleteProgressDialog;
 
+        // Get Delete Progress Dialogs Count
+        int dpdCount = deleteProgressDialogs.count();
+
+        // Go Thru Dialogs
+        for (int i=0; i<dpdCount; ++i) {
+            // Get Dialog
+            DeleteProgressDialog* dialog = deleteProgressDialogs[i];
+            // Check Dialog
+            if (dialog == aDeleteProgressDialog) {
+                // Remove Dialog From Delete Progress Dialogs
+                deleteProgressDialogs.removeAt(i);
+                // Delete Dialog
+                delete dialog;
+                dialog = NULL;
+            }
+        }
     }
 }
 
@@ -655,7 +715,24 @@ void MainWindow::transferProgressClosed(TransferProgressDialog* aTransferProgres
 {
     // Check Progress Dialog
     if (aTransferProgressDialog) {
+        qDebug() << "MainWindow::transferProgressClosed - aTransferProgressDialog: " << aTransferProgressDialog;
 
+        // Get Transfer Progress Dialogs Count
+        int tpdCount = transferProgressDialogs.count();
+
+        // Go Thru Dialogs
+        for (int i=0; i<tpdCount; ++i) {
+            // Get Dialog
+            TransferProgressDialog* dialog = transferProgressDialogs[i];
+            // Check Dialog
+            if (dialog == aTransferProgressDialog) {
+                // Remove Dialog From Transfer Progress Dialogs
+                transferProgressDialogs.removeAt(i);
+                // Delete Dialog
+                delete dialog;
+                dialog = NULL;
+            }
+        }
     }
 }
 

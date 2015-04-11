@@ -617,7 +617,7 @@ void RemoteFileUtilClient::setStatus(const ClientStatusType& aStatus)
 {
     // Check Status
     if (status != aStatus) {
-        qDebug() << "RemoteFileUtilClient::setStatus - cID: " << cID << " - aStatus: " << aStatus;
+        qDebug() << "RemoteFileUtilClient::setStatus - cID: " << cID << " - aStatus: " << statusToString(aStatus);
 
         // Set Status
         status = aStatus;
@@ -911,7 +911,7 @@ void RemoteFileUtilClient::parseLastDataMap()
 
     // Check Client ID
     if (cID != rcID) {
-        qWarning() << "RemoteFileUtilClient::parseLastBuffer - cID: " << cID << " - INVALID CLIENT ID: " << rcID;
+        qWarning() << "RemoteFileUtilClient::parseLastDataMap - cID: " << cID << " - INVALID CLIENT ID: " << rcID;
         //return;
         goto finished;
     }
@@ -934,7 +934,7 @@ void RemoteFileUtilClient::parseLastDataMap()
 
     // Check If Aborting
     if (status == ECSTAborting || status == ECSTAborted) {
-        qDebug() << "#### RemoteFileUtilClient::parseLastBuffer - cID: " << cID << " - ABORTING!!";
+        qDebug() << "#### RemoteFileUtilClient::parseLastDataMap - cID: " << cID << " - ABORTING!!";
         //return;
         goto finished;
     }
@@ -943,6 +943,14 @@ void RemoteFileUtilClient::parseLastDataMap()
     if (lastDataMap[DEFAULT_KEY_RESPONSE].toString() == QString(DEFAULT_RESPONSE_TEST)) {
         // Handle Test
         handleTest();
+        //return;
+        goto finished;
+    }
+
+    // Check Response
+    if (lastDataMap[DEFAULT_KEY_RESPONSE].toString() == QString(DEFAULT_RESPONSE_START)) {
+        // Handle Started
+        handleStarted();
         //return;
         goto finished;
     }
@@ -995,7 +1003,7 @@ void RemoteFileUtilClient::parseLastDataMap()
         goto finished;
     }
 
-    qDebug() << "RemoteFileUtilClient::parseLastBuffer - WTF?!??";
+    qDebug() << "RemoteFileUtilClient::parseLastDataMap - WTF?!??";
 
 finished:
 
@@ -1020,22 +1028,35 @@ void RemoteFileUtilClient::handleTest()
 }
 
 //==============================================================================
+// Handle Started
+//==============================================================================
+void RemoteFileUtilClient::handleStarted()
+{
+    // Set Status
+    setStatus(ECSTBusy);
+
+    // Emit File Operation Started Signal
+    emit fileOpStarted(cID,
+                       lastDataMap[DEFAULT_KEY_OPERATION].toString(),
+                       lastDataMap[DEFAULT_KEY_PATH].toString(),
+                       lastDataMap[DEFAULT_KEY_SOURCE].toString(),
+                       lastDataMap[DEFAULT_KEY_TARGET].toString());
+}
+
+//==============================================================================
 // Handle Preogress
 //==============================================================================
 void RemoteFileUtilClient::handleProgress()
 {
+    // Set Status
+    setStatus(ECSTBusy);
+
     // Emit File Operation Progress Signal
     emit fileOpProgress(cID,
                         lastDataMap[DEFAULT_KEY_OPERATION].toString(),
                         lastDataMap[DEFAULT_KEY_PATH].toString(),
                         lastDataMap[DEFAULT_KEY_CURRPROGRESS].toULongLong(),
-                        lastDataMap[DEFAULT_KEY_CURRTOTAL].toULongLong(),
-                        lastDataMap[DEFAULT_KEY_OVERALLPROGRESS].toULongLong(),
-                        lastDataMap[DEFAULT_KEY_OVERALLTOTAL].toULongLong(),
-                        lastDataMap[DEFAULT_KEY_SPEED].toInt());
-
-    // Send Acknowledge
-    sendAcknowledge();
+                        lastDataMap[DEFAULT_KEY_CURRTOTAL].toULongLong());
 }
 
 //==============================================================================
@@ -1085,9 +1106,6 @@ void RemoteFileUtilClient::handleAbort()
                        lastDataMap[DEFAULT_KEY_PATH].toString(),
                        lastDataMap[DEFAULT_KEY_SOURCE].toString(),
                        lastDataMap[DEFAULT_KEY_TARGET].toString());
-
-    // Set Status
-    //setStatus(ECSTIdle);
 }
 
 //==============================================================================

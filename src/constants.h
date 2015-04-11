@@ -160,8 +160,22 @@
 
 #define DEFAULT_STATUS_BAR_MESSAGE_TIMEOUT                  3000
 
+// Progress Dialogs
+
+#define DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_OP             30
+#define DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_DONE           40
+#define DEFAULT_PROGRESS_DIALOG_TEXT_MARGIN                 4
+
 
 // Localization Constants
+
+#define DEFAULT_ERROR_TITLE_DELETE_FILE                     "File Deleting Error"
+#define DEFAULT_ERROR_TITLE_COPY_FILE                       "File Copy Error"
+#define DEFAULT_ERROR_TITLE_MOVE_FILE                       "File Rename/Move Error"
+
+#define DEFAULT_ERROR_TEXT_FILE_DOESNT_EXIST                "File Doesn't Exist:"
+
+#define DEFAULT_CONFIRM_TITLE_CONFIRMATION                  "Confirmation"
 
 #define DEFAULT_CONFIRM_BUTTON_TEXT_YES                     "Yes"
 #define DEFAULT_CONFIRM_BUTTON_TEXT_YESTOALL                "Yes to All"
@@ -174,10 +188,16 @@
 
 
 #define DEFAULT_CONFIRM_TEXT_DIRECTORY_EXISTS               "Directory Exists:"
-#define DEFAULT_CONFIRM_TEXT_FILE_DOESNT_EXIST              "File Doesn't Exist:"
+#define DEFAULT_CONFIRM_TEXT_FILE_DOESNT_EXIST              DEFAULT_ERROR_TEXT_FILE_DOESNT_EXIST
 #define DEFAULT_CONFIRM_TEXT_FILE_EXISTS                    "File Exists: %1 Overwrite?"
 #define DEFAULT_CONFIRM_TEXT_CANT_CREATE_DIRECTORY          "Can Not Create Directory:"
 #define DEFAULT_CONFIRM_TEXT_CANT_DELETE_FILE               "Can Not Delete File:"
+
+#define DEFAULT_CONFIRM_TEXT_CANT_COPY_FILE                 "Can Not Copy File:"
+#define DEFAULT_CONFIRM_TEXT_CANT_MOVE_FILE                 "Can Not Rename/Move File:"
+
+
+
 
 
 #endif // CONSTANTS_H

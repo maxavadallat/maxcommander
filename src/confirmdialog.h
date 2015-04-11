@@ -21,12 +21,14 @@ public:
     // Constructor
     explicit ConfirmDialog(QWidget* aParent = NULL);
 
+    // Set Confirm Title
+    void setConfirmTitle(const QString& aTitleText);
     // Set Confirm Text
     void setConfirmText(const QString& aConfirmText);
     // Configure Buttons
     void configureButtons(const QDialogButtonBox::StandardButtons& aButtons = QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
     // Add Button With Action Index
-    void addButton(const QString& aText, const QDialogButtonBox::ButtonRole& aButtonRole, const int& aActionIndex = 0);
+    void addCustomButton(const QString& aText, const QDialogButtonBox::ButtonRole& aButtonRole, const int& aActionIndex = 0);
     // Clear Buttons
     void clearButtons();
     // Get Action Index

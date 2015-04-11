@@ -80,7 +80,7 @@ void FilePanel::init()
     // Check File List Model
     if (fileListModel) {
         // Connect Signals
-        connect(fileListModel, SIGNAL(busyChanged(bool)), this, SIGNAL(busyChanged(bool)));
+        connect(fileListModel, SIGNAL(busyChanged(bool)), this, SLOT(fileModelBusyChanged(bool)));
         connect(fileListModel, SIGNAL(dirFetchFinished()), this, SLOT(fileModelDirFetchFinished()));
         connect(fileListModel, SIGNAL(dirCreated(QString)), this, SLOT(fileModelDirCreated(QString)));
         connect(fileListModel, SIGNAL(error(QString,int)), this, SLOT(fileModelError(QString,int)));
@@ -1191,6 +1191,24 @@ void FilePanel::updateSupportedImageFormats()
 }
 
 //==============================================================================
+// File List Model Busy Changed Slot
+//==============================================================================
+void FilePanel::fileModelBusyChanged(const bool& aBusy)
+{
+    // Check Busy
+    if (aBusy) {
+        // Stop Dir Watcher
+        stopDirWatcher();
+    } else {
+        // Start Dir Watcher
+        startDirWatcher();
+    }
+
+    // Emit Busy Changed Signal
+    emit busyChanged(aBusy);
+}
+
+//==============================================================================
 // File Model Fetch Ready
 //==============================================================================
 void FilePanel::fileModelDirFetchFinished()
@@ -1269,7 +1287,7 @@ void FilePanel::fileModelError(const QString& aPath, const int& aError)
                     // Set Text
                     confirmDialog.setConfirmText(tr(DEFAULT_CONFIRM_TEXT_DIRECTORY_EXISTS));
                     // Add Button
-                    confirmDialog.addButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_RETRY), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_RETRY);
+                    confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_RETRY), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_RETRY);
                     // Set Path
                     confirmDialog.setPath(aPath);
                     // Exec Dialog
@@ -1825,6 +1843,31 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
             default:
                 qDebug() << "FilePanel::keyReleaseEvent - key: " << aEvent->key();
             break;
+        }
+    }
+}
+
+//==============================================================================
+// Timer Event
+//==============================================================================
+void FilePanel::timerEvent(QTimerEvent* aEvent)
+{
+    // Cehck EVent
+    if (aEvent) {
+        // Check Tiemr ID
+        if (aEvent->timerId() == dirWatcherTimerID) {
+            // Check If Need Refrsh
+            if (fileListModel && !fileListModel->getBusy() && (dwDirChanged || dwFileChanged)) {
+                qDebug() << "FilePanel::timerEvent - dirWatcherTimerID";
+                // Reset Dir Changed
+                dwDirChanged = false;
+                // Reset File Changed
+                dwFileChanged = false;
+                // Reload
+                reload(currentIndex);
+            }
+
+            qDebug() << ".";
         }
     }
 }

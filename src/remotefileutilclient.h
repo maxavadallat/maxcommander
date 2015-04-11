@@ -133,10 +133,7 @@ signals:
                         const QString& aOp,
                         const QString& aCurrFilePath,
                         const quint64& aCurrProgress,
-                        const quint64& aCurrTotal,
-                        const quint64& aOverallProgress,
-                        const quint64& aOverallTotal,
-                        const int& aSpeed);
+                        const quint64& aCurrTotal);
 
     // åFile Operation Suspended
     void fileOpSuspended(const unsigned int& aID,
@@ -225,6 +222,8 @@ protected slots:
     // Handle Test
     void handleTest();
 
+    // Handle Started
+    void handleStarted();
     // Handle Preogress
     void handleProgress();
     // Handle Confirm

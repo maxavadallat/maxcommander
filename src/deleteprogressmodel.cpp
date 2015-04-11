@@ -208,20 +208,32 @@ QVariant DeleteProgressModel::data(const QModelIndex& aIndex, int aRole) const
 {
     // Check Index
     if (aIndex.row() >=0 && aIndex.row() < rowCount()) {
+
+        //qDebug() << "DeleteProgressModel::data - aIndex[" << aIndex.row() << ":" << aIndex.column() << "] - aRole: " << aRole;
+
         // Get Item
         DeleteProgressModelItem* item = items[aIndex.row()];
 
         // Switch Role
         switch (aRole) {
-            case ERIDFileName: return item->fileName;
-            case ERIDDone:     return item->done;
+            case Qt::DisplayRole:
+                // Switch Column
+                switch (aIndex.column()) {
+                    default:
+                    case 0: return item->fileName;
+                    case 1: return item->done;
+                }
+            break;
+
+            case ERIDFileName:  return item->fileName;
+            case ERIDDone:      return item->done;
 
             default:
             break;
         }
     }
 
-    return QVariant();
+    return "";
 }
 
 //==============================================================================
@@ -259,6 +271,38 @@ bool DeleteProgressModel::setData(const QModelIndex& aIndex, const QVariant& aVa
 }
 
 //==============================================================================
+// Header Data
+//==============================================================================
+QVariant DeleteProgressModel::headerData(int aSection, Qt::Orientation aOrientation, int aRole) const
+{
+    // Check Orientation & Display Role
+    if (aOrientation == Qt::Horizontal && aRole == Qt::DisplayRole) {
+        // Switch Section
+        switch (aSection) {
+            case 0: return tr("File Name");
+            case 1: return tr("Done");
+
+            default:
+            break;
+        }
+
+        return "";
+    }
+
+    return QAbstractItemModel::headerData(aSection, aOrientation, aRole);
+}
+
+//==============================================================================
+// Flags
+//==============================================================================
+Qt::ItemFlags DeleteProgressModel::flags(const QModelIndex& aIndex) const
+{
+    Q_UNUSED(aIndex);
+
+    return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+}
+
+//==============================================================================
 // Clear
 //==============================================================================
 void DeleteProgressModel::clear()
@@ -273,8 +317,7 @@ void DeleteProgressModel::clear()
         // Take & Delete Last Item
         delete items.takeLast();
     }
-    // Clear Items
-    //items.clear();
+
     // End Reset Model
     endResetModel();
 }

@@ -52,6 +52,13 @@ public:
     // Set Completed
     void setDone(const int& aIndex, const bool& aDone = true);
 
+    // Get Operation
+    QString getOperation(const int& aIndex);
+    // Get Source File Name
+    QString getSourceFileName(const int& aIndex);
+    // Get Target File Name
+    QString getTargetFileName(const int& aIndex);
+
     // Destructor
     virtual ~TransferProgressModel();
 
@@ -75,6 +82,10 @@ public: // From QAbstractListModel
     virtual QVariant data(const QModelIndex& aIndex, int aRole = Qt::DisplayRole) const;
     // Set Data
     virtual bool setData(const QModelIndex& aIndex, const QVariant& aValue, int aRole = Qt::EditRole);
+    // Header Data
+    virtual QVariant headerData(int aSection, Qt::Orientation aOrientation, int aRole = Qt::DisplayRole) const;
+    // Flags
+    virtual Qt::ItemFlags flags(const QModelIndex& aIndex) const;
 
 protected:
 
@@ -86,7 +97,7 @@ protected:
     // Role ID's
     enum RolesIDs
     {
-        ERIDOp      = 0,
+        ERIDOp      = Qt::UserRole + 1,
         ERIDSource,
         ERIDTarget,
         ERIDDone

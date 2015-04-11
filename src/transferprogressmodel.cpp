@@ -56,7 +56,7 @@ void TransferProgressModel::init()
 //==============================================================================
 void TransferProgressModel::addItem(const QString& aOp, const QString& aSource, const QString& aTarget)
 {
-    qDebug() << "TransferProgressModel::init";
+    qDebug() << "TransferProgressModel::addItem - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget;
 
     // Create New Item
     TransferProgressModelItem* newItem = new TransferProgressModelItem(aOp, aSource, aTarget);
@@ -97,8 +97,32 @@ void TransferProgressModel::setDone(const int& aIndex, const bool& aDone)
     if (aIndex >=0 && aIndex < rowCount()) {
         qDebug() << "TransferProgressModel::setDone - aIndex: " << aIndex;
         // Set Data
-        setData(createIndex(aIndex, 0), aDone, ERIDDone);
+        setData(createIndex(aIndex, 3), aDone, ERIDDone);
     }
+}
+
+//==============================================================================
+// Get Operation
+//==============================================================================
+QString TransferProgressModel::getOperation(const int& aIndex)
+{
+    return data(createIndex(aIndex, 0)).toString();
+}
+
+//==============================================================================
+// Get Source File Name
+//==============================================================================
+QString TransferProgressModel::getSourceFileName(const int& aIndex)
+{
+    return data(createIndex(aIndex, 1)).toString();
+}
+
+//==============================================================================
+// Get Target File Name
+//==============================================================================
+QString TransferProgressModel::getTargetFileName(const int& aIndex)
+{
+    return data(createIndex(aIndex, 2)).toString();
 }
 
 //==============================================================================
@@ -154,9 +178,21 @@ QVariant TransferProgressModel::data(const QModelIndex& aIndex, int aRole) const
 
         // Switch Role
         switch (aRole) {
+            case Qt::DisplayRole:
+                // Switch Column
+                switch (aIndex.column()) {
+                    default:
+                    case 0: return item->op;
+                    case 1: return item->source;
+                    case 2: return item->target;
+                    case 3: return item->done;
+                }
+            break;
+
             case ERIDOp:        return item->op;
             case ERIDSource:    return item->source;
             case ERIDTarget:    return item->target;
+            case ERIDDone:      return item->done;
 
             default:
             break;
@@ -213,6 +249,41 @@ bool TransferProgressModel::setData(const QModelIndex& aIndex, const QVariant& a
 
     return false;
 }
+
+//==============================================================================
+// Header Data
+//==============================================================================
+QVariant TransferProgressModel::headerData(int aSection, Qt::Orientation aOrientation, int aRole) const
+{
+    // Check Orientation & Display Role
+    if (aOrientation == Qt::Horizontal && aRole == Qt::DisplayRole) {
+        // Switch Section
+        switch (aSection) {
+            case 0: return tr("Op");
+            case 1: return tr("Source");
+            case 2: return tr("Target");
+            case 3: return tr("Done");
+
+            default:
+            break;
+        }
+
+        return "";
+    }
+
+    return QAbstractItemModel::headerData(aSection, aOrientation, aRole);
+}
+
+//==============================================================================
+// Flags
+//==============================================================================
+Qt::ItemFlags TransferProgressModel::flags(const QModelIndex& aIndex) const
+{
+    Q_UNUSED(aIndex);
+
+    return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+}
+
 
 //==============================================================================
 // Clear

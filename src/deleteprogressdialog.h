@@ -2,7 +2,11 @@
 #define DELETEPROGRESSDIALOG_H
 
 #include <QDialog>
+#include <QStyledItemDelegate>
 #include <QCloseEvent>
+#include <QResizeEvent>
+#include <QTimerEvent>
+#include <QDialogButtonBox>
 
 namespace Ui {
 class DeleteProgressDialog;
@@ -11,6 +15,36 @@ class DeleteProgressDialog;
 class DeleteProgressModel;
 class RemoteFileUtilClient;
 class ConfirmDialog;
+
+
+
+//==============================================================================
+// Delete Progress Dialog Queue Item Delegate Class
+//==============================================================================
+class DeleteProgressQueueItemDelegate : public QStyledItemDelegate
+{
+public:
+    // Constructor
+    explicit DeleteProgressQueueItemDelegate(QObject* aParent = NULL);
+
+    // Paint
+    virtual void paint(QPainter* aPainter,
+                       const QStyleOptionViewItem& aOption,
+                       const QModelIndex& aIndex) const;
+
+    // Create Edirot
+    virtual QWidget* createEditor(QWidget* aParent,
+                                  const QStyleOptionViewItem& aOption,
+                                  const QModelIndex& aIndex) const;
+
+    // Destructor
+    virtual ~DeleteProgressQueueItemDelegate();
+};
+
+
+
+
+
 
 
 //==============================================================================
@@ -66,7 +100,13 @@ protected slots:
     // Save Settings
     void saveSettings();
 
+    // Configure Buttons
+    void configureButtons(const QDialogButtonBox::StandardButtons& aButtons = QDialogButtonBox::Close);
+
 protected slots: // for RemoteFileUtilClient
+
+    // Client Connection Changed Slot
+    void clientConnectionChanged(const unsigned int& aID, const bool& aConnected);
 
     // Client Status Changed Slot
     void clientStatusChanged(const unsigned int& aID, const int& aStatus);
@@ -83,10 +123,7 @@ protected slots: // for RemoteFileUtilClient
                         const QString& aOp,
                         const QString& aCurrFilePath,
                         const quint64& aCurrProgress,
-                        const quint64& aCurrTotal,
-                        const quint64& aOverallProgress,
-                        const quint64& aOverallTotal,
-                        const int& aSpeed);
+                        const quint64& aCurrTotal);
 
     // File Operation Finished Slot
     void fileOpFinished(const unsigned int& aID,
@@ -125,10 +162,24 @@ protected slots: // for RemoteFileUtilClient
                               const QString& aSource,
                               const QString& aTarget);
 
+protected slots: // For QDialogButtonBox
+
+    // Button Box Accepted Slot
+    void buttonBoxAccepted();
+    // Button Box Rejected Slot
+    void buttonBoxRejected();
+
+protected slots: // For QTabWidget
+
+    // Tab Changed Slot
+    void tabChanged(const int& aIndex);
+
 protected: // From QDialog
 
     // Close Event
     virtual void closeEvent(QCloseEvent* aEvent);
+    // Resize Event
+    virtual void resizeEvent(QResizeEvent* aEvent);
 
 private:
     // UI
@@ -146,3 +197,5 @@ private:
 };
 
 #endif // DELETEPROGRESSDIALOG_H
+
+

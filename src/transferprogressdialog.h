@@ -2,6 +2,11 @@
 #define TRANSFERPROGRESSDIALOG_H
 
 #include <QDialog>
+#include <QStyledItemDelegate>
+#include <QCloseEvent>
+#include <QResizeEvent>
+#include <QTimerEvent>
+#include <QDialogButtonBox>
 
 namespace Ui {
 class TransferProgressDialog;
@@ -10,6 +15,37 @@ class TransferProgressDialog;
 class TransferProgressModel;
 class RemoteFileUtilClient;
 class ConfirmDialog;
+
+
+
+//==============================================================================
+// Transfer Progress Dialog Queue Item Delegate Class
+//==============================================================================
+class TransferProgressQueueItemDelegate : public QStyledItemDelegate
+{
+public:
+    // Constructor
+    explicit TransferProgressQueueItemDelegate(QObject* aParent = NULL);
+
+    // Paint
+    virtual void paint(QPainter* aPainter,
+                       const QStyleOptionViewItem& aOption,
+                       const QModelIndex& aIndex) const;
+
+    // Create Edirot
+    virtual QWidget* createEditor(QWidget* aParent,
+                                  const QStyleOptionViewItem& aOption,
+                                  const QModelIndex& aIndex) const;
+
+    // Destructor
+    virtual ~TransferProgressQueueItemDelegate();
+};
+
+
+
+
+
+
 
 
 
@@ -69,7 +105,18 @@ protected slots:
     // Save Settings
     void saveSettings();
 
+    // Configure Buttons
+    void configureButtons(const QDialogButtonBox::StandardButtons& aButtons = QDialogButtonBox::Close);
+
+    // Start Transfer Speed Timer
+    void startTransferSpeedTimer();
+    // Stop Transfer Speed Timer
+    void stopTransferSpeedTimer();
+
 protected slots: // For RemoteFileUtilClient
+
+    // Client Connection Changed Slot
+    void clientConnectionChanged(const unsigned int& aID, const bool& aConnected);
 
     // Client Status Changed Slot
     void clientStatusChanged(const unsigned int& aID, const int& aStatus);
@@ -86,10 +133,7 @@ protected slots: // For RemoteFileUtilClient
                         const QString& aOp,
                         const QString& aCurrFilePath,
                         const quint64& aCurrProgress,
-                        const quint64& aCurrTotal,
-                        const quint64& aOverallProgress,
-                        const quint64& aOverallTotal,
-                        const int& aSpeed);
+                        const quint64& aCurrTotal);
 
     // File Operation Finished Slot
     void fileOpFinished(const unsigned int& aID,
@@ -128,8 +172,24 @@ protected slots: // For RemoteFileUtilClient
                               const QString& aSource,
                               const QString& aTarget);
 
+protected slots: // For QDialogButtonBox
+
+    // Button Box Accepted Slot
+    void buttonBoxAccepted();
+    // Button Box Rejected Slot
+    void buttonBoxRejected();
+
+protected slots: // For QTabWidget
+
+    // Tab Changed Slot
+    void tabChanged(const int& aIndex);
+
 protected: // From QDialog
 
+    // Resize Event
+    virtual void resizeEvent(QResizeEvent* aEvent);
+    // Timer Event
+    virtual void timerEvent(QTimerEvent* aEvent);
     // Close Event
     virtual void closeEvent(QCloseEvent* aEvent);
 
@@ -146,6 +206,27 @@ private:
     bool                            closeWhenFinished;
     // Queue Index
     int                             queueIndex;
+
+    // Source Path
+    QString                         sourcePath;
+    // Target Path
+    QString                         targetPath;
+
+    // Speed Timer ID
+    int                             transferSpeedTimerID;
+    // Last Transfered Size
+    quint64                         lastTransferedSize;
+    // Current Transfered Size
+    quint64                         currTransferedSize;
+    // Transfer Speed
+    int                             transferSpeed;
+
+    // Overall Progress
+    quint64                         overallProgress;
+    // Overall Size
+    quint64                         overallSize;
+
 };
 
 #endif // TRANSFERPROGRESSDIALOG_H
+

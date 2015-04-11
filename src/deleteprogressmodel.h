@@ -77,6 +77,10 @@ public: // From QAbstractListModel
     virtual QVariant data(const QModelIndex& aIndex, int aRole = Qt::DisplayRole) const;
     // Set Data
     virtual bool setData(const QModelIndex& aIndex, const QVariant& aValue, int aRole = Qt::EditRole);
+    // Header Data
+    virtual QVariant headerData(int aSection, Qt::Orientation aOrientation, int aRole = Qt::DisplayRole) const;
+    // Flags
+    virtual Qt::ItemFlags flags(const QModelIndex& aIndex) const;
 
 protected:
 
@@ -88,7 +92,7 @@ protected:
     // Role ID's
     enum RolesIDs
     {
-        ERIDFileName    = 0,
+        ERIDFileName    = Qt::UserRole + 1,
         ERIDDone
     };
 

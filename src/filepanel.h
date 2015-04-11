@@ -6,6 +6,7 @@
 #include <QStringList>
 #include <QFileInfo>
 #include <QFileSystemWatcher>
+#include <QTimerEvent>
 
 namespace Ui {
 class FilePanel;
@@ -344,9 +345,11 @@ protected slots:
 
 protected slots: // From File Model
 
-    // File Model Fetch Ready Slot
+    // File List Model Busy Changed Slot
+    void fileModelBusyChanged(const bool& aBusy);
+    // File List Model Fetch Ready Slot
     void fileModelDirFetchFinished();
-    // File Model Dir Created Slot
+    // File List Model Dir Created Slot
     void fileModelDirCreated(const QString& aDirPath);
     // File Model Error
     void fileModelError(const QString& aPath, const int& aError);
@@ -385,6 +388,8 @@ protected: // From QWidget
     // Key Release Event
     virtual void keyReleaseEvent(QKeyEvent* aEvent);
 
+    // Timer Event
+    virtual void timerEvent(QTimerEvent* aEvent);
 
 private:
     friend class MainWindow;

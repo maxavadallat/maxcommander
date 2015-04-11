@@ -22,6 +22,15 @@ ConfirmDialog::ConfirmDialog(QWidget* aParent)
 }
 
 //==============================================================================
+// Set Confirm Title
+//==============================================================================
+void ConfirmDialog::setConfirmTitle(const QString& aTitleText)
+{
+    // Set Window Title
+    setWindowTitle(aTitleText);
+}
+
+//==============================================================================
 // Set Confirm Text
 //==============================================================================
 void ConfirmDialog::setConfirmText(const QString& aConfirmText)
@@ -40,8 +49,10 @@ void ConfirmDialog::configureButtons(const QDialogButtonBox::StandardButtons& aB
 //==============================================================================
 // Add Button
 //==============================================================================
-void ConfirmDialog::addButton(const QString& aText, const QDialogButtonBox::ButtonRole& aButtonRole, const int& aActionIndex)
+void ConfirmDialog::addCustomButton(const QString& aText, const QDialogButtonBox::ButtonRole& aButtonRole, const int& aActionIndex)
 {
+    qDebug() << "ConfirmDialog::addCustomButton - aText: " << aText << " - aActionIndex: " << aActionIndex;
+
     // Add Button
     QPushButton* pushButton = ui->buttonBox->addButton(aText, aButtonRole);
 
@@ -67,12 +78,23 @@ void ConfirmDialog::buttonClicked(QAbstractButton* aButton)
 {
     // Check Button
     if (aButton) {
+        // Check Custom Buttons Keys
+        if (customButtons.uniqueKeys().count() > 0 && customButtons.uniqueKeys().indexOf(aButton) >= 0) {
 
-        // Get Action Index
-        actionIndex = customButtons[aButton];
+            // Get Action Index
+            actionIndex = customButtons[aButton];
 
-        qDebug() << "ConfirmDialog::buttonClicked - actionIndex: " << actionIndex;
+            //qDebug() << "ConfirmDialog::buttonClicked - customButtons.keys: " << customButtons.keys();
+            //qDebug() << "ConfirmDialog::buttonClicked - customButtons.values: " << customButtons.values();
 
+            qDebug() << "ConfirmDialog::buttonClicked - actionIndex: " << actionIndex;
+        } else {
+
+            // Reset Action Index
+            actionIndex = -1;
+
+            qDebug() << "ConfirmDialog::buttonClicked - NO MATCHING CUSTOM BUTTON!! - actionIndex: " << actionIndex;
+        }
     } else {
         // Reset Action Index
         actionIndex = -1;

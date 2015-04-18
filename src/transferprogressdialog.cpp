@@ -21,8 +21,10 @@
 //==============================================================================
 TransferProgressQueueItemDelegate::TransferProgressQueueItemDelegate(QObject* aParent)
     : QStyledItemDelegate(aParent)
+    , doneIcon(QImage(DEFAULT_ICON_PATH_OK).scaled(QSize(DEFAULT_ICON_WIDTH_16, DEFAULT_ICON_HEIGHT_16), Qt::KeepAspectRatio, Qt::SmoothTransformation))
+    , errorIcon(QImage(DEFAULT_ICON_PATH_CANCEL).scaled(QSize(DEFAULT_ICON_WIDTH_16, DEFAULT_ICON_HEIGHT_16), Qt::KeepAspectRatio, Qt::SmoothTransformation))
+    , progressIcon(QImage(DEFAULT_ICON_PATH_PROGRESS).scaled(QSize(DEFAULT_ICON_WIDTH_16, DEFAULT_ICON_HEIGHT_16), Qt::KeepAspectRatio, Qt::SmoothTransformation))
 {
-
 }
 
 //==============================================================================
@@ -50,10 +52,27 @@ void TransferProgressQueueItemDelegate::paint(QPainter* aPainter,
             aPainter->drawText(aOption.rect, Qt::AlignCenter, aIndex.model()->data(aIndex).toString());
         break;
 
-        case 1:
+        case 1: {
+            // Init File Name
+            QString fileName(aIndex.model()->data(aIndex).toString());
+
+            // Check File
+            if (!QFile::exists(fileName)) {
+                // Save
+                aPainter->save();
+                // Set Brush
+                aPainter->setBrush(QColor(128, 0, 0, 16));
+                // Set Pen
+                aPainter->setPen(Qt::NoPen);
+                // Draw Background
+                aPainter->drawRect(aOption.rect);
+                // Restore
+                aPainter->restore();
+            }
+
             // Draw Source Text
-            aPainter->drawText(aOption.rect.adjusted(DEFAULT_PROGRESS_DIALOG_TEXT_MARGIN, 0, -DEFAULT_PROGRESS_DIALOG_TEXT_MARGIN, 0), Qt::AlignVCenter, aIndex.model()->data(aIndex).toString());
-        break;
+            aPainter->drawText(aOption.rect.adjusted(DEFAULT_PROGRESS_DIALOG_TEXT_MARGIN, 0, -DEFAULT_PROGRESS_DIALOG_TEXT_MARGIN, 0), Qt::AlignVCenter, fileName);
+        } break;
 
         case 2:
             // Draw Target Text
@@ -61,8 +80,30 @@ void TransferProgressQueueItemDelegate::paint(QPainter* aPainter,
         break;
 
         case 3:
-            // Draw Done Text
-            aPainter->drawText(aOption.rect, Qt::AlignCenter, aIndex.model()->data(aIndex).toBool() ? "X" : "");
+            // Switch State
+            switch (aIndex.model()->data(aIndex).toInt()) {
+                case ETPSkipped:
+                case ETPIdle:
+                    // Save
+                    aPainter->save();
+                    // Set Opacity
+                    aPainter->setOpacity(DEFAULT_PROGRESS_DIALOG_SEMI_TRANSPARENCY);
+                    // Draw Image
+                    aPainter->drawImage(aOption.rect.center() - QPoint(progressIcon.width() / 2, progressIcon.height() / 2), progressIcon);
+                    // Restore
+                    aPainter->restore();
+                break;
+
+                case ETPRunning:
+                    // Set Opacity
+                    aPainter->setOpacity(1.0);
+                    // Draw Image
+                    aPainter->drawImage(aOption.rect.center() - QPoint(progressIcon.width() / 2, progressIcon.height() / 2), progressIcon);
+                break;
+
+                case ETPFinished:   aPainter->drawImage(aOption.rect.center() - QPoint(doneIcon.width() / 2, doneIcon.height() / 2), doneIcon);             break;
+                case ETPError:      aPainter->drawImage(aOption.rect.center() - QPoint(errorIcon.width() / 2, errorIcon.height() / 2), errorIcon);          break;
+            }
         break;
     }
 }
@@ -86,7 +127,6 @@ QWidget* TransferProgressQueueItemDelegate::createEditor(QWidget* aParent,
 //==============================================================================
 TransferProgressQueueItemDelegate::~TransferProgressQueueItemDelegate()
 {
-
 }
 
 
@@ -121,6 +161,7 @@ TransferProgressDialog::TransferProgressDialog(const QString& aOperation, QWidge
     , transferSpeedTimerID(-1)
     , lastTransferedSize(0)
     , currTransferedSize(0)
+    , speedMeasureLastSize(0)
     , transferSpeed(0)
     , overallProgress(0)
     , overallSize(0)
@@ -161,6 +202,7 @@ void TransferProgressDialog::init()
         connect(fileUtil, SIGNAL(fileOpNeedConfirm(uint,QString,int,QString,QString,QString)), this, SLOT(fileOpNeedConfirm(uint,QString,int,QString,QString,QString)));
         connect(fileUtil, SIGNAL(fileOpAborted(uint,QString,QString,QString,QString)), this, SLOT(fileOpAborted(uint,QString,QString,QString,QString)));
         connect(fileUtil, SIGNAL(fileOpError(uint,QString,QString,QString,QString,int)), this, SLOT(fileOpError(uint,QString,QString,QString,QString,int)));
+        connect(fileUtil, SIGNAL(fileOpSkipped(uint,QString,QString,QString,QString)), this, SLOT(fileOpSkipped(uint,QString,QString,QString,QString)));
         connect(fileUtil, SIGNAL(fileOpFinished(uint,QString,QString,QString,QString)), this, SLOT(fileOpFinished(uint,QString,QString,QString,QString)));
         connect(fileUtil, SIGNAL(fileOpQueueItemFound(uint,QString,QString,QString,QString)), this, SLOT(fileOpQueueItemFound(uint,QString,QString,QString,QString)));
     }
@@ -202,8 +244,20 @@ void TransferProgressDialog::launch(const QString& aSourcePath, const QString& a
     if (buildQueue(aSourcePath, aTargetPath, aSelectedFiles)) {
         // Set Queue Index
         queueIndex = 0;
-        // Process Queue
-        //QTimer::singleShot(1, this, SLOT(processQueue()));
+
+        // Check File Util Client
+        if (fileUtil) {
+            // Check If Connected
+            if (!fileUtil->isConnected()) {
+                // Connect
+                fileUtil->connectToFileServer();
+            } else {
+                // Clear Options
+                fileUtil->clearFileTransferOptions();
+                // Process Queue
+                QTimer::singleShot(1, this, SLOT(processQueue()));
+            }
+        }
     } else {
         // Reset Queue Index
         queueIndex = -1;
@@ -234,6 +288,12 @@ bool TransferProgressDialog::buildQueue(const QString& aSourcePath, const QStrin
 
     qDebug() << "TransferProgressDialog::buildQueue - aSourcePath: " << aSourcePath << " - aTargetPath: " << aTargetPath << " - count: " << aSelectedFiles.count();
 
+    // Reset Overall Progress
+    overallProgress = 0;
+    // Reset Overall Size
+    overallSize = 0;
+
+
     // Init Local Source Path
     QString localSourcePath = aSourcePath;
     // Check Local Path
@@ -252,8 +312,26 @@ bool TransferProgressDialog::buildQueue(const QString& aSourcePath, const QStrin
 
     // Go Thru Selected Files
     for (int i=0; i<sfCount; ++i) {
+        // Init Source File Path
+        QString sourceFilePath = localSourcePath + aSelectedFiles[i];
+        // Init Target File Path
+        QString targetFilePath = localTargetPath + aSelectedFiles[i];
+
+        // Init Source File Info
+        QFileInfo sourceInfo(sourceFilePath);
+        // Check If Is Dir
+        if (!sourceInfo.isDir() && !sourceInfo.isBundle() && !sourceInfo.isSymLink()) {
+            // Add Size To Overall Size
+            overallSize += sourceInfo.size();
+
+            qDebug() << "TransferProgressDialog::buildQueue - aSourcePath: " << aSourcePath << " - overallSize: " << overallSize;
+
+            // Set Overall Progress
+            setOverallProgress(overallProgress, overallSize);
+        }
+
         // Add To Queue Model
-        queueModel->addItem(operation, localSourcePath + aSelectedFiles[i], localTargetPath + aSelectedFiles[i]);
+        queueModel->addItem(operation, sourceFilePath, targetFilePath);
     }
 
     return true;
@@ -299,6 +377,8 @@ void TransferProgressDialog::processQueue()
             } else {
                 // Configure Buttons
                 configureButtons(QDialogButtonBox::Close);
+                // Set Current File
+                setCurrentFileName("");
             }
         }
     }
@@ -328,23 +408,18 @@ void TransferProgressDialog::restoreUI()
 {
     qDebug() << "TransferProgressDialog::restoreUI";
 
+    // Configure Buttons
+    configureButtons(QDialogButtonBox::Close);
+
     // Init Settings
     QSettings settings;
     // Get Close When Finished
-    //closeWhenFinished = settings.value(SETTINGS_KEY_CLOSE_WHEN_FINISHED, false).toBool();
+    closeWhenFinished = settings.value(SETTINGS_KEY_CLOSE_WHEN_FINISHED, false).toBool();
     // Set Checkbox
-    //ui->closeWhenFinishedCheckBox->setChecked(closeWhenFinished);
+    ui->closeWhenFinishedCheckBox->setChecked(closeWhenFinished);
 
-    // Set Column Width
-    ui->transferQueue->setColumnWidth(0, DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_OP);
-    // Set Column Width
-    ui->transferQueue->setColumnWidth(1, (ui->transferQueue->width() - DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_OP - DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_DONE) / 2);
-    // Set Column Width
-    ui->transferQueue->setColumnWidth(2, (ui->transferQueue->width() - DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_OP - DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_DONE) / 2);
-    // Set Column Width
-    ui->transferQueue->setColumnWidth(3, DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_DONE);
-
-    // ...
+    // Update Queue Column Sizes
+    updateQueueColumnSizes();
 }
 
 //==============================================================================
@@ -380,11 +455,9 @@ void TransferProgressDialog::startTransferSpeedTimer()
 {
     // Check Transfer Speed Timer ID
     if (transferSpeedTimerID == -1) {
-        qDebug() <<"TransferProgressDialog::startTransferSpeedTimer";
-        // Reset Last Transfer Size
-        lastTransferedSize = 0;
-        // reset Current Transfer Size
-        currTransferedSize = 0;
+        //qDebug() <<"TransferProgressDialog::startTransferSpeedTimer";
+        // Reset Last Speed Measure
+        speedMeasureLastSize = 0;
         // Start Timer
         transferSpeedTimerID = startTimer(DEFAULT_ONE_SEC, Qt::PreciseTimer);
     }
@@ -397,16 +470,31 @@ void TransferProgressDialog::stopTransferSpeedTimer()
 {
     // Check Transfer Speed Timer ID
     if (transferSpeedTimerID != -1) {
-        qDebug() <<"TransferProgressDialog::stopTransferSpeedTimer";
+        //qDebug() <<"TransferProgressDialog::stopTransferSpeedTimer";
         // Kill Timer
         killTimer(transferSpeedTimerID);
         // Reset Timer ID
         transferSpeedTimerID = -1;
-        // Reset Last Transfer Size
-        lastTransferedSize = 0;
-        // reset Current Transfer Size
-        currTransferedSize = 0;
+        // Reset Last Speed Measure
+        speedMeasureLastSize = 0;
     }
+}
+
+//==============================================================================
+// Update Queue Column Sizes
+//==============================================================================
+void TransferProgressDialog::updateQueueColumnSizes()
+{
+    qDebug() << "TransferProgressDialog::updateQueueColumnSizes";
+
+    // Set Column Width
+    ui->transferQueue->setColumnWidth(0, DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_OP);
+    // Set Column Width
+    ui->transferQueue->setColumnWidth(1, (ui->transferQueue->width() - DEFAULT_PROGRESS_DIALOG_SCROLLBAR_WIDTH - DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_OP - DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_DONE) / 2);
+    // Set Column Width
+    ui->transferQueue->setColumnWidth(2, (ui->transferQueue->width() - DEFAULT_PROGRESS_DIALOG_SCROLLBAR_WIDTH - DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_OP - DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_DONE) / 2);
+    // Set Column Width
+    ui->transferQueue->setColumnWidth(3, DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_DONE);
 }
 
 //==============================================================================
@@ -472,9 +560,29 @@ void TransferProgressDialog::setTitle(const QString& aTitle)
 //==============================================================================
 // Set Current File Name
 //==============================================================================
-void TransferProgressDialog::setCurrentFileName(const QString& aCurrentFileName)
+void TransferProgressDialog::setCurrentFileName(const QString& aCurrentFileName, const int& aSpeed)
 {
-    ui->currentFileNameLabel->setText(aCurrentFileName);
+    // Check Current File Name
+    if (currentFileName != aCurrentFileName || transferSpeed != aSpeed) {
+        // Set Current File Name
+        currentFileName = aCurrentFileName;
+        // Set Transfer Speed
+        transferSpeed = aSpeed;
+        // Get Font Metrics
+        QFontMetrics fontMetrics = ui->currentFileNameLabel->fontMetrics();
+
+        // Check Speed
+        if (transferSpeed > 0) {
+            // Set Name Label Text
+            nameLabelText = QString(DEFAULT_PROGRESS_DIALOG_FILENAME_TEXT_TEMPLATE).arg(currentFileName).arg(transferSpeed >> 10);
+        } else {
+            // Set Name Label Text
+            nameLabelText = currentFileName;
+        }
+
+        // Set Text
+        ui->currentFileNameLabel->setText(fontMetrics.elidedText(nameLabelText, Qt::ElideMiddle, ui->currentFileNameLabel->width()));
+    }
 }
 
 //==============================================================================
@@ -486,7 +594,7 @@ void TransferProgressDialog::setCurrentProgress(const quint64& aProgress, const 
     ui->currentProgress->setMinimum(0);
 
     // Check Total
-    if (aTotal > INT_MAX) {
+    if (aTotal > UINT_MAX) {
         // Set Maximum
         ui->currentProgress->setMaximum(aTotal >> 32);
         // Set Progress
@@ -508,7 +616,7 @@ void TransferProgressDialog::setOverallProgress(const quint64& aProgress, const 
     ui->overallProgress->setMinimum(0);
 
     // Check Total
-    if (aTotal > INT_MAX) {
+    if (aTotal > UINT_MAX) {
         // Set Maximum
         ui->overallProgress->setMaximum(aTotal >> 32);
         // Set Value
@@ -530,6 +638,12 @@ void TransferProgressDialog::clientConnectionChanged(const unsigned int& aID, co
 
     // Check If Connected
     if (aConnected) {
+        // Check File Util
+        if (fileUtil) {
+            // Clear Options
+            fileUtil->clearFileTransferOptions();
+        }
+
         // Process Queue
         QTimer::singleShot(1, this, SLOT(processQueue()));
     }
@@ -557,9 +671,25 @@ void TransferProgressDialog::fileOpStarted(const unsigned int& aID,
 {
     Q_UNUSED(aPath);
 
+
+    qDebug() << " ";
+    qDebug() << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>";
+    qDebug() << " ";
     qDebug() << "TransferProgressDialog::fileOpStarted - aID: " << aID << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget;
 
-    // ...
+    // Configure Buttons
+    configureButtons(QDialogButtonBox::Abort);
+
+    // Set Current File Name
+    setCurrentFileName(aSource);
+
+    // Reset Last Transfer Size
+    lastTransferedSize = 0;
+    // Reset Current Transfer Size
+    currTransferedSize = 0;
+
+    // Set Current Progress
+    setCurrentProgress(0, 0);
 
     // Start Transfer Speed Timer
     startTransferSpeedTimer();
@@ -574,23 +704,81 @@ void TransferProgressDialog::fileOpProgress(const unsigned int& aID,
                                             const quint64& aCurrProgress,
                                             const quint64& aCurrTotal)
 {
-    qDebug() << "TransferProgressDialog::fileOpProgress - aID: " << aID << " - aOp: " << aOp << " - aCurrFilePath: " << aCurrFilePath;
+    Q_UNUSED(aID);
+    Q_UNUSED(aOp);
+    Q_UNUSED(aCurrFilePath);
 
-    // Set Current File Name
-    setCurrentFileName(aCurrFilePath);
+    //qDebug() << "TransferProgressDialog::fileOpProgress - p: " << aCurrProgress << " - t: " << aCurrTotal;
+
+    // Check Queue Model
+    if (queueModel) {
+        // Set Done
+        queueModel->setProgressState(queueIndex, ETPRunning);
+    }
+
     // Set Current Progress
     setCurrentProgress(aCurrProgress, aCurrTotal);
 
-    // Set Last Transfer Size
-    lastTransferedSize = currTransferedSize;
     // Set Current Transfer Size
     currTransferedSize = aCurrProgress;
 
     // Calculate Overall Progress
     overallProgress += (currTransferedSize - lastTransferedSize);
 
+    // Set Last Transfer Size
+    lastTransferedSize = currTransferedSize;
+
     // Set Overall Progress
     setOverallProgress(overallProgress, overallSize);
+}
+
+//==============================================================================
+// File Operation Skipped Slot
+//==============================================================================
+void TransferProgressDialog::fileOpSkipped(const unsigned int& aID,
+                                           const QString& aOp,
+                                           const QString& aPath,
+                                           const QString& aSource,
+                                           const QString& aTarget)
+{
+    Q_UNUSED(aPath);
+
+    qDebug() << "TransferProgressDialog::fileOpSkipped - aID: " << aID << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget;
+    qDebug() << " ";
+    qDebug() << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<";
+    qDebug() << " ";
+
+    // Check Operation - Copy/Move File
+    if (aOp == DEFAULT_OPERATION_COPY_FILE || aOp == DEFAULT_OPERATION_MOVE_FILE) {
+        // Check Queue Model
+        if (queueModel) {
+            // Set Done
+            queueModel->setProgressState(queueIndex, ETPSkipped);
+        }
+
+        // Init Source Info
+        QFileInfo sourceInfo(aSource);
+
+        // Set Current Progress
+        setCurrentProgress(sourceInfo.size(), sourceInfo.size());
+
+        // Calculate Overall Progress
+        overallProgress += sourceInfo.size();
+
+        // Set Last Transfer Size
+        lastTransferedSize = 0;
+
+        // Set Overall Progress
+        setOverallProgress(overallProgress, overallSize);
+
+        // Increase Current Queue Index
+        queueIndex++;
+    }
+
+    // ...
+
+    // Process Queue
+    processQueue();
 }
 
 //==============================================================================
@@ -605,11 +793,34 @@ void TransferProgressDialog::fileOpFinished(const unsigned int& aID,
     Q_UNUSED(aPath);
 
     qDebug() << "TransferProgressDialog::fileOpFinished - aID: " << aID << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget;
+    qDebug() << " ";
+    qDebug() << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<";
+    qDebug() << " ";
 
     // ...
 
-    // Stop Transfer Speed Timer
-    stopTransferSpeedTimer();
+    // Check Operation - Copy/Move File
+    if (aOp == DEFAULT_OPERATION_COPY_FILE || aOp == DEFAULT_OPERATION_MOVE_FILE) {
+        // Check Queue Model
+        if (queueModel) {
+            // Set Done
+            queueModel->setProgressState(queueIndex, ETPFinished);
+        }
+
+        // Increase Current Queue Index
+        queueIndex++;
+
+    // Check Operation - Queue
+    } else if (aOp == DEFAULT_OPERATION_QUEUE) {
+
+        // Increase Current Queue Index
+        queueIndex++;
+    }
+
+    // ...
+
+    // Process Queue
+    processQueue();
 }
 
 //==============================================================================
@@ -631,6 +842,9 @@ void TransferProgressDialog::fileOpAborted(const unsigned int& aID,
     if (closeWhenFinished) {
         // Close
         close();
+    } else {
+        // Configure Buttons
+        configureButtons(QDialogButtonBox::Close);
     }
 }
 
@@ -670,7 +884,7 @@ void TransferProgressDialog::fileOpError(const unsigned int& aID,
     // Switch Error
     switch (aError) {
         default:
-        case DEFAULT_ERROR_GENERAL:
+        case DEFAULT_ERROR_GENERAL: {
             // Check Operation - Copy
             if (aOp == DEFAULT_OPERATION_COPY_FILE) {
 
@@ -684,32 +898,31 @@ void TransferProgressDialog::fileOpError(const unsigned int& aID,
                 confirmDialog.setConfirmText(tr(DEFAULT_CONFIRM_TEXT_CANT_MOVE_FILE));
 
             }
-        break;
+
+            // Set Path
+            confirmDialog.setPath(aPath);
+
+            // Configure Standard Buttons
+            confirmDialog.configureButtons(QDialogButtonBox::Abort);
+
+            // Add Button
+            confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_RETRY), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_RETRY);
+            confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_SKIP), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_SKIP);
+            confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_SKIPALL), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_SKIPALL);
+
+            // Exec Confirm Dialog
+            confirmDialog.exec();
+
+            // Get Action Index
+            int actionIndex = confirmDialog.getActionIndex();
+
+            // Check File Util
+            if (fileUtil) {
+                // Send User Response
+                fileUtil->sendUserResponse(actionIndex == -1 ? DEFAULT_CONFIRM_ABORT : actionIndex, confirmDialog.getPath());
+            }
+        } break;
     }
-
-    // Set Path
-    confirmDialog.setPath(aPath);
-
-    // Configure Standard Buttons
-    confirmDialog.configureButtons(QDialogButtonBox::Abort);
-
-    // Add Button
-    confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_RETRY), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_RETRY);
-    confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_SKIP), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_SKIP);
-    confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_SKIPALL), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_SKIPALL);
-
-    // Exec Confirm Dialog
-    confirmDialog.exec();
-
-    // Get Action Index
-    int actionIndex = confirmDialog.getActionIndex();
-
-    // Check File Util
-    if (fileUtil) {
-        // Send User Response
-        fileUtil->sendUserResponse(actionIndex == -1 ? DEFAULT_CONFIRM_ABORT : actionIndex, confirmDialog.getPath());
-    }
-
 }
 
 //==============================================================================
@@ -736,8 +949,13 @@ void TransferProgressDialog::fileOpNeedConfirm(const unsigned int& aID,
     switch (aCode) {
         case DEFAULT_ERROR_EXISTS: {
             // Set Error Text
-            confirmDialog.setConfirmText(tr(DEFAULT_CONFIRM_TEXT_FILE_EXISTS).arg(aTarget));
+            confirmDialog.setConfirmText(tr(DEFAULT_CONFIRM_TEXT_TARGET_FILE_EXISTS).arg(aTarget));
         } break;
+
+        case DEFAULT_ERROR_TARGET_DIR_NOT_EXISTS: {
+            // Set Error Text
+            confirmDialog.setConfirmText(tr(DEFAULT_CONFIRM_TEXT_TARGET_DIR_DOESNT_EXIST).arg(aTarget));
+        }
     }
 
     // Set Path
@@ -839,14 +1057,8 @@ void TransferProgressDialog::tabChanged(const int& aIndex)
 
     // Check Tab Index
     if (aIndex == 1) {
-        // Set Column Width
-        ui->transferQueue->setColumnWidth(0, DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_OP);
-        // Set Column Width
-        ui->transferQueue->setColumnWidth(1, (ui->transferQueue->width() - DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_OP - DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_DONE) / 2);
-        // Set Column Width
-        ui->transferQueue->setColumnWidth(2, (ui->transferQueue->width() - DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_OP - DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_DONE) / 2);
-        // Set Column Width
-        ui->transferQueue->setColumnWidth(3, DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_DONE);
+        // Update Queue Column Sizes
+        updateQueueColumnSizes();
     }
 }
 
@@ -859,14 +1071,13 @@ void TransferProgressDialog::resizeEvent(QResizeEvent* aEvent)
     if (aEvent && aEvent->size().width() > 0 && aEvent->size().height() > 0) {
         //qDebug() << "TransferProgressDialog::resizeEvent - aEvent: " << aEvent->size();
 
-        // Set Column Width
-        ui->transferQueue->setColumnWidth(0, DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_OP);
-        // Set Column Width
-        ui->transferQueue->setColumnWidth(1, (ui->transferQueue->width() - DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_OP - DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_DONE) / 2);
-        // Set Column Width
-        ui->transferQueue->setColumnWidth(2, (ui->transferQueue->width() - DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_OP - DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_DONE) / 2);
-        // Set Column Width
-        ui->transferQueue->setColumnWidth(3, DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_DONE);
+        // Update Queue Column Sizes
+        updateQueueColumnSizes();
+
+        // Get Font Metrics
+        QFontMetrics fontMetrics = ui->currentFileNameLabel->fontMetrics();
+        // Set Current File Name Label Text
+        ui->currentFileNameLabel->setText(fontMetrics.elidedText(nameLabelText, Qt::ElideMiddle, ui->currentFileNameLabel->width()));
     }
 }
 
@@ -879,8 +1090,20 @@ void TransferProgressDialog::timerEvent(QTimerEvent* aEvent)
     if (aEvent) {
         // Check Timer ID
         if (aEvent->timerId() == transferSpeedTimerID) {
-            // Calculate Transfer Speed
-            transferSpeed = currTransferedSize - lastTransferedSize;
+
+            // Check File Util Client
+            if (fileUtil && (fileUtil->getStatus() == ECSTBusy || fileUtil->getStatus() == ECSTWaiting)) {
+                //qDebug() << "TransferProgressDialog::timerEvent - currTransferedSize: " << currTransferedSize << " - diff: " << (currTransferedSize - speedMeasureLastSize);
+                // Set Current File name Label
+                setCurrentFileName(currentFileName, currTransferedSize - speedMeasureLastSize);
+                // Set Speed Measure Last Size
+                speedMeasureLastSize = currTransferedSize;
+            } else {
+                // Set Current File Name
+                setCurrentFileName("");
+                // Stop Transfer Speed Timer
+                stopTransferSpeedTimer();
+            }
 
             // ...
         }

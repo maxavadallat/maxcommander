@@ -7,6 +7,7 @@
 #include <QResizeEvent>
 #include <QTimerEvent>
 #include <QDialogButtonBox>
+#include <QImage>
 
 namespace Ui {
 class TransferProgressDialog;
@@ -15,7 +16,6 @@ class TransferProgressDialog;
 class TransferProgressModel;
 class RemoteFileUtilClient;
 class ConfirmDialog;
-
 
 
 //==============================================================================
@@ -39,6 +39,14 @@ public:
 
     // Destructor
     virtual ~TransferProgressQueueItemDelegate();
+
+protected:
+    // Done Icon
+    QImage                  doneIcon;
+    // Error Icon
+    QImage                  errorIcon;
+    // Progress Icon
+    QImage                  progressIcon;
 };
 
 
@@ -64,7 +72,7 @@ public:
     void setTitle(const QString& aTitle);
 
     // Set Current File Name
-    void setCurrentFileName(const QString& aCurrentFileName);
+    void setCurrentFileName(const QString& aCurrentFileName, const int& aSpeed = 0);
     // Set Current File Progress
     void setCurrentProgress(const quint64& aProgress, const quint64& aTotal);
     // Set Overall Progress
@@ -113,6 +121,9 @@ protected slots:
     // Stop Transfer Speed Timer
     void stopTransferSpeedTimer();
 
+    // Update Queue Column Sizes
+    void updateQueueColumnSizes();
+
 protected slots: // For RemoteFileUtilClient
 
     // Client Connection Changed Slot
@@ -134,6 +145,13 @@ protected slots: // For RemoteFileUtilClient
                         const QString& aCurrFilePath,
                         const quint64& aCurrProgress,
                         const quint64& aCurrTotal);
+
+    // File Operation Skipped Slot
+    void fileOpSkipped(const unsigned int& aID,
+                       const QString& aOp,
+                       const QString& aPath,
+                       const QString& aSource,
+                       const QString& aTarget);
 
     // File Operation Finished Slot
     void fileOpFinished(const unsigned int& aID,
@@ -207,10 +225,14 @@ private:
     // Queue Index
     int                             queueIndex;
 
+    // Current File Name
+    QString                         currentFileName;
     // Source Path
     QString                         sourcePath;
     // Target Path
     QString                         targetPath;
+    // Name Label text
+    QString                         nameLabelText;
 
     // Speed Timer ID
     int                             transferSpeedTimerID;
@@ -218,6 +240,8 @@ private:
     quint64                         lastTransferedSize;
     // Current Transfered Size
     quint64                         currTransferedSize;
+    // Speed Measure Last Size
+    quint64                         speedMeasureLastSize;
     // Transfer Speed
     int                             transferSpeed;
 

@@ -14,16 +14,15 @@
 
 
 
-
-
-
 //==============================================================================
 // Constructor
 //==============================================================================
 DeleteProgressQueueItemDelegate::DeleteProgressQueueItemDelegate(QObject* aParent)
     : QStyledItemDelegate(aParent)
+    , doneIcon(QImage(DEFAULT_ICON_PATH_OK).scaled(QSize(DEFAULT_ICON_WIDTH_16, DEFAULT_ICON_HEIGHT_16), Qt::KeepAspectRatio, Qt::SmoothTransformation))
+    , errorIcon(QImage(DEFAULT_ICON_PATH_CANCEL).scaled(QSize(DEFAULT_ICON_WIDTH_16, DEFAULT_ICON_HEIGHT_16), Qt::KeepAspectRatio, Qt::SmoothTransformation))
+    , progressIcon(QImage(DEFAULT_ICON_PATH_PROGRESS).scaled(QSize(DEFAULT_ICON_WIDTH_16, DEFAULT_ICON_HEIGHT_16), Qt::KeepAspectRatio, Qt::SmoothTransformation))
 {
-
 }
 
 //==============================================================================
@@ -53,8 +52,23 @@ void DeleteProgressQueueItemDelegate::paint(QPainter* aPainter,
         break;
 
         case 1:
-            // Draw Text
-            aPainter->drawText(aOption.rect, Qt::AlignCenter, aIndex.model()->data(aIndex).toBool() ? "X" : "");
+            // Switch State
+            switch (aIndex.model()->data(aIndex).toInt()) {
+                case EDPSkipped:
+                case EDPIdle:
+                    // Save
+                    aPainter->save();
+                    // Set Opacity
+                    aPainter->setOpacity(DEFAULT_PROGRESS_DIALOG_SEMI_TRANSPARENCY);
+                    // Draw Image
+                    aPainter->drawImage(aOption.rect.center() - QPoint(progressIcon.width() / 2, progressIcon.height() / 2), progressIcon);
+                    // Restore
+                    aPainter->restore();
+                break;
+                case EDPRunning:    aPainter->drawImage(aOption.rect.center() - QPoint(progressIcon.width() / 2, progressIcon.height() / 2), progressIcon); break;
+                case EDPFinished:   aPainter->drawImage(aOption.rect.center() - QPoint(doneIcon.width() / 2, doneIcon.height() / 2), doneIcon);             break;
+                case EDPError:      aPainter->drawImage(aOption.rect.center() - QPoint(errorIcon.width() / 2, errorIcon.height() / 2), errorIcon);          break;
+            }
         break;
     }
 }
@@ -139,12 +153,13 @@ void DeleteProgressDialog::init()
         connect(fileUtil, SIGNAL(fileOpNeedConfirm(uint,QString,int,QString,QString,QString)), this, SLOT(fileOpNeedConfirm(uint,QString,int,QString,QString,QString)));
         connect(fileUtil, SIGNAL(fileOpAborted(uint,QString,QString,QString,QString)), this, SLOT(fileOpAborted(uint,QString,QString,QString,QString)));
         connect(fileUtil, SIGNAL(fileOpError(uint,QString,QString,QString,QString,int)), this, SLOT(fileOpError(uint,QString,QString,QString,QString,int)));
+        connect(fileUtil, SIGNAL(fileOpSkipped(uint,QString,QString,QString,QString)), this, SLOT(fileOpSkipped(uint,QString,QString,QString,QString)));
         connect(fileUtil, SIGNAL(fileOpFinished(uint,QString,QString,QString,QString)), this, SLOT(fileOpFinished(uint,QString,QString,QString,QString)));
         connect(fileUtil, SIGNAL(fileOpQueueItemFound(uint,QString,QString,QString,QString)), this, SLOT(fileOpQueueItemFound(uint,QString,QString,QString,QString)));
     }
 
     // Connect To File Server
-    fileUtil->connectToFileServer();
+    //fileUtil->connectToFileServer();
 
     // Connect Signals
     connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(buttonBoxAccepted()));
@@ -222,6 +237,8 @@ void DeleteProgressDialog::processQueue()
             } else {
                 // Configure Buttons
                 configureButtons(QDialogButtonBox::Close);
+                // Set Current File
+                setCurrentFileName("");
             }
         }
     }
@@ -258,10 +275,8 @@ void DeleteProgressDialog::restoreUI()
     // Set Checkbox
     ui->closeWhenFinishedCheckBox->setChecked(closeWhenFinished);
 
-    // Set Column Width
-    ui->deleteQueue->setColumnWidth(0, ui->deleteQueue->width() - DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_DONE);
-    // Set Column Width
-    ui->deleteQueue->setColumnWidth(1, DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_DONE);
+    // Update Queue Column Sizes
+    updateQueueColumnSizes();
 }
 
 //==============================================================================
@@ -286,8 +301,23 @@ void DeleteProgressDialog::saveSettings()
 //==============================================================================
 void DeleteProgressDialog::configureButtons(const QDialogButtonBox::StandardButtons& aButtons)
 {
+    qDebug() << "DeleteProgressDialog::configureButtons";
+
     // Configure Buttons
     ui->buttonBox->setStandardButtons(aButtons);
+}
+
+//==============================================================================
+// Update Queue Column Sizes
+//==============================================================================
+void DeleteProgressDialog::updateQueueColumnSizes()
+{
+    qDebug() << "DeleteProgressDialog::updateQueueColumnSizes";
+
+    // Set Column Width
+    ui->deleteQueue->setColumnWidth(0, ui->deleteQueue->width() - DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_DONE - DEFAULT_PROGRESS_DIALOG_SCROLLBAR_WIDTH);
+    // Set Column Width
+    ui->deleteQueue->setColumnWidth(1, DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_DONE);
 }
 
 //==============================================================================
@@ -312,8 +342,19 @@ void DeleteProgressDialog::launch(const QString& aDirPath, const QStringList& aS
     if (buildQueue(aDirPath, aSelectedFiles)) {
         // Set Queue Index
         queueIndex = 0;
-        // Process Queue
-        //QTimer::singleShot(1, this, SLOT(processQueue()));
+        // Chekc File Util
+        if (fileUtil) {
+            // Check If Connected
+            if (!fileUtil->isConnected()) {
+                // Connect
+                fileUtil->connectToFileServer();
+            } else {
+                // Clear Options
+                fileUtil->clearFileTransferOptions();
+                // Process Queue
+                QTimer::singleShot(1, this, SLOT(processQueue()));
+            }
+        }
     } else {
         // Reset Queue Index
         queueIndex = -1;
@@ -410,6 +451,11 @@ void DeleteProgressDialog::clientConnectionChanged(const unsigned int& aID, cons
 
     // Check If Connected
     if (aConnected) {
+        // Check File Util
+        if (fileUtil) {
+            // Clear Options
+            fileUtil->clearFileTransferOptions();
+        }
         // Process Queue
         QTimer::singleShot(1, this, SLOT(processQueue()));
     }
@@ -466,8 +512,41 @@ void DeleteProgressDialog::fileOpProgress(const unsigned int& aID,
 
     // Set Current File Name
     setCurrentFileName(aCurrFilePath);
-    // Set Current Progress
-    //setCurrentProgress(aCurrProgress, aCurrTotal);
+}
+
+//==============================================================================
+// File Operation Skipped Slot
+//==============================================================================
+void DeleteProgressDialog::fileOpSkipped(const unsigned int& aID,
+                                           const QString& aOp,
+                                           const QString& aPath,
+                                           const QString& aSource,
+                                           const QString& aTarget)
+{
+    Q_UNUSED(aSource);
+    Q_UNUSED(aTarget);
+
+    qDebug() << "DeleteProgressDialog::fileOpSkipped - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath;
+
+    // Check Operation - Delete File
+    if (aOp == DEFAULT_OPERATION_DELETE_FILE) {
+        // Check Queue Model
+        if (queueModel) {
+            // Set Done
+            queueModel->setProgressState(queueIndex, EDPSkipped);
+        }
+
+        // Increase Current Queue Index
+        queueIndex++;
+
+        // Set Current Progress
+        setCurrentProgress(queueIndex, queueModel->rowCount());
+    }
+
+    // ...
+
+    // Process Queue
+    processQueue();
 }
 
 //==============================================================================
@@ -491,7 +570,7 @@ void DeleteProgressDialog::fileOpFinished(const unsigned int& aID,
         // Check Queue Model
         if (queueModel) {
             // Set Done
-            queueModel->setDone(queueIndex);
+            queueModel->setProgressState(queueIndex, EDPFinished);
         }
 
         // Increase Current Queue Index
@@ -533,6 +612,11 @@ void DeleteProgressDialog::fileOpAborted(const unsigned int& aID,
     if (closeWhenFinished) {
         // Close
         close();
+    } else {
+        // Configure Buttons
+        configureButtons(QDialogButtonBox::Close);
+        // Set Current File
+        setCurrentFileName("");
     }
 }
 
@@ -551,8 +635,6 @@ void DeleteProgressDialog::fileOpError(const unsigned int& aID,
 
     qDebug() << "DeleteProgressDialog::fileOpError - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath << " - aError: " << aError;
 
-    // ...
-
     // Init Confirmation Dialog
     ConfirmDialog confirmDialog;
 
@@ -561,34 +643,64 @@ void DeleteProgressDialog::fileOpError(const unsigned int& aID,
 
     // Switch Error
     switch (aError) {
-        case DEFAULT_ERROR_NOTEXISTS:
+        default:
+        case DEFAULT_ERROR_GENERAL: {
+            // Set Error Text
+            confirmDialog.setConfirmText(tr(DEFAULT_CONFIRM_TEXT_CANT_DELETE_FILE));
+
+            // Set Path
+            confirmDialog.setPath(aPath);
+
+            // Configure Standard Buttons
+            confirmDialog.configureButtons(QDialogButtonBox::Abort);
+
+            // Add Button
+            confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_RETRY), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_RETRY);
+            confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_SKIP), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_SKIP);
+            confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_SKIPALL), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_SKIPALL);
+
+            // Exec Confirm Dialog
+            confirmDialog.exec();
+
+            // Get Action Index
+            int actionIndex = confirmDialog.getActionIndex();
+
+            // Check File Util
+            if (fileUtil) {
+                // Send User Response
+                fileUtil->sendUserResponse(actionIndex == -1 ? DEFAULT_CONFIRM_ABORT : actionIndex, confirmDialog.getPath());
+            }
+        } break;
+
+        case DEFAULT_ERROR_NOTEXISTS: {
             // Set Error Text
             confirmDialog.setConfirmText(tr(DEFAULT_ERROR_TEXT_FILE_DOESNT_EXIST));
-        break;
+
+            // Set Path
+            confirmDialog.setPath(aPath);
+
+            // Configure Standard Buttons
+            confirmDialog.configureButtons(QDialogButtonBox::Abort);
+
+            // Add Button
+            confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_RETRY), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_RETRY);
+            confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_SKIP), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_SKIP);
+            confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_SKIPALL), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_SKIPALL);
+
+            // Exec Confirm Dialog
+            confirmDialog.exec();
+
+            // Get Action Index
+            int actionIndex = confirmDialog.getActionIndex();
+
+            // Check File Util
+            if (fileUtil) {
+                // Send User Response
+                fileUtil->sendUserResponse(actionIndex == -1 ? DEFAULT_CONFIRM_ABORT : actionIndex, confirmDialog.getPath());
+            }
+        } break;
     }
 
-    // Set Path
-    confirmDialog.setPath(aPath);
-
-    // Configure Standard Buttons
-    confirmDialog.configureButtons(QDialogButtonBox::Abort);
-
-    // Add Button
-    confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_RETRY), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_RETRY);
-    confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_SKIP), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_SKIP);
-    confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_SKIPALL), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_SKIPALL);
-
-    // Exec Confirm Dialog
-    confirmDialog.exec();
-
-    // Get Action Index
-    int actionIndex = confirmDialog.getActionIndex();
-
-    // Check File Util
-    if (fileUtil) {
-        // Send User Response
-        fileUtil->sendUserResponse(actionIndex == -1 ? DEFAULT_CONFIRM_ABORT : actionIndex, confirmDialog.getPath());
-    }
 }
 
 //==============================================================================
@@ -604,7 +716,48 @@ void DeleteProgressDialog::fileOpNeedConfirm(const unsigned int& aID,
     Q_UNUSED(aSource);
     Q_UNUSED(aTarget);
 
-    qDebug() << "DeleteProgressDialog::fileOpError - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath << " - aCode: " << aCode;
+    qDebug() << "DeleteProgressDialog::fileOpNeedConfirm - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath << " - aCode: " << aCode;
+
+    // Init Confirmation Dialog
+    ConfirmDialog confirmDialog;
+
+    // Set Dialog Title
+    confirmDialog.setConfirmTitle(tr(DEFAULT_CONFIRM_TITLE_CONFIRMATION));
+
+    // Switch Error
+    switch (aCode) {
+        case DEFAULT_ERROR_NON_EMPTY: {
+            // Set Error Text
+            confirmDialog.setConfirmText(tr(DEFAULT_CONFIRM_TEXT_DIRECTORY_NOT_EMPTY).arg(aPath));
+
+            // Set Path
+            //confirmDialog.setPath(aPath);
+
+            // Configure Standard Buttons
+            confirmDialog.configureButtons(QDialogButtonBox::Abort);
+
+            // Add Button
+            confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_YES), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_YES);
+            confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_YESTOALL), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_YESALL);
+            confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_NO), QDialogButtonBox::RejectRole, DEFAULT_CONFIRM_NO);
+            confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_NOTOALL), QDialogButtonBox::RejectRole, DEFAULT_CONFIRM_NOALL);
+
+            // Exec Confirm Dialog
+            confirmDialog.exec();
+
+            // Get Action Index
+            int actionIndex = confirmDialog.getActionIndex();
+
+            // Check File Util
+            if (fileUtil) {
+                // Send User Response
+                fileUtil->sendUserResponse(actionIndex == -1 ? DEFAULT_CONFIRM_ABORT : actionIndex, confirmDialog.getPath());
+            }
+        } break;
+
+        default:
+        break;
+    }
 
     // ...
 }
@@ -668,10 +821,8 @@ void DeleteProgressDialog::tabChanged(const int& aIndex)
 
     // Check Tab Index
     if (aIndex == 1) {
-        // Set Column Width
-        ui->deleteQueue->setColumnWidth(0, ui->deleteQueue->width() - DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_DONE);
-        // Set Column Width
-        ui->deleteQueue->setColumnWidth(1, DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_DONE);
+        // Update Queue Column Sizes
+        updateQueueColumnSizes();
     }
 }
 
@@ -697,10 +848,8 @@ void DeleteProgressDialog::resizeEvent(QResizeEvent* aEvent)
     if (aEvent && aEvent->size().width() > 0 && aEvent->size().height() > 0) {
         //qDebug() << "DeleteProgressDialog::resizeEvent - aEvent: " << aEvent->size();
 
-        // Set Column Width
-        ui->deleteQueue->setColumnWidth(0, ui->deleteQueue->width() - DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_DONE);
-        // Set Column Width
-        ui->deleteQueue->setColumnWidth(1, DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_DONE);
+        // Update Queue Column Sizes
+        updateQueueColumnSizes();
     }
 }
 

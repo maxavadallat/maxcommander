@@ -383,6 +383,24 @@ void RemoteFileUtilClient::searchFile(const QString& aName, const QString& aDirP
 }
 
 //==============================================================================
+// Clear Global File Transfer Options
+//==============================================================================
+void RemoteFileUtilClient::clearFileTransferOptions()
+{
+    // Init New Data
+    QVariantMap newData;
+
+    // Set Up New Data
+    newData[DEFAULT_KEY_CID]            = cID;
+    newData[DEFAULT_KEY_OPERATION]      = QString(DEFAULT_OPERATION_CLEAR);
+
+    // ...
+
+    // Write Data
+    wirteData(newData);
+}
+
+//==============================================================================
 // Abort Current Operation
 //==============================================================================
 void RemoteFileUtilClient::abort()
@@ -506,11 +524,11 @@ void RemoteFileUtilClient::sendUserResponse(const int& aResponse, const QString&
 {
     // Check If Connected
     if (!isConnected()) {
-        qDebug() << "RemoteFileUtilClient::sendResponse - cID: " << cID << " - CLIENT NOT CONNECTED!!";
+        qDebug() << "RemoteFileUtilClient::sendUserResponse - cID: " << cID << " - CLIENT NOT CONNECTED!!";
         return;
     }
 
-    qDebug() << "RemoteFileUtilClient::sendResponse - cID: " << cID << " - aResponse: " << aResponse;
+    //qDebug() << "RemoteFileUtilClient::sendUserResponse - cID: " << cID << " - aResponse: " << aResponse;
 
     // Init New Data
     QVariantMap newData;
@@ -617,7 +635,7 @@ void RemoteFileUtilClient::setStatus(const ClientStatusType& aStatus)
 {
     // Check Status
     if (status != aStatus) {
-        qDebug() << "RemoteFileUtilClient::setStatus - cID: " << cID << " - aStatus: " << statusToString(aStatus);
+        //qDebug() << "RemoteFileUtilClient::setStatus - cID: " << cID << " - aStatus: " << statusToString(aStatus);
 
         // Set Status
         status = aStatus;
@@ -980,6 +998,14 @@ void RemoteFileUtilClient::parseLastDataMap()
     }
 
     // Check Response
+    if (lastDataMap[DEFAULT_KEY_RESPONSE].toString() == QString(DEFAULT_RESPONSE_SKIP)) {
+        // Handle Skipped
+        handleSkipped();
+        //return;
+        goto finished;
+    }
+
+    // Check Response
     if (lastDataMap[DEFAULT_KEY_RESPONSE].toString() == QString(DEFAULT_RESPONSE_READY)) {
         // Handle Finished
         handleFinished();
@@ -1057,6 +1083,9 @@ void RemoteFileUtilClient::handleProgress()
                         lastDataMap[DEFAULT_KEY_PATH].toString(),
                         lastDataMap[DEFAULT_KEY_CURRPROGRESS].toULongLong(),
                         lastDataMap[DEFAULT_KEY_CURRTOTAL].toULongLong());
+
+    // Send Acknowledge
+    //sendAcknowledge();
 }
 
 //==============================================================================
@@ -1102,6 +1131,22 @@ void RemoteFileUtilClient::handleAbort()
 
     // Emit File Operation Aborted Signal
     emit fileOpAborted(cID,
+                       lastDataMap[DEFAULT_KEY_OPERATION].toString(),
+                       lastDataMap[DEFAULT_KEY_PATH].toString(),
+                       lastDataMap[DEFAULT_KEY_SOURCE].toString(),
+                       lastDataMap[DEFAULT_KEY_TARGET].toString());
+}
+
+//==============================================================================
+// Handle Skipped
+//==============================================================================
+void RemoteFileUtilClient::handleSkipped()
+{
+    // Set Status
+    setStatus(ECSTIdle);
+
+    // Emit File Operation Skipped Signal
+    emit fileOpSkipped(cID,
                        lastDataMap[DEFAULT_KEY_OPERATION].toString(),
                        lastDataMap[DEFAULT_KEY_PATH].toString(),
                        lastDataMap[DEFAULT_KEY_SOURCE].toString(),
@@ -1169,6 +1214,20 @@ void RemoteFileUtilClient::handleDirSizeUpdate()
 
     // Send Acknowledge
     //sendAcknowledge();
+}
+
+//==============================================================================
+// Handle File Search Item Found
+//==============================================================================
+void RemoteFileUtilClient::handleSearchItemFound()
+{
+    // Emit Search REsult Item Found Signal
+    emit fileSearchResultItemFound(cID,
+                                   lastDataMap[DEFAULT_KEY_PATH].toString(),
+                                   lastDataMap[DEFAULT_KEY_FILENAME].toString());
+
+    // Send Acknowledge
+    sendAcknowledge();
 }
 
 //==============================================================================

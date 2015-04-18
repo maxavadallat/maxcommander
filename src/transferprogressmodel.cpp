@@ -11,7 +11,7 @@ TransferProgressModelItem::TransferProgressModelItem(const QString& aOp, const Q
     : op(aOp)
     , source(aSource)
     , target(aTarget)
-    , done(false)
+    , state(ETPIdle)
 {
 
 }
@@ -89,15 +89,15 @@ void TransferProgressModel::removeItem(const int& aIndex)
 }
 
 //==============================================================================
-// Set Done
+// Set Progress State
 //==============================================================================
-void TransferProgressModel::setDone(const int& aIndex, const bool& aDone)
+void TransferProgressModel::setProgressState(const int& aIndex, const TransferProgressState& aState)
 {
     // Check Index
     if (aIndex >=0 && aIndex < rowCount()) {
-        qDebug() << "TransferProgressModel::setDone - aIndex: " << aIndex;
+        //qDebug() << "TransferProgressModel::setProgressState - aIndex: " << aIndex << " - aState: " << aState;
         // Set Data
-        setData(createIndex(aIndex, 3), aDone, ERIDDone);
+        setData(createIndex(aIndex, ERIDState - Qt::UserRole - 1), aState, ERIDState);
     }
 }
 
@@ -106,7 +106,7 @@ void TransferProgressModel::setDone(const int& aIndex, const bool& aDone)
 //==============================================================================
 QString TransferProgressModel::getOperation(const int& aIndex)
 {
-    return data(createIndex(aIndex, 0)).toString();
+    return data(createIndex(aIndex, ERIDOp - Qt::UserRole - 1)).toString();
 }
 
 //==============================================================================
@@ -114,7 +114,7 @@ QString TransferProgressModel::getOperation(const int& aIndex)
 //==============================================================================
 QString TransferProgressModel::getSourceFileName(const int& aIndex)
 {
-    return data(createIndex(aIndex, 1)).toString();
+    return data(createIndex(aIndex, ERIDSource - Qt::UserRole - 1)).toString();
 }
 
 //==============================================================================
@@ -122,7 +122,15 @@ QString TransferProgressModel::getSourceFileName(const int& aIndex)
 //==============================================================================
 QString TransferProgressModel::getTargetFileName(const int& aIndex)
 {
-    return data(createIndex(aIndex, 2)).toString();
+    return data(createIndex(aIndex, ERIDTarget - Qt::UserRole - 1)).toString();
+}
+
+//==============================================================================
+// Get Progress State
+//==============================================================================
+TransferProgressState TransferProgressModel::getProgressState(const int& aIndex)
+{
+    return (TransferProgressState)(data(createIndex(aIndex, ERIDState - Qt::UserRole - 1)).toInt());
 }
 
 //==============================================================================
@@ -139,8 +147,8 @@ QHash<int, QByteArray> TransferProgressModel::roleNames() const
     roles[ERIDSource]   = "fileSource";
     // File Target
     roles[ERIDTarget]   = "fileTarget";
-    // Operation Done
-    roles[ERIDDone]     = "fileOpDone";
+    // Operation State
+    roles[ERIDState]     = "fileOpState";
 
     return roles;
 
@@ -185,14 +193,14 @@ QVariant TransferProgressModel::data(const QModelIndex& aIndex, int aRole) const
                     case 0: return item->op;
                     case 1: return item->source;
                     case 2: return item->target;
-                    case 3: return item->done;
+                    case 3: return item->state;
                 }
             break;
 
             case ERIDOp:        return item->op;
             case ERIDSource:    return item->source;
             case ERIDTarget:    return item->target;
-            case ERIDDone:      return item->done;
+            case ERIDState:      return item->state;
 
             default:
             break;
@@ -235,11 +243,14 @@ bool TransferProgressModel::setData(const QModelIndex& aIndex, const QVariant& a
                 emit dataChanged(aIndex, aIndex);
             return true;
 
-            case ERIDDone:
-                // Set Done
-                item->done = aValue.toBool();
-                // Emit Data Changed Signal
-                emit dataChanged(aIndex, aIndex);
+            case ERIDState:
+                // Check State
+                if (item->state != (TransferProgressState)aValue.toInt()) {
+                    // Set State
+                    item->state = (TransferProgressState)aValue.toInt();
+                    // Emit Data Changed Signal
+                    emit dataChanged(aIndex, aIndex);
+                }
             return true;
 
             default:

@@ -8,6 +8,19 @@
 
 
 //==============================================================================
+// Transfer Progress Item State
+//==============================================================================
+enum TransferProgressState
+{
+    ETPIdle         = 0,
+    ETPRunning,
+    ETPFinished,
+    ETPSkipped,
+    ETPError
+};
+
+
+//==============================================================================
 // File Transfer Progress Queue Model Item Class
 //==============================================================================
 class TransferProgressModelItem
@@ -22,13 +35,14 @@ protected:
     friend class TransferProgressModel;
 
     // Operation
-    QString     op;
+    QString                 op;
     // Source
-    QString     source;
+    QString                 source;
     // Target
-    QString     target;
-    // Done
-    bool        done;
+    QString                 target;
+    // State
+    TransferProgressState   state;
+
 };
 
 
@@ -49,8 +63,8 @@ public:
     void addItem(const QString& aOp, const QString& aSource, const QString& aTarget);
     // Remove Item
     void removeItem(const int& aIndex);
-    // Set Completed
-    void setDone(const int& aIndex, const bool& aDone = true);
+    // Set Progress State
+    void setProgressState(const int& aIndex, const TransferProgressState& aState);
 
     // Get Operation
     QString getOperation(const int& aIndex);
@@ -58,6 +72,9 @@ public:
     QString getSourceFileName(const int& aIndex);
     // Get Target File Name
     QString getTargetFileName(const int& aIndex);
+    // Get Progress State
+    TransferProgressState getProgressState(const int& aIndex);
+
 
     // Destructor
     virtual ~TransferProgressModel();
@@ -100,7 +117,7 @@ protected:
         ERIDOp      = Qt::UserRole + 1,
         ERIDSource,
         ERIDTarget,
-        ERIDDone
+        ERIDState
     };
 
     // Items

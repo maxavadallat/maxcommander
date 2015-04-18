@@ -3,6 +3,7 @@
 
 #include "confirmdialog.h"
 #include "ui_confirmdialog.h"
+#include "constants.h"
 
 //==============================================================================
 // Constructor
@@ -12,7 +13,7 @@ ConfirmDialog::ConfirmDialog(QWidget* aParent)
     , ui(new Ui::ConfirmDialog)
     , actionIndex(-1)
 {
-    qDebug() << "ConfirmDialog::ConfirmDialog";
+    //qDebug() << "ConfirmDialog::ConfirmDialog";
 
     // Setup UI
     ui->setupUi(this);
@@ -43,7 +44,11 @@ void ConfirmDialog::setConfirmText(const QString& aConfirmText)
 //==============================================================================
 void ConfirmDialog::configureButtons(const QDialogButtonBox::StandardButtons& aButtons)
 {
+    // Set Standard Buttons
     ui->buttonBox->setStandardButtons(aButtons);
+
+    // Set Minimal Width
+    setMinimumWidth(ui->buttonBox->buttons().count() * DEFAULT_CONFIRM_BUTTON_MINIMAL_WIDTH);
 }
 
 //==============================================================================
@@ -51,13 +56,16 @@ void ConfirmDialog::configureButtons(const QDialogButtonBox::StandardButtons& aB
 //==============================================================================
 void ConfirmDialog::addCustomButton(const QString& aText, const QDialogButtonBox::ButtonRole& aButtonRole, const int& aActionIndex)
 {
-    qDebug() << "ConfirmDialog::addCustomButton - aText: " << aText << " - aActionIndex: " << aActionIndex;
+    //qDebug() << "ConfirmDialog::addCustomButton - aText: " << aText << " - aActionIndex: " << aActionIndex;
 
     // Add Button
     QPushButton* pushButton = ui->buttonBox->addButton(aText, aButtonRole);
 
     // Add Button To Custom Buttons
     customButtons[pushButton] = aActionIndex;
+
+    // Set Minimal Width
+    setMinimumWidth(ui->buttonBox->buttons().count() * DEFAULT_CONFIRM_BUTTON_MINIMAL_WIDTH);
 }
 
 //==============================================================================
@@ -69,6 +77,9 @@ void ConfirmDialog::clearButtons()
     ui->buttonBox->clear();
     // Clear Custom Buttons
     customButtons.clear();
+
+    // Set Button Box Minimal Size
+    //ui->buttonBox->setMinimumWidth(0);
 }
 
 //==============================================================================
@@ -87,13 +98,13 @@ void ConfirmDialog::buttonClicked(QAbstractButton* aButton)
             //qDebug() << "ConfirmDialog::buttonClicked - customButtons.keys: " << customButtons.keys();
             //qDebug() << "ConfirmDialog::buttonClicked - customButtons.values: " << customButtons.values();
 
-            qDebug() << "ConfirmDialog::buttonClicked - actionIndex: " << actionIndex;
+            //qDebug() << "ConfirmDialog::buttonClicked - actionIndex: " << actionIndex;
         } else {
 
             // Reset Action Index
             actionIndex = -1;
 
-            qDebug() << "ConfirmDialog::buttonClicked - NO MATCHING CUSTOM BUTTON!! - actionIndex: " << actionIndex;
+            //qDebug() << "ConfirmDialog::buttonClicked - NO MATCHING CUSTOM BUTTON!! - actionIndex: " << actionIndex;
         }
     } else {
         // Reset Action Index
@@ -135,15 +146,19 @@ int ConfirmDialog::exec()
     if (ui->pathEdit->text().length() <= 0) {
         // Set Visibility
         ui->pathEdit->setVisible(false);
+        // Set Geometry
+        ui->verticalSpacer->setGeometry(QRect(0, 0, 0, 0));
     } else {
         // Set Visibility
         ui->pathEdit->setVisible(true);
+        // Set Geometry
+        ui->verticalSpacer->setGeometry(QRect(0, 0, 20, 8));
     }
 
     // Exec Dialog
     int result = QDialog::exec();
 
-    qDebug() << "ConfirmDialog::exec - result: " << result;
+    //qDebug() << "ConfirmDialog::exec - result: " << result;
 
     // Check Result
 
@@ -163,5 +178,6 @@ ConfirmDialog::~ConfirmDialog()
 
     delete ui;
 
-    qDebug() << "ConfirmDialog::~ConfirmDialog";
+    //qDebug() << "ConfirmDialog::~ConfirmDialog";
 }
+

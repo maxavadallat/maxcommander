@@ -7,6 +7,7 @@
 #include <QResizeEvent>
 #include <QTimerEvent>
 #include <QDialogButtonBox>
+#include <QImage>
 
 namespace Ui {
 class DeleteProgressDialog;
@@ -15,7 +16,6 @@ class DeleteProgressDialog;
 class DeleteProgressModel;
 class RemoteFileUtilClient;
 class ConfirmDialog;
-
 
 
 //==============================================================================
@@ -39,6 +39,15 @@ public:
 
     // Destructor
     virtual ~DeleteProgressQueueItemDelegate();
+
+protected:
+
+    // Done Icon
+    QImage              doneIcon;
+    // Error Icon
+    QImage              errorIcon;
+    // Progress Icon
+    QImage              progressIcon;
 };
 
 
@@ -103,6 +112,10 @@ protected slots:
     // Configure Buttons
     void configureButtons(const QDialogButtonBox::StandardButtons& aButtons = QDialogButtonBox::Close);
 
+    // Update Queue Column Sizes
+    void updateQueueColumnSizes();
+
+
 protected slots: // for RemoteFileUtilClient
 
     // Client Connection Changed Slot
@@ -124,6 +137,13 @@ protected slots: // for RemoteFileUtilClient
                         const QString& aCurrFilePath,
                         const quint64& aCurrProgress,
                         const quint64& aCurrTotal);
+
+    // File Operation Skipped Slot
+    void fileOpSkipped(const unsigned int& aID,
+                       const QString& aOp,
+                       const QString& aPath,
+                       const QString& aSource,
+                       const QString& aTarget);
 
     // File Operation Finished Slot
     void fileOpFinished(const unsigned int& aID,

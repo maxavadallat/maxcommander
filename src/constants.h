@@ -145,9 +145,16 @@
 // Date Format String
 #define DEFAULT_DATE_FORMAT_STRING                          "%1-%2-%3 %4:%5:%6"
 
-// Default Icon Size
+// Default Icon Sizes
+#define DEFAULT_ICON_WIDTH_16                               16
+#define DEFAULT_ICON_HEIGHT_16                              16
+
 #define DEFAULT_ICON_WIDTH_32                               32
 #define DEFAULT_ICON_HEIGHT_32                              32
+
+#define DEFAULT_ICON_WIDTH_64                               64
+#define DEFAULT_ICON_HEIGHT_64                              64
+
 
 #define DEFAULT_ONE_SEC                                     1000
 #define DEFAULT_ANIM_FRAME_RATE                             30
@@ -165,7 +172,9 @@
 #define DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_OP             30
 #define DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_DONE           40
 #define DEFAULT_PROGRESS_DIALOG_TEXT_MARGIN                 4
+#define DEFAULT_PROGRESS_DIALOG_SCROLLBAR_WIDTH             10
 
+#define DEFAULT_PROGRESS_DIALOG_SEMI_TRANSPARENCY           0.4
 
 // Localization Constants
 
@@ -186,15 +195,29 @@
 #define DEFAULT_CONFIRM_BUTTON_TEXT_RETRY                   "Retry"
 #define DEFAULT_CONFIRM_BUTTON_TEXT_ASADMIN                 "As Admin"
 
+#define DEFAULT_CONFIRM_BUTTON_MINIMAL_WIDTH                80
+
 
 #define DEFAULT_CONFIRM_TEXT_DIRECTORY_EXISTS               "Directory Exists:"
+#define DEFAULT_CONFIRM_TEXT_DIRECTORY_NOT_EMPTY            "Directory: %1 Is Not Empty. Delete All?"
 #define DEFAULT_CONFIRM_TEXT_FILE_DOESNT_EXIST              DEFAULT_ERROR_TEXT_FILE_DOESNT_EXIST
-#define DEFAULT_CONFIRM_TEXT_FILE_EXISTS                    "File Exists: %1 Overwrite?"
+#define DEFAULT_CONFIRM_TEXT_TARGET_FILE_EXISTS             "Target File Exists: %1 Overwrite?"
 #define DEFAULT_CONFIRM_TEXT_CANT_CREATE_DIRECTORY          "Can Not Create Directory:"
 #define DEFAULT_CONFIRM_TEXT_CANT_DELETE_FILE               "Can Not Delete File:"
 
 #define DEFAULT_CONFIRM_TEXT_CANT_COPY_FILE                 "Can Not Copy File:"
 #define DEFAULT_CONFIRM_TEXT_CANT_MOVE_FILE                 "Can Not Rename/Move File:"
+
+#define DEFAULT_CONFIRM_TEXT_TARGET_DIR_DOESNT_EXIST        "Target Dir Doesn\'t Exist. Create?"
+
+#define DEFAULT_PROGRESS_DIALOG_FILENAME_TEXT_TEMPLATE      "%1 @ %2 KB/s"
+
+// Icons
+#define DEFAULT_ICON_PATH_OK                                ":/resources/images/check_256.png"
+#define DEFAULT_ICON_PATH_CANCEL                            ":/resources/images/delete_256.png"
+#define DEFAULT_ICON_PATH_PROGRESS                          ":/resources/images/synchronize_256.png"
+
+
 
 
 

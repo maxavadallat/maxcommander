@@ -7,6 +7,19 @@
 
 
 //==============================================================================
+// Delete Progress Queue Item State
+//==============================================================================
+enum DeleteProgressState
+{
+    EDPIdle         = 0,
+    EDPRunning,
+    EDPFinished,
+    EDPSkipped,
+    EDPError
+};
+
+
+//==============================================================================
 // File Delete Progress Queue Model Item Class
 //==============================================================================
 class DeleteProgressModelItem
@@ -22,9 +35,9 @@ protected:
     friend class DeleteProgressModel;
 
     // File Name
-    QString     fileName;
-    // Done
-    bool        done;
+    QString             fileName;
+    // Progress State
+    DeleteProgressState state;
 };
 
 
@@ -46,11 +59,14 @@ public:
     void insertItem(const int& aIndex, const QString& aFileName);
     // Remove Item
     void removeItem(const int& aIndex);
-    // Set Done
-    void setDone(const int& aIndex, const bool& aDone = true);
+    // Set Progress State
+    void setProgressState(const int& aIndex, const DeleteProgressState& aState);
 
     // Get File Name
     QString getFileName(const int& aIndex);
+    // Get Progress State
+    DeleteProgressState getProgressState(const int& aIndex);
+
     // Find Index
     int findIndex(const QString& aFileName);
 
@@ -93,7 +109,7 @@ protected:
     enum RolesIDs
     {
         ERIDFileName    = Qt::UserRole + 1,
-        ERIDDone
+        ERIDState
     };
 
     // Items

@@ -81,6 +81,9 @@ public:
     // Search File
     void searchFile(const QString& aName, const QString& aDirPath, const QString& aContent, const int& aOptions);
 
+    // Clear Global File Transfer Options
+    void clearFileTransferOptions();
+
     // Get Drive Info
 
     // Abort Current Operation
@@ -157,6 +160,13 @@ signals:
                        const QString& aSource,
                        const QString& aTarget);
 
+    // File Operation Skipped Signal
+    void fileOpSkipped(const unsigned int& aID,
+                       const QString& aOp,
+                       const QString& aPath,
+                       const QString& aSource,
+                       const QString& aTarget);
+
     // File Operation Error Signal
     void fileOpError(const unsigned int& aID,
                      const QString& aOp,
@@ -194,7 +204,7 @@ signals:
 
     // File Search Result Item Found Signal
     void fileSearchResultItemFound(const unsigned int& aID,
-                                   const QString& aOp,
+                                   const QString& aPath,
                                    const QString& aFilePath);
 
 protected slots:
@@ -232,6 +242,8 @@ protected slots:
     void handleFinished();
     // Handle Aborted
     void handleAbort();
+    // Handle Skipped
+    void handleSkipped();
     // Handle Error
     void handleError();
     // Handle Dir List Item
@@ -240,6 +252,8 @@ protected slots:
     void handleQueueItem();
     // Handle Dir Size Update
     void handleDirSizeUpdate();
+    // Handle File Search Item Found
+    void handleSearchItemFound();
 
     // Write Data
     void writeData(const QByteArray& aData);

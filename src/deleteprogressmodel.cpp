@@ -8,7 +8,7 @@
 //==============================================================================
 DeleteProgressModelItem::DeleteProgressModelItem(const QString& aFileName)
     : fileName(aFileName)
-    , done(false)
+    , state(EDPIdle)
 {
 
 }
@@ -123,15 +123,15 @@ void DeleteProgressModel::removeItem(const int& aIndex)
 }
 
 //==============================================================================
-// Set Done
+// Set Progress State
 //==============================================================================
-void DeleteProgressModel::setDone(const int& aIndex, const bool& aDone)
+void DeleteProgressModel::setProgressState(const int& aIndex, const DeleteProgressState& aState)
 {
     // Check Index
     if (aIndex >=0 && aIndex < rowCount()) {
-        qDebug() << "DeleteProgressModel::setDone - aIndex: " << aIndex;
+        //qDebug() << "DeleteProgressModel::setDone - aIndex: " << aIndex;
         // Set Data
-        setData(createIndex(aIndex, 0), aDone, ERIDDone);
+        setData(createIndex(aIndex, ERIDState - Qt::UserRole - 1), aState, ERIDState);
     }
 }
 
@@ -140,7 +140,15 @@ void DeleteProgressModel::setDone(const int& aIndex, const bool& aDone)
 //==============================================================================
 QString DeleteProgressModel::getFileName(const int& aIndex)
 {
-    return data(createIndex(aIndex, 0), ERIDFileName).toString();
+    return data(createIndex(aIndex, ERIDFileName - Qt::UserRole - 1), ERIDFileName).toString();
+}
+
+//==============================================================================
+// Get Progress State
+//==============================================================================
+DeleteProgressState DeleteProgressModel::getProgressState(const int& aIndex)
+{
+    return (DeleteProgressState)data(createIndex(aIndex, ERIDState - Qt::UserRole - 1), ERIDState).toInt();
 }
 
 //==============================================================================
@@ -174,8 +182,8 @@ QHash<int, QByteArray> DeleteProgressModel::roleNames() const
 
     // File Name
     roles[ERIDFileName] = "fileName";
-    // Operation Done
-    roles[ERIDDone]     = "done";
+    // Operation State
+    roles[ERIDState]    = "state";
 
     return roles;
 
@@ -221,12 +229,12 @@ QVariant DeleteProgressModel::data(const QModelIndex& aIndex, int aRole) const
                 switch (aIndex.column()) {
                     default:
                     case 0: return item->fileName;
-                    case 1: return item->done;
+                    case 1: return item->state;
                 }
             break;
 
             case ERIDFileName:  return item->fileName;
-            case ERIDDone:      return item->done;
+            case ERIDState:     return item->state;
 
             default:
             break;
@@ -255,11 +263,14 @@ bool DeleteProgressModel::setData(const QModelIndex& aIndex, const QVariant& aVa
                 emit dataChanged(aIndex, aIndex);
             return true;
 
-            case ERIDDone:
-                // Set Done
-                item->done = aValue.toBool();
-                // Emit Data Changed Signal
-                emit dataChanged(aIndex, aIndex);
+            case ERIDState:
+                // Check State
+                if (item->state != (DeleteProgressState)aValue.toInt()) {
+                    // Set State
+                    item->state = (DeleteProgressState)aValue.toInt();
+                    // Emit Data Changed Signal
+                    emit dataChanged(aIndex, aIndex);
+                }
             return true;
 
             default:

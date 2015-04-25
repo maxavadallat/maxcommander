@@ -235,8 +235,6 @@ void TransferProgressDialog::launch(const QString& aSourcePath, const QString& a
     // Restore UI
     restoreUI();
 
-    // ...
-
     // Show
     show();
 
@@ -346,7 +344,7 @@ void TransferProgressDialog::processQueue()
     if (fileUtil && queueModel) {
         // Check Queue Index
         if (queueIndex >= 0 && queueIndex < queueModel->rowCount()) {
-            qDebug() << "TransferProgressDialog::processQueue";
+            qDebug() << "TransferProgressDialog::processQueue - queueIndex: " << queueIndex;
 
             // Get Source File Name
             QString sourceFileName = queueModel->getSourceFileName(queueIndex);
@@ -362,7 +360,7 @@ void TransferProgressDialog::processQueue()
             // Check Operation - Rename/Move
             } else if (operation == DEFAULT_OPERATION_MOVE_FILE) {
                 // Move File
-                fileUtil->copyFile(sourceFileName, targetFileName);
+                fileUtil->moveFile(sourceFileName, targetFileName);
             }
 
             // Configure Buttons
@@ -410,6 +408,15 @@ void TransferProgressDialog::restoreUI()
 
     // Configure Buttons
     configureButtons(QDialogButtonBox::Close);
+
+    // Check Operation
+    if (operation == DEFAULT_OPERATION_COPY_FILE) {
+        // Set Title
+        setTitle(DEFAULT_TITLE_COPY_FILES);
+    } else {
+        // Set Title
+        setTitle(DEFAULT_TITLE_MOVE_FILES);
+    }
 
     // Init Settings
     QSettings settings;
@@ -485,7 +492,7 @@ void TransferProgressDialog::stopTransferSpeedTimer()
 //==============================================================================
 void TransferProgressDialog::updateQueueColumnSizes()
 {
-    qDebug() << "TransferProgressDialog::updateQueueColumnSizes";
+    //qDebug() << "TransferProgressDialog::updateQueueColumnSizes";
 
     // Set Column Width
     ui->transferQueue->setColumnWidth(0, DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_OP);
@@ -799,28 +806,82 @@ void TransferProgressDialog::fileOpFinished(const unsigned int& aID,
 
     // ...
 
-    // Check Operation - Copy/Move File
-    if (aOp == DEFAULT_OPERATION_COPY_FILE || aOp == DEFAULT_OPERATION_MOVE_FILE) {
-        // Check Queue Model
-        if (queueModel) {
-            // Set Done
-            queueModel->setProgressState(queueIndex, ETPFinished);
+    // Check Operation - Copy
+    if (operation == DEFAULT_OPERATION_COPY_FILE) {
+
+        // Check Finished Operation
+        if (aOp == DEFAULT_OPERATION_QUEUE || aOp == DEFAULT_OPERATION_COPY_FILE) {
+            // Check Queue Model
+            if (queueModel) {
+                // Set Done
+                queueModel->setProgressState(queueIndex, ETPFinished);
+            }
+
+            // Increase Current Queue Index
+            queueIndex++;
+
+            // Process Queue
+            processQueue();
+
+        } else {
+
+            // Unhandled
+
+            // ...
         }
 
-        // Increase Current Queue Index
-        queueIndex++;
+    // Check Operation - Move
+    } else if (operation == DEFAULT_OPERATION_MOVE_FILE) {
 
-    // Check Operation - Queue
-    } else if (aOp == DEFAULT_OPERATION_QUEUE) {
+        // Check Finished Operation - Move
+        if (aOp == DEFAULT_OPERATION_MOVE_FILE) {
 
-        // Increase Current Queue Index
-        queueIndex++;
+            // Check Queue Model
+            if (queueModel) {
+                // Set Done
+                queueModel->setProgressState(queueIndex, ETPFinished);
+            }
+
+            // Set Current Progress
+            setCurrentProgress(1, 1);
+
+            // Increase Current Queue Index
+            queueIndex++;
+
+        // Check Finished Operation - Queue
+        } else if (aOp == DEFAULT_OPERATION_QUEUE) {
+
+            // Do Nothing, Process Queue
+
+        // Check Finished Operation - Copy
+        } else if (aOp == DEFAULT_OPERATION_COPY_FILE) {
+
+            // Return, Delete Suppose to Follow
+
+            return;
+
+        } else if (aOp == DEFAULT_OPERATION_DELETE_FILE) {
+
+            // Check Queue Model
+            if (queueModel) {
+                // Set Done
+                queueModel->setProgressState(queueIndex, ETPFinished);
+            }
+
+            // Increase Current Queue Index
+            queueIndex++;
+
+        } else {
+
+            // Unhandled
+
+            // ...
+
+        }
+
+        // Process Queue
+        processQueue();
     }
-
-    // ...
-
-    // Process Queue
-    processQueue();
 }
 
 //==============================================================================
@@ -943,7 +1004,7 @@ void TransferProgressDialog::fileOpNeedConfirm(const unsigned int& aID,
     ConfirmDialog confirmDialog;
 
     // Set Dialog Title
-    confirmDialog.setConfirmTitle(tr(DEFAULT_CONFIRM_TITLE_CONFIRMATION));
+    confirmDialog.setConfirmTitle(tr(DEFAULT_TITLE_CONFIRMATION));
 
     // Switch Code
     switch (aCode) {
@@ -1004,20 +1065,39 @@ void TransferProgressDialog::fileOpQueueItemFound(const unsigned int& aID,
 
         // ...
 
-        // Add Item
-        queueModel->addItem(aOp, aSource, aTarget);
+        // Check Operation
+        if (aOp == DEFAULT_OPERATION_COPY_FILE) {
+            // Add Item
+            queueModel->addItem(aOp, aSource, aTarget);
 
-        // Init Source File Info
-        QFileInfo sourceInfo(aSource);
+            // Init Source File Info
+            QFileInfo sourceInfo(aSource);
 
-        // Check If Is Dir
-        if (!sourceInfo.isDir() && !sourceInfo.isBundle() && !sourceInfo.isSymLink()) {
+            // Check If Is Dir
+            if (!sourceInfo.isDir() && !sourceInfo.isBundle() && !sourceInfo.isSymLink()) {
 
-            // Add Size To Overall Size
-            overallSize += sourceInfo.size();
+                // Add Size To Overall Size
+                overallSize += sourceInfo.size();
 
-            // Set Overall Progress
-            setOverallProgress(overallProgress, overallSize);
+                // Set Overall Progress
+                setOverallProgress(overallProgress, overallSize);
+            }
+        } else if (aOp == DEFAULT_OPERATION_MOVE_FILE) {
+            // Insert Item
+            queueModel->insertItem(queueIndex, aOp, aSource, aTarget);
+
+            // Init Source File Info
+            QFileInfo sourceInfo(aSource);
+
+            // Check If Is Dir
+            if (!sourceInfo.isDir() && !sourceInfo.isBundle() && !sourceInfo.isSymLink()) {
+
+                // Add Size To Overall Size
+                overallSize += sourceInfo.size();
+
+                // Set Overall Progress
+                setOverallProgress(overallProgress, overallSize);
+            }
         }
     }
 }

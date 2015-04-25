@@ -16,6 +16,7 @@
         <file>qml/FileListHeaderPopupItem.qml</file>
         <file>qml/ImageViewer.qml</file>
         <file>qml/VideoViewer.qml</file>
+        <file>qml/FileListItemRenamer.qml</file>
     </qresource>
 </RCC>
 

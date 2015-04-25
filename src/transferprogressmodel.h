@@ -61,6 +61,8 @@ public:
 
     // Add Item
     void addItem(const QString& aOp, const QString& aSource, const QString& aTarget);
+    // Insert Item
+    void insertItem(const int& aIndex, const QString& aOp, const QString& aSource, const QString& aTarget);
     // Remove Item
     void removeItem(const int& aIndex);
     // Set Progress State
@@ -75,6 +77,8 @@ public:
     // Get Progress State
     TransferProgressState getProgressState(const int& aIndex);
 
+    // Find Index
+    int findIndex(const QString& aSourceFileName);
 
     // Destructor
     virtual ~TransferProgressModel();

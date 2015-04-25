@@ -63,6 +63,9 @@ class FilePanel : public QFrame
     // Busy
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
 
+    // File Rename Active
+    Q_PROPERTY(bool fileRenameActive READ getFileRenameActive WRITE setFileRenameActive NOTIFY fileRenameActiveChanged)
+
 public:
     // Constructor
     explicit FilePanel(QWidget* aParent = NULL);
@@ -181,6 +184,11 @@ public:
     // Create Dir
     void createDir(const QString& aDirPath);
 
+    // File Rename Active
+    bool getFileRenameActive();
+    // Set File Rename Active
+    void setFileRenameActive(const bool& aFileRenameActive);
+
     // Destructor
     virtual ~FilePanel();
 
@@ -234,6 +242,9 @@ public slots:
 
     // Get Selected Files
     QStringList getSelectedFiles();
+
+    // Rename File
+    void renameFile(const QString& aSource, const QString& aTarget);
 
 signals:
 
@@ -310,6 +321,9 @@ signals:
     // Launch File Move/Rename Signal
     void launchFileMove();
 
+    // Launch File Rename
+    void launchFileRename();
+
     // Launch Create Dir Signal
     void launchCreateDir();
 
@@ -322,6 +336,8 @@ signals:
     // Error Occured Signal
     void error(const QString& aPath, const int& aError);
 
+    // File Rename Active Changed Signal
+    void fileRenameActiveChanged(const bool& aActive);
 
 protected slots:
 
@@ -351,6 +367,8 @@ protected slots: // From File Model
     void fileModelDirFetchFinished();
     // File List Model Dir Created Slot
     void fileModelDirCreated(const QString& aDirPath);
+    // File List Model File Renames Slot
+    void fileModelFileRenamed(const QString& aSource, const QString& aTarget);
     // File Model Error
     void fileModelError(const QString& aPath, const int& aError);
 
@@ -475,6 +493,9 @@ private:
 
     // Own Key Press
     bool                    ownKeyPress;
+
+    // File Rename Active
+    bool                    fileRenameActive;
 };
 
 #endif // FILEPANEL_H

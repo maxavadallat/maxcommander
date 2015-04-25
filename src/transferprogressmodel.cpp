@@ -72,6 +72,37 @@ void TransferProgressModel::addItem(const QString& aOp, const QString& aSource, 
 }
 
 //==============================================================================
+// Insert Item
+//==============================================================================
+void TransferProgressModel::insertItem(const int& aIndex, const QString& aOp, const QString& aSource, const QString& aTarget)
+{
+    // Check If Source File Exists
+    if (findIndex(aSource) >= 0) {
+        qDebug() << "TransferProgressModel::insertItem - aSource: " << aSource << " - SOURCE ALREADY IN QUEUE!";
+
+        return;
+    }
+
+    qDebug() << "TransferProgressModel::insertItem - aIndex: " << aIndex << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget;
+
+    // Create New Item
+    TransferProgressModelItem* newItem = new TransferProgressModelItem(aOp, aSource, aTarget);
+
+    // Init Insertion Index
+    int insertIndex = qBound(0, aIndex, rowCount()-1);
+
+    // Begin Append Rows
+    beginInsertRows(QModelIndex(), insertIndex, insertIndex);
+
+    // Insert Item
+    items.insert(insertIndex, newItem);
+
+    // End Insert Rows
+    endInsertRows();
+
+}
+
+//==============================================================================
 // Remove Item
 //==============================================================================
 void TransferProgressModel::removeItem(const int& aIndex)
@@ -131,6 +162,28 @@ QString TransferProgressModel::getTargetFileName(const int& aIndex)
 TransferProgressState TransferProgressModel::getProgressState(const int& aIndex)
 {
     return (TransferProgressState)(data(createIndex(aIndex, ERIDState - Qt::UserRole - 1)).toInt());
+}
+
+//==============================================================================
+// Find Index
+//==============================================================================
+int TransferProgressModel::findIndex(const QString& aSourceFileName)
+{
+    // Get Items Count
+    int iCount = items.count();
+
+    // Go Thru Items
+    for (int i=0; i<iCount; ++i) {
+        // Get Item
+        TransferProgressModelItem* item = items[i];
+        // Check Source File Name
+        if (item && item->source == aSourceFileName) {
+            return i;
+        }
+    }
+
+    return -1;
+
 }
 
 //==============================================================================

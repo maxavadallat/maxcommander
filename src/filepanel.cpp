@@ -55,6 +55,7 @@ FilePanel::FilePanel(QWidget* aParent)
     , dwDirChanged(false)
     , dwFileChanged(false)
     , ownKeyPress(false)
+    , fileRenameActive(false)
 
 {
     // Setup UI
@@ -83,6 +84,7 @@ void FilePanel::init()
         connect(fileListModel, SIGNAL(busyChanged(bool)), this, SLOT(fileModelBusyChanged(bool)));
         connect(fileListModel, SIGNAL(dirFetchFinished()), this, SLOT(fileModelDirFetchFinished()));
         connect(fileListModel, SIGNAL(dirCreated(QString)), this, SLOT(fileModelDirCreated(QString)));
+        connect(fileListModel, SIGNAL(fileRenamed(QString,QString)), this, SLOT(fileModelFileRenamed(QString,QString)));
         connect(fileListModel, SIGNAL(error(QString,int)), this, SLOT(fileModelError(QString,int)));
     }
 
@@ -696,6 +698,56 @@ void FilePanel::createDir(const QString& aDirPath)
 }
 
 //==============================================================================
+// Rename File
+//==============================================================================
+void FilePanel::renameFile(const QString& aSource, const QString& aTarget)
+{
+    // Check Source & Target
+    if (aSource == aTarget || aTarget.isEmpty()) {
+        return;
+    }
+
+    // Check File List Model
+    if (fileListModel) {
+        // Init Local Dir Name
+        QString localDir(currentDir);
+        // Check Local Dir
+        if (!localDir.endsWith("/")) {
+            // Adjust Local Dir
+            localDir += "/";
+        }
+
+        // Rename File
+        fileListModel->renameFile(localDir + aSource, localDir + aTarget);
+    }
+}
+
+//==============================================================================
+// File Rename Active
+//==============================================================================
+bool FilePanel::getFileRenameActive()
+{
+    return fileRenameActive;
+}
+
+//==============================================================================
+// Set File Rename Active
+//==============================================================================
+void FilePanel::setFileRenameActive(const bool& aFileRenameActive)
+{
+    // Check File Rename Active
+    if (fileRenameActive != aFileRenameActive) {
+        // Set File Rename Active
+        fileRenameActive = aFileRenameActive;
+
+        // ...
+
+        // Emit File Rename Active Changed Signal
+        emit fileRenameActiveChanged(fileRenameActive);
+    }
+}
+
+//==============================================================================
 // Set Panel Has Focus
 //==============================================================================
 void FilePanel::setPanelFocus(const bool& aFocus)
@@ -1260,6 +1312,22 @@ void FilePanel::fileModelDirCreated(const QString& aDirPath)
 }
 
 //==============================================================================
+// File List Model File Renames Slot
+//==============================================================================
+void FilePanel::fileModelFileRenamed(const QString& aSource, const QString& aTarget)
+{
+    // Get Path
+    QString path = getDirPath(aTarget);
+
+    // Check Path
+    if (path == currentDir) {
+        qDebug() << "FilePanel::fileModelFileRenamed - panelName: " << panelName << " - aSource: " << aSource << " - aTarget: " << aTarget;
+
+        // ...
+    }
+}
+
+//==============================================================================
 // File Model Error
 //==============================================================================
 void FilePanel::fileModelError(const QString& aPath, const int& aError)
@@ -1598,6 +1666,11 @@ void FilePanel::keyPressEvent(QKeyEvent* aEvent)
 
     // Check Event
     if (aEvent) {
+        // Check If File Renamer Active
+        if (fileRenameActive) {
+            return;
+        }
+
         // Set Own Key Press
         ownKeyPress = true;
 
@@ -1663,6 +1736,11 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
 
     // Reset Own Key Press
     ownKeyPress = false;
+
+    // Check If File Renamer Active
+    if (fileRenameActive) {
+        return;
+    }
 
     // Check Event
     if (aEvent) {
@@ -1801,8 +1879,17 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
             case Qt::Key_F6:
                 // Check Modifier Keys
                 if (modifierKeys == Qt::NoModifier) {
+
                     // Emit Launch File Move/Rename
                     emit launchFileMove();
+
+                } else if (modifierKeys == Qt::ShiftModifier) {
+
+                    // Check If File Renamer Active
+                    if (!fileRenameActive) {
+                        // Emit Launch File Rename
+                        emit launchFileRename();
+                    }
                 }
             break;
 
@@ -1858,7 +1945,7 @@ void FilePanel::timerEvent(QTimerEvent* aEvent)
         if (aEvent->timerId() == dirWatcherTimerID) {
             // Check If Need Refrsh
             if (fileListModel && !fileListModel->getBusy() && (dwDirChanged || dwFileChanged)) {
-                qDebug() << "FilePanel::timerEvent - dirWatcherTimerID";
+                qDebug() << "#### FilePanel::timerEvent - dirWatcherTimerID";
                 // Reset Dir Changed
                 dwDirChanged = false;
                 // Reset File Changed
@@ -1867,7 +1954,7 @@ void FilePanel::timerEvent(QTimerEvent* aEvent)
                 reload(currentIndex);
             }
 
-            qDebug() << ".";
+            //qDebug() << ".";
         }
     }
 }

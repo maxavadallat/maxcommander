@@ -184,7 +184,9 @@
 
 #define DEFAULT_ERROR_TEXT_FILE_DOESNT_EXIST                "File Doesn't Exist:"
 
-#define DEFAULT_CONFIRM_TITLE_CONFIRMATION                  "Confirmation"
+#define DEFAULT_TITLE_CONFIRMATION                          "Confirmation"
+#define DEFAULT_TITLE_COPY_FILES                            "Copy File(s)"
+#define DEFAULT_TITLE_MOVE_FILES                            "Move File(s)"
 
 #define DEFAULT_CONFIRM_BUTTON_TEXT_YES                     "Yes"
 #define DEFAULT_CONFIRM_BUTTON_TEXT_YESTOALL                "Yes to All"

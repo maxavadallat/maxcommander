@@ -108,6 +108,12 @@ public slots:
     // Get All Selected Files
     QStringList getAllSelected();
 
+    // Rename File
+    void renameFile(const QString& aSource, const QString& aTarget);
+
+    // Get File Name
+    QString getFileName(const int& aIndex);
+
 signals:
 
     // Current Dir Changed Signal
@@ -121,6 +127,9 @@ signals:
 
     // Busy State Changed Signal
     void busyChanged(const bool& aBusy);
+
+    // File Renamed Signal
+    void fileRenamed(const QString& aSource, const QString& aTarget);
 
     // Error
     void error(const QString& aPath, const int& aError);

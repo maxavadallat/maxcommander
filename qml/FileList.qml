@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import QtGraphicalEffects 1.0
 import MyCustomComponents 1.0
 
 import "qrc:/qml"
@@ -292,6 +293,42 @@ Rectangle {
         }
     }
 
+    // Shadow For File Renamer
+    Rectangle {
+       width: fileRenamer.width
+       height: fileRenamer.height
+       opacity: fileRenamer.opacity
+       anchors.centerIn: fileRenamer
+       anchors.horizontalCenterOffset: 4
+       anchors.verticalCenterOffset: 4
+       radius: fileRenamer.radius
+       color: "#44000000"
+       //color: "red"
+   }
+
+    // File Renamer
+    FileListItemRenamer {
+        id: fileRenamer
+        opacity: 0.0
+
+        onAccepted: {
+            // Check File Name
+            if (fileName.length > 0) {
+                console.log("fileRenamer.onAccepted - originalFileName: " + fileRenamer.originalFileName + " - fileName: " + fileRenamer.fileName);
+                // Rename File
+                mainController.renameFile(fileRenamer.originalFileName, fileRenamer.fileName);
+            }
+
+            // Set Focus
+            fileListView.focus = true;
+        }
+
+        onRejected: {
+            // Set Focus
+            fileListView.focus = true;
+        }
+    }
+
     // Busy Indicator
     BusyIndicator {
         id: busyIndicator
@@ -352,6 +389,25 @@ Rectangle {
                 // Position View
                 fileListView.positionViewAtIndex(aIndex + 1, ListView.Center);
             }
+        }
+
+        // On Launch File Rename
+        onLaunchFileRename: {
+            console.log("fileListRoot.Connections.mainController.onLaunchFileRename");
+
+            // Set File Renamer Pos & Size
+            fileRenamer.x = fileListView.currentItem.x;
+            fileRenamer.y = fileListView.currentItem.y + fileListView.y;
+            fileRenamer.width = fileListView.width - 4;
+            fileRenamer.height = fileListView.currentItem.height;
+
+            // Set Original File Name
+            fileRenamer.originalFileName = fileListModel.getFileName(fileListView.currentIndex);
+            // Set File Name
+            fileRenamer.fileName = fileListModel.getFileName(fileListView.currentIndex);
+
+            // Show Renamer
+            fileRenamer.showRenamer();
         }
     }
 }

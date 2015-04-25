@@ -181,6 +181,18 @@ void FileListModel::createDir(const QString& aDirPath)
 }
 
 //==============================================================================
+// Rename File
+//==============================================================================
+void FileListModel::renameFile(const QString& aSource, const QString& aTarget)
+{
+    // Check File Util
+    if (fileUtil) {
+        // Rename/Move File
+        fileUtil->moveFile(aSource, aTarget);
+    }
+}
+
+//==============================================================================
 // Has Selection
 //==============================================================================
 bool FileListModel::hasSelection()
@@ -407,6 +419,22 @@ QStringList FileListModel::getAllSelected()
 }
 
 //==============================================================================
+// Get File Name
+//==============================================================================
+QString FileListModel::getFileName(const int& aIndex)
+{
+    // Get Item List Count
+    int ilCount = itemList.count();
+
+    // Check Index
+    if (aIndex >= 0 && aIndex < ilCount) {
+        return itemList[aIndex]->fileInfo.fileName();
+    }
+
+    return "";
+}
+
+//==============================================================================
 // Fetch Dir
 //==============================================================================
 void FileListModel::fetchDirItems()
@@ -523,6 +551,29 @@ void FileListModel::fileOpFinished(const unsigned int& aID,
     } else if (aOp == DEFAULT_OPERATION_MAKE_DIR) {
         // Emit Dir Create Signal
         emit dirCreated(aPath);
+    } else if (aOp == DEFAULT_OPERATION_MOVE_FILE) {
+        // Init Source Info
+        QFileInfo sourceInfo(aSource);
+        // Check Path
+        if (sourceInfo.absolutePath() == currentDir) {
+            // Find Index
+            int fileIndex = findIndex(sourceInfo.fileName());
+            // Check File Index
+            if (fileIndex >= 0) {
+                // Get Item
+                FileListModelItem* item = itemList[fileIndex];
+                // Update File Info
+                item->fileInfo = QFileInfo(aTarget);
+                // Create Index
+                QModelIndex updateIndex = createIndex(fileIndex, 0);
+                // Emit Data Changed
+                emit dataChanged(updateIndex, updateIndex);
+                // Emit File Renamed
+                emit fileRenamed(aSource, aTarget);
+            }
+        }
+    } else {
+        qDebug() << "FileListModel::fileOpFinished - WTF?!?";
     }
 }
 

@@ -722,7 +722,7 @@ void DeleteProgressDialog::fileOpNeedConfirm(const unsigned int& aID,
     ConfirmDialog confirmDialog;
 
     // Set Dialog Title
-    confirmDialog.setConfirmTitle(tr(DEFAULT_CONFIRM_TITLE_CONFIRMATION));
+    confirmDialog.setConfirmTitle(tr(DEFAULT_TITLE_CONFIRMATION));
 
     // Switch Error
     switch (aCode) {

@@ -6,6 +6,7 @@
 #include <QQmlContext>
 #include <QQmlEngine>
 #include <QImageReader>
+#include <QTimer>
 #include <QDebug>
 
 #include <mcwinterface.h>
@@ -13,10 +14,12 @@
 #include "mainwindow.h"
 #include "busyindicator.h"
 #include "filepanel.h"
+#include "ui_filepanel.h"
 #include "filelistmodel.h"
 #include "filelistimageprovider.h"
+#include "remotefileutilclient.h"
 #include "confirmdialog.h"
-#include "ui_filepanel.h"
+#include "transferprogressmodel.h"
 #include "utility.h"
 #include "constants.h"
 
@@ -56,6 +59,7 @@ FilePanel::FilePanel(QWidget* aParent)
     , dwFileChanged(false)
     , ownKeyPress(false)
     , fileRenameActive(false)
+    , fileRenamer(NULL)
 
 {
     // Setup UI
@@ -707,69 +711,19 @@ void FilePanel::renameFile(const QString& aSource, const QString& aTarget)
         return;
     }
 
-    // Check File List Model
-    if (!fileListModel) {
+    // Check File Renamer
+    if (!fileRenamer) {
+        // Create File Renamer
+        fileRenamer = new FileRenamer();
+    }
+
+    // Check File Renamer
+    if (!fileRenamer) {
+        qDebug() << "FilePanel::renameFile - aSource: " << aSource << " - aTarget: " << aTarget << " - NO FILE RENAMER!!";
         return;
     }
 
     qDebug() << "FilePanel::renameFile - aSource: " << aSource << " - aTarget: " << aTarget;
-
-    // Init Source Info
-    QFileInfo sourceInfo(aSource);
-    // Init Target Info
-    QFileInfo targetInfo(aTarget);
-
-    // Check Source Info
-    if (sourceInfo.isDir() || sourceInfo.isBundle()) {
-        // Check If Target Exists
-        if (targetInfo.exists()) {
-            // Check If Source Empty
-            if (isDirEmpty(aSource)) {
-                // Remove Source Dir
-                fileListModel->deleteFile(aSource);
-
-                return;
-            }
-
-            // Check If Target Empty
-            if (isDirEmpty(aTarget)) {
-                // Remove Target
-                fileListModel->deleteFile(aTarget);
-
-                // Continue
-
-            } else {
-/*
-                // Directory Exists
-                ConfirmDialog confirmDialog;
-                // Configure Buttons
-                confirmDialog.configureButtons(QDialogButtonBox::Abort);
-
-                // Set Text
-                confirmDialog.setConfirmText(tr(DEFAULT_CONFIRM_TEXT_DIRECTORY_EXISTS_MERGE));
-                // Add Buttons
-                confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_YES), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_YES);
-                confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_NO), QDialogButtonBox::RejectRole, DEFAULT_CONFIRM_NO);
-
-                // Set Path
-                confirmDialog.setPath(aTarget);
-
-                // Exec Dialog
-                if (confirmDialog.exec()) {
-
-                    // Merge Dirs
-
-                }
-*/
-
-                // Create Merge Dir Controller
-
-
-
-                return;
-            }
-        }
-    }
 
     // Init Local Dir Name
     QString localDir(currentDir);
@@ -780,7 +734,7 @@ void FilePanel::renameFile(const QString& aSource, const QString& aTarget)
     }
 
     // Rename File
-    fileListModel->renameFile(localDir + aSource, localDir + aTarget);
+    fileRenamer->renameFile(localDir + aSource, localDir + aTarget);
 }
 
 //==============================================================================
@@ -2077,5 +2031,500 @@ FilePanel::~FilePanel()
         delete fileListModel;
         fileListModel = NULL;
     }
+
+    // Check File Renamer
+    if (fileRenamer) {
+        // Delete File Renamer
+        delete fileRenamer;
+        fileRenamer = NULL;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//==============================================================================
+// Constructor
+//==============================================================================
+FileRenamer::FileRenamer(QWidget* aParent)
+    : QObject(aParent)
+    , fileUtil(NULL)
+    , queueIndex(-1)
+{
+    qDebug() << "FileRenamer::FileRenamer";
+
+    // ...
+}
+
+//==============================================================================
+// Rename File
+//==============================================================================
+void FileRenamer::renameFile(const QString& aSource, const QString& aTarget)
+{
+    qDebug() << "FileRenamer::renameFile - aSource: " << aSource << " - aTarget: " << aTarget;
+
+    // Add Item
+    addItem(aSource, aTarget);
+
+    // Reset Queue Index
+    queueIndex = 0;
+
+    // Check File Util
+    if (!fileUtil) {
+        // Create File Util
+        fileUtil = new RemoteFileUtilClient();
+
+        // Connect Signals
+        connect(fileUtil, SIGNAL(clientConnectionChanged(uint,bool)), this, SLOT(clientConnectionChanged(uint,bool)));
+        connect(fileUtil, SIGNAL(clientStatusChanged(uint,int)), this, SLOT(clientStatusChanged(uint,int)));
+        connect(fileUtil, SIGNAL(fileOpStarted(uint,QString,QString,QString,QString)), this, SLOT(fileOpStarted(uint,QString,QString,QString,QString)));
+        connect(fileUtil, SIGNAL(fileOpNeedConfirm(uint,QString,int,QString,QString,QString)), this, SLOT(fileOpNeedConfirm(uint,QString,int,QString,QString,QString)));
+        connect(fileUtil, SIGNAL(fileOpAborted(uint,QString,QString,QString,QString)), this, SLOT(fileOpAborted(uint,QString,QString,QString,QString)));
+        connect(fileUtil, SIGNAL(fileOpError(uint,QString,QString,QString,QString,int)), this, SLOT(fileOpError(uint,QString,QString,QString,QString,int)));
+        connect(fileUtil, SIGNAL(fileOpSkipped(uint,QString,QString,QString,QString)), this, SLOT(fileOpSkipped(uint,QString,QString,QString,QString)));
+        connect(fileUtil, SIGNAL(fileOpFinished(uint,QString,QString,QString,QString)), this, SLOT(fileOpFinished(uint,QString,QString,QString,QString)));
+        connect(fileUtil, SIGNAL(fileOpQueueItemFound(uint,QString,QString,QString,QString)), this, SLOT(fileOpQueueItemFound(uint,QString,QString,QString,QString)));
+    }
+
+    // Check File Util
+    if (fileUtil) {
+        // Check If Connected
+        if (!fileUtil->isConnected()) {
+            // Connect
+            fileUtil->connectToFileServer();
+        } else {
+            // Clear Options
+            fileUtil->clearFileTransferOptions();
+            // Process Queue
+            QTimer::singleShot(1, this, SLOT(processQueue()));
+        }
+    }
+}
+
+//==============================================================================
+// Add Item
+//==============================================================================
+void FileRenamer::addItem(const QString& aSource, const QString& aTarget)
+{
+    qDebug() << "FileRenamer::addItem - aSource: " << aSource << " - aTarget: " << aTarget;
+
+    // Create New Item
+    TransferProgressModelItem* newItem = new TransferProgressModelItem(DEFAULT_OPERATION_MOVE_FILE, aSource, aTarget);
+
+    // Add To Queue
+    renameQueue << newItem;
+}
+
+//==============================================================================
+// Insert Item
+//==============================================================================
+void FileRenamer::insertItem(const int& aIndex, const QString& aSource, const QString& aTarget)
+{
+    qDebug() << "FileRenamer::insertItem - aIndex: " << aIndex << " - aSource: " << aSource << " - aTarget: " << aTarget;
+
+    // Create New Item
+    TransferProgressModelItem* newItem = new TransferProgressModelItem(DEFAULT_OPERATION_MOVE_FILE, aSource, aTarget);
+
+    // Check Index
+    if (aIndex >= 0 && aIndex < renameQueue.count()) {
+        // Insert To Queue
+        renameQueue.insert(aIndex, newItem);
+    } else {
+        // Add To Queue
+        renameQueue << newItem;
+    }
+}
+
+//==============================================================================
+// Set Item State
+//==============================================================================
+void FileRenamer::setItemState(const int& aIndex, const int& aState)
+{
+    qDebug() << "FileRenamer::setItemState - aIndex: " << aIndex << " - aState: " << aState;
+
+    // Check Index
+    if (aIndex >= 0 && aIndex < renameQueue.count()) {
+        // Get Item
+        TransferProgressModelItem* item = renameQueue[aIndex];
+        // Set State
+        item->state = (TransferProgressState)aState;
+    }
+}
+
+//==============================================================================
+// Process Queue
+//==============================================================================
+void FileRenamer::processQueue()
+{
+    // Check Queue Index
+    if (fileUtil && queueIndex >= 0 && queueIndex < renameQueue.count()) {
+        // Get Source File Name
+        QString sourceFile = renameQueue[queueIndex]->source;
+        // Get Target File Name
+        QString targetFile = renameQueue[queueIndex]->target;
+
+        // Rename File
+        fileUtil->moveFile(sourceFile, targetFile);
+    } else {
+        // Finished
+
+        // Check Queue Index
+        if (queueIndex != -1) {
+            // Clear Queue
+            clearQueue();
+            // Reset Queue Index
+            queueIndex = -1;
+        }
+
+        // ...
+    }
+}
+
+//==============================================================================
+// Abort
+//==============================================================================
+void FileRenamer::abort()
+{
+    // Check File Util
+    if (fileUtil) {
+        // Check Status
+        if (fileUtil->getStatus() == ECSTBusy ||
+            fileUtil->getStatus() == ECSTError  ) {
+
+            qDebug() << "FileRenamer::abort";
+
+            // Abort
+            fileUtil->abort();
+        }
+    }
+}
+
+//==============================================================================
+// Clear Queue
+//==============================================================================
+void FileRenamer::clearQueue()
+{
+    // Check Queue
+    if (renameQueue.count() <= 0) {
+        return;
+    }
+
+    qDebug() << "FileRenamer::clearQueue";
+
+    // Go Thru Queue
+    while (renameQueue.count() > 0) {
+        // Get Queue Item
+        TransferProgressModelItem* item = renameQueue.takeLast();
+        // Delete Item
+        delete item;
+        item = NULL;
+    }
+}
+
+//==============================================================================
+// Client Connection Changed Slot
+//==============================================================================
+void FileRenamer::clientConnectionChanged(const unsigned int& aID, const bool& aConnected)
+{
+    qDebug() << "FileRenamer::clientConnectionChanged - aID: " << aID << " - aConnected: " << aConnected;
+
+    // Check If Connected
+    if (aConnected) {
+        // Check File Util
+        if (fileUtil) {
+            // Clear Options
+            fileUtil->clearFileTransferOptions();
+        }
+
+        // Process Queue
+        QTimer::singleShot(1, this, SLOT(processQueue()));
+    }
+}
+
+//==============================================================================
+// Client Status Changed Slot
+//==============================================================================
+void FileRenamer::clientStatusChanged(const unsigned int& aID, const int& aStatus)
+{
+    qDebug() << "TransferProgressDialog::clientStatusChanged - aID: " << aID << " - aStatus: " << RemoteFileUtilClient::statusToString(aStatus);
+
+    // ...
+}
+
+//==============================================================================
+// File Operation Started Slot
+//==============================================================================
+void FileRenamer::fileOpStarted(const unsigned int& aID,
+                                const QString& aOp,
+                                const QString& aPath,
+                                const QString& aSource,
+                                const QString& aTarget)
+{
+    Q_UNUSED(aPath);
+
+    qDebug() << "TransferProgressDialog::fileOpStarted - aID: " << aID << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget;
+
+    // ...
+}
+
+//==============================================================================
+// File Operation Skipped Slot
+//==============================================================================
+void FileRenamer::fileOpSkipped(const unsigned int& aID,
+                                const QString& aOp,
+                                const QString& aPath,
+                                const QString& aSource,
+                                const QString& aTarget)
+{
+    Q_UNUSED(aPath);
+
+    qDebug() << "TransferProgressDialog::fileOpSkipped - aID: " << aID << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget;
+
+    // Check Operation
+    if (aOp == DEFAULT_OPERATION_MOVE_FILE) {
+        // Increase Current Queue Index
+        queueIndex++;
+        // Process Queue
+        processQueue();
+    }
+
+    // ...
+}
+
+//==============================================================================
+// File Operation Finished Slot
+//==============================================================================
+void FileRenamer::fileOpFinished(const unsigned int& aID,
+                                 const QString& aOp,
+                                 const QString& aPath,
+                                 const QString& aSource,
+                                 const QString& aTarget)
+{
+    Q_UNUSED(aPath);
+
+    qDebug() << "TransferProgressDialog::fileOpFinished - aID: " << aID << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget;
+
+    // Check Operation - QUEUE
+    if (aOp == DEFAULT_OPERATION_QUEUE) {
+
+        // ... Do Nothing, Process Queue
+
+    // Check Operation - MOVE
+    } else if (aOp == DEFAULT_OPERATION_MOVE_FILE) {
+        // Increase Current Queue Index
+        queueIndex++;
+    }
+
+    // Process Queue
+    processQueue();
+
+    // ...
+}
+
+//==============================================================================
+// File Operation Aborted Slot
+//==============================================================================
+void FileRenamer::fileOpAborted(const unsigned int& aID,
+                                const QString& aOp,
+                                const QString& aPath,
+                                const QString& aSource,
+                                const QString& aTarget)
+{
+    Q_UNUSED(aPath);
+
+    qDebug() << "TransferProgressDialog::fileOpAborted - aID: " << aID << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget;
+
+    // ...
+
+}
+
+//==============================================================================
+// File Operation Error Slot
+//==============================================================================
+void FileRenamer::fileOpError(const unsigned int& aID,
+                              const QString& aOp,
+                              const QString& aPath,
+                              const QString& aSource,
+                              const QString& aTarget,
+                              const int& aError)
+{
+    Q_UNUSED(aPath);
+
+    qDebug() << "TransferProgressDialog::fileOpError - aID: " << aID << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget << " - aError: " << aError;
+
+
+    // Init Confirmation Dialog
+    ConfirmDialog confirmDialog;
+
+    if (aOp == DEFAULT_OPERATION_MOVE_FILE) {
+
+        // Set Dialog Title
+        confirmDialog.setConfirmTitle(tr(DEFAULT_ERROR_TITLE_MOVE_FILE));
+    }
+
+    // Switch Error
+    switch (aError) {
+        default:
+        case DEFAULT_ERROR_GENERAL: {
+            // Set Error Text
+            confirmDialog.setConfirmText(tr(DEFAULT_CONFIRM_TEXT_CANT_MOVE_FILE));
+            // Set Path
+            confirmDialog.setPath(aSource);
+        } break;
+
+        case DEFAULT_ERROR_CANNOT_DELETE_SOURCE_DIR: {
+            // Set Error Text
+            confirmDialog.setConfirmText(tr(DEFAULT_CONFIRM_TEXT_CANT_DELETE_SOURCE));
+            // Set Path
+            confirmDialog.setPath(aSource);
+        } break;
+
+        case DEFAULT_ERROR_CANNOT_DELETE_TARGET_DIR: {
+            // Set Error Text
+            confirmDialog.setConfirmText(tr(DEFAULT_CONFIRM_TEXT_CANT_DELETE_TARGET));
+            // Set Path
+            confirmDialog.setPath(aTarget);
+        } break;
+    }
+
+
+    // Configure Standard Buttons
+    confirmDialog.configureButtons(QDialogButtonBox::Abort);
+
+    // Add Button
+    confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_RETRY), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_RETRY);
+    confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_SKIP), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_SKIP);
+    confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_SKIPALL), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_SKIPALL);
+
+    // Exec Confirm Dialog
+    confirmDialog.exec();
+
+    // Get Action Index
+    int actionIndex = confirmDialog.getActionIndex();
+
+    // Check File Util
+    if (fileUtil) {
+        // Send User Response
+        fileUtil->sendUserResponse(actionIndex == -1 ? DEFAULT_CONFIRM_ABORT : actionIndex, confirmDialog.getPath());
+    }
+
+    // ...
+}
+
+//==============================================================================
+// Need Confirmation Slot
+//==============================================================================
+void FileRenamer::fileOpNeedConfirm(const unsigned int& aID,
+                                    const QString& aOp,
+                                    const int& aCode,
+                                    const QString& aPath,
+                                    const QString& aSource,
+                                    const QString& aTarget)
+{
+    Q_UNUSED(aPath);
+
+    qDebug() << "TransferProgressDialog::fileOpNeedConfirm - aID: " << aID << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget << " - aCode: " << aCode;
+
+    // Init Confirmation Dialog
+    ConfirmDialog confirmDialog;
+
+    // Set Dialog Title
+    confirmDialog.setConfirmTitle(tr(DEFAULT_TITLE_CONFIRMATION));
+
+    // Switch Code
+    switch (aCode) {
+        case DEFAULT_ERROR_TARGET_DIR_EXISTS:
+            // Set Error Text
+            confirmDialog.setConfirmText(tr(DEFAULT_CONFIRM_TEXT_DIRECTORY_EXISTS_MERGE));
+        break;
+    }
+
+    // Set Path
+    confirmDialog.setPath(aPath);
+
+    // Configure Standard Buttons
+    confirmDialog.configureButtons(QDialogButtonBox::Abort);
+
+    // Add Button
+    confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_YES), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_YES);
+    confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_YESTOALL), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_YESALL);
+    confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_NO), QDialogButtonBox::RejectRole, DEFAULT_CONFIRM_NO);
+    confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_NOTOALL), QDialogButtonBox::RejectRole, DEFAULT_CONFIRM_NOALL);
+
+    // Exec Confirm Dialog
+    confirmDialog.exec();
+
+    // Get Action Index
+    int actionIndex = confirmDialog.getActionIndex();
+
+    // Check File Util
+    if (fileUtil) {
+        // Send User Response
+        fileUtil->sendUserResponse(actionIndex == -1 ? DEFAULT_CONFIRM_ABORT : actionIndex, confirmDialog.getPath());
+    }
+
+    // ...
+}
+
+//==============================================================================
+// File Operation Queue Item Found Slot
+//==============================================================================
+void FileRenamer::fileOpQueueItemFound(const unsigned int& aID,
+                                       const QString& aOp,
+                                       const QString& aPath,
+                                       const QString& aSource,
+                                       const QString& aTarget)
+{
+    Q_UNUSED(aPath);
+
+    qDebug() << "TransferProgressDialog::fileOpQueueItemFound - aID: " << aID << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget;
+
+    // Check Operation
+    if (aOp == DEFAULT_OPERATION_MOVE_FILE) {
+        // Insert Item
+        insertItem(queueIndex, aSource, aTarget);
+    }
+
+    // ...
+}
+
+//==============================================================================
+// Destructor
+//==============================================================================
+FileRenamer::~FileRenamer()
+{
+    // Abort
+    abort();
+
+    // Clear Queue
+    clearQueue();
+
+    qDebug() << "FileRenamer::~FileRenamer";
 }
 

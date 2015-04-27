@@ -33,6 +33,7 @@ public:
 
 protected:
     friend class TransferProgressModel;
+    friend class FileRenamer;
 
     // Operation
     QString                 op;

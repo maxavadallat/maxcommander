@@ -211,6 +211,9 @@
 #define DEFAULT_CONFIRM_TEXT_CANT_COPY_FILE                 "Can Not Copy File:"
 #define DEFAULT_CONFIRM_TEXT_CANT_MOVE_FILE                 "Can Not Rename/Move File:"
 
+#define DEFAULT_CONFIRM_TEXT_CANT_DELETE_SOURCE             "Can Not Delete Source:"
+#define DEFAULT_CONFIRM_TEXT_CANT_DELETE_TARGET             "Can Not Delete Target:"
+
 #define DEFAULT_CONFIRM_TEXT_TARGET_DIR_DOESNT_EXIST        "Target Dir Doesn\'t Exist. Create?"
 
 #define DEFAULT_PROGRESS_DIALOG_FILENAME_TEXT_TEMPLATE      "%1 @ %2 KB/s"

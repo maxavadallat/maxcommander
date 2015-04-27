@@ -517,6 +517,19 @@ QString getExtensionFromFullName(const QString& aFullFileName)
     return aFullFileName.right(aFullFileName.length() - lastDotPos - 1);
 }
 
+//==============================================================================
+// Check If Dir Is Empty
+//==============================================================================
+bool isDirEmpty(const QString& aDirPath)
+{
+    // Init Dir
+    QDir dir(aDirPath);
+
+    // Get Entry List
+    QStringList entryList = dir.entryList(QDir::AllEntries | QDir::Hidden | QDir::System | QDir::NoDotAndDotDot);
+
+    return entryList.count() == 0;
+}
 
 
 

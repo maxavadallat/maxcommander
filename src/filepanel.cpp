@@ -708,18 +708,79 @@ void FilePanel::renameFile(const QString& aSource, const QString& aTarget)
     }
 
     // Check File List Model
-    if (fileListModel) {
-        // Init Local Dir Name
-        QString localDir(currentDir);
-        // Check Local Dir
-        if (!localDir.endsWith("/")) {
-            // Adjust Local Dir
-            localDir += "/";
-        }
-
-        // Rename File
-        fileListModel->renameFile(localDir + aSource, localDir + aTarget);
+    if (!fileListModel) {
+        return;
     }
+
+    qDebug() << "FilePanel::renameFile - aSource: " << aSource << " - aTarget: " << aTarget;
+
+    // Init Source Info
+    QFileInfo sourceInfo(aSource);
+    // Init Target Info
+    QFileInfo targetInfo(aTarget);
+
+    // Check Source Info
+    if (sourceInfo.isDir() || sourceInfo.isBundle()) {
+        // Check If Target Exists
+        if (targetInfo.exists()) {
+            // Check If Source Empty
+            if (isDirEmpty(aSource)) {
+                // Remove Source Dir
+                fileListModel->deleteFile(aSource);
+
+                return;
+            }
+
+            // Check If Target Empty
+            if (isDirEmpty(aTarget)) {
+                // Remove Target
+                fileListModel->deleteFile(aTarget);
+
+                // Continue
+
+            } else {
+/*
+                // Directory Exists
+                ConfirmDialog confirmDialog;
+                // Configure Buttons
+                confirmDialog.configureButtons(QDialogButtonBox::Abort);
+
+                // Set Text
+                confirmDialog.setConfirmText(tr(DEFAULT_CONFIRM_TEXT_DIRECTORY_EXISTS_MERGE));
+                // Add Buttons
+                confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_YES), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_YES);
+                confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_NO), QDialogButtonBox::RejectRole, DEFAULT_CONFIRM_NO);
+
+                // Set Path
+                confirmDialog.setPath(aTarget);
+
+                // Exec Dialog
+                if (confirmDialog.exec()) {
+
+                    // Merge Dirs
+
+                }
+*/
+
+                // Create Merge Dir Controller
+
+
+
+                return;
+            }
+        }
+    }
+
+    // Init Local Dir Name
+    QString localDir(currentDir);
+    // Check Local Dir
+    if (!localDir.endsWith("/")) {
+        // Adjust Local Dir
+        localDir += "/";
+    }
+
+    // Rename File
+    fileListModel->renameFile(localDir + aSource, localDir + aTarget);
 }
 
 //==============================================================================
@@ -1060,16 +1121,6 @@ void FilePanel::handleItemSelect()
 }
 
 //==============================================================================
-// Rename
-//==============================================================================
-void FilePanel::renameCurrent()
-{
-    qDebug() << "FilePanel::renameCurrent - panelName: " << panelName;
-
-    // ...
-}
-
-//==============================================================================
 // Clear
 //==============================================================================
 void FilePanel::clear()
@@ -1383,6 +1434,57 @@ void FilePanel::fileModelError(const QString& aPath, const int& aError)
                 break;
             }
         }
+    }
+}
+
+//==============================================================================
+// File Model Need Confirm Found Slot
+//==============================================================================
+void FilePanel::fileModelNeedConfirm(const int& aCode, const QString& aPath, const QString& aSource, const QString& aTarget)
+{
+    Q_UNUSED(aPath);
+
+    // Check File List Model
+    if (fileListModel) {
+        qDebug() << "FilePanel::fileModelNeedConfirm - panelName: " << panelName << " - op: " << fileListModel->lastOperation() << " - aSource: " << aSource << " - aTarget: " << aTarget << " - aCode: " << aCode;
+
+/*
+        // Check Last Operation - Rename
+        if (fileListModel->lastOperation() == DEFAULT_OPERATION_MOVE_FILE) {
+
+            // Directory Exists
+            ConfirmDialog confirmDialog;
+            // Configure Buttons
+            confirmDialog.configureButtons(QDialogButtonBox::Abort);
+
+            // Switch Code
+            switch (aCode) {
+                case DEFAULT_ERROR_TARGET_DIR_EXISTS: {
+                    // Set Text
+                    confirmDialog.setConfirmText(tr(DEFAULT_CONFIRM_TEXT_DIRECTORY_EXISTS_MERGE));
+                    // Add Buttons
+                    confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_YES), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_YES);
+                    confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_NO), QDialogButtonBox::RejectRole, DEFAULT_CONFIRM_NO);
+
+                    // Set Path
+                    confirmDialog.setPath(aTarget);
+
+                    // Exec Dialog
+                    if (confirmDialog.exec()) {
+                        // Send User Response/Confirm
+                        fileListModel->sendUserResponse(confirmDialog.getActionIndex(), confirmDialog.getPath());
+                    } else {
+                        // Send User Response/Confirm
+                        fileListModel->sendUserResponse(DEFAULT_CONFIRM_ABORT, confirmDialog.getPath());
+                    }
+
+                } break;
+
+                default:
+                break;
+            }
+        }
+*/
     }
 }
 
@@ -1712,7 +1814,7 @@ void FilePanel::keyPressEvent(QKeyEvent* aEvent)
             break;
 
             default:
-                qDebug() << "FilePanel::keyPressEvent - key: " << aEvent->key();
+                //qDebug() << "FilePanel::keyPressEvent - key: " << aEvent->key();
             break;
         }
     }

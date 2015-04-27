@@ -62,6 +62,9 @@ void FileListModel::init()
     connect(fileUtil, SIGNAL(clientConnectionChanged(uint,bool)), this, SLOT(clientConnectionChanged(uint,bool)));
     connect(fileUtil, SIGNAL(clientStatusChanged(uint, int)), this, SLOT(clientStatusChanged(uint, int)));
     connect(fileUtil, SIGNAL(dirListItemFound(uint,QString,QString)), this, SLOT(dirListItemFound(uint,QString,QString)));
+    connect(fileUtil, SIGNAL(fileOpQueueItemFound(uint,QString,QString,QString,QString)), this, SLOT(fileOpQueueItemFound(uint,QString,QString,QString,QString)));
+    connect(fileUtil, SIGNAL(fileOpNeedConfirm(uint,QString,int,QString,QString,QString)), this, SLOT(fileOpNeedConfirm(uint,QString,int,QString,QString,QString)));
+    connect(fileUtil, SIGNAL(fileOpSkipped(uint,QString,QString,QString,QString)), this, SLOT(fileOpSkipped(uint,QString,QString,QString,QString)));
     connect(fileUtil, SIGNAL(fileOpFinished(uint,QString,QString,QString,QString)), this, SLOT(fileOpFinished(uint,QString,QString,QString,QString)));
     connect(fileUtil, SIGNAL(fileOpAborted(uint,QString,QString,QString,QString)), this, SLOT(fileOpAborted(uint,QString,QString,QString,QString)));
     connect(fileUtil, SIGNAL(fileOpError(uint,QString,QString,QString,QString,int)), this, SLOT(fileOpError(uint,QString,QString,QString,QString,int)));
@@ -175,6 +178,7 @@ void FileListModel::createDir(const QString& aDirPath)
 {
     // Check File Util
     if (fileUtil) {
+        qDebug() << "FileListModel::createDir - aDirPath: " << aDirPath;
         // Create Dir
         fileUtil->createDir(aDirPath);
     }
@@ -187,8 +191,22 @@ void FileListModel::renameFile(const QString& aSource, const QString& aTarget)
 {
     // Check File Util
     if (fileUtil) {
+        qDebug() << "FileListModel::renameFile - aSource: " << aSource << " - aTarget: " << aTarget;
         // Rename/Move File
         fileUtil->moveFile(aSource, aTarget);
+    }
+}
+
+//==============================================================================
+// Delete File
+//==============================================================================
+void FileListModel::deleteFile(const QString& aFilePath)
+{
+    // Check File Util
+    if (fileUtil) {
+        qDebug() << "FileListModel::deleteFile - aFilePath: " << aFilePath;
+        // Delete File
+        fileUtil->deleteFile(aFilePath);
     }
 }
 
@@ -221,6 +239,7 @@ void FileListModel::sendUserResponse(const int& aConfirm, const QString& aNewPat
 {
     // Check File Util
     if (fileUtil) {
+        qDebug() << "FileListModel::sendUserResponse - aConfirm: " << aConfirm << " - aNewPath: " << aNewPath;
         // Send Confirm/Response
         fileUtil->sendUserResponse(aConfirm, aNewPath);
     }
@@ -231,7 +250,7 @@ void FileListModel::sendUserResponse(const int& aConfirm, const QString& aNewPat
 //==============================================================================
 void FileListModel::clear()
 {
-    //qDebug() << "FileListModel::clear";
+    qDebug() << "FileListModel::clear";
 
     // Begin Reset Model
     beginResetModel();
@@ -294,6 +313,7 @@ void FileListModel::setSelected(const int& aIndex, const bool& aSelected)
     if (aIndex >=0 && aIndex < itemList.count()) {
         // Check If Item Selected
         if (itemList[aIndex]->selected != aSelected) {
+            qDebug() << "FileListModel::setSelected - aIndex: " << aIndex << " - aSelected: " << aSelected;
             // Set Item Selected
             itemList[aIndex]->selected = aSelected;
             // Create Model Index
@@ -317,11 +337,11 @@ void FileListModel::setSelected(const int& aIndex, const bool& aSelected)
 //==============================================================================
 void FileListModel::selectAll()
 {
+    qDebug() << "FileListModel::selectAll";
     // Get Item List Count
     int ilCount = itemList.count();
     // Reset Selected Count
     selectedCount = 0;
-
     // Go Thru Item List
     for (int i=0; i<ilCount; ++i) {
         // Check File Name
@@ -346,6 +366,7 @@ void FileListModel::selectAll()
 //==============================================================================
 void FileListModel::deselectAll()
 {
+    qDebug() << "FileListModel::deselectAll";
     // Get Item List Count
     int ilCount = itemList.count();
     // Go Thru Item List
@@ -370,12 +391,11 @@ void FileListModel::deselectAll()
 //==============================================================================
 void FileListModel::toggleAllSelection()
 {
+    qDebug() << "FileListModel::toggleAllSelection";
     // Get Item List Count
     int ilCount = itemList.count();
-
     // Reset Selected Count
     selectedCount = 0;
-
     // Go Thru Item List
     for (int i=0; i<ilCount; ++i) {
 
@@ -516,7 +536,7 @@ void FileListModel::clientConnectionChanged(const unsigned int& aID, const bool&
 //==============================================================================
 void FileListModel::clientStatusChanged(const unsigned int& aID, const int& aStatus)
 {
-    qDebug() << "FileListModel::clientStatusChanged - aID: " << aID << " - aStatus: " << aStatus;
+    qDebug() << "FileListModel::clientStatusChanged - aID: " << aID << " - aStatus: " << RemoteFileUtilClient::statusToString(aStatus);
 
     // Check Status
     if (aStatus == ECSTBusy || aStatus == ECSTAborting || aStatus == ECSTWaiting) {
@@ -575,6 +595,22 @@ void FileListModel::fileOpFinished(const unsigned int& aID,
     } else {
         qDebug() << "FileListModel::fileOpFinished - WTF?!?";
     }
+}
+
+//==============================================================================
+// File Operation Skipped Slot
+//==============================================================================
+void FileListModel::fileOpSkipped(const unsigned int& aID,
+                                  const QString& aOp,
+                                  const QString& aPath,
+                                  const QString& aSource,
+                                  const QString& aTarget)
+{
+    Q_UNUSED(aPath);
+
+    qDebug() << "FileListModel::fileOpFinished - aID: " << aID << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget;
+
+    // ...
 }
 
 //==============================================================================
@@ -659,6 +695,40 @@ void FileListModel::dirListItemFound(const unsigned int& aID,
 
     // End Insert Row
     endInsertRows();
+}
+
+//==============================================================================
+// Need Confirmation Slot
+//==============================================================================
+void FileListModel::fileOpNeedConfirm(const unsigned int& aID,
+                                      const QString& aOp,
+                                      const int& aCode,
+                                      const QString& aPath,
+                                      const QString& aSource,
+                                      const QString& aTarget)
+{
+
+    qDebug() << "FileListModel::fileOpQueueItemFound - aID: " << aID << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget;
+
+    // Emit Need Confirm Signal
+    emit needConfirm(aCode, aPath, aSource, aTarget);
+}
+
+//==============================================================================
+// File Operation Queue Item Found Slot
+//==============================================================================
+void FileListModel::fileOpQueueItemFound(const unsigned int& aID,
+                                         const QString& aOp,
+                                         const QString& aPath,
+                                         const QString& aSource,
+                                         const QString& aTarget)
+{
+    //Q_UNUSED(aID);
+    Q_UNUSED(aPath);
+
+    qDebug() << "FileListModel::fileOpQueueItemFound - aID: " << aID << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget;
+
+    // ...
 }
 
 //==============================================================================
@@ -998,8 +1068,7 @@ bool FileListModel::isBundle(const int& aIndex)
 //==============================================================================
 bool FileListModel::getBusy()
 {
-    return fileUtil ? (fileUtil->getStatus() == ECSTBusy) || (fileUtil->getStatus() == ECSTAborting)
-                    : false;
+    return fileUtil ? (fileUtil->getStatus() == ECSTBusy) || (fileUtil->getStatus() == ECSTAborting) : false;
 }
 
 //==============================================================================

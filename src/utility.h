@@ -63,6 +63,9 @@ QString getFileNameFromFullName(const QString& aFullFileName);
 // Get File Extension From Full File Name
 QString getExtensionFromFullName(const QString& aFullFileName);
 
+// Check If Dir Is Empty
+bool isDirEmpty(const QString& aDirPath);
+
 
 #endif // UTILITY
 

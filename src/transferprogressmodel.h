@@ -42,7 +42,6 @@ protected:
     QString                 target;
     // State
     TransferProgressState   state;
-
 };
 
 

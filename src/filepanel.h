@@ -217,8 +217,6 @@ public slots:
 
     // Handle Item Select
     void handleItemSelect();
-    // Rename
-    void renameCurrent();
 
     // Set Panel Focus
     void setPanelFocus(const bool& aFocus);
@@ -369,8 +367,10 @@ protected slots: // From File Model
     void fileModelDirCreated(const QString& aDirPath);
     // File List Model File Renames Slot
     void fileModelFileRenamed(const QString& aSource, const QString& aTarget);
-    // File Model Error
+    // File Model Error Slot
     void fileModelError(const QString& aPath, const int& aError);
+    // File Model Need Confirm Found Slot
+    void fileModelNeedConfirm(const int& aCode, const QString& aPath, const QString& aSource, const QString& aTarget);
 
 protected slots: // From QFileSystemWatcher
 

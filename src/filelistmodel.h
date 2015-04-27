@@ -9,6 +9,7 @@
 
 class RemoteFileUtilClient;
 
+
 //==============================================================================
 // File List Model Item Class
 //==============================================================================
@@ -22,6 +23,8 @@ public:
     // Selected
     bool            selected;
 };
+
+
 
 
 //==============================================================================
@@ -111,6 +114,9 @@ public slots:
     // Rename File
     void renameFile(const QString& aSource, const QString& aTarget);
 
+    // Delete File
+    void deleteFile(const QString& aFilePath);
+
     // Get File Name
     QString getFileName(const int& aIndex);
 
@@ -134,6 +140,9 @@ signals:
     // Error
     void error(const QString& aPath, const int& aError);
 
+    // Need Confirm
+    void needConfirm(const int& aCode, const QString& aPath, const QString& aSource, const QString& aTarget);
+
 public: // From QAbstractListModel
 
     // Get Role Names
@@ -153,7 +162,6 @@ protected slots:
     void init();
     // Fetch Dir
     void fetchDirItems();
-
     // Delete Item
     void deleteItem(const int& aIndex);
 
@@ -171,6 +179,13 @@ protected slots: // For Remote File Client
                         const QString& aPath,
                         const QString& aSource,
                         const QString& aTarget);
+
+    // File Operation Skipped Slot
+    void fileOpSkipped(const unsigned int& aID,
+                       const QString& aOp,
+                       const QString& aPath,
+                       const QString& aSource,
+                       const QString& aTarget);
 
     // File Operation Aborted Slot
     void fileOpAborted(const unsigned int& aID,
@@ -191,6 +206,21 @@ protected slots: // For Remote File Client
     void dirListItemFound(const unsigned int& aID,
                           const QString& aPath,
                           const QString& aFileName);
+
+    // Need Confirmation Slot
+    void fileOpNeedConfirm(const unsigned int& aID,
+                           const QString& aOp,
+                           const int& aCode,
+                           const QString& aPath,
+                           const QString& aSource,
+                           const QString& aTarget);
+
+    // File Operation Queue Item Found Slot
+    void fileOpQueueItemFound(const unsigned int& aID,
+                              const QString& aOp,
+                              const QString& aPath,
+                              const QString& aSource,
+                              const QString& aTarget);
 
 protected:
 
@@ -213,24 +243,24 @@ protected:
     };
 
     // Current Dir
-    QString                     currentDir;
+    QString                             currentDir;
 
     // File Info List
-    QList<FileListModelItem*>   itemList;
+    QList<FileListModelItem*>           itemList;
     // File Name List - For Quicker Search
-    QStringList                 fileNameList;
+    QStringList                         fileNameList;
 
     // Remote File Client
-    RemoteFileUtilClient*       fileUtil;
+    RemoteFileUtilClient*               fileUtil;
 
     // Sorting Mode
-    int                         sorting;
+    int                                 sorting;
 
     // Reverse Order
-    bool                        reverseOrder;
+    bool                                reverseOrder;
 
     // Selected Count
-    int                         selectedCount;
+    int                                 selectedCount;
 
     // ...
 };

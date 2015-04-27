@@ -202,6 +202,7 @@
 
 #define DEFAULT_CONFIRM_TEXT_DIRECTORY_EXISTS               "Directory Exists:"
 #define DEFAULT_CONFIRM_TEXT_DIRECTORY_NOT_EMPTY            "Directory: %1 Is Not Empty. Delete All?"
+#define DEFAULT_CONFIRM_TEXT_DIRECTORY_EXISTS_MERGE         "Target Directory Exists, Merge?"
 #define DEFAULT_CONFIRM_TEXT_FILE_DOESNT_EXIST              DEFAULT_ERROR_TEXT_FILE_DOESNT_EXIST
 #define DEFAULT_CONFIRM_TEXT_TARGET_FILE_EXISTS             "Target File Exists: %1 Overwrite?"
 #define DEFAULT_CONFIRM_TEXT_CANT_CREATE_DIRECTORY          "Can Not Create Directory:"

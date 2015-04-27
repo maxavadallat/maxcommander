@@ -218,6 +218,9 @@ void RemoteFileUtilClient::scanDirSize(const QString& aDirPath)
 
     // Write Data
     wirteData(newData);
+
+    // Set Status
+    setStatus(ECSTBusy);
 }
 
 //==============================================================================
@@ -237,6 +240,9 @@ void RemoteFileUtilClient::scanDirTree(const QString& aDirPath)
 
     // Write Data
     wirteData(newData);
+
+    // Set Status
+    setStatus(ECSTBusy);
 }
 
 //==============================================================================
@@ -257,6 +263,9 @@ void RemoteFileUtilClient::copyFile(const QString& aSource, const QString& aTarg
 
     // Write Data
     wirteData(newData);
+
+    // Set Status
+    setStatus(ECSTBusy);
 }
 
 //==============================================================================
@@ -277,6 +286,9 @@ void RemoteFileUtilClient::moveFile(const QString& aSource, const QString& aTarg
 
     // Write Data
     wirteData(newData);
+
+    // Set Status
+    setStatus(ECSTBusy);
 }
 
 //==============================================================================
@@ -297,7 +309,6 @@ void RemoteFileUtilClient::setFileAttributes(const QString& aFilePath, const int
 
     // Write Data
     wirteData(newData);
-
 }
 
 //==============================================================================
@@ -380,6 +391,9 @@ void RemoteFileUtilClient::searchFile(const QString& aName, const QString& aDirP
 
     // Write Data
     wirteData(newData);
+
+    // Set Status
+    setStatus(ECSTBusy);
 }
 
 //==============================================================================

@@ -377,6 +377,12 @@ void TransferProgressDialog::processQueue()
                 configureButtons(QDialogButtonBox::Close);
                 // Set Current File
                 setCurrentFileName("");
+
+                // Check Overall Progress
+                if (ui->overallProgress->value() == 0) {
+                    // Set Overall Progress
+                    setOverallProgress(1, 1);
+                }
             }
         }
     }
@@ -875,6 +881,8 @@ void TransferProgressDialog::fileOpFinished(const unsigned int& aID,
 
             // Unhandled
 
+            qDebug() << "TransferProgressDialog::fileOpFinished - aID: " << aID << " - aOp: " << aOp << " - WTF?!?";
+
             // ...
 
         }
@@ -939,7 +947,6 @@ void TransferProgressDialog::fileOpError(const unsigned int& aID,
 
         // Set Dialog Title
         confirmDialog.setConfirmTitle(tr(DEFAULT_ERROR_TITLE_MOVE_FILE));
-
     }
 
     // Switch Error
@@ -1008,15 +1015,20 @@ void TransferProgressDialog::fileOpNeedConfirm(const unsigned int& aID,
 
     // Switch Code
     switch (aCode) {
-        case DEFAULT_ERROR_EXISTS: {
+        case DEFAULT_ERROR_EXISTS:
             // Set Error Text
             confirmDialog.setConfirmText(tr(DEFAULT_CONFIRM_TEXT_TARGET_FILE_EXISTS).arg(aTarget));
-        } break;
+        break;
 
-        case DEFAULT_ERROR_TARGET_DIR_NOT_EXISTS: {
+        case DEFAULT_ERROR_TARGET_DIR_NOT_EXISTS:
             // Set Error Text
             confirmDialog.setConfirmText(tr(DEFAULT_CONFIRM_TEXT_TARGET_DIR_DOESNT_EXIST).arg(aTarget));
-        }
+        break;
+
+        case DEFAULT_ERROR_TARGET_DIR_EXISTS:
+            // Set Error Text
+            confirmDialog.setConfirmText(tr(DEFAULT_CONFIRM_TEXT_DIRECTORY_EXISTS_MERGE));
+        break;
     }
 
     // Set Path
@@ -1024,7 +1036,6 @@ void TransferProgressDialog::fileOpNeedConfirm(const unsigned int& aID,
 
     // Configure Standard Buttons
     confirmDialog.configureButtons(QDialogButtonBox::Abort);
-    //confirmDialog.configureButtons(QDialogButtonBox::NoButton);
 
     // Add Button
     confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_YES), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_YES);

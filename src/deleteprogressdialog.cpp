@@ -879,6 +879,9 @@ DeleteProgressDialog::~DeleteProgressDialog()
 
     // Check File Util
     if (fileUtil) {
+        // Close
+        fileUtil->close();
+
         // Delete File Util
         delete fileUtil;
         fileUtil = NULL;

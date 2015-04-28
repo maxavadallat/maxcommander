@@ -838,10 +838,17 @@ void FilePanel::setPanelFocus(const bool& aFocus)
 //==============================================================================
 void FilePanel::setCurrentIndex(const int& aCurrentIndex)
 {
+    // Get Bounded Index
+    int boundedIndex = fileListModel ? qBound(0, aCurrentIndex, fileListModel->rowCount()-1) : 0;
+
     // Check Current Index
-    if (currentIndex != aCurrentIndex) {
+    if (currentIndex != boundedIndex) {
+        //qDebug() << "FilePanel::setCurrentIndex - boundedIndex: " << boundedIndex;
+
         // Set Current Index
-        currentIndex = qBound(0, aCurrentIndex, fileListModel ? fileListModel->rowCount()-1 : 0);
+        currentIndex = boundedIndex;
+
+        // ...
 
         // Emit Current Index Changed Signal
         emit currentIndexChanged(currentIndex);
@@ -855,6 +862,8 @@ void FilePanel::setVisualItemsCount(const int& aVisualCount)
 {
     // Check Current Index
     if (visualItemsCount != aVisualCount) {
+        qDebug() << "FilePanel::setVisualItemsCount - aVisualCount: " << aVisualCount;
+
         // Set Current Index
         visualItemsCount = aVisualCount;
 
@@ -1499,7 +1508,7 @@ void FilePanel::startDirWatcher()
     if (dirWatcherTimerID == -1) {
         qDebug() << "FilePanel::startDirWatcher";
         // Start Timer
-        dirWatcherTimerID = startTimer(DEFAULT_ONE_SEC / 2);
+        dirWatcherTimerID = startTimer(DEFAULT_ONE_SEC * 5);
 
         // Start Dir Watcher
         dirWatcher.addPath(currentDir);
@@ -2650,6 +2659,15 @@ FileRenamer::~FileRenamer()
 
     // Clear Queue
     clearQueue();
+
+    // Check File Util
+    if (fileUtil) {
+        // Close
+        fileUtil->close();
+        // Delete File Util
+        delete fileUtil;
+        fileUtil = NULL;
+    }
 
     qDebug() << "FileRenamer::~FileRenamer";
 }

@@ -369,7 +369,9 @@ void ViewerWindow::textChanged()
 //==============================================================================
 void ViewerWindow::imageBrowserCurrentIndexChanged(const int& aCurrentIndex)
 {
-    qDebug() << "ViewerWindow::imageBrowserCurrentIndexChanged - aCurrentIndex: " << aCurrentIndex;
+    Q_UNUSED(aCurrentIndex);
+
+    //qDebug() << "ViewerWindow::imageBrowserCurrentIndexChanged - aCurrentIndex: " << aCurrentIndex;
 
     // ...
 }
@@ -379,7 +381,7 @@ void ViewerWindow::imageBrowserCurrentIndexChanged(const int& aCurrentIndex)
 //==============================================================================
 void ViewerWindow::imageBrowserCurrentFileChanged(const QString& aCurrentFile)
 {
-    qDebug() << "ViewerWindow::imageBrowserCurrentFileChanged - aCurrentFile: " << aCurrentFile;
+    //qDebug() << "ViewerWindow::imageBrowserCurrentFileChanged - aCurrentFile: " << aCurrentFile;
 
     // Set File Name
     fileName = aCurrentFile;
@@ -504,8 +506,14 @@ ViewerWindow::~ViewerWindow()
     // Delete UI
     delete ui;
 
-    qDebug() << "ViewerWindow::~ViewerWindow";
+    // Check Image Browser
+    if (imageBrowser) {
+        // Delete Image Browser
+        delete imageBrowser;
+        imageBrowser = NULL;
+    }
 
+    qDebug() << "ViewerWindow::~ViewerWindow";
 }
 
 
@@ -615,7 +623,7 @@ void ImageBrowser::setCurrentIndex(const int& aIndex)
 
     // Check Current Index
     if (currentIndex != boundedIndex) {
-        qDebug() << "ImageBrowser::setCurrentIndex - boundedIndex: " << boundedIndex;
+        //qDebug() << "ImageBrowser::setCurrentIndex - boundedIndex: " << boundedIndex;
         // Set Current Index
         currentIndex = boundedIndex;
 
@@ -806,6 +814,16 @@ ImageBrowser::~ImageBrowser()
 {
     // Clear Images
     imageFiles.clear();
+
+    // Check File Util
+    if (fileUtil) {
+        // Close
+        fileUtil->close();
+
+        // Delete File Util
+        delete fileUtil;
+        fileUtil = NULL;
+    }
 }
 
 

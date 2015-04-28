@@ -120,7 +120,7 @@ void BusyIndicator::start()
 {
     // Check Timer ID
     if (animTimerID == -1) {
-        qDebug() << "BusyIndicator::start";
+        //qDebug() << "BusyIndicator::start";
         // Start Timer ~30 FPS
         animTimerID = startTimer(DEFAULT_ONE_SEC / DEFAULT_ANIM_FRAME_RATE, Qt::PreciseTimer);
         // Emit Running Changed Signal
@@ -135,7 +135,7 @@ void BusyIndicator::stop()
 {
     // Check Timer ID
     if (animTimerID != -1) {
-        qDebug() << "BusyIndicator::stop";
+        //qDebug() << "BusyIndicator::stop";
         // Kill Timer
         killTimer(animTimerID);
         // Reset Anim Timer ID

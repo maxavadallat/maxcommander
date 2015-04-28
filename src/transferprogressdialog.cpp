@@ -654,7 +654,7 @@ void TransferProgressDialog::setCurrentFileName(const QString& aCurrentFileName,
 //==============================================================================
 void TransferProgressDialog::setCurrentProgress(const quint64& aProgress, const quint64& aTotal)
 {
-    qDebug() << "TransferProgressDialog::setCurrentProgress - aProgress: " << aProgress << " - aTotal: " << aTotal;
+    //qDebug() << "TransferProgressDialog::setCurrentProgress - aProgress: " << aProgress << " - aTotal: " << aTotal;
 
     // Set Minimum
     ui->currentProgress->setMinimum(0);
@@ -678,7 +678,7 @@ void TransferProgressDialog::setCurrentProgress(const quint64& aProgress, const 
 //==============================================================================
 void TransferProgressDialog::setOverallProgress(const quint64& aProgress, const quint64& aTotal)
 {
-    qDebug() << "TransferProgressDialog::setOverallProgress - aProgress: " << aProgress << " - aTotal: " << aTotal;
+    //qDebug() << "TransferProgressDialog::setOverallProgress - aProgress: " << aProgress << " - aTotal: " << aTotal;
 
     // Set Minimum
     ui->overallProgress->setMinimum(0);
@@ -1292,6 +1292,8 @@ TransferProgressDialog::~TransferProgressDialog()
 
     // Check File Util
     if (fileUtil) {
+        // Close
+        fileUtil->close();
         // Delete File Util
         delete fileUtil;
         fileUtil = NULL;

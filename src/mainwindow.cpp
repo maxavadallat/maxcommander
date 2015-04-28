@@ -295,7 +295,7 @@ void MainWindow::launchViewer(const bool& aEditMode)
     ViewerWindow* newViewer = new ViewerWindow();
 
     // Load File
-    newViewer->loadFile(focusedPanel->getCurrFileInfo().absoluteFilePath());
+    newViewer->loadFile(focusedPanel->getCurrFileInfo().absoluteFilePath(), focusedPanel->getPanelName());
 
     // Setup Viewer Window
 

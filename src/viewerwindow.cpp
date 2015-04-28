@@ -10,7 +10,10 @@
 #include <QQmlEngine>
 #include <QFileInfo>
 #include <QDir>
+#include <QSettings>
 #include <QDebug>
+
+#include <mcwinterface.h>
 
 #include "viewerwindow.h"
 #include "ui_viewerwindow.h"
@@ -86,7 +89,7 @@ QString ViewerWindow::getContentSource()
 //==============================================================================
 // Load File
 //==============================================================================
-void ViewerWindow::loadFile(const QString& aFileName)
+void ViewerWindow::loadFile(const QString& aFileName, const QString& aPanelName)
 {
     // Init Mime Database
     QMimeDatabase mimeDatabase;
@@ -146,7 +149,7 @@ void ViewerWindow::loadFile(const QString& aFileName)
         // Check Image Browser
         if (!imageBrowser) {
             // Create Image Browser
-            imageBrowser = new ImageBrowser(fileName);
+            imageBrowser = new ImageBrowser(fileName, aPanelName);
 
             // Connect Signals
             connect(imageBrowser, SIGNAL(currentIndexChanged(int)), this, SLOT(imageBrowserCurrentIndexChanged(int)));
@@ -532,9 +535,10 @@ ViewerWindow::~ViewerWindow()
 //==============================================================================
 // Constructor
 //==============================================================================
-ImageBrowser::ImageBrowser(const QString& aFileName, QObject* aParent)
+ImageBrowser::ImageBrowser(const QString& aFileName, const QString& aPanelName, QObject* aParent)
     : QObject(aParent)
     , fileUtil(NULL)
+    , panelName(aPanelName)
     , currentIndex(-1)
     , currentFile(aFileName)
     , currentDir("")
@@ -690,8 +694,13 @@ void ImageBrowser::clientConnectionChanged(const unsigned int& aID, const bool& 
 
     // Check If Connected
     if (aConnected && fileUtil) {
+        // Init Settings
+        QSettings settings;
+        // Get Sorting
+        int sorting = settings.value(panelName + SETTINGS_KEY_PANEL_SORTTYPE, DEFAULT_SORT_NAME).toInt();
+
         // Fetch Dir Items
-        fileUtil->getDirList(currentDir, QDir::Files);
+        fileUtil->getDirList(currentDir, QDir::Files, sorting);
     }
 }
 

@@ -38,7 +38,7 @@ public:
 public slots:
 
     // Load File
-    void loadFile(const QString& aFileName);
+    void loadFile(const QString& aFileName, const QString& aPanelName);
     // Save File As
     void saveFileAs(const QString& aFileName);
 
@@ -136,7 +136,7 @@ class ImageBrowser : public QObject
 public:
 
     // Constructor
-    explicit ImageBrowser(const QString& aFileName, QObject* aParent = NULL);
+    explicit ImageBrowser(const QString& aFileName, const QString& aPanelName, QObject* aParent = NULL);
 
     // Get Current File
     QString getCurrentFile();
@@ -212,6 +212,8 @@ protected:
 
     // File Util
     RemoteFileUtilClient*   fileUtil;
+    // Panel Name
+    QString                 panelName;
     // Image Files
     QStringList             imageFiles;
     // Current Index

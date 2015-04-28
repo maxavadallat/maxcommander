@@ -8,6 +8,8 @@
 #include <QMimeType>
 #include <QQmlContext>
 #include <QQmlEngine>
+#include <QFileInfo>
+#include <QDir>
 #include <QDebug>
 
 #include "viewerwindow.h"
@@ -26,6 +28,8 @@ ViewerWindow::ViewerWindow(QWidget* aParent)
     , fileName("")
     , editMode(false)
     , dirty(false)
+    , mime("")
+    , imageBrowser(NULL)
 {
     qDebug() << "ViewerWindow::ViewerWindow";
 
@@ -138,6 +142,20 @@ void ViewerWindow::loadFile(const QString& aFileName)
 
         // Set Source
         ui->quickWidget->setSource(QUrl("qrc:/qml/ImageViewer.qml"));
+
+        // Check Image Browser
+        if (!imageBrowser) {
+            // Create Image Browser
+            imageBrowser = new ImageBrowser(fileName);
+
+            // Connect Signals
+            connect(imageBrowser, SIGNAL(currentIndexChanged(int)), this, SLOT(imageBrowserCurrentIndexChanged(int)));
+            connect(imageBrowser, SIGNAL(currentFileChanged(QString)), this, SLOT(imageBrowserCurrentFileChanged(QString)));
+
+        }
+
+        // Set Context Property
+        //ctx->setContextProperty(DEFAULT_IMAGE_BROWSER, imageBrowser);
 
     } else if (!editMode && mime.startsWith(DEFAULT_MIME_PREFIX_AUDIO)) {
 
@@ -344,6 +362,35 @@ void ViewerWindow::textChanged()
 }
 
 //==============================================================================
+// Current Index Changed Slot
+//==============================================================================
+void ViewerWindow::imageBrowserCurrentIndexChanged(const int& aCurrentIndex)
+{
+    qDebug() << "ViewerWindow::imageBrowserCurrentIndexChanged - aCurrentIndex: " << aCurrentIndex;
+
+    // ...
+}
+
+//==============================================================================
+// Current File Changed Slot
+//==============================================================================
+void ViewerWindow::imageBrowserCurrentFileChanged(const QString& aCurrentFile)
+{
+    qDebug() << "ViewerWindow::imageBrowserCurrentFileChanged - aCurrentFile: " << aCurrentFile;
+
+    // Set File Name
+    fileName = aCurrentFile;
+
+    // Set Context Properties
+    QQmlContext* ctx = ui->quickWidget->rootContext();
+    // Set Context Properties - Dummy Model
+    ctx->setContextProperty(DEFAULT_IMAGE_VIEWER_CONTENT, fileName);
+
+    // Set Window Title
+    setWindowTitle(tr("Viewer - ") + fileName);
+}
+
+//==============================================================================
 // Close Event
 //==============================================================================
 void ViewerWindow::closeEvent(QCloseEvent* aEvent)
@@ -405,6 +452,38 @@ void ViewerWindow::keyReleaseEvent(QKeyEvent* aEvent)
                 }
             break;
 
+            case Qt::Key_Home:
+                // Check Image Browser
+                if (imageBrowser) {
+                    // Go To First
+                    imageBrowser->gotoFirst();
+                }
+            break;
+
+            case Qt::Key_Left:
+                // Check Image Browser
+                if (imageBrowser) {
+                    // Go To Prev
+                    imageBrowser->gotoPrev();
+                }
+            break;
+
+            case Qt::Key_Right:
+                // Check Image Browser
+                if (imageBrowser) {
+                    // Go To Next
+                    imageBrowser->gotoNext();
+                }
+            break;
+
+            case Qt::Key_End:
+                // Check Image Browser
+                if (imageBrowser) {
+                    // Go To Last
+                    imageBrowser->gotoLast();
+                }
+            break;
+
             default:
             break;
         }
@@ -425,3 +504,306 @@ ViewerWindow::~ViewerWindow()
     qDebug() << "ViewerWindow::~ViewerWindow";
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//==============================================================================
+// Constructor
+//==============================================================================
+ImageBrowser::ImageBrowser(const QString& aFileName, QObject* aParent)
+    : QObject(aParent)
+    , fileUtil(NULL)
+    , currentIndex(-1)
+    , currentFile(aFileName)
+    , currentDir("")
+{
+    // Init
+    init();
+}
+
+//==============================================================================
+// Init
+//==============================================================================
+void ImageBrowser::init()
+{
+    // Init Current File Info
+    QFileInfo fileInfo(currentFile);
+    // Check File Info
+    if (fileInfo.exists()) {
+        // Set Current Dir
+        currentDir = fileInfo.absolutePath();
+
+        // Check Current Dir
+        if (!currentDir.endsWith("/")) {
+            // Update Current Dir
+            currentDir += "/";
+        }
+
+        // Check File Util
+        if (!fileUtil) {
+            // Create File Util
+            fileUtil = new RemoteFileUtilClient();
+
+            // Connect Signals
+            connect(fileUtil, SIGNAL(clientConnectionChanged(uint,bool)), this, SLOT(clientConnectionChanged(uint,bool)));
+            connect(fileUtil, SIGNAL(clientStatusChanged(uint, int)), this, SLOT(clientStatusChanged(uint, int)));
+            connect(fileUtil, SIGNAL(dirListItemFound(uint,QString,QString)), this, SLOT(dirListItemFound(uint,QString,QString)));
+            connect(fileUtil, SIGNAL(fileOpFinished(uint,QString,QString,QString,QString)), this, SLOT(fileOpFinished(uint,QString,QString,QString,QString)));
+            connect(fileUtil, SIGNAL(fileOpAborted(uint,QString,QString,QString,QString)), this, SLOT(fileOpAborted(uint,QString,QString,QString,QString)));
+            connect(fileUtil, SIGNAL(fileOpError(uint,QString,QString,QString,QString,int)), this, SLOT(fileOpError(uint,QString,QString,QString,QString,int)));
+        }
+
+        // Connect To Server
+        fileUtil->connectToFileServer();
+    }
+
+    // ...
+}
+
+//==============================================================================
+// Find Index By File Name
+//==============================================================================
+int ImageBrowser::findIndex(const QString& aFileName)
+{
+    // Get Image Files Count
+    int ifCount = imageFiles.count();
+
+    // Go Thru Image Files
+    for (int i=0; i<ifCount; ++i) {
+        // Check File Name
+        if (imageFiles[i] == aFileName) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+//==============================================================================
+// Set Current Index
+//==============================================================================
+void ImageBrowser::setCurrentIndex(const int& aIndex)
+{
+    // Get Bounded Index
+    int boundedIndex = qBound(0, aIndex, imageFiles.count()-1);
+
+    // Check Current Index
+    if (currentIndex != boundedIndex) {
+        qDebug() << "ImageBrowser::setCurrentIndex - boundedIndex: " << boundedIndex;
+        // Set Current Index
+        currentIndex = boundedIndex;
+
+        // Emit Current Index Changed Signal
+        emit currentIndexChanged(currentIndex);
+
+        // Check Image Files
+        if (imageFiles.count() > 0) {
+            // Set Current File
+            currentFile = imageFiles[currentIndex];
+
+            // Emit Current File Changed Signal
+            emit currentFileChanged(currentDir + currentFile);
+        }
+    }
+}
+
+//==============================================================================
+// Get Current File
+//==============================================================================
+QString ImageBrowser::getCurrentFile()
+{
+    return currentFile;
+}
+
+//==============================================================================
+// Get Current Index
+//==============================================================================
+int ImageBrowser::getCurrentIndex()
+{
+    return currentIndex;
+}
+
+//==============================================================================
+// Go To First
+//==============================================================================
+void ImageBrowser::gotoFirst()
+{
+    // Set Current Index
+    setCurrentIndex(0);
+}
+
+//==============================================================================
+// Go To Prev
+//==============================================================================
+void ImageBrowser::gotoPrev()
+{
+    // Set Current Index
+    setCurrentIndex(currentIndex - 1);
+}
+
+//==============================================================================
+// Go To Next
+//==============================================================================
+void ImageBrowser::gotoNext()
+{
+    // Set Current Index
+    setCurrentIndex(currentIndex + 1);
+}
+
+//==============================================================================
+// Go To Last
+//==============================================================================
+void ImageBrowser::gotoLast()
+{
+    // Set Current Index
+    setCurrentIndex(imageFiles.count() - 1);
+}
+
+//==============================================================================
+// Client Connection Changed Slot
+//==============================================================================
+void ImageBrowser::clientConnectionChanged(const unsigned int& aID, const bool& aConnected)
+{
+    Q_UNUSED(aID);
+
+    // Check If Connected
+    if (aConnected && fileUtil) {
+        // Fetch Dir Items
+        fileUtil->getDirList(currentDir, QDir::Files);
+    }
+}
+
+//==============================================================================
+//==============================================================================
+// Client Status Changed Slot
+void ImageBrowser::clientStatusChanged(const unsigned int& aID, const int& aStatus)
+{
+    Q_UNUSED(aID);
+
+    qDebug() << "ImageBrowser::clientStatusChanged - aID: " << aID << " - aStatus: " << RemoteFileUtilClient::statusToString(aStatus);
+
+}
+
+//==============================================================================
+// File Operation Finished Slot
+//==============================================================================
+void ImageBrowser::fileOpFinished(const unsigned int& aID,
+                    const QString& aOp,
+                    const QString& aPath,
+                    const QString& aSource,
+                    const QString& aTarget)
+{
+    Q_UNUSED(aID);
+    Q_UNUSED(aSource);
+    Q_UNUSED(aTarget);
+
+    qDebug() << "ImageBrowser::fileOpFinished - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath;
+
+    // Check Path
+    if (QDir(currentDir) == QDir(aPath)) {
+        // Init File Info
+        QFileInfo fileInfo(currentFile);
+        // Get Image Index
+        currentIndex = findIndex(fileInfo.fileName());
+    }
+}
+
+//==============================================================================
+// File Operation Aborted Slot
+//==============================================================================
+void ImageBrowser::fileOpAborted(const unsigned int& aID,
+                   const QString& aOp,
+                   const QString& aPath,
+                   const QString& aSource,
+                   const QString& aTarget)
+{
+    Q_UNUSED(aID);
+    Q_UNUSED(aSource);
+    Q_UNUSED(aTarget);
+
+    qDebug() << "ImageBrowser::fileOpFinished - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath;
+
+    // ...
+}
+
+//==============================================================================
+// File Operation Error Slot
+//==============================================================================
+void ImageBrowser::fileOpError(const unsigned int& aID,
+                 const QString& aOp,
+                 const QString& aPath,
+                 const QString& aSource,
+                 const QString& aTarget,
+                 const int& aError)
+{
+    Q_UNUSED(aID);
+    Q_UNUSED(aSource);
+    Q_UNUSED(aTarget);
+
+    qDebug() << "ImageBrowser::fileOpFinished - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath << " - aError: " << aError;
+
+    // ...
+}
+
+//==============================================================================
+// Dir List Item Found Slot
+//==============================================================================
+void ImageBrowser::dirListItemFound(const unsigned int& aID,
+                                    const QString& aPath,
+                                    const QString& aFileName)
+{
+    Q_UNUSED(aID);
+
+    // Check Path
+    if (currentDir == aPath) {
+        // Init Mime Database
+        QMimeDatabase mimeDatabase;
+        // Get Mime Tpye
+        QString mimeType = mimeDatabase.mimeTypeForFile(aFileName).name();
+        // Check Mime
+        if (mimeType.startsWith(DEFAULT_MIME_PREFIX_IMAGE)) {
+            // Add To Image List
+            imageFiles << aFileName;
+        }
+    }
+}
+
+//==============================================================================
+// Destructor
+//==============================================================================
+ImageBrowser::~ImageBrowser()
+{
+    // Clear Images
+    imageFiles.clear();
+}
+
+
+
+
+
+
+
+
+

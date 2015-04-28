@@ -52,7 +52,7 @@ public:
     QString lastOperation();
 
     // Get Dir List
-    void getDirList(const QString& aDirPath, const int& aFilters, const int& aSortFlags);
+    void getDirList(const QString& aDirPath, const int& aFilters = 0, const int& aSortFlags = 0);
 
     // Create Directory
     void createDir(const QString& aDirPath);

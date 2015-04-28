@@ -138,6 +138,8 @@
 #define DEFAULT_FILE_LIST_MODEL_NAME                        "fileListModel"
 #define DEFAULT_IMAGE_VIEWER_CONTROLLER                     "viewerController"
 #define DEFAULT_IMAGE_VIEWER_CONTENT                        "viewerContent"
+#define DEFAULT_IMAGE_BROWSER                               "imageBrowser"
+
 
 #define DEFAULT_FILE_ICON_PROVIDER_ID                       "fileicon"
 #define DEFAULT_AUDIO_TAG_PROVIDER_ID                       "audiotag"

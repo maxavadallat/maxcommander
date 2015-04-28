@@ -13,6 +13,8 @@ class ViewerWindow;
 
 class ConfirmDialog;
 class RemoteFileUtilClient;
+class ImageBrowser;
+
 
 //==============================================================================
 // Internal File Viewer Window Class
@@ -73,6 +75,13 @@ protected slots: // For QTextEdit
     // Text Changed Slot
     void textChanged();
 
+protected slots: // For Image Browser
+
+    // Current Index Changed Slot
+    void imageBrowserCurrentIndexChanged(const int& aCurrentIndex);
+    // Current File Changed Slot
+    void imageBrowserCurrentFileChanged(const QString& aCurrentFile);
+
 protected: // From QWidget
 
     // Close Event
@@ -93,7 +102,126 @@ private:
     bool                    dirty;
     // Mime
     QString                 mime;
+
+    // Image Browser
+    ImageBrowser*           imageBrowser;
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//==============================================================================
+// Image Browser Class
+//==============================================================================
+class ImageBrowser : public QObject
+{
+    Q_OBJECT
+
+    Q_PROPERTY(QString currentFile READ getCurrentFile NOTIFY currentFileChanged)
+    Q_PROPERTY(int currentIndex READ getCurrentIndex NOTIFY currentIndexChanged)
+
+public:
+
+    // Constructor
+    explicit ImageBrowser(const QString& aFileName, QObject* aParent = NULL);
+
+    // Get Current File
+    QString getCurrentFile();
+    // Get Current Index
+    int getCurrentIndex();
+
+    // Go To First
+    void gotoFirst();
+    // Go To Prev
+    void gotoPrev();
+    // Go To Next
+    void gotoNext();
+    // Go To Last
+    void gotoLast();
+
+    // Destructor
+    virtual ~ImageBrowser();
+
+signals:
+
+    // Current Index Changed Signal
+    void currentIndexChanged(const int& aCurrentIndex);
+    // Current File Changed Signal
+    void currentFileChanged(const QString& aCurrentFile);
+
+protected slots:
+
+    // Init
+    void init();
+
+    // Find Index By File Name
+    int findIndex(const QString& aFileName);
+
+    // Set Current Index
+    void setCurrentIndex(const int& aIndex);
+
+protected slots: // From Remote File Util
+
+    // Client Connection Changed Slot
+    void clientConnectionChanged(const unsigned int& aID, const bool& aConnected);
+
+    // Client Status Changed Slot
+    void clientStatusChanged(const unsigned int& aID, const int& aStatus);
+
+    // File Operation Finished Slot
+    void fileOpFinished(const unsigned int& aID,
+                        const QString& aOp,
+                        const QString& aPath,
+                        const QString& aSource,
+                        const QString& aTarget);
+
+    // File Operation Aborted Slot
+    void fileOpAborted(const unsigned int& aID,
+                       const QString& aOp,
+                       const QString& aPath,
+                       const QString& aSource,
+                       const QString& aTarget);
+
+    // File Operation Error Slot
+    void fileOpError(const unsigned int& aID,
+                     const QString& aOp,
+                     const QString& aPath,
+                     const QString& aSource,
+                     const QString& aTarget,
+                     const int& aError);
+
+    // Dir List Item Found Slot
+    void dirListItemFound(const unsigned int& aID,
+                          const QString& aPath,
+                          const QString& aFileName);
+
+protected:
+
+    // File Util
+    RemoteFileUtilClient*   fileUtil;
+    // Image Files
+    QStringList             imageFiles;
+    // Current Index
+    int                     currentIndex;
+    // Current File
+    QString                 currentFile;
+    // Current Dir
+    QString                 currentDir;
+};
+
 
 #endif // VIEWERWINDOW_H
 

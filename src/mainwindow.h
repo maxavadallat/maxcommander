@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QList>
+#include <QActionGroup>
 
 namespace Ui {
 class MainWindow;
@@ -116,6 +117,9 @@ protected slots:
     // Focused Panel Changed Slot
     void focusedPanelChanged(FilePanel* aFocusedPanel);
 
+    // Launch Transfer
+    void launchTransfer(const QString& aOperation);
+
 protected slots: // Actions & Button
 
     // Help Button Clicked Slot
@@ -192,6 +196,11 @@ protected slots: // Actions & Button
     // Action Edit Triggered Slot
     void on_actionEdit_triggered();
 
+    // Action Copy File Triggered Slot
+    void on_actionCopy_triggered();
+    // Action Move File Triggered Slot
+    void on_actionMove_triggered();
+
     // Action Exit Triggered Slot
     void on_actionExit_triggered();
 
@@ -199,6 +208,8 @@ private:
 
     // UI
     Ui::MainWindow*                 ui;
+    // Action Group
+    QActionGroup*                   viewMenuActionGroup;
 
     // Left Drive Buttons - Windows
 

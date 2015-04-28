@@ -233,7 +233,7 @@ public slots:
     QStringList getSupportedImageFormats();
 
     // Reload
-    void reload(const int& aIndex);
+    void reload(const int& aIndex = -1);
 
     // Select All Files
     void selectAllFiles();
@@ -385,6 +385,13 @@ protected slots: // From QFileSystemWatcher
     // Refresh File List Model
     void refreshFileListModel(const QString& aFilePath);
 
+protected slots: // From File Renamer
+
+    // Rename Finished Slot
+    void renamerFinished(const QString& aSource, const QString& aTarget);
+
+protected slots:
+
     // Handle Modifier Key Press Event
     bool handleModifierKeyPressEvent(QKeyEvent* aEvent);
     // Handle Modifier Key Release Event
@@ -441,6 +448,8 @@ private:
 
     // Last Directory Name To Jump After CD UP
     QString                 lastDirName;
+    // Last File Name To Jump After Reload
+    QString                 lastFileName;
     // Last Index Before Reload
     int                     lastIndex;
 
@@ -499,9 +508,14 @@ private:
 
     // File Rename Active
     bool                    fileRenameActive;
-
     // File Ranemer
     FileRenamer*            fileRenamer;
+    // File Renamer Update Is Done
+    bool                    fileRenamerUpdate;
+    // File Transfer Update
+    bool                    fileTransferUpdate;
+    // File Delete Update
+    bool                    fileDeleteUpdate;
 };
 
 
@@ -531,6 +545,11 @@ public:
 
     // Destructor
     virtual ~FileRenamer();
+
+signals:
+
+    // Renamer Finished Signal
+    void finished(const QString& aSource, const QString& aTarget);
 
 protected slots:
 

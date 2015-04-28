@@ -59,6 +59,7 @@ void MainWindow::release()
 MainWindow::MainWindow(QWidget* aParent)
     : QMainWindow(aParent)
     , ui(new Ui::MainWindow)
+    , viewMenuActionGroup(new QActionGroup(NULL))
     , leftPanel(NULL)
     , rightPanel(NULL)
     , focusedPanel(NULL)
@@ -75,6 +76,17 @@ MainWindow::MainWindow(QWidget* aParent)
 
     // Setup UI
     ui->setupUi(this);
+
+    // Add Actions To Action Group
+    viewMenuActionGroup->addAction(ui->actionSort_by_Name);
+    viewMenuActionGroup->addAction(ui->actionSort_by_Extension);
+    viewMenuActionGroup->addAction(ui->actionSort_by_Type);
+    viewMenuActionGroup->addAction(ui->actionSort_by_Size);
+    viewMenuActionGroup->addAction(ui->actionSort_by_Date);
+    viewMenuActionGroup->addAction(ui->actionSort_by_Owner);
+    viewMenuActionGroup->addAction(ui->actionSort_by_Permissions);
+    // Set Exclusive
+    viewMenuActionGroup->setExclusive(true);
 
     // Set Left Panel
     leftPanel  = ui->leftPanel;
@@ -163,6 +175,7 @@ void MainWindow::saveSettings()
 {
     qDebug() << "MainWindow::saveSettings";
 
+    // ...
 }
 
 //==============================================================================
@@ -210,7 +223,7 @@ void MainWindow::showHelp()
     }
 
     // Load Content
-    //helpWindow->loadContent();
+    helpWindow->loadContent();
 
     // Show Help Window
     helpWindow->showWindow();
@@ -222,11 +235,30 @@ void MainWindow::showHelp()
 void MainWindow::launchTerminal(const QString& aDirPath)
 {
     // Check Focused Panel
-    if (focusedPanel) {
-        qDebug() << "MainWindow::launchTerminal - aDirPath: " << aDirPath;
-
-        // ...
+    if (!focusedPanel) {
+        return;
     }
+
+    qDebug() << "MainWindow::launchTerminal - aDirPath: " << aDirPath;
+
+    // Init Settings
+    QSettings settings;
+
+    // Get Terminal App
+    QString terminalApp = settings.value(SETTINGS_KEY_APPS_TERMINAL).toString();
+
+    // Check Terminal App
+    if (!terminalApp.isEmpty()) {
+        // Init Args
+        QStringList args;
+        // Add Current Dir To Args
+        args << focusedPanel->getCurrentDir();
+
+        // Launch App
+        launchApp(terminalApp, args, focusedPanel->getCurrentDir());
+    }
+
+    // ...
 }
 
 //==============================================================================
@@ -235,31 +267,51 @@ void MainWindow::launchTerminal(const QString& aDirPath)
 void MainWindow::launchViewer(const bool& aEditMode)
 {
     // Check Focused Panel
-    if (focusedPanel) {
-        qDebug() << "MainWindow::launchViewer - aEditMode: " << aEditMode;
+    if (!focusedPanel) {
+        return;
+    }
 
-        // Create New Viewer Window
-        ViewerWindow* newViewer = new ViewerWindow();
+    // Get File info
+    QFileInfo fileInfo = focusedPanel->getCurrFileInfo();
 
-        // Load File
-        newViewer->loadFile(focusedPanel->getCurrFileInfo().absoluteFilePath());
+    // Check File Type
+    if (fileInfo.isDir() || fileInfo.isBundle() || fileInfo.isSymLink()) {
+        qDebug() << "MainWindow::launchViewer - aEditMode: " << aEditMode << " - NO SELECTED FILE!";
 
-        // Setup Viewer Window
-
-        // Set Edit Mode
-        newViewer->setEditModeEnabled(aEditMode);
+        // Launch Dir Quick View
 
         // ...
 
-        // Connect Signal
-        connect(newViewer, SIGNAL(viewerClosed(ViewerWindow*)), this, SLOT(viewerWindowClosed(ViewerWindow*)));
-
-        // Add To Viewer List
-        viewerWindows << newViewer;
-
-        // Show Window
-        newViewer->showWindow();
+        return;
     }
+
+    qDebug() << "MainWindow::launchViewer - aEditMode: " << aEditMode;
+
+
+    // Check Settings For Using External Viewer
+
+
+    // Create New Viewer Window
+    ViewerWindow* newViewer = new ViewerWindow();
+
+    // Load File
+    newViewer->loadFile(focusedPanel->getCurrFileInfo().absoluteFilePath());
+
+    // Setup Viewer Window
+
+    // Set Edit Mode
+    newViewer->setEditModeEnabled(aEditMode);
+
+    // ...
+
+    // Connect Signal
+    connect(newViewer, SIGNAL(viewerClosed(ViewerWindow*)), this, SLOT(viewerWindowClosed(ViewerWindow*)));
+
+    // Add To Viewer List
+    viewerWindows << newViewer;
+
+    // Show Window
+    newViewer->showWindow();
 }
 
 //==============================================================================
@@ -267,31 +319,10 @@ void MainWindow::launchViewer(const bool& aEditMode)
 //==============================================================================
 void MainWindow::launchFileCopy()
 {
-    qDebug() << "MainWindow::launchFileCopy";
+    //qDebug() << "MainWindow::launchFileCopy";
 
-    // Check Transfer File Dialog
-    if (!transferFileDialog) {
-        // Create Transfer File Dialog
-        transferFileDialog = new TransferFileDialog();
-    }
-
-    // Setup Delete File Dialog - Copy
-
-    // ...
-
-    // Launch Dialog
-    if (transferFileDialog->exec()) {
-
-        // Create Transfer Progress Dialog
-
-        // Add To Transfer Progress Dialog List
-
-        // Show
-
-        // Build Queue
-
-        // Process Queueu
-    }
+    // Launch Transfer
+    launchTransfer(DEFAULT_OPERATION_COPY_FILE);
 }
 
 //==============================================================================
@@ -299,7 +330,21 @@ void MainWindow::launchFileCopy()
 //==============================================================================
 void MainWindow::launchFileMove()
 {
-    qDebug() << "MainWindow::launchFileMove";
+    //qDebug() << "MainWindow::launchFileMove";
+
+    // Launch Transfer
+    launchTransfer(DEFAULT_OPERATION_MOVE_FILE);
+}
+
+//==============================================================================
+// Launch Transfer
+//==============================================================================
+void MainWindow::launchTransfer(const QString& aOperation)
+{
+    // Check Focused Panel
+    if (!focusedPanel) {
+        return;
+    }
 
     // Check Transfer File Dialog
     if (!transferFileDialog) {
@@ -307,7 +352,73 @@ void MainWindow::launchFileMove()
         transferFileDialog = new TransferFileDialog();
     }
 
-    // Setup Delete File Dialog - Move
+    // Init Selected Files
+    QStringList selectedFiles = focusedPanel->getSelectedFiles();
+
+    // Init Transfer Source Dir
+    QString transferSource = "";
+    // Init Transfer Target Dir
+    QString transferTarget = "";
+
+    // Check Focused Panel - Left
+    if (focusedPanel == leftPanel) {
+
+        // Set Transfer Source
+        transferSource = leftPanel->getCurrentDir();
+        // Set Transfer Target
+        transferTarget = rightPanel->getCurrentDir();
+
+    // Check Focused Panel - Right
+    } else if (focusedPanel == rightPanel) {
+
+        // Set Transfer Source
+        transferSource = rightPanel->getCurrentDir();
+        // Set Transfer Target
+        transferTarget = leftPanel->getCurrentDir();
+
+    }
+
+    // Setup Delete File Dialog - Copy
+
+    // Check Selected Files Count
+    if (selectedFiles.count() > 1) {
+
+        // Set Transfer Dialog Source File Text
+        transferFileDialog->setSourceFileText(transferSource);
+        // Set Transfer Dialog Target File Text
+        transferFileDialog->setTargetFileText(transferTarget);
+
+    } else if (selectedFiles.count() == 1) {
+
+        // Check Transfer Source
+        if (!transferSource.endsWith("/")) {
+            // Adjust Transfer Source
+            transferSource += "/";
+        }
+
+        // Check Transfer Target
+        if (!transferTarget.endsWith("/")) {
+            // Adjust Transfer Target
+            transferTarget += "/";
+        }
+
+        // Set Transfer Dialog Source File Text
+        transferFileDialog->setSourceFileText(transferSource + selectedFiles[0], true);
+        // Set Transfer Dialog Target File Text
+        transferFileDialog->setTargetFileText(transferTarget + selectedFiles[0]);
+
+    } else {
+
+        qDebug() << "MainWindow::launchTransfer - aOperation: " << aOperation << " - NO SELECTED FILE!";
+
+        // Nothing Selected
+
+        // ...
+
+        return;
+    }
+
+    qDebug() << "MainWindow::launchTransfer - aOperation: " << aOperation << " - count: " << selectedFiles.count();
 
     // ...
 
@@ -315,15 +426,25 @@ void MainWindow::launchFileMove()
     if (transferFileDialog->exec()) {
 
         // Create Transfer Progress Dialog
+        TransferProgressDialog* newTransferProgressDialog = new TransferProgressDialog(aOperation);
+
+        // Connect Closed Signal
+        connect(newTransferProgressDialog, SIGNAL(dialogClosed(TransferProgressDialog*)), this, SLOT(transferProgressClosed(TransferProgressDialog*)));
 
         // Add To Transfer Progress Dialog List
+        transferProgressDialogs << newTransferProgressDialog;
 
-        // Show
-
-        // Build Queue
-
-        // Process Queueu
+        // Check Selected Files Count
+        if (selectedFiles.count() == 1) {
+            // Launch Progress Dialog
+            newTransferProgressDialog->launch(transferFileDialog->getSourceFileText(), transferFileDialog->getTargetFileText());
+        } else {
+            // Launch Progress Dialog
+            newTransferProgressDialog->launch(transferSource, transferTarget, selectedFiles);
+        }
     }
+
+
 }
 
 //==============================================================================
@@ -332,36 +453,38 @@ void MainWindow::launchFileMove()
 void MainWindow::launchCreateDir()
 {
     // Check Focused Panel
-    if (focusedPanel) {
-        qDebug() << "MainWindow::launchCreateDir";
+    if (!focusedPanel) {
+        return;
+    }
 
-        // Check CreateDirDialog
-        if (!createDirDialog) {
-            // Create Create Dir Dialog
-            createDirDialog = new CreateDirDialog();
-        }
+    qDebug() << "MainWindow::launchCreateDir";
 
-        // Init Dir Path
-        QString dirPath = focusedPanel->getCurrentDir();
-        // Chekc Dir Path
-        if (!dirPath.endsWith("/")) {
-            // Adjust Dir Path
-            dirPath += "/";
-        }
+    // Check CreateDirDialog
+    if (!createDirDialog) {
+        // Create Create Dir Dialog
+        createDirDialog = new CreateDirDialog();
+    }
 
-        // Setup Dialog
-        createDirDialog->setDirPath(dirPath);
+    // Init Dir Path
+    QString dirPath = focusedPanel->getCurrentDir();
+    // Chekc Dir Path
+    if (!dirPath.endsWith("/")) {
+        // Adjust Dir Path
+        dirPath += "/";
+    }
 
-        // ...
+    // Setup Dialog
+    createDirDialog->setDirPath(dirPath);
 
-        // Launch Dialog
-        if (createDirDialog->exec()) {
-            // Get Dir Path
-            dirPath = createDirDialog->getDirectory();
+    // ...
 
-            // Create Directory
-            focusedPanel->createDir(dirPath);
-        }
+    // Launch Dialog
+    if (createDirDialog->exec()) {
+        // Get Dir Path
+        dirPath = createDirDialog->getDirectory();
+
+        // Create Directory
+        focusedPanel->createDir(dirPath);
     }
 }
 
@@ -370,6 +493,11 @@ void MainWindow::launchCreateDir()
 //==============================================================================
 void MainWindow::launchDelete()
 {
+    // Check Focused Panel
+    if (!focusedPanel) {
+        return;
+    }
+
     // Get Number Of Transfer Progress Dialogs
     int numTransferProgressDialogs = transferProgressDialogs.count();
     // Get number Of Delete Progress Dialogs
@@ -382,65 +510,58 @@ void MainWindow::launchDelete()
         return;
     }
 
-    // Check Focused Panel
-    if (focusedPanel) {
+    // Check Delete File Dialog
+    if (!deleteFileDialog) {
+        // Create Delete File Dialog
+        deleteFileDialog = new DeleteFileDialog();
+    }
 
-        // Check Active Delete Progress Dialogs Path
+    // Get Selected File List
+    QStringList selectedFileList = focusedPanel->getSelectedFiles();
 
+    // Check Selected File List
+    if (selectedFileList.count() == 0) {
+        qDebug() << "MainWindow::launchDelete - NO SELECTED FILE!";
 
-        // Check Delete File Dialog
-        if (!deleteFileDialog) {
-            // Create Delete File Dialog
-            deleteFileDialog = new DeleteFileDialog();
-        }
+        return;
+    }
 
-        // Get Selected File List
-        QStringList selectedFileList = focusedPanel->getSelectedFiles();
+    qDebug() << "MainWindow::launchDelete";
 
-        // Check Selected File List
-        if (selectedFileList.count() == 0) {
-            qDebug() << "MainWindow::launchDelete - NO SELECTED FILE!";
+    // Get Focused Panel Current Dir
+    QString currDir = focusedPanel->getCurrentDir();
 
-            return;
-        }
+    // Check Current Dir
+    if (!currDir.endsWith("/")) {
+        // Adjust Current Dir
+        currDir += "/";
+    }
 
-        qDebug() << "MainWindow::launchDelete";
+    // Check Selected File List
+    if (selectedFileList.count() == 1) {
+        // Setup Delete File Dialog
+        deleteFileDialog->setFileName(currDir + selectedFileList[0]);
+    } else {
+        // Setup Delete File Dialog
+        deleteFileDialog->setFileName(currDir);
+    }
 
-        // Get Focused Panel Current Dir
-        QString currDir = focusedPanel->getCurrentDir();
+    // ...
 
-        // Check Current Dir
-        if (!currDir.endsWith("/")) {
-            // Adjust Current Dir
-            currDir += "/";
-        }
+    // Launch Dialog
+    if (deleteFileDialog->exec()) {
 
-        // Check Selected File List
-        if (selectedFileList.count() == 1) {
-            // Setup Delete File Dialog
-            deleteFileDialog->setFileName(currDir + selectedFileList[0]);
-        } else {
-            // Setup Delete File Dialog
-            deleteFileDialog->setFileName(currDir);
-        }
+        // Create Delete Progress Dialog
+        DeleteProgressDialog* newDialog = new DeleteProgressDialog();
 
-        // ...
+        // Connect Signal
+        connect(newDialog, SIGNAL(dialogClosed(DeleteProgressDialog*)), this, SLOT(deleteProgressClosed(DeleteProgressDialog*)));
 
-        // Launch Dialog
-        if (deleteFileDialog->exec()) {
+        // Add To Delete Progress Dialog List
+        deleteProgressDialogs << newDialog;
 
-            // Create Delete Progress Dialog
-            DeleteProgressDialog* newDialog = new DeleteProgressDialog();
-
-            // Connect Signal
-            connect(newDialog, SIGNAL(dialogClosed(DeleteProgressDialog*)), this, SLOT(deleteProgressClosed(DeleteProgressDialog*)));
-
-            // Add To Delete Progress Dialog List
-            deleteProgressDialogs << newDialog;
-
-            // Launch
-            newDialog->launch(focusedPanel->getCurrentDir(), focusedPanel->getSelectedFiles());
-        }
+        // Launch
+        newDialog->launch(focusedPanel->getCurrentDir(), focusedPanel->getSelectedFiles());
     }
 }
 
@@ -1110,7 +1231,7 @@ void MainWindow::on_actionNew_Directory_triggered()
 //==============================================================================
 void MainWindow::on_actionNew_File_triggered()
 {
-    //
+
 }
 
 //==============================================================================
@@ -1129,6 +1250,24 @@ void MainWindow::on_actionEdit_triggered()
 {
     // Launch Viewer
     launchViewer(true);
+}
+
+//==============================================================================
+// Action Copy File Triggered Slot
+//==============================================================================
+void MainWindow::on_actionCopy_triggered()
+{
+    // Launch File Copy
+    launchFileCopy();
+}
+
+//==============================================================================
+// Action Move File Triggered Slot
+//==============================================================================
+void MainWindow::on_actionMove_triggered()
+{
+    // Launch File Move
+    launchFileMove();
 }
 
 //==============================================================================
@@ -1189,6 +1328,13 @@ MainWindow::~MainWindow()
     // Shut Down
     shutDown();
 
+    // Check View Menu Action Group
+    if (viewMenuActionGroup) {
+        // Delete View Menu Action Group
+        delete viewMenuActionGroup;
+        viewMenuActionGroup = NULL;
+    }
+
     // Delete UI
     delete ui;
 
@@ -1237,5 +1383,6 @@ MainWindow::~MainWindow()
 
     qDebug() << "MainWindow::~MainWindow";
 }
+
 
 

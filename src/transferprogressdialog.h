@@ -80,6 +80,8 @@ public:
 
     // Launch Progress Dialog
     void launch(const QString& aSourcePath, const QString& aTargetPath, const QStringList& aSelectedFiles);
+    // Launch Progress Dialog
+    void launch(const QString& aSource, const QString& aTarget);
 
     // Suspend
     void suspend();

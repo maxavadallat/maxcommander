@@ -289,7 +289,6 @@ Rectangle {
 
             // Set Name Header Sizer Position
             fileListHeader.setNameHeaderSeparatorPosition(remainingWidth - Const.DEFAULT_FILE_LIST_HEADER_SEPARATOR_WIDTH);
-
         }
     }
 
@@ -303,7 +302,6 @@ Rectangle {
        anchors.verticalCenterOffset: 4
        radius: fileRenamer.radius
        color: "#44000000"
-       //color: "red"
    }
 
     // File Renamer
@@ -396,8 +394,8 @@ Rectangle {
             console.log("fileListRoot.Connections.mainController.onLaunchFileRename");
 
             // Set File Renamer Pos & Size
-            fileRenamer.x = fileListView.currentItem.x;
-            fileRenamer.y = fileListView.currentItem.y + fileListView.y;
+            fileRenamer.x = fileListView.currentItem.mapToItem(fileListRoot).x;
+            fileRenamer.y = fileListView.currentItem.mapToItem(fileListRoot).y;
             fileRenamer.width = fileListView.width - 4;
             fileRenamer.height = fileListView.currentItem.height;
 

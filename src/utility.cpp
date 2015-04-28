@@ -531,5 +531,12 @@ bool isDirEmpty(const QString& aDirPath)
     return entryList.count() == 0;
 }
 
+//==============================================================================
+// Launch App
+//==============================================================================
+bool launchApp(const QString& aAppName, const QStringList& aArgs, const QString& aWorkingDir)
+{
+    return QProcess::startDetached(aAppName, aArgs, aWorkingDir);
+}
 
 

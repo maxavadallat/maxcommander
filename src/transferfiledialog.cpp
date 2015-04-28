@@ -22,9 +22,12 @@ QString TransferFileDialog::getSourceFileText()
 //==============================================================================
 // Set Source File Text
 //==============================================================================
-void TransferFileDialog::setSourceFileText(const QString& aSourceFile)
+void TransferFileDialog::setSourceFileText(const QString& aSourceFile, const bool& aReadOnly)
 {
+    // Set Text
     ui->sourceFileEdit->setText(aSourceFile);
+    // Set Read Only
+    ui->sourceFileEdit->setReadOnly(aReadOnly);
 }
 
 //==============================================================================
@@ -38,9 +41,12 @@ QString TransferFileDialog::getTargetFileText()
 //==============================================================================
 // Set Target Fiel Text
 //==============================================================================
-void TransferFileDialog::setTargetFileText(const QString& aTargetFile)
+void TransferFileDialog::setTargetFileText(const QString& aTargetFile, const bool& aReadOnly)
 {
+    // Set Text
     ui->targetFileEdit->setText(aTargetFile);
+    // Set Read Only
+    ui->targetFileEdit->setReadOnly(aReadOnly);
 }
 
 //==============================================================================

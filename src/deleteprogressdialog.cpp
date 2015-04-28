@@ -646,7 +646,7 @@ void DeleteProgressDialog::fileOpError(const unsigned int& aID,
         default:
         case DEFAULT_ERROR_GENERAL: {
             // Set Error Text
-            confirmDialog.setConfirmText(tr(DEFAULT_CONFIRM_TEXT_CANT_DELETE_FILE));
+            confirmDialog.setConfirmText(tr(DEFAULT_ERROR_TEXT_CANT_DELETE_FILE));
 
             // Set Path
             confirmDialog.setPath(aPath);

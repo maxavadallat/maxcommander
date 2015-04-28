@@ -66,6 +66,9 @@ QString getExtensionFromFullName(const QString& aFullFileName);
 // Check If Dir Is Empty
 bool isDirEmpty(const QString& aDirPath);
 
+// Launch App
+bool launchApp(const QString& aAppName, const QStringList& aArgs, const QString& aWorkingDir = "");
+
 
 #endif // UTILITY
 

@@ -47,13 +47,17 @@ public:
     // Set Current Dir
     void setCurrentDir(const QString& aCurrentDir);
 
-    // Find Index
+    // Find Index by File Name
     int findIndex(const QString& aFileName);
     // Insert Item by File Name - For Newly Create Directory
     void insertItem(const QString& aFileName);
 
     // Get File Info
     QFileInfo getFileInfo(const int& aIndex);
+
+    // Update Item
+    void updateItem(const int& aIndex, const QFileInfo& aFileInfo);
+
     // Check If Is Dir
     bool isDir(const int& aIndex);
     // Check If Is Bundle
@@ -69,9 +73,6 @@ public:
 
     // Get File Count
     int getFileCount();
-
-    // Get File Index By FileName
-    int getFileIndex(const QString& aFileName);
 
     // Create Dir
     void createDir(const QString& aDirPath);

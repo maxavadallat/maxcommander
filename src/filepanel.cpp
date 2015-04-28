@@ -38,6 +38,7 @@ FilePanel::FilePanel(QWidget* aParent)
     , currentIndex(-1)
     , visualItemsCount(-1)
     , lastDirName("")
+    , lastFileName("")
     , lastIndex(-1)
     , showHidden(true)
     , extVisible(true)
@@ -60,6 +61,9 @@ FilePanel::FilePanel(QWidget* aParent)
     , ownKeyPress(false)
     , fileRenameActive(false)
     , fileRenamer(NULL)
+    , fileRenamerUpdate(false)
+    , fileTransferUpdate(false)
+    , fileDeleteUpdate(false)
 
 {
     // Setup UI
@@ -683,7 +687,7 @@ int FilePanel::getFileIndex(const QString& aFileName)
     // Check File List Model
     if (fileListModel) {
         // Get Index
-        return fileListModel->getFileIndex(aFileName);
+        return fileListModel->findIndex(aFileName);
     }
 
     return -1;
@@ -715,6 +719,9 @@ void FilePanel::renameFile(const QString& aSource, const QString& aTarget)
     if (!fileRenamer) {
         // Create File Renamer
         fileRenamer = new FileRenamer();
+
+        // Connect Signal
+        connect(fileRenamer, SIGNAL(finished(QString,QString)), this, SLOT(renamerFinished(QString,QString)));
     }
 
     // Check File Renamer
@@ -846,7 +853,7 @@ void FilePanel::reload(const int& aIndex)
 
     // Check File List Model
     if (fileListModel) {
-        //qDebug() << "FilePanel::reload - panelName: " << panelName;
+        qDebug() << "FilePanel::reload - panelName: " << panelName;
         // Reload
         fileListModel->reload();
     }
@@ -859,6 +866,7 @@ void FilePanel::selectAllFiles()
 {
     // Check File List Model
     if (fileListModel) {
+        qDebug() << "FilePanel::selectAllFiles - panelName: " << panelName;
         // Select All Items
         fileListModel->selectAll();
     }
@@ -871,6 +879,7 @@ void FilePanel::deselectAllFiles()
 {
     // Check File List Model
     if (fileListModel) {
+        qDebug() << "FilePanel::deselectAllFiles - panelName: " << panelName;
         // Deselect All Items
         fileListModel->deselectAll();
     }
@@ -883,6 +892,7 @@ void FilePanel::toggleCurrentFileSelection()
 {
     // Check File List Model
     if (fileListModel) {
+        qDebug() << "FilePanel::toggleCurrentFileSelection - panelName: " << panelName;
         // Set Item Selection
         fileListModel->setSelected(currentIndex, !fileListModel->getSelected(currentIndex));
     }
@@ -1280,6 +1290,15 @@ void FilePanel::fileModelDirFetchFinished()
         lastDirName = "";
         // Set Current Index
         setCurrentIndex(lastDirIndex);
+
+    } else if (!lastFileName.isEmpty()) {
+        // Find Index
+        int lastFileIndex = fileListModel ? fileListModel->findIndex(lastFileName) : 0;
+        // reset Last File Name
+        lastFileName = "";
+        // Set Current Index
+        setCurrentIndex(lastFileIndex);
+
     } else if (lastIndex != -1) {
         // Set Current Index
         setCurrentIndex(lastIndex);
@@ -1402,43 +1421,7 @@ void FilePanel::fileModelNeedConfirm(const int& aCode, const QString& aPath, con
     if (fileListModel) {
         qDebug() << "FilePanel::fileModelNeedConfirm - panelName: " << panelName << " - op: " << fileListModel->lastOperation() << " - aSource: " << aSource << " - aTarget: " << aTarget << " - aCode: " << aCode;
 
-/*
-        // Check Last Operation - Rename
-        if (fileListModel->lastOperation() == DEFAULT_OPERATION_MOVE_FILE) {
-
-            // Directory Exists
-            ConfirmDialog confirmDialog;
-            // Configure Buttons
-            confirmDialog.configureButtons(QDialogButtonBox::Abort);
-
-            // Switch Code
-            switch (aCode) {
-                case DEFAULT_ERROR_TARGET_DIR_EXISTS: {
-                    // Set Text
-                    confirmDialog.setConfirmText(tr(DEFAULT_CONFIRM_TEXT_DIRECTORY_EXISTS_MERGE));
-                    // Add Buttons
-                    confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_YES), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_YES);
-                    confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_NO), QDialogButtonBox::RejectRole, DEFAULT_CONFIRM_NO);
-
-                    // Set Path
-                    confirmDialog.setPath(aTarget);
-
-                    // Exec Dialog
-                    if (confirmDialog.exec()) {
-                        // Send User Response/Confirm
-                        fileListModel->sendUserResponse(confirmDialog.getActionIndex(), confirmDialog.getPath());
-                    } else {
-                        // Send User Response/Confirm
-                        fileListModel->sendUserResponse(DEFAULT_CONFIRM_ABORT, confirmDialog.getPath());
-                    }
-
-                } break;
-
-                default:
-                break;
-            }
-        }
-*/
+        // ...
     }
 }
 
@@ -1491,7 +1474,15 @@ void FilePanel::directoryChanged(const QString& aDirPath)
 {
     // Check Dir Path
     if (currentDir == aDirPath) {
-        qDebug() << "FilePanel::stopDirWatcher - aDirPath: " << aDirPath;
+        // Check File Renamer Update
+        if (fileRenamerUpdate) {
+            // Reset file Renamer Update
+            fileRenamerUpdate = false;
+
+            return;
+        }
+
+        qDebug() << "#### FilePanel::directoryChanged - aDirPath: " << aDirPath;
         // Set Dir Changed
         dwDirChanged = true;
 
@@ -1508,7 +1499,7 @@ void FilePanel::fileChanged(const QString& aFilePath)
     QFileInfo fileInfo(aFilePath);
     // Check File Path
     if (currentDir == fileInfo.absolutePath()) {
-        qDebug() << "FilePanel::fileChanged - aFilePath: " << aFilePath;
+        qDebug() << "#### FilePanel::fileChanged - aFilePath: " << aFilePath;
         // Set File Changed
         dwFileChanged = true;
 
@@ -1523,6 +1514,36 @@ void FilePanel::refreshFileListModel(const QString& aFilePath)
 {
     qDebug() << "FilePanel::refreshFileListModel - aFilePath: " << aFilePath;
 
+    // ...
+
+}
+
+//==============================================================================
+// Rename Finished Slot
+//==============================================================================
+void FilePanel::renamerFinished(const QString& aSource, const QString& aTarget)
+{
+    // Init Target File Info
+    QFileInfo targetInfo(aTarget);
+
+    // Check Target Info Path
+    if (targetInfo.absolutePath() == currentDir) {
+        qDebug() << "FilePanel::renamerFinished - aSource: " << aSource << " - aTarget: " << aTarget;
+
+        // Check File List Model
+        if (fileListModel) {
+            // Set File  Renamer Update
+            fileRenamerUpdate = true;
+
+            // Set Last File Name
+            lastFileName = targetInfo.fileName();
+
+            // Reload
+            reload();
+        }
+    }
+
+    // ...
 }
 
 //==============================================================================
@@ -1901,26 +1922,16 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
             case Qt::Key_F3:
                 // Check Modifier Keys
                 if (modifierKeys == Qt::NoModifier) {
-                    // Get File info
-                    QFileInfo fileInfo = getCurrFileInfo();
-                    // Check File Type
-                    if (!fileInfo.isDir() && !fileInfo.isBundle() && !fileInfo.isSymLink()) {
-                        // Emit Launch Viewer
-                        emit launchViewer(false);
-                    }
+                    // Emit Launch Viewer
+                    emit launchViewer(false);
                 }
             break;
 
             case Qt::Key_F4:
                 // Check Modifier Keys
                 if (modifierKeys == Qt::NoModifier) {
-                    // Get File info
-                    QFileInfo fileInfo = getCurrFileInfo();
-                    // Check File Type
-                    if (!fileInfo.isDir() && !fileInfo.isBundle() && !fileInfo.isSymLink()) {
-                        // Emit Launch Viewer
-                        emit launchViewer(true);
-                    }
+                    // Emit Launch Viewer
+                    emit launchViewer(true);
                 }
             break;
 
@@ -2001,7 +2012,7 @@ void FilePanel::timerEvent(QTimerEvent* aEvent)
         if (aEvent->timerId() == dirWatcherTimerID) {
             // Check If Need Refrsh
             if (fileListModel && !fileListModel->getBusy() && (dwDirChanged || dwFileChanged)) {
-                qDebug() << "#### FilePanel::timerEvent - dirWatcherTimerID";
+                qDebug() << "FilePanel::timerEvent - dirWatcherTimerID";
                 // Reset Dir Changed
                 dwDirChanged = false;
                 // Reset File Changed
@@ -2039,19 +2050,6 @@ FilePanel::~FilePanel()
         fileRenamer = NULL;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -2192,7 +2190,6 @@ void FileRenamer::processQueue()
         // Rename File
         fileUtil->moveFile(sourceFile, targetFile);
     } else {
-        // Finished
 
         // Check Queue Index
         if (queueIndex != -1) {
@@ -2337,6 +2334,10 @@ void FileRenamer::fileOpFinished(const unsigned int& aID,
 
     // Check Operation - MOVE
     } else if (aOp == DEFAULT_OPERATION_MOVE_FILE) {
+
+        // Emit Finished Signal
+        emit finished(aSource, aTarget);
+
         // Increase Current Queue Index
         queueIndex++;
     }
@@ -2393,21 +2394,21 @@ void FileRenamer::fileOpError(const unsigned int& aID,
         default:
         case DEFAULT_ERROR_GENERAL: {
             // Set Error Text
-            confirmDialog.setConfirmText(tr(DEFAULT_CONFIRM_TEXT_CANT_MOVE_FILE));
+            confirmDialog.setConfirmText(tr(DEFAULT_ERROR_TEXT_CANT_MOVE_FILE));
             // Set Path
             confirmDialog.setPath(aSource);
         } break;
 
         case DEFAULT_ERROR_CANNOT_DELETE_SOURCE_DIR: {
             // Set Error Text
-            confirmDialog.setConfirmText(tr(DEFAULT_CONFIRM_TEXT_CANT_DELETE_SOURCE));
+            confirmDialog.setConfirmText(tr(DEFAULT_ERROR_TEXT_CANT_DELETE_SOURCE));
             // Set Path
             confirmDialog.setPath(aSource);
         } break;
 
         case DEFAULT_ERROR_CANNOT_DELETE_TARGET_DIR: {
             // Set Error Text
-            confirmDialog.setConfirmText(tr(DEFAULT_CONFIRM_TEXT_CANT_DELETE_TARGET));
+            confirmDialog.setConfirmText(tr(DEFAULT_ERROR_TEXT_CANT_DELETE_TARGET));
             // Set Path
             confirmDialog.setPath(aTarget);
         } break;

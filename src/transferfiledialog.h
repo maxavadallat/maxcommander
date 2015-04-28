@@ -21,18 +21,20 @@ public:
     // Get Source File Text
     QString getSourceFileText();
     // Set Source File Text
-    void setSourceFileText(const QString& aSourceFile);
+    void setSourceFileText(const QString& aSourceFile, const bool& aReadOnly = false);
     // Get Target File Text
     QString getTargetFileText();
     // Set Target Fiel Text
-    void setTargetFileText(const QString& aTargetFile);
+    void setTargetFileText(const QString& aTargetFile, const bool& aReadOnly = false);
     // Destructor
     virtual ~TransferFileDialog();
 
 private:
 
     // UI
-    Ui::TransferFileDialog *ui;
+    Ui::TransferFileDialog* ui;
 };
 
 #endif // TRANSFERFILEDIALOG_H
+
+

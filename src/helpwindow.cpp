@@ -20,8 +20,11 @@ HelpWindow::HelpWindow(QWidget* aParent)
 //==============================================================================
 void HelpWindow::loadContent(const QUrl& aURL)
 {
-    // Set URL
-    ui->webView->setUrl(aURL);
+    // Check URL
+    if (!aURL.isEmpty()) {
+        // Set URL
+        ui->webView->setUrl(aURL);
+    }
 }
 
 //==============================================================================
@@ -55,7 +58,6 @@ void HelpWindow::restoreUI()
     QSettings settings;
 
     // ...
-
 }
 
 //==============================================================================
@@ -66,9 +68,7 @@ void HelpWindow::saveSettings()
     // Init Settings
     QSettings settings;
 
-
     // ...
-
 }
 
 //==============================================================================

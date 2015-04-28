@@ -258,7 +258,7 @@ protected slots:
     // Write Data
     void writeData(const QByteArray& aData);
     // Write Data
-    void wirteData(const QVariantMap& aData);
+    void writeData(const QVariantMap& aData);
 
     // Socket Host Found
     void socketHostFound();

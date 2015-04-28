@@ -31,11 +31,13 @@
 #define SETTINGS_GROUP_PANEL_COMMON                         "panelCommon"
 #define SETTINGS_GROUP_UI                                   "ui"
 #define SETTINGS_GROUP_VIEWER                               "viewer"
+#define SETTINGS_GROUP_APPS                                 "apps"
 
 
 // Settings Keys
 
 // Main
+
 #define SETTINGS_KEY_EXEC_PATH                              SETTINGS_GROUP_MAIN"/execpath"
 
 #define SETTINGS_KEY_MAIN_MAXIMIZED                         SETTINGS_GROUP_MAIN"/maximized"
@@ -64,6 +66,9 @@
 #define SETTINGS_KEY_SHOW_HIDDEN_FILES                      SETTINGS_GROUP_PANEL_COMMON"/showHidden"
 #define SETTINGS_KEY_DIRFIRST                               SETTINGS_GROUP_PANEL_COMMON"/dirFirst"
 #define SETTINGS_KEY_CASE_SENSITIVE                         SETTINGS_GROUP_PANEL_COMMON"/caseSensitive"
+
+
+// File Panels
 
 #define DEFAULT_PANEL_NAME_LEFT                             "LEFT_PANEL"
 #define DEFAULT_PANEL_NAME_RIGHT                            "RIGHT_PANEL"
@@ -107,6 +112,16 @@
 #define DEFAULT_MIME_PREFIX_AUDIO                           "audio/"
 #define DEFAULT_MIME_PREFIX_VIDEO                           "video/"
 
+
+
+// Apps
+
+#define SETTINGS_KEY_APPS_TERMINAL                          SETTINGS_GROUP_APPS"/terminal"
+#define SETTINGS_KEY_APPS_VIEWER                            SETTINGS_GROUP_APPS"/viewer"
+#define SETTINGS_KEY_APPS_EDITOR                            SETTINGS_GROUP_APPS"/editor"
+#define SETTINGS_KEY_APPS_COMPARE                           SETTINGS_GROUP_APPS"/compare"
+#define SETTINGS_KEY_APPS_PACKER                            SETTINGS_GROUP_APPS"/packer"
+#define SETTINGS_KEY_APPS_UNPACKER                          SETTINGS_GROUP_APPS"/unpacker"
 
 // Default Settings
 
@@ -186,7 +201,7 @@
 
 #define DEFAULT_TITLE_CONFIRMATION                          "Confirmation"
 #define DEFAULT_TITLE_COPY_FILES                            "Copy File(s)"
-#define DEFAULT_TITLE_MOVE_FILES                            "Move File(s)"
+#define DEFAULT_TITLE_MOVE_FILES                            "Move/Rename File(s)"
 
 #define DEFAULT_CONFIRM_BUTTON_TEXT_YES                     "Yes"
 #define DEFAULT_CONFIRM_BUTTON_TEXT_YESTOALL                "Yes to All"
@@ -203,16 +218,15 @@
 #define DEFAULT_CONFIRM_TEXT_DIRECTORY_EXISTS               "Directory Exists:"
 #define DEFAULT_CONFIRM_TEXT_DIRECTORY_NOT_EMPTY            "Directory: %1 Is Not Empty. Delete All?"
 #define DEFAULT_CONFIRM_TEXT_DIRECTORY_EXISTS_MERGE         "Target Directory Exists, Merge?"
-#define DEFAULT_CONFIRM_TEXT_FILE_DOESNT_EXIST              DEFAULT_ERROR_TEXT_FILE_DOESNT_EXIST
 #define DEFAULT_CONFIRM_TEXT_TARGET_FILE_EXISTS             "Target File Exists: %1 Overwrite?"
-#define DEFAULT_CONFIRM_TEXT_CANT_CREATE_DIRECTORY          "Can Not Create Directory:"
-#define DEFAULT_CONFIRM_TEXT_CANT_DELETE_FILE               "Can Not Delete File:"
+#define DEFAULT_ERROR_TEXT_CANT_CREATE_DIRECTORY            "Can Not Create Directory:"
+#define DEFAULT_ERROR_TEXT_CANT_DELETE_FILE                 "Can Not Delete File:"
 
-#define DEFAULT_CONFIRM_TEXT_CANT_COPY_FILE                 "Can Not Copy File:"
-#define DEFAULT_CONFIRM_TEXT_CANT_MOVE_FILE                 "Can Not Rename/Move File:"
+#define DEFAULT_ERROR_TEXT_CANT_COPY_FILE                   "Can Not Copy File:"
+#define DEFAULT_ERROR_TEXT_CANT_MOVE_FILE                   "Can Not Rename/Move File:"
 
-#define DEFAULT_CONFIRM_TEXT_CANT_DELETE_SOURCE             "Can Not Delete Source:"
-#define DEFAULT_CONFIRM_TEXT_CANT_DELETE_TARGET             "Can Not Delete Target:"
+#define DEFAULT_ERROR_TEXT_CANT_DELETE_SOURCE               "Can Not Delete Source:"
+#define DEFAULT_ERROR_TEXT_CANT_DELETE_TARGET               "Can Not Delete Target:"
 
 #define DEFAULT_CONFIRM_TEXT_TARGET_DIR_DOESNT_EXIST        "Target Dir Doesn\'t Exist. Create?"
 

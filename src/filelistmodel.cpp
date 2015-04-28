@@ -153,25 +153,6 @@ int FileListModel::getFileCount()
 }
 
 //==============================================================================
-// Get File Index By FileName
-//==============================================================================
-int FileListModel::getFileIndex(const QString& aFileName)
-{
-    // Get Item List Count
-    int ilCount = itemList.count();
-
-    // Go Thru Items
-    for (int i=0; i<ilCount; ++i) {
-        // Check Item's File Name
-        if (itemList[i]->fileInfo.fileName() == aFileName) {
-            return i;
-        }
-    }
-
-    return -1;
-}
-
-//==============================================================================
 // Create Dir
 //==============================================================================
 void FileListModel::createDir(const QString& aDirPath)
@@ -1029,6 +1010,26 @@ QFileInfo FileListModel::getFileInfo(const int& aIndex)
     }
 
     return QFileInfo("/");
+}
+
+//==============================================================================
+// Update Item
+//==============================================================================
+void FileListModel::updateItem(const int& aIndex, const QFileInfo& aFileInfo)
+{
+    // Check Index
+    if (aIndex >= 0 && aIndex < rowCount()) {
+        // Get Item
+        FileListModelItem* item = itemList[aIndex];
+
+        // Set File Info
+        item->fileInfo = aFileInfo;
+        // Get Update Index
+        QModelIndex updatedIndex = createIndex(aIndex, 0);
+
+        // Emit Data Changed
+        emit dataChanged(updatedIndex, updatedIndex);
+    }
 }
 
 //==============================================================================

@@ -24,7 +24,7 @@ public:
 public slots:
 
     // Load Content
-    void loadContent(const QUrl& aURL);
+    void loadContent(const QUrl& aURL = QUrl(""));
 
     // Show Window
     void showWindow();
@@ -44,3 +44,5 @@ private:
 };
 
 #endif // HELPWINDOW_H
+
+

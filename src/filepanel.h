@@ -19,6 +19,7 @@ class ConfirmDialog;
 class RemoteFileUtilClient;
 class TransferProgressModelItem;
 class FileRenamer;
+class DirScanner;
 
 
 //==============================================================================
@@ -69,6 +70,9 @@ class FilePanel : public QFrame
 
     // File Rename Active
     Q_PROPERTY(bool fileRenameActive READ getFileRenameActive WRITE setFileRenameActive NOTIFY fileRenameActiveChanged)
+
+    // Modifier Keys
+    Q_PROPERTY(int modifierKeys READ getModifierKeys NOTIFY modifierKeysChanged)
 
 public:
     // Constructor
@@ -193,6 +197,9 @@ public:
     // Set File Rename Active
     void setFileRenameActive(const bool& aFileRenameActive);
 
+    // Get Modifier Keys
+    int getModifierKeys();
+
     // Destructor
     virtual ~FilePanel();
 
@@ -219,9 +226,6 @@ public slots:
     // Go To End Of The List
     void goLast();
 
-    // Handle Item Select
-    void handleItemSelect();
-
     // Set Panel Focus
     void setPanelFocus(const bool& aFocus);
     // Set Current Index
@@ -247,6 +251,8 @@ public slots:
 
     // Rename File
     void renameFile(const QString& aSource, const QString& aTarget);
+    // Scan Dir
+    void scanDir(const QString& aDirPath);
 
 signals:
 
@@ -360,6 +366,11 @@ protected slots:
     // Stop Dir Watcher Slot
     void stopDirWatcher();
 
+    // Handle Item Exec
+    void handleItemExec();
+    // Handle Item Select
+    void handleItemSelect();
+
 protected slots: // From File Model
 
     // File List Model Busy Changed Slot
@@ -389,6 +400,11 @@ protected slots: // From File Renamer
 
     // Rename Finished Slot
     void renamerFinished(const QString& aSource, const QString& aTarget);
+
+protected slots: // From Dir Scanner
+
+    // Scan Size Changed Slot
+    void scanSizeChanged(const QString& aDirPath, const quint64& aSize);
 
 protected slots:
 
@@ -516,7 +532,16 @@ private:
     bool                    fileTransferUpdate;
     // File Delete Update
     bool                    fileDeleteUpdate;
+
+    // Dir Scanner
+    DirScanner*             dirScanner;
 };
+
+
+
+
+
+
 
 
 
@@ -647,6 +672,168 @@ protected:
 
 
 
+
+
+
+
+
+//==============================================================================
+// Dir Scan Progess State Enum
+//==============================================================================
+enum DirScanProgressState
+{
+    EDSSIdle         = 0,
+    EDSSRunning,
+    EDSSPaused,
+    EDSSFinished,
+    EDSSSkipped,
+    EDSSError
+};
+
+
+
+
+//==============================================================================
+// Dir Scan Queue Item Class
+//==============================================================================
+class DirScannerQueueItem
+{
+public:
+
+    // Constructor
+    explicit DirScannerQueueItem(const QString& aDirPath);
+    // Destructor
+    virtual ~DirScannerQueueItem();
+
+protected:
+    friend class DirScanner;
+
+    // Dir Path
+    QString                 dirPath;
+    // Size
+    quint64                 dirSize;
+    // Progress State
+    DirScanProgressState    state;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+//==============================================================================
+// Dir Scanner Controller Class
+//==============================================================================
+class DirScanner : public QObject
+{
+    Q_OBJECT
+
+public:
+
+    // Constructor
+    explicit DirScanner(QObject* aParent = NULL);
+
+    // Scan Dir
+    void scanDir(const QString& aDirPath);
+
+    // Abort
+    void abort();
+
+    // Clear Queue
+    void clearQueue();
+
+    // Destructor
+    virtual ~DirScanner();
+
+signals:
+
+    // Scan Finished Signal
+    void scanFinished(const QString& aDirPath);
+
+    // Scan Size Changed
+    void scanSizeChanged(const QString& aDirPath, const quint64& aSize);
+
+protected slots:
+
+    // Add Item
+    void addItem(const QString& aDirPath);
+    // Set Item State
+    void setItemState(const int& aIndex, const int& aState);
+
+    // Find Index
+    int findIndex(const QString& aDirPath);
+
+    // Process Queue
+    void processQueue();
+
+protected slots: // For RemoteFileUtilClient
+
+    // Client Connection Changed Slot
+    void clientConnectionChanged(const unsigned int& aID, const bool& aConnected);
+
+    // Client Status Changed Slot
+    void clientStatusChanged(const unsigned int& aID, const int& aStatus);
+
+    // File Operation Started Slot
+    void fileOpStarted(const unsigned int& aID,
+                       const QString& aOp,
+                       const QString& aPath,
+                       const QString& aSource,
+                       const QString& aTarget);
+
+    // Dir Size Scan Progress Signal
+    void fileOpDirSizeScanProgress(const unsigned int& aID,
+                                   const QString& aPath,
+                                   const quint64& aNumDirs,
+                                   const quint64& aNumFiles,
+                                   const quint64& aScannedSize);
+
+    // File Operation Skipped Slot
+    void fileOpSkipped(const unsigned int& aID,
+                       const QString& aOp,
+                       const QString& aPath,
+                       const QString& aSource,
+                       const QString& aTarget);
+
+    // File Operation Finished Slot
+    void fileOpFinished(const unsigned int& aID,
+                        const QString& aOp,
+                        const QString& aPath,
+                        const QString& aSource,
+                        const QString& aTarget);
+
+    // File Operation Aborted Slot
+    void fileOpAborted(const unsigned int& aID,
+                       const QString& aOp,
+                       const QString& aPath,
+                       const QString& aSource,
+                       const QString& aTarget);
+
+    // File Operation Error Slot
+    void fileOpError(const unsigned int& aID,
+                     const QString& aOp,
+                     const QString& aPath,
+                     const QString& aSource,
+                     const QString& aTarget,
+                     const int& aError);
+
+protected: // For RemoteFileUtilClient
+
+    // File Util
+    RemoteFileUtilClient*               fileUtil;
+
+    // Rename Items Queue
+    QList<DirScannerQueueItem*>         scanQueue;
+
+    // Queue Index
+    int                                 queueIndex;
+};
 
 
 #endif // FILEPANEL_H

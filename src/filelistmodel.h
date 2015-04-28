@@ -20,6 +20,8 @@ public:
 
     // File Info
     QFileInfo       fileInfo;
+    // Dir Size
+    quint64         dirSize;
     // Selected
     bool            selected;
 };
@@ -57,6 +59,9 @@ public:
 
     // Update Item
     void updateItem(const int& aIndex, const QFileInfo& aFileInfo);
+
+    // Update Dir Size
+    void updateDirSize(const int& aIndex, const quint64& aSize);
 
     // Check If Is Dir
     bool isDir(const int& aIndex);
@@ -120,6 +125,9 @@ public slots:
 
     // Get File Name
     QString getFileName(const int& aIndex);
+
+    // Get Dir Size
+    quint64 getDirSize(const int& aIndex);
 
 signals:
 
@@ -239,6 +247,7 @@ protected:
         FileIsHidden,
         FileIsLink,
         FileFullName,
+        FileDirSize,
 
         FileRolesCount
     };

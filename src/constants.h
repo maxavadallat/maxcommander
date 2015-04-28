@@ -196,6 +196,7 @@
 #define DEFAULT_ERROR_TITLE_DELETE_FILE                     "File Deleting Error"
 #define DEFAULT_ERROR_TITLE_COPY_FILE                       "File Copy Error"
 #define DEFAULT_ERROR_TITLE_MOVE_FILE                       "File Rename/Move Error"
+#define DEFAULT_ERROR_TITLE_SCAN_DIR                        "Dir Scanning Error"
 
 #define DEFAULT_ERROR_TEXT_FILE_DOESNT_EXIST                "File Doesn't Exist:"
 
@@ -224,6 +225,8 @@
 
 #define DEFAULT_ERROR_TEXT_CANT_COPY_FILE                   "Can Not Copy File:"
 #define DEFAULT_ERROR_TEXT_CANT_MOVE_FILE                   "Can Not Rename/Move File:"
+
+#define DEFAULT_ERROR_TEXT_CANT_SCAN_DIR                    "Can Not Scan Directory:"
 
 #define DEFAULT_ERROR_TEXT_CANT_DELETE_SOURCE               "Can Not Delete Source:"
 #define DEFAULT_ERROR_TEXT_CANT_DELETE_TARGET               "Can Not Delete Target:"

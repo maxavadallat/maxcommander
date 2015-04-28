@@ -17,6 +17,7 @@
 //==============================================================================
 FileListModelItem::FileListModelItem(const QString& aPath, const QString& aFileName)
     : fileInfo(aPath + "/" + aFileName)
+    , dirSize(0)
     , selected(false)
 {
     // ...
@@ -292,6 +293,14 @@ void FileListModel::setSelected(const int& aIndex, const bool& aSelected)
 {
     // Check Index
     if (aIndex >=0 && aIndex < itemList.count()) {
+
+        // Check File Name
+        if (itemList[aIndex]->fileInfo.fileName() == "." || itemList[aIndex]->fileInfo.fileName() == ".."  ) {
+
+            // Skip
+            return;
+        }
+
         // Check If Item Selected
         if (itemList[aIndex]->selected != aSelected) {
             qDebug() << "FileListModel::setSelected - aIndex: " << aIndex << " - aSelected: " << aSelected;
@@ -433,6 +442,22 @@ QString FileListModel::getFileName(const int& aIndex)
     }
 
     return "";
+}
+
+//==============================================================================
+// Get Dir Size
+//==============================================================================
+quint64 FileListModel::getDirSize(const int& aIndex)
+{
+    // Get Item List Count
+    int ilCount = itemList.count();
+
+    // Check Index
+    if (aIndex >= 0 && aIndex < ilCount) {
+        return itemList[aIndex]->dirSize;
+    }
+
+    return 0;
 }
 
 //==============================================================================
@@ -744,6 +769,8 @@ QHash<int, QByteArray> FileListModel::roleNames() const
     roles[FileIsLink]       = "fileIsLink";
     // Full File Name
     roles[FileFullName]     = "fileFullName";
+    // Dir Size
+    roles[FileDirSize]      = "dirSize";
 
     return roles;
 }
@@ -840,6 +867,8 @@ QVariant FileListModel::data(const QModelIndex& aIndex, int aRole) const
             case FileIsHidden:      return (item->fileInfo.fileName() == QString("..") ? false : item->fileInfo.isHidden());
             case FileIsLink:        return item->fileInfo.isSymLink();
 
+            case FileDirSize:       return item->dirSize;
+
             default:
             break;
         }
@@ -912,6 +941,18 @@ bool FileListModel::setData(const QModelIndex& aIndex, const QVariant& aValue, i
 
             case FileIsLink: {
 
+            } break;
+
+            case FileDirSize: {
+                // Check Item
+                if (item && item->fileInfo.fileName() != QString("..") && item->fileInfo.fileName() != QString(".")) {
+                    // Set Dir Size
+                    item->dirSize = aValue.toULongLong();
+                    // Emit Data Changed Signal
+                    emit dataChanged(aIndex, aIndex);
+
+                    return true;
+                }
             } break;
 
             default: {
@@ -1024,6 +1065,26 @@ void FileListModel::updateItem(const int& aIndex, const QFileInfo& aFileInfo)
 
         // Set File Info
         item->fileInfo = aFileInfo;
+        // Get Update Index
+        QModelIndex updatedIndex = createIndex(aIndex, 0);
+
+        // Emit Data Changed
+        emit dataChanged(updatedIndex, updatedIndex);
+    }
+}
+
+//==============================================================================
+// Update Dir Size
+//==============================================================================
+void FileListModel::updateDirSize(const int& aIndex, const quint64& aSize)
+{
+    // Check Index
+    if (aIndex >= 0 && aIndex < rowCount()) {
+        // Get Item
+        FileListModelItem* item = itemList[aIndex];
+
+        // Set File Info
+        item->dirSize = aSize;
         // Get Update Index
         QModelIndex updatedIndex = createIndex(aIndex, 0);
 

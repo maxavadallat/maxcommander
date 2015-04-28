@@ -53,6 +53,7 @@ Rectangle {
 
         property int delegateHeight: 32
         property int visualItemsCount: Math.floor((fileListView.height + fileListView.spacing) / fileListView.delegateHeight);
+        property int prevIndex: -1
 
         // Model
         model: fileListModel
@@ -80,10 +81,11 @@ Rectangle {
             fileNameText: fileName
             fileExtText : fileExt
             fileTypeText: fileType
-            fileSizeText: fileSize
+            fileSizeText: dirSize > 0 ? dirSize : fileSize
             fileDateText: fileDate
             fileHidden  : fileIsHidden
             fileSelected: fileIsSelected
+            fileDirSize : dirSize
 
             nameWidth   : fileListHeader.nameWidth
             extWidth    : fileListHeader.extWidth
@@ -148,8 +150,7 @@ Rectangle {
                         delegateMouseArea.pressedInside = false;
 
                         // Check Mouse Position
-                        if (mouse.x >= 0 && mouse.x < fileListDelegateRoot.width &&
-                            mouse.y >= 0 && mouse.y < fileListDelegateRoot.height) {
+                        if (mouse.x >= 0 && mouse.x < fileListDelegateRoot.width && mouse.y >= 0 && mouse.y < fileListDelegateRoot.height) {
 
                             //console.log("fileListDelegateRoot.MouseArea.onReleased - index: " + index + " - pos:[" + mouse.x + ":" + mouse.y + "]");
 
@@ -169,45 +170,9 @@ Rectangle {
                     // Check Pressed Buttons
                     if (delegateMouseArea.pressedButtons === Qt.LeftButton) {
                         //console.log("fileListDelegateRoot.MouseArea.onDoubleClicked - index: " + index + " - pressedButtons: " + delegateMouseArea.pressedButtons);
-
-                        // ...
-
                         // Handle Item Select
-                        mainController.handleItemSelect();
+                        mainController.handleItemExec();
                     }
-                }
-
-                // On Entered
-                onEntered: {
-                    //console.log("fileListDelegateRoot.MouseArea.onEntered - index: " + index);
-
-                    // Set Mouse Hovered
-                    //mouseHovered = true;
-
-                    // Reset Prevent Stealing
-                    //delegateMouseArea.preventStealing = true;
-
-//                    // Check Pressed Buttons
-//                    if (delegateMouseArea.pressedButtons & Qt.RightButton) {
-//                        // Toggle File Selected
-//                        fileIsSelected = !fileIsSelected;
-//                    }
-
-                }
-
-                // On Exited
-                onExited: {
-                    //console.log("fileListDelegateRoot.MouseArea.onExited - index: " + index);
-
-                    // Reset Mouse Hovered
-                    //mouseHovered = false;
-
-//                    // Check Pressed Buttons
-//                    if (delegateMouseArea.pressedButtons & Qt.RightButton) {
-
-//                        // ...
-
-//                    }
                 }
             }
         }
@@ -223,6 +188,52 @@ Rectangle {
             //console.log("fileListView.onCurrentIndexChanged - currentIndex: " + fileListView.currentIndex);
             // Set Main Controller Current Index
             mainController.currentIndex = fileListView.currentIndex;
+
+            // Check If Shift Pressed
+            if (mainController.modifierKeys & Qt.ShiftModifier) {
+                // Check Previous Index
+                if (fileListView.prevIndex === -1) {
+                    // Set Prev Index
+                    fileListView.prevIndex = 0;
+                }
+
+                //console.log("fileListView.onCurrentIndexChanged - currentIndex: " + currentIndex + " - prevIndex: " + fileListView.prevIndex);
+
+                // Check Previous Index
+                if (fileListView.prevIndex < fileListView.currentIndex) {
+
+                    // Go Thru Items From Previous Index To Current Index
+                    for (var i=fileListView.prevIndex; i < fileListView.currentIndex && i >= 0 && i < fileListView.count;  i++) {
+                        // Set Selected
+                        fileListModel.setSelected(i, !fileListModel.getSelected(i));
+                    }
+
+                    // Check The Difference
+                    if (fileListView.currentIndex - fileListView.prevIndex > 1) {
+                        // Set Selected
+                        fileListModel.setSelected(fileListView.currentIndex, !fileListModel.getSelected(fileListView.currentIndex));
+                    }
+
+                } else {
+
+                    // Go Thru Items From Previous Index To Current Index
+                    for (var i=fileListView.prevIndex; i > fileListView.currentIndex && i >= 0 && i < fileListView.count;  i--) {
+                        // Set Selected
+                        fileListModel.setSelected(i, !fileListModel.getSelected(i));
+                    }
+
+                    // Check The Difference
+                    if (fileListView.prevIndex - fileListView.currentIndex > 1) {
+                        // Set Selected
+                        fileListModel.setSelected(fileListView.currentIndex, !fileListModel.getSelected(fileListView.currentIndex));
+                    }
+
+                }
+            }
+
+            // Set Previous Index
+            fileListView.prevIndex = fileListView.currentIndex;
+
         }
 
         // On Visual Items Count Changed
@@ -364,6 +375,9 @@ Rectangle {
         // Set Visual Items Count
         mainController.visualItemsCount = fileListView.visualItemsCount;
 
+        // Set Prev Index
+        fileListView.prevIndex = fileListView.currentIndex;
+
         // ...
 
     }
@@ -387,6 +401,37 @@ Rectangle {
                 // Position View
                 fileListView.positionViewAtIndex(aIndex + 1, ListView.Center);
             }
+        }
+
+        // On Modifier Keys Pressed
+        onModifierKeysChanged: {
+            // Check Modifier Keys
+            if (aModifierKeys === 0) {
+                console.log("fileListRoot.Connections.mainController.onModifierKeysChanged - NO MODIFIER");
+            }
+
+            // Check Modifier Keys
+            if (aModifierKeys & Qt.ShiftModifier) {
+                console.log("fileListRoot.Connections.mainController.onModifierKeysChanged - SHIFT");
+            }
+
+            // Check Modifier Keys
+            if (aModifierKeys & Qt.AltModifier) {
+                console.log("fileListRoot.Connections.mainController.onModifierKeysChanged - ALT");
+            }
+
+            // Check Modifier Keys
+            if (aModifierKeys & Qt.ControlModifier) {
+                console.log("fileListRoot.Connections.mainController.onModifierKeysChanged - CONTROL");
+            }
+
+            // Check Modifier Keys
+            if (aModifierKeys & Qt.MetaModifier) {
+                console.log("fileListRoot.Connections.mainController.onModifierKeysChanged - META");
+            }
+
+
+            // ...
         }
 
         // On Launch File Rename

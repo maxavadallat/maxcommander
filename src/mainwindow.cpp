@@ -278,7 +278,7 @@ void MainWindow::launchViewer(const bool& aEditMode)
     if (fileInfo.isDir() || fileInfo.isBundle() || fileInfo.isSymLink()) {
         qDebug() << "MainWindow::launchViewer - aEditMode: " << aEditMode << " - NO SELECTED FILE!";
 
-        // Launch Dir Quick View
+        // Launch Dir Quick View Maybe...
 
         // ...
 
@@ -847,6 +847,11 @@ void MainWindow::transferProgressClosed(TransferProgressDialog* aTransferProgres
             TransferProgressDialog* dialog = transferProgressDialogs[i];
             // Check Dialog
             if (dialog == aTransferProgressDialog) {
+
+
+                // Reload Panels
+
+
                 // Remove Dialog From Transfer Progress Dialogs
                 transferProgressDialogs.removeAt(i);
                 // Delete Dialog

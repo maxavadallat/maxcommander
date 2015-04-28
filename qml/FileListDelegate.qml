@@ -40,6 +40,8 @@ Rectangle {
 
     property bool mouseHovered: false
 
+    property int fileDirSize: 0
+
     property string textColor: {
         // Check If Selected
         if (fileListDelegateRoot.fileSelected) {

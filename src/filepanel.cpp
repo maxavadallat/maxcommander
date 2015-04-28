@@ -64,6 +64,7 @@ FilePanel::FilePanel(QWidget* aParent)
     , fileRenamerUpdate(false)
     , fileTransferUpdate(false)
     , fileDeleteUpdate(false)
+    , dirScanner(NULL)
 
 {
     // Setup UI
@@ -745,6 +746,25 @@ void FilePanel::renameFile(const QString& aSource, const QString& aTarget)
 }
 
 //==============================================================================
+// Scan Dir
+//==============================================================================
+void FilePanel::scanDir(const QString& aDirPath)
+{
+    // Check Dir Scanner
+    if (!dirScanner) {
+        // Create Dir Scanner
+        dirScanner = new DirScanner();
+        // Connect Signal
+        connect(dirScanner, SIGNAL(scanSizeChanged(QString,quint64)), this, SLOT(scanSizeChanged(QString,quint64)));
+    }
+
+    qDebug() << "FilePanel::scanDir - aDirPath: " << aDirPath;
+
+    // Scan Dir
+    dirScanner->scanDir(aDirPath);
+}
+
+//==============================================================================
 // File Rename Active
 //==============================================================================
 bool FilePanel::getFileRenameActive()
@@ -767,6 +787,14 @@ void FilePanel::setFileRenameActive(const bool& aFileRenameActive)
         // Emit File Rename Active Changed Signal
         emit fileRenameActiveChanged(fileRenameActive);
     }
+}
+
+//==============================================================================
+// Get Modifier Keys
+//==============================================================================
+int FilePanel::getModifierKeys()
+{
+    return modifierKeys;
 }
 
 //==============================================================================
@@ -1048,20 +1076,20 @@ void FilePanel::goLast()
 }
 
 //==============================================================================
-// Handle Item Select
+// Handle Item Exec
 //==============================================================================
-void FilePanel::handleItemSelect()
+void FilePanel::handleItemExec()
 {
     // Check File List Model
     if (!fileListModel) {
-        qWarning() << "FilePanel::handleItemSelect - panelName: " << panelName << " - NO FILE LIST MODEL!!";
+        qWarning() << "FilePanel::handleItemExec - panelName: " << panelName << " - NO FILE LIST MODEL!!";
         return;
     }
 
-    //qDebug() << "FilePanel::handleItemSelect - panelName: " << panelName;
-
     // Get File Info
     QFileInfo fileInfo = fileListModel->getFileInfo(currentIndex);
+
+    qDebug() << "FilePanel::handleItemExec - panelName: " << panelName << " - fileName: " << fileInfo.fileName();
 
     // Check If Dir
     if (fileInfo.isDir() || fileInfo.isBundle()) {
@@ -1077,11 +1105,40 @@ void FilePanel::handleItemSelect()
         }
     } else {
 
-        // Handle Files
+        // Handle Exec Files
+
+        // ...
 
     }
+}
 
-    // ...
+//==============================================================================
+// Handle Item Select
+//==============================================================================
+void FilePanel::handleItemSelect()
+{
+    // Check File List Model
+    if (!fileListModel) {
+        qWarning() << "FilePanel::handleItemSelect - panelName: " << panelName << " - NO FILE LIST MODEL!!";
+        return;
+    }
+
+    // Get Current File Info
+    QFileInfo fileInfo = fileListModel->getFileInfo(currentIndex);
+
+    qDebug() << "FilePanel::handleItemSelect - panelName: " << panelName << " - fileName: " << fileInfo.fileName();
+
+    // Check If Dir
+    if (fileInfo.isDir() || fileInfo.isBundle()) {
+        // Check File Name
+        if (fileInfo.fileName() != QString("..")) {
+            // Scan Dir
+            scanDir(fileInfo.absoluteFilePath());
+        }
+    } else {
+        // Toggle Selection
+        fileListModel->setSelected(currentIndex, !fileListModel->getSelected(currentIndex));
+    }
 }
 
 //==============================================================================
@@ -1308,6 +1365,14 @@ void FilePanel::fileModelDirFetchFinished()
 
     // Update Available Space Label
     updateAvailableSpaceLabel();
+
+    // Check If Dir Watcher Has Changes
+    if (dwDirChanged || dwFileChanged) {
+        qDebug() << "FilePanel::fileModelDirFetchFinished - panelName: " << panelName << " - lastDirName: " << lastDirName << " - CHANGED!!";
+
+        // Reload
+
+    }
 }
 
 //==============================================================================
@@ -1434,7 +1499,7 @@ void FilePanel::startDirWatcher()
     if (dirWatcherTimerID == -1) {
         qDebug() << "FilePanel::startDirWatcher";
         // Start Timer
-        dirWatcherTimerID = startTimer(DEFAULT_ONE_SEC);
+        dirWatcherTimerID = startTimer(DEFAULT_ONE_SEC / 2);
 
         // Start Dir Watcher
         dirWatcher.addPath(currentDir);
@@ -1542,8 +1607,28 @@ void FilePanel::renamerFinished(const QString& aSource, const QString& aTarget)
             reload();
         }
     }
+}
 
-    // ...
+//==============================================================================
+// Scan Size Changed Slot
+//==============================================================================
+void FilePanel::scanSizeChanged(const QString& aDirPath, const quint64& aSize)
+{
+    // Check File List Model
+    if (fileListModel) {
+        // Init Dir Info
+        QFileInfo dirInfo(aDirPath);
+        // Find Index
+        int dirIndex = fileListModel->findIndex(dirInfo.fileName());
+
+        // Check Index
+        if (dirIndex >= 0 && dirIndex < fileListModel->rowCount()) {
+            //qDebug() << "FilePanel::scanSizeChanged - aDirPath: " << aDirPath << " - aSize: " << aSize;
+
+            // Update Dir Size
+            fileListModel->updateDirSize(dirIndex, aSize);
+        }
+    }
 }
 
 //==============================================================================
@@ -1639,7 +1724,7 @@ bool FilePanel::handleModifierKeyReleaseEvent(QKeyEvent* aEvent)
                 modifierKeys ^= Qt::ShiftModifier;
                 // Emit Modifier Keys Changed Signal
                 emit modifierKeysChanged(modifierKeys);
-            return true;;
+            return true;
 
             case Qt::Key_Control:
                 //qDebug() << "FilePanel::keyReleaseEvent - key: CONTROL";
@@ -1647,7 +1732,7 @@ bool FilePanel::handleModifierKeyReleaseEvent(QKeyEvent* aEvent)
                 modifierKeys = modifierKeys ^ Qt::ControlModifier;
                 // Emit Modifier Keys Changed Signal
                 emit modifierKeysChanged(modifierKeys);
-            return true;;
+            return true;
 
             case Qt::Key_AltGr:
             case Qt::Key_Alt:
@@ -1656,7 +1741,7 @@ bool FilePanel::handleModifierKeyReleaseEvent(QKeyEvent* aEvent)
                 modifierKeys = modifierKeys ^ Qt::AltModifier;
                 // Emit Modifier Keys Changed Signal
                 emit modifierKeysChanged(modifierKeys);
-            return true;;
+            return true;
 
             case Qt::Key_Meta:
                 //qDebug() << "FilePanel::keyReleaseEvent - key: META";
@@ -1664,7 +1749,7 @@ bool FilePanel::handleModifierKeyReleaseEvent(QKeyEvent* aEvent)
                 modifierKeys = modifierKeys ^ Qt::MetaModifier;
                 // Emit Modifier Keys Changed Signal
                 emit modifierKeysChanged(modifierKeys);
-            return true;;
+            return true;
 
             default:
             break;
@@ -1829,12 +1914,41 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
 
             case Qt::Key_Return:
             case Qt::Key_Enter:
-                // Handle Item Selection
-                handleItemSelect();
+                // Check Modifier Keys
+                if (modifierKeys == Qt::NoModifier) {
+                    // Handle Item Exec
+                    handleItemExec();
+                }
             break;
 
             case Qt::Key_Space:
-                // Scan Dir
+                // Check Modifier Keys
+                if (modifierKeys == Qt::NoModifier) {
+                    // Handle Item Select
+                    handleItemSelect();
+                }
+            break;
+
+            case Qt::Key_Up:
+                // Check Modifier - SHIFT
+                if (modifierKeys == Qt::ShiftModifier && fileListModel) {
+                    // Check Current Index
+                    if (currentIndex == 0) {
+                        // Set Selected
+                        fileListModel->setSelected(currentIndex, !fileListModel->getSelected(currentIndex));
+                    }
+                }
+            break;
+
+            case Qt::Key_Down:
+                // Check Modifier - SHIFT
+                if (modifierKeys == Qt::ShiftModifier && fileListModel) {
+                    // Check Current Index
+                    if (currentIndex == fileListModel->rowCount()-1) {
+                        // Set Selected
+                        fileListModel->setSelected(currentIndex, !fileListModel->getSelected(currentIndex));
+                    }
+                }
             break;
 
             case Qt::Key_Backspace:
@@ -2010,18 +2124,25 @@ void FilePanel::timerEvent(QTimerEvent* aEvent)
     if (aEvent) {
         // Check Tiemr ID
         if (aEvent->timerId() == dirWatcherTimerID) {
-            // Check If Need Refrsh
-            if (fileListModel && !fileListModel->getBusy() && (dwDirChanged || dwFileChanged)) {
-                qDebug() << "FilePanel::timerEvent - dirWatcherTimerID";
-                // Reset Dir Changed
-                dwDirChanged = false;
-                // Reset File Changed
-                dwFileChanged = false;
-                // Reload
-                reload(currentIndex);
-            }
+            // Check File List Model
+            if (fileListModel) {
+                // Check If Busy
+                if (fileListModel->getBusy()) {
 
-            //qDebug() << ".";
+                    //qDebug() << "FilePanel::timerEvent - dirWatcherTimerID - BUSY!";
+
+                } else if (dwDirChanged || dwFileChanged){
+
+                    //qDebug() << "FilePanel::timerEvent - dirWatcherTimerID";
+
+                    // Reset Dir Changed
+                    dwDirChanged = false;
+                    // Reset File Changed
+                    dwFileChanged = false;
+                    // Reload
+                    reload(currentIndex);
+                }
+            }
         }
     }
 }
@@ -2048,6 +2169,13 @@ FilePanel::~FilePanel()
         // Delete File Renamer
         delete fileRenamer;
         fileRenamer = NULL;
+    }
+
+    // Check Dir Scanner
+    if (dirScanner) {
+        // Delete Dir Scanner
+        delete dirScanner;
+        dirScanner = NULL;
     }
 }
 
@@ -2090,9 +2218,6 @@ void FileRenamer::renameFile(const QString& aSource, const QString& aTarget)
     // Add Item
     addItem(aSource, aTarget);
 
-    // Reset Queue Index
-    queueIndex = 0;
-
     // Check File Util
     if (!fileUtil) {
         // Create File Util
@@ -2117,10 +2242,15 @@ void FileRenamer::renameFile(const QString& aSource, const QString& aTarget)
             // Connect
             fileUtil->connectToFileServer();
         } else {
-            // Clear Options
-            fileUtil->clearFileTransferOptions();
-            // Process Queue
-            QTimer::singleShot(1, this, SLOT(processQueue()));
+            // Check Queue Index
+            if (queueIndex == -1) {
+                // Reset Queue Index
+                queueIndex = 0;
+                // Clear Options
+                fileUtil->clearFileTransferOptions();
+                // Process Queue
+                QTimer::singleShot(1, this, SLOT(processQueue()));
+            }
         }
     }
 }
@@ -2182,6 +2312,8 @@ void FileRenamer::processQueue()
 {
     // Check Queue Index
     if (fileUtil && queueIndex >= 0 && queueIndex < renameQueue.count()) {
+        qDebug() << "FileRenamer::processQueue - queueIndex: " << queueIndex;
+
         // Get Source File Name
         QString sourceFile = renameQueue[queueIndex]->source;
         // Get Target File Name
@@ -2211,9 +2343,7 @@ void FileRenamer::abort()
     // Check File Util
     if (fileUtil) {
         // Check Status
-        if (fileUtil->getStatus() == ECSTBusy ||
-            fileUtil->getStatus() == ECSTError  ) {
-
+        if (fileUtil->getStatus() == ECSTBusy || fileUtil->getStatus() == ECSTError  ) {
             qDebug() << "FileRenamer::abort";
 
             // Abort
@@ -2258,7 +2388,8 @@ void FileRenamer::clientConnectionChanged(const unsigned int& aID, const bool& a
             // Clear Options
             fileUtil->clearFileTransferOptions();
         }
-
+        // Reset Queue Index
+        queueIndex = 0;
         // Process Queue
         QTimer::singleShot(1, this, SLOT(processQueue()));
     }
@@ -2269,7 +2400,7 @@ void FileRenamer::clientConnectionChanged(const unsigned int& aID, const bool& a
 //==============================================================================
 void FileRenamer::clientStatusChanged(const unsigned int& aID, const int& aStatus)
 {
-    qDebug() << "TransferProgressDialog::clientStatusChanged - aID: " << aID << " - aStatus: " << RemoteFileUtilClient::statusToString(aStatus);
+    qDebug() << "FileRenamer::clientStatusChanged - aID: " << aID << " - aStatus: " << RemoteFileUtilClient::statusToString(aStatus);
 
     // ...
 }
@@ -2285,7 +2416,7 @@ void FileRenamer::fileOpStarted(const unsigned int& aID,
 {
     Q_UNUSED(aPath);
 
-    qDebug() << "TransferProgressDialog::fileOpStarted - aID: " << aID << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget;
+    qDebug() << "FileRenamer::fileOpStarted - aID: " << aID << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget;
 
     // ...
 }
@@ -2301,7 +2432,7 @@ void FileRenamer::fileOpSkipped(const unsigned int& aID,
 {
     Q_UNUSED(aPath);
 
-    qDebug() << "TransferProgressDialog::fileOpSkipped - aID: " << aID << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget;
+    qDebug() << "FileRenamer::fileOpSkipped - aID: " << aID << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget;
 
     // Check Operation
     if (aOp == DEFAULT_OPERATION_MOVE_FILE) {
@@ -2325,7 +2456,7 @@ void FileRenamer::fileOpFinished(const unsigned int& aID,
 {
     Q_UNUSED(aPath);
 
-    qDebug() << "TransferProgressDialog::fileOpFinished - aID: " << aID << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget;
+    qDebug() << "FileRenamer::fileOpFinished - aID: " << aID << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget;
 
     // Check Operation - QUEUE
     if (aOp == DEFAULT_OPERATION_QUEUE) {
@@ -2359,7 +2490,7 @@ void FileRenamer::fileOpAborted(const unsigned int& aID,
 {
     Q_UNUSED(aPath);
 
-    qDebug() << "TransferProgressDialog::fileOpAborted - aID: " << aID << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget;
+    qDebug() << "FileRenamer::fileOpAborted - aID: " << aID << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget;
 
     // ...
 
@@ -2377,65 +2508,63 @@ void FileRenamer::fileOpError(const unsigned int& aID,
 {
     Q_UNUSED(aPath);
 
-    qDebug() << "TransferProgressDialog::fileOpError - aID: " << aID << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget << " - aError: " << aError;
+    qDebug() << "FileRenamer::fileOpError - aID: " << aID << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget << " - aError: " << aError;
 
 
-    // Init Confirmation Dialog
-    ConfirmDialog confirmDialog;
 
+    // Check Operation
     if (aOp == DEFAULT_OPERATION_MOVE_FILE) {
+        // Init Confirmation Dialog
+        ConfirmDialog confirmDialog;
 
         // Set Dialog Title
         confirmDialog.setConfirmTitle(tr(DEFAULT_ERROR_TITLE_MOVE_FILE));
+
+        // Switch Error
+        switch (aError) {
+            default:
+            case DEFAULT_ERROR_GENERAL: {
+                // Set Error Text
+                confirmDialog.setConfirmText(tr(DEFAULT_ERROR_TEXT_CANT_MOVE_FILE));
+                // Set Path
+                confirmDialog.setPath(aSource);
+            } break;
+
+            case DEFAULT_ERROR_CANNOT_DELETE_SOURCE_DIR: {
+                // Set Error Text
+                confirmDialog.setConfirmText(tr(DEFAULT_ERROR_TEXT_CANT_DELETE_SOURCE));
+                // Set Path
+                confirmDialog.setPath(aSource);
+            } break;
+
+            case DEFAULT_ERROR_CANNOT_DELETE_TARGET_DIR: {
+                // Set Error Text
+                confirmDialog.setConfirmText(tr(DEFAULT_ERROR_TEXT_CANT_DELETE_TARGET));
+                // Set Path
+                confirmDialog.setPath(aTarget);
+            } break;
+        }
+
+        // Configure Standard Buttons
+        confirmDialog.configureButtons(QDialogButtonBox::Abort);
+
+        // Add Button
+        confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_RETRY), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_RETRY);
+        confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_SKIP), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_SKIP);
+        confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_SKIPALL), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_SKIPALL);
+
+        // Exec Confirm Dialog
+        confirmDialog.exec();
+
+        // Get Action Index
+        int actionIndex = confirmDialog.getActionIndex();
+
+        // Check File Util
+        if (fileUtil) {
+            // Send User Response
+            fileUtil->sendUserResponse(actionIndex == -1 ? DEFAULT_CONFIRM_ABORT : actionIndex, confirmDialog.getPath());
+        }
     }
-
-    // Switch Error
-    switch (aError) {
-        default:
-        case DEFAULT_ERROR_GENERAL: {
-            // Set Error Text
-            confirmDialog.setConfirmText(tr(DEFAULT_ERROR_TEXT_CANT_MOVE_FILE));
-            // Set Path
-            confirmDialog.setPath(aSource);
-        } break;
-
-        case DEFAULT_ERROR_CANNOT_DELETE_SOURCE_DIR: {
-            // Set Error Text
-            confirmDialog.setConfirmText(tr(DEFAULT_ERROR_TEXT_CANT_DELETE_SOURCE));
-            // Set Path
-            confirmDialog.setPath(aSource);
-        } break;
-
-        case DEFAULT_ERROR_CANNOT_DELETE_TARGET_DIR: {
-            // Set Error Text
-            confirmDialog.setConfirmText(tr(DEFAULT_ERROR_TEXT_CANT_DELETE_TARGET));
-            // Set Path
-            confirmDialog.setPath(aTarget);
-        } break;
-    }
-
-
-    // Configure Standard Buttons
-    confirmDialog.configureButtons(QDialogButtonBox::Abort);
-
-    // Add Button
-    confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_RETRY), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_RETRY);
-    confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_SKIP), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_SKIP);
-    confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_SKIPALL), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_SKIPALL);
-
-    // Exec Confirm Dialog
-    confirmDialog.exec();
-
-    // Get Action Index
-    int actionIndex = confirmDialog.getActionIndex();
-
-    // Check File Util
-    if (fileUtil) {
-        // Send User Response
-        fileUtil->sendUserResponse(actionIndex == -1 ? DEFAULT_CONFIRM_ABORT : actionIndex, confirmDialog.getPath());
-    }
-
-    // ...
 }
 
 //==============================================================================
@@ -2450,7 +2579,7 @@ void FileRenamer::fileOpNeedConfirm(const unsigned int& aID,
 {
     Q_UNUSED(aPath);
 
-    qDebug() << "TransferProgressDialog::fileOpNeedConfirm - aID: " << aID << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget << " - aCode: " << aCode;
+    qDebug() << "FileRenamer::fileOpNeedConfirm - aID: " << aID << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget << " - aCode: " << aCode;
 
     // Init Confirmation Dialog
     ConfirmDialog confirmDialog;
@@ -2489,8 +2618,6 @@ void FileRenamer::fileOpNeedConfirm(const unsigned int& aID,
         // Send User Response
         fileUtil->sendUserResponse(actionIndex == -1 ? DEFAULT_CONFIRM_ABORT : actionIndex, confirmDialog.getPath());
     }
-
-    // ...
 }
 
 //==============================================================================
@@ -2504,15 +2631,13 @@ void FileRenamer::fileOpQueueItemFound(const unsigned int& aID,
 {
     Q_UNUSED(aPath);
 
-    qDebug() << "TransferProgressDialog::fileOpQueueItemFound - aID: " << aID << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget;
+    qDebug() << "FileRenamer::fileOpQueueItemFound - aID: " << aID << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget;
 
     // Check Operation
     if (aOp == DEFAULT_OPERATION_MOVE_FILE) {
         // Insert Item
         insertItem(queueIndex, aSource, aTarget);
     }
-
-    // ...
 }
 
 //==============================================================================
@@ -2529,3 +2654,440 @@ FileRenamer::~FileRenamer()
     qDebug() << "FileRenamer::~FileRenamer";
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//==============================================================================
+// Constructor
+//==============================================================================
+DirScannerQueueItem::DirScannerQueueItem(const QString& aDirPath)
+    : dirPath(aDirPath)
+    , dirSize(0)
+    , state(EDSSIdle)
+{
+}
+
+//==============================================================================
+// Destructor
+//==============================================================================
+DirScannerQueueItem::~DirScannerQueueItem()
+{
+}
+
+
+
+
+
+
+
+
+
+
+
+
+//==============================================================================
+// Constructor
+//==============================================================================
+DirScanner::DirScanner(QObject* aParent)
+    : QObject(aParent)
+    , fileUtil(NULL)
+    , queueIndex(-1)
+{
+    qDebug() << "DirScanner::DirScanner";
+
+}
+
+//==============================================================================
+// Scan Dir
+//==============================================================================
+void DirScanner::scanDir(const QString& aDirPath)
+{
+    qDebug() << "DirScanner::scanDir - aDirPath: " << aDirPath;
+
+    // Add Item
+    addItem(aDirPath);
+
+    // Check File Util
+    if (!fileUtil) {
+        // Create File Util
+        fileUtil = new RemoteFileUtilClient();
+
+        connect(fileUtil, SIGNAL(clientConnectionChanged(uint,bool)), this, SLOT(clientConnectionChanged(uint,bool)));
+        connect(fileUtil, SIGNAL(clientStatusChanged(uint,int)), this, SLOT(clientStatusChanged(uint,int)));
+        connect(fileUtil, SIGNAL(fileOpStarted(uint,QString,QString,QString,QString)), this, SLOT(fileOpStarted(uint,QString,QString,QString,QString)));
+        connect(fileUtil, SIGNAL(dirSizeScanProgress(uint,QString,quint64,quint64,quint64)), this, SLOT(fileOpDirSizeScanProgress(uint,QString,quint64,quint64,quint64)));
+        connect(fileUtil, SIGNAL(fileOpAborted(uint,QString,QString,QString,QString)), this, SLOT(fileOpAborted(uint,QString,QString,QString,QString)));
+        connect(fileUtil, SIGNAL(fileOpError(uint,QString,QString,QString,QString,int)), this, SLOT(fileOpError(uint,QString,QString,QString,QString,int)));
+        connect(fileUtil, SIGNAL(fileOpSkipped(uint,QString,QString,QString,QString)), this, SLOT(fileOpSkipped(uint,QString,QString,QString,QString)));
+        connect(fileUtil, SIGNAL(fileOpFinished(uint,QString,QString,QString,QString)), this, SLOT(fileOpFinished(uint,QString,QString,QString,QString)));
+    }
+
+    // Check File Util
+    if (fileUtil) {
+        // Check If Connected
+        if (!fileUtil->isConnected()) {
+            // Connect
+            fileUtil->connectToFileServer();
+        } else {
+            // Check Queue Index
+            if (queueIndex == -1) {
+                // Set Queue Index
+                queueIndex = 0;
+                // Clear Options
+                fileUtil->clearFileTransferOptions();
+                // Process Queue
+                QTimer::singleShot(1, this, SLOT(processQueue()));
+            }
+        }
+    }
+}
+
+//==============================================================================
+// Abort
+//==============================================================================
+void DirScanner::abort()
+{
+    // Check File Util
+    if (fileUtil && (fileUtil->getStatus() == ECSTBusy || fileUtil->getStatus() == ECSTWaiting) ) {
+        qDebug() << "DirScanner::abort";
+
+        // Abort
+        fileUtil->abort();
+    }
+}
+
+//==============================================================================
+// Add Item
+//==============================================================================
+void DirScanner::addItem(const QString& aDirPath)
+{
+    // Get Dir Path Index
+    int dirPathIndex = findIndex(aDirPath);
+
+    // Check Dir Path Index
+    if (dirPathIndex >= 0) {
+
+        // Already Added, skipping...
+
+        return;
+    }
+
+    qDebug() << "DirScanner::addItem - aDirPath: " << aDirPath;
+
+    // Create New Item
+    DirScannerQueueItem* newItem = new DirScannerQueueItem(aDirPath);
+
+    // Add To Queue
+    scanQueue << newItem;
+}
+
+//==============================================================================
+// Set Item State
+//==============================================================================
+void DirScanner::setItemState(const int& aIndex, const int& aState)
+{
+    // Check Index
+    if (aIndex >= 0 && aIndex < scanQueue.count()) {
+        qDebug() << "DirScanner::setItemState - aIndex: " << aIndex << " - aState: " << aState;
+        // Set State
+        scanQueue[aIndex]->state = (DirScanProgressState)aState;
+    }
+}
+
+//==============================================================================
+// Find Index
+//==============================================================================
+int DirScanner::findIndex(const QString& aDirPath)
+{
+    // Get Queue Count
+    int sqiCount = scanQueue.count();
+
+    // Go Thru Queue Items
+    for (int i=0; i<sqiCount; ++i) {
+        // Get Queue Item
+        DirScannerQueueItem* item = scanQueue[i];
+        // Check Dir Path
+        if (item->dirPath == aDirPath) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+//==============================================================================
+// Process Queue
+//==============================================================================
+void DirScanner::processQueue()
+{
+    // Check Queue Index
+    if (fileUtil && queueIndex >= 0 && queueIndex < scanQueue.count()) {
+        qDebug() << "FileRenamer::processQueue - queueIndex: " << queueIndex;
+        // Get Dir Path
+        QString dirPath = scanQueue[queueIndex]->dirPath;
+        // Scan Dir
+        fileUtil->scanDirSize(dirPath);
+    } else {
+        // Check Queue Index
+        if (queueIndex != -1) {
+            // Clear Queue
+            clearQueue();
+            // Reset Queue Index
+            queueIndex = -1;
+        }
+    }
+}
+
+//==============================================================================
+// Clear Queue
+//==============================================================================
+void DirScanner::clearQueue()
+{
+    qDebug() << "DirScanner::clearQueue";
+
+    // While Queue Is Not Empty
+    while (scanQueue.count() > 0) {
+        // Get Scan Queue Item
+        DirScannerQueueItem* item = scanQueue.takeLast();
+        // Delete Item
+        delete item;
+        item = NULL;
+    }
+}
+
+//==============================================================================
+// Client Connection Changed Slot
+//==============================================================================
+void DirScanner::clientConnectionChanged(const unsigned int& aID, const bool& aConnected)
+{
+    qDebug() << "DirScanner::clientConnectionChanged - aID: " << aID << " - aConnected: " << aConnected;
+
+    // Check If Connected
+    if (aConnected) {
+        // Check File Util
+        if (fileUtil) {
+            // Clear Options
+            fileUtil->clearFileTransferOptions();
+        }
+        // Reset Queue Index
+        queueIndex = 0;
+        // Process Queue
+        QTimer::singleShot(1, this, SLOT(processQueue()));
+    }
+}
+
+//==============================================================================
+// Client Status Changed Slot
+//==============================================================================
+void DirScanner::clientStatusChanged(const unsigned int& aID, const int& aStatus)
+{
+    qDebug() << "DirScanner::clientStatusChanged - aID: " << aID << " - aStatus: " << RemoteFileUtilClient::statusToString(aStatus);
+
+    // ...
+}
+
+//==============================================================================
+// File Operation Started Slot
+//==============================================================================
+void DirScanner::fileOpStarted(const unsigned int& aID,
+                   const QString& aOp,
+                   const QString& aPath,
+                   const QString& aSource,
+                   const QString& aTarget)
+{
+    Q_UNUSED(aSource);
+    Q_UNUSED(aTarget);
+
+    qDebug() << "DirScanner::fileOpStarted - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath;
+
+
+    // ...
+}
+
+//==============================================================================
+// Dir Size Scan Progress Signal
+//==============================================================================
+void DirScanner::fileOpDirSizeScanProgress(const unsigned int& aID,
+                                           const QString& aPath,
+                                           const quint64& aNumDirs,
+                                           const quint64& aNumFiles,
+                                           const quint64& aScannedSize)
+{
+    Q_UNUSED(aID);
+    Q_UNUSED(aNumDirs);
+    Q_UNUSED(aNumFiles);
+
+    // Find Index
+    int dirIndex = findIndex(aPath);
+
+    // Check Queue Index
+    if (dirIndex >= 0 && dirIndex < scanQueue.count()) {
+        //qDebug() << "DirScanner::fileOpDirSizeScanProgress - aID: " << aID << " - aPath: " << aPath << " - aNumDirs: " << aNumDirs << " - aNumFiles: " << aNumFiles << " - aScannedSize: " << aScannedSize;
+
+        // Get Item
+        DirScannerQueueItem* item = scanQueue[dirIndex];
+        // Update Scan Queue Item
+        item->dirSize = aScannedSize;
+
+        // Emit Scan Size Changed Signal
+        emit scanSizeChanged(item->dirPath, item->dirSize);
+    }
+}
+
+//==============================================================================
+// File Operation Skipped Slot
+//==============================================================================
+void DirScanner::fileOpSkipped(const unsigned int& aID,
+                   const QString& aOp,
+                   const QString& aPath,
+                   const QString& aSource,
+                   const QString& aTarget)
+{
+    Q_UNUSED(aSource);
+    Q_UNUSED(aTarget);
+
+    qDebug() << "DirScanner::fileOpSkipped - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath;
+
+    // Check Operation
+    if (aOp == DEFAULT_OPERATION_SCAN_DIR) {
+        // Inc Queue Index
+        queueIndex++;
+
+        // Process Queue
+        processQueue();
+    }
+}
+
+//==============================================================================
+// File Operation Finished Slot
+//==============================================================================
+void DirScanner::fileOpFinished(const unsigned int& aID,
+                    const QString& aOp,
+                    const QString& aPath,
+                    const QString& aSource,
+                    const QString& aTarget)
+{
+    Q_UNUSED(aSource);
+    Q_UNUSED(aTarget);
+
+    qDebug() << "DirScanner::fileOpFinished - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath;
+
+    // Check Operation
+    if (aOp == DEFAULT_OPERATION_SCAN_DIR) {
+        // Inc Queue Index
+        queueIndex++;
+        // Process Queue
+        processQueue();
+    }
+}
+
+//==============================================================================
+// File Operation Aborted Slot
+//==============================================================================
+void DirScanner::fileOpAborted(const unsigned int& aID,
+                   const QString& aOp,
+                   const QString& aPath,
+                   const QString& aSource,
+                   const QString& aTarget)
+{
+    Q_UNUSED(aSource);
+    Q_UNUSED(aTarget);
+
+    qDebug() << "DirScanner::fileOpAborted - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath;
+
+    // ...
+}
+
+//==============================================================================
+// File Operation Error Slot
+//==============================================================================
+void DirScanner::fileOpError(const unsigned int& aID,
+                 const QString& aOp,
+                 const QString& aPath,
+                 const QString& aSource,
+                 const QString& aTarget,
+                 const int& aError)
+{
+    Q_UNUSED(aSource);
+    Q_UNUSED(aTarget);
+
+    qDebug() << "DirScanner::fileOpError - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath << " - aError: " << aError;
+
+    // Check Operation
+    if (aOp == DEFAULT_OPERATION_SCAN_DIR) {
+        // Init Confirmation Dialog
+        ConfirmDialog confirmDialog;
+
+        // Set Dialog Title
+        confirmDialog.setConfirmTitle(tr(DEFAULT_ERROR_TITLE_SCAN_DIR));
+
+        // Switch Error
+        switch (aError) {
+            default:
+            case DEFAULT_ERROR_GENERAL: {
+                // Set Error Text
+                confirmDialog.setConfirmText(tr(DEFAULT_ERROR_TEXT_CANT_SCAN_DIR));
+                // Set Path
+                confirmDialog.setPath(aSource);
+            } break;
+        }
+
+
+        // Configure Standard Buttons
+        confirmDialog.configureButtons(QDialogButtonBox::Abort);
+
+        // Add Button
+        confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_RETRY), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_RETRY);
+        confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_SKIP), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_SKIP);
+        confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_SKIPALL), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_SKIPALL);
+
+        // Exec Confirm Dialog
+        confirmDialog.exec();
+
+        // Get Action Index
+        int actionIndex = confirmDialog.getActionIndex();
+
+        // Check File Util
+        if (fileUtil) {
+            // Send User Response
+            fileUtil->sendUserResponse(actionIndex == -1 ? DEFAULT_CONFIRM_ABORT : actionIndex, confirmDialog.getPath());
+        }
+    }
+}
+
+//==============================================================================
+// Destructor
+//==============================================================================
+DirScanner::~DirScanner()
+{
+    // Abort
+    abort();
+    // Clear Queue
+    clearQueue();
+
+    qDebug() << "DirScanner::~DirScanner";
+}

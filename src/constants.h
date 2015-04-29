@@ -139,6 +139,7 @@
 #define DEFAULT_IMAGE_VIEWER_CONTROLLER                     "viewerController"
 #define DEFAULT_IMAGE_VIEWER_CONTENT                        "viewerContent"
 #define DEFAULT_IMAGE_BROWSER                               "imageBrowser"
+#define DEFAULT_CLIENT_LIST_MODEL_NAME                      "clientListModel"
 
 
 #define DEFAULT_FILE_ICON_PROVIDER_ID                       "fileicon"

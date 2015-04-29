@@ -232,7 +232,7 @@ void FileListModel::sendUserResponse(const int& aConfirm, const QString& aNewPat
 //==============================================================================
 void FileListModel::clear()
 {
-    qDebug() << "FileListModel::clear";
+    //qDebug() << "FileListModel::clear";
 
     // Begin Reset Model
     beginResetModel();
@@ -264,7 +264,7 @@ void FileListModel::clear()
 //==============================================================================
 void FileListModel::reload()
 {
-    qDebug() << "FileListModel::reload";
+    //qDebug() << "FileListModel::reload";
 
     // Clear
     clear();
@@ -542,7 +542,9 @@ void FileListModel::clientConnectionChanged(const unsigned int& aID, const bool&
 //==============================================================================
 void FileListModel::clientStatusChanged(const unsigned int& aID, const int& aStatus)
 {
-    qDebug() << "FileListModel::clientStatusChanged - aID: " << aID << " - aStatus: " << RemoteFileUtilClient::statusToString(aStatus);
+    Q_UNUSED(aID);
+
+    //qDebug() << "FileListModel::clientStatusChanged - aID: " << aID << " - aStatus: " << RemoteFileUtilClient::statusToString(aStatus);
 
     // Check Status
     if (aStatus == ECSTBusy || aStatus == ECSTAborting || aStatus == ECSTWaiting) {

@@ -119,7 +119,6 @@ void FilePanel::init()
     // Set Source
     ui->fileListWidget->setSource(QUrl("qrc:/qml/FileList.qml"));
 
-
     // Connect Signals
     connect(ui->fileListWidget, SIGNAL(focusChanged(bool)), this, SLOT(setPanelFocus(bool)));
 
@@ -862,7 +861,7 @@ void FilePanel::setVisualItemsCount(const int& aVisualCount)
 {
     // Check Current Index
     if (visualItemsCount != aVisualCount) {
-        qDebug() << "FilePanel::setVisualItemsCount - aVisualCount: " << aVisualCount;
+        //qDebug() << "FilePanel::setVisualItemsCount - aVisualCount: " << aVisualCount;
 
         // Set Current Index
         visualItemsCount = aVisualCount;
@@ -1360,7 +1359,7 @@ void FilePanel::fileModelDirFetchFinished()
     } else if (!lastFileName.isEmpty()) {
         // Find Index
         int lastFileIndex = fileListModel ? fileListModel->findIndex(lastFileName) : 0;
-        // reset Last File Name
+        // Reset Last File Name
         lastFileName = "";
         // Set Current Index
         setCurrentIndex(lastFileIndex);
@@ -1506,7 +1505,7 @@ void FilePanel::startDirWatcher()
 {
     // Check Dir Watcher Timer ID
     if (dirWatcherTimerID == -1) {
-        qDebug() << "FilePanel::startDirWatcher";
+        //qDebug() << "FilePanel::startDirWatcher";
         // Start Timer
         dirWatcherTimerID = startTimer(DEFAULT_ONE_SEC * 5);
 
@@ -1522,7 +1521,7 @@ void FilePanel::stopDirWatcher()
 {
     // Check Dir Watcher Timer ID
     if (dirWatcherTimerID != -1) {
-        qDebug() << "FilePanel::stopDirWatcher";
+        //qDebug() << "FilePanel::stopDirWatcher";
         // Kill Timer
         killTimer(dirWatcherTimerID);
         // Reset Dir Watcher Timer ID

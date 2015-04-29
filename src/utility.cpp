@@ -341,7 +341,7 @@ int launchRemoteFileServer(const bool& asRoot, const QString& aRootPass)
                                                                                  .arg(DEFAULT_OPTION_RUNASROOT)
                                            : QString(getAppExecPath() + "/%1").arg(DEFAULT_FILE_SERVER_EXEC_NAME);
 
-    qDebug() << "launchRemoteFileServer - fileServerCommandLine: " << QDir::currentPath();
+    qDebug() << "launchRemoteFileServer - fileServerCommandLine: " << fileServerCommandLine;
 
     // Exec Shell Command
     int result = execShellCommand(fileServerCommandLine, asRoot, aRootPass);

@@ -48,9 +48,7 @@ BusyIndicator::BusyIndicator(QQuickItem* aParent)
     : QQuickPaintedItem(aParent)
     , animTimerID(-1)
 {
-    qDebug() << "BusyIndicator::BusyIndicator";
-
-
+    //qDebug() << "BusyIndicator::BusyIndicator";
     // Init
     init();
 }
@@ -60,7 +58,7 @@ BusyIndicator::BusyIndicator(QQuickItem* aParent)
 //==============================================================================
 void BusyIndicator::init()
 {
-    qDebug() << "BusyIndicator::init";
+    //qDebug() << "BusyIndicator::init";
 
     // Init Random Generator
     qsrand(QDateTime::currentMSecsSinceEpoch());
@@ -86,8 +84,6 @@ void BusyIndicator::init()
         // Change Direction
         ccw = !ccw;
     }
-
-    // ...
 }
 
 //==============================================================================
@@ -152,13 +148,6 @@ void BusyIndicator::paint(QPainter* aPainter)
 {
     // Check Painter
     if (aPainter) {
-        // Set Pen
-        //aPainter->setPen(Qt::NoPen);
-        // Set Brush
-        //aPainter->setBrush(QColor::fromRgba(qRgba(0, 0, 0, 32)));
-        // Draw Rect
-        //aPainter->drawRoundedRect(boundingRect(), 8, 8);
-
         // Get Pieces Count
         int apCount = animPieces.count();
         // Go Thru Animation Pieces
@@ -213,7 +202,7 @@ void BusyIndicator::timerEvent(QTimerEvent* aEvent)
 //==============================================================================
 void BusyIndicator::clear()
 {
-    qDebug() << "BusyIndicator::clear";
+    //qDebug() << "BusyIndicator::clear";
 
     // Go Thru List
     while (animPieces.count() > 0) {
@@ -229,10 +218,9 @@ BusyIndicator::~BusyIndicator()
 {
     // Stop
     stop();
-
     // Clear
     clear();
 
-    qDebug() << "BusyIndicator::~BusyIndicator";
+    //qDebug() << "BusyIndicator::~BusyIndicator";
 }
 

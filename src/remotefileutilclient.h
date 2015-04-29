@@ -40,10 +40,13 @@ public:
     explicit RemoteFileUtilClient(QObject* aParent = NULL);
 
     // Connect To File Server
-    void connectToFileServer(const bool& asRoot = false, const QString& aRootPass = "");
+    void connectToFileServer(const QString& aHost = "", const bool& asRoot = false, const QString& aRootPass = "");
 
     // Is Client Connected
     bool isConnected();
+
+    // Get ID
+    unsigned int getID();
 
     // Get Status
     ClientStatusType getStatus();
@@ -102,7 +105,7 @@ public:
     void sendUserResponse(const int& aResponse, const QString& aNewPath = "");
 
     // Launch Server Test
-    void launchServerTest(const bool& asRoot = false, const QString& aRootPass = "");
+    void launchServerTest(const QString& aHost = "", const bool& asRoot = false, const QString& aRootPass = "");
     // Start Test Operation
     void startTestOperation();
     // Stop/Abort Test Operation

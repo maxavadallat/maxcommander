@@ -69,7 +69,7 @@ void RemoteFileUtilClient::init()
 //==============================================================================
 // Connect To File Server
 //==============================================================================
-void RemoteFileUtilClient::connectToFileServer(const bool& asRoot, const QString& aRootPass)
+void RemoteFileUtilClient::connectToFileServer(const QString& aHost, const bool& asRoot, const QString& aRootPass)
 {
     // Check Client
     if (!client) {
@@ -91,7 +91,7 @@ void RemoteFileUtilClient::connectToFileServer(const bool& asRoot, const QString
         return;
     }
 
-    qDebug() << "RemoteFileUtilClient::connectToFileServer - host: " << DEFAULT_WORKER_HOST_NAME << ":" << (asRoot ? DEFAULT_FILE_SERVER_ROOT_HOST_PORT : DEFAULT_FILE_SERVER_HOST_PORT);
+    qDebug() << "RemoteFileUtilClient::connectToFileServer - host: " << (aHost.isEmpty() ? DEFAULT_WORKER_HOST_NAME : aHost) << " - port:" << (asRoot ? DEFAULT_FILE_SERVER_ROOT_HOST_PORT : DEFAULT_FILE_SERVER_HOST_PORT);
 
     // Connect To Host
     client->connectToHost(DEFAULT_WORKER_HOST_NAME, asRoot ? DEFAULT_FILE_SERVER_ROOT_HOST_PORT : DEFAULT_FILE_SERVER_HOST_PORT);
@@ -103,6 +103,14 @@ void RemoteFileUtilClient::connectToFileServer(const bool& asRoot, const QString
 bool RemoteFileUtilClient::isConnected()
 {
     return client ? client->state() == QAbstractSocket::ConnectedState : false;
+}
+
+//==============================================================================
+// Get ID
+//==============================================================================
+unsigned int RemoteFileUtilClient::getID()
+{
+    return client && client->state() == QAbstractSocket::ConnectedState ? cID : 0;
 }
 
 //==============================================================================
@@ -545,7 +553,7 @@ void RemoteFileUtilClient::sendUserResponse(const int& aResponse, const QString&
         return;
     }
 
-    //qDebug() << "RemoteFileUtilClient::sendUserResponse - cID: " << cID << " - aResponse: " << aResponse;
+    qDebug() << "RemoteFileUtilClient::sendUserResponse - cID: " << cID << " - aResponse: " << aResponse;
 
     // Init New Data
     QVariantMap newData;
@@ -563,12 +571,12 @@ void RemoteFileUtilClient::sendUserResponse(const int& aResponse, const QString&
 //==============================================================================
 // Launch Server Test
 //==============================================================================
-void RemoteFileUtilClient::launchServerTest(const bool& asRoot, const QString& aRootPass)
+void RemoteFileUtilClient::launchServerTest(const QString& aHost, const bool& asRoot, const QString& aRootPass)
 {
     qDebug() << "RemoteFileUtilClient::launchServerTest - cID: " << cID;
 
     // Connect To File Server
-    connectToFileServer(asRoot, aRootPass);
+    connectToFileServer(aHost, asRoot, aRootPass);
 }
 
 //==============================================================================
@@ -780,7 +788,7 @@ void RemoteFileUtilClient::socketDisconnected()
 void RemoteFileUtilClient::socketError(QAbstractSocket::SocketError socketError)
 {
     qWarning() << " ";
-    qWarning() << "RemoteFileUtilClient::socketError - cID: " << cID << " - socketError: " << socketError << " - error: " << client->errorString();
+    qWarning() << "#### RemoteFileUtilClient::socketError - cID: " << cID << " - socketError: " << socketError << " - error: " << client->errorString();
     qWarning() << " ";
 
     // ...
@@ -825,7 +833,7 @@ void RemoteFileUtilClient::socketBytesWritten(qint64 bytes)
 //==============================================================================
 void RemoteFileUtilClient::socketReadChannelFinished()
 {
-    qDebug() << "RemoteFileUtilClient::socketReadChannelFinished - cID: " << cID;
+    //qDebug() << "RemoteFileUtilClient::socketReadChannelFinished - cID: " << cID;
 
 }
 
@@ -1279,6 +1287,9 @@ RemoteFileUtilClient::~RemoteFileUtilClient()
 
     // Check Client
     if (client) {
+        // Close
+        client->close();
+
         // Delete Socket
         delete client;
         client = NULL;

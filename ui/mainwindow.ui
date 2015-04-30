@@ -496,7 +496,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Show/Hide Hiden</string>
+    <string>Show Hidden Files</string>
    </property>
    <property name="shortcut">
     <string>Meta+H</string>

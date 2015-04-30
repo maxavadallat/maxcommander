@@ -37,6 +37,8 @@ public:
 
 public slots:
 
+    // New File
+    void newFile(const QString& aDirPath);
     // Load File
     void loadFile(const QString& aFileName, const QString& aPanelName);
     // Save File As
@@ -96,6 +98,8 @@ private:
     Ui::ViewerWindow*       ui;
     // File Name
     QString                 fileName;
+    // Current Dir
+    QString                 currentDir;
     // Edit Mode
     bool                    editMode;
     // Dirty

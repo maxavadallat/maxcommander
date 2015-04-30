@@ -238,6 +238,12 @@
 
 #define DEFAULT_PROGRESS_DIALOG_FILENAME_TEXT_TEMPLATE      "%1 @ %2 KB/s"
 
+
+#define DEFAULT_TITLE_SAVE_NEW_FILE                         "Save New File"
+#define DEFAULT_TITLE_SAVE_FILE                             "Save File"
+
+
+
 // Icons
 #define DEFAULT_ICON_PATH_OK                                ":/resources/images/check_256.png"
 #define DEFAULT_ICON_PATH_CANCEL                            ":/resources/images/delete_256.png"

@@ -51,7 +51,7 @@ public slots:
     void launchTerminal(const QString& aDirPath);
 
     // Launch Viewer
-    void launchViewer(const bool& aEditMode = false);
+    void launchViewer(const bool& aEditMode = false, const bool& aNewFile = false);
 
     // Launch File Copy
     void launchFileCopy();

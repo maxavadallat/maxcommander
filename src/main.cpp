@@ -33,6 +33,9 @@ int main(int argc, char* argv[])
     // Store App Exec Path
     storeAppExecPath(argv[0]);
 
+    // Init Result
+    int result = 0;
+
     // Init Main Window
     MainWindow* mainWindow = MainWindow::getInstance();
 
@@ -40,7 +43,7 @@ int main(int argc, char* argv[])
     mainWindow->showWindow();
 
     // Execute App
-    int result = app.exec();
+    result = app.exec();
 
     // Release Main Window Instance
     mainWindow->release();

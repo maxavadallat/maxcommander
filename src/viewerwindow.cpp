@@ -11,6 +11,7 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QSettings>
+#include <QFileDialog>
 #include <QDebug>
 
 #include <mcwinterface.h>
@@ -84,6 +85,26 @@ void ViewerWindow::init()
 QString ViewerWindow::getContentSource()
 {
     return fileName;
+}
+
+//==============================================================================
+// New File
+//==============================================================================
+void ViewerWindow::newFile(const QString& aDirPath)
+{
+    qDebug() << "ViewerWindow::newFile - aDirPath: " << aDirPath;
+
+    // Quick Widget Set Visible
+    ui->quickWidget->setVisible(false);
+    // Text Edit Set Visible
+    ui->textEdit->setVisible(true);
+
+    // Reset File Name
+    fileName = "";
+    // Get Current Dir
+    currentDir = aDirPath;
+
+    // ...
 }
 
 //==============================================================================
@@ -402,25 +423,50 @@ void ViewerWindow::closeEvent(QCloseEvent* aEvent)
 {
     // Check Event
     if (aEvent) {
+        qDebug() << "ViewerWindow::​closeEvent - dirty: " << dirty;
 
         // Check Dirty Flag
         if (dirty) {
-            qDebug() << "ViewerWindow::​closeEvent - IGNORE!";
 
-            // Ask For Save
+            // Init Save File Name
+            QString saveFileName = "";
 
-            // Ignore Event
-            aEvent->ignore();
+            // Check File Name
+            if (!fileName.isEmpty()) {
+                // Get Saved File Name
+                saveFileName = QFileDialog::getSaveFileName(this, tr(DEFAULT_TITLE_SAVE_FILE), fileName, "", NULL, QFileDialog::DontConfirmOverwrite);
+            } else {
+                // Get Saved File Name
+                saveFileName = QFileDialog::getSaveFileName(this, tr(DEFAULT_TITLE_SAVE_NEW_FILE), currentDir);
+            }
 
-        } else {
-            qDebug() << "ViewerWindow::​closeEvent";
+            // Check Save File Name
+            if (!saveFileName.isEmpty()) {
+                // Init File
+                QFile file(saveFileName);
 
-            // Accept Event
-            aEvent->accept();
+                // Open File
+                if (file.open(QIODevice::WriteOnly)) {
+                    // Init Text Stream
+                    QTextStream textStream(&file);
 
-            // Emit Viewer Closed Signal
-            emit viewerClosed(this);
+                    // Load From File
+                    textStream << ui->textEdit->toPlainText();
+
+                    // Reset Dirty Flag
+                    dirty = false;
+
+                    // Close File
+                    file.close();
+                }
+            }
         }
+
+        // Accept Event
+        aEvent->accept();
+
+        // Emit Viewer Closed Signal
+        emit viewerClosed(this);
     }
 }
 

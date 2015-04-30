@@ -56,7 +56,7 @@ Rectangle {
                     width: parent.width - parent.height - spacer.width
                     height: parent.height
                     verticalAlignment: Text.AlignVCenter
-                    text: clientID
+                    text: clientID === 0 ? "Disconnected" : "Client ID: " + clientID
                     color: "#FFEFEFEF"
 
                     MouseArea {

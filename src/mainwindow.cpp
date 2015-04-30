@@ -264,7 +264,7 @@ void MainWindow::launchTerminal(const QString& aDirPath)
 //==============================================================================
 // Launch Viewer
 //==============================================================================
-void MainWindow::launchViewer(const bool& aEditMode)
+void MainWindow::launchViewer(const bool& aEditMode, const bool& aNewFile)
 {
     // Check Focused Panel
     if (!focusedPanel) {
@@ -294,15 +294,18 @@ void MainWindow::launchViewer(const bool& aEditMode)
     // Create New Viewer Window
     ViewerWindow* newViewer = new ViewerWindow();
 
-    // Load File
-    newViewer->loadFile(focusedPanel->getCurrFileInfo().absoluteFilePath(), focusedPanel->getPanelName());
+    // Check New File
+    if (aNewFile) {
+
+    } else {
+        // Load File
+        newViewer->loadFile(focusedPanel->getCurrFileInfo().absoluteFilePath(), focusedPanel->getPanelName());
+    }
 
     // Setup Viewer Window
 
     // Set Edit Mode
     newViewer->setEditModeEnabled(aEditMode);
-
-    // ...
 
     // Connect Signal
     connect(newViewer, SIGNAL(viewerClosed(ViewerWindow*)), this, SLOT(viewerWindowClosed(ViewerWindow*)));
@@ -742,6 +745,25 @@ void MainWindow::updateMenu()
 {
     qDebug() << "MainWindow::updateMenu";
 
+    // Check Focused Panel
+    if (focusedPanel) {
+
+        // Switch Sorting
+        switch (focusedPanel->getSorting()) {
+            default:
+            case DEFAULT_SORT_NAME:     ui->actionSort_by_Name->setChecked(true); break;
+            case DEFAULT_SORT_EXT:      ui->actionSort_by_Extension->setChecked(true); break;
+            case DEFAULT_SORT_TYPE:     ui->actionSort_by_Type->setChecked(true); break;
+            case DEFAULT_SORT_SIZE:     ui->actionSort_by_Size->setChecked(true); break;
+            case DEFAULT_SORT_DATE:     ui->actionSort_by_Date->setChecked(true); break;
+            case DEFAULT_SORT_OWNER:    ui->actionSort_by_Owner->setChecked(true); break;
+            case DEFAULT_SORT_PERMS:    ui->actionSort_by_Permissions->setChecked(true); break;
+            case DEFAULT_SORT_ATTRS:    break;
+        }
+
+        // Set Show Hidden Checked
+        ui->actionShow_Hide_Hiden->setChecked(focusedPanel->getShowHidden());
+    }
 }
 
 //==============================================================================
@@ -871,6 +893,9 @@ void MainWindow::focusedPanelChanged(FilePanel* aFocusedPanel)
 
     // Set Focused Panel
     focusedPanel = aFocusedPanel;
+
+    // Update Menu
+    updateMenu();
 }
 
 //==============================================================================
@@ -1156,7 +1181,13 @@ void MainWindow::on_actionTerminal_triggered()
 //==============================================================================
 void MainWindow::on_actionSort_by_Name_triggered()
 {
-    // Sort Focused Panel Items By Name
+    // Check Focused Panel
+    if (focusedPanel) {
+        // Check Sorting
+
+        // Sort Focused Panel Items By Name
+        focusedPanel->setSorting(DEFAULT_SORT_NAME);
+    }
 }
 
 //==============================================================================
@@ -1164,8 +1195,10 @@ void MainWindow::on_actionSort_by_Name_triggered()
 //==============================================================================
 void MainWindow::on_actionSort_by_Extension_triggered()
 {
+    // Check Focused Panel
+    if (focusedPanel) {
     // Sort Focused Panel Items By Extension
-
+    }
 }
 
 //==============================================================================
@@ -1173,8 +1206,11 @@ void MainWindow::on_actionSort_by_Extension_triggered()
 //==============================================================================
 void MainWindow::on_actionSort_by_Type_triggered()
 {
-    // Sort Focused Panel Items By Type
-
+    // Check Focused Panel
+    if (focusedPanel) {
+        // Sort Focused Panel Items By Type
+        focusedPanel->setSorting(DEFAULT_SORT_EXT);
+    }
 }
 
 //==============================================================================
@@ -1182,8 +1218,11 @@ void MainWindow::on_actionSort_by_Type_triggered()
 //==============================================================================
 void MainWindow::on_actionSort_by_Size_triggered()
 {
-    // Sort Focused Panel Items By Size
-
+    // Check Focused Panel
+    if (focusedPanel) {
+        // Sort Focused Panel Items By Size
+        focusedPanel->setSorting(DEFAULT_SORT_SIZE);
+    }
 }
 
 //==============================================================================
@@ -1191,8 +1230,11 @@ void MainWindow::on_actionSort_by_Size_triggered()
 //==============================================================================
 void MainWindow::on_actionSort_by_Date_triggered()
 {
-    // Sort Focused Panel Items By Date
-
+    // Check Focused Panel
+    if (focusedPanel) {
+        // Sort Focused Panel Items By Date
+        focusedPanel->setSorting(DEFAULT_SORT_DATE);
+    }
 }
 
 //==============================================================================
@@ -1200,8 +1242,11 @@ void MainWindow::on_actionSort_by_Date_triggered()
 //==============================================================================
 void MainWindow::on_actionSort_by_Owner_triggered()
 {
-    // Sort Focused Panel Items By Owner
-
+    // Check Focused Panel
+    if (focusedPanel) {
+        // Sort Focused Panel Items By Owner
+        focusedPanel->setSorting(DEFAULT_SORT_OWNER);
+    }
 }
 
 //==============================================================================
@@ -1209,8 +1254,11 @@ void MainWindow::on_actionSort_by_Owner_triggered()
 //==============================================================================
 void MainWindow::on_actionSort_by_Permissions_triggered()
 {
-    // Sort Focused Panel Items By Permission
-
+    // Check Focused Panel
+    if (focusedPanel) {
+        // Sort Focused Panel Items By Permission
+        focusedPanel->setSorting(DEFAULT_SORT_PERMS);
+    }
 }
 
 //==============================================================================
@@ -1236,7 +1284,8 @@ void MainWindow::on_actionNew_Directory_triggered()
 //==============================================================================
 void MainWindow::on_actionNew_File_triggered()
 {
-
+    // Launch Editor
+    launchViewer(true, true);
 }
 
 //==============================================================================

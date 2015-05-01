@@ -11,6 +11,9 @@
         <file>resources/images/check_256.png</file>
         <file>resources/images/delete_256.png</file>
         <file>resources/images/synchronize_256.png</file>
+        <file>resources/images/error.png</file>
+        <file>resources/images/info.png</file>
+        <file>resources/images/warning.png</file>
     </qresource>
 </RCC>
 

@@ -90,8 +90,12 @@ public:
 
     // Get Panel Focus
     bool getPanelFocus();
+
     // Get Current Index
     int getCurrentIndex();
+    // Set Current Index
+    void setCurrentIndex(const int& aCurrentIndex);
+
     // Get Visual Items Count
     int getvisualItemsCount();
 
@@ -228,8 +232,6 @@ public slots:
 
     // Set Panel Focus
     void setPanelFocus(const bool& aFocus);
-    // Set Current Index
-    void setCurrentIndex(const int& aCurrentIndex);
     // Set Visual Items Count
     void setVisualItemsCount(const int& aVisualCount);
 

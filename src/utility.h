@@ -4,7 +4,7 @@
 #include <QString>
 #include <QFileInfo>
 #include <QDateTime>
-
+#include <QRgb>
 
 // File Sorting Type
 enum FileSortType {
@@ -68,6 +68,11 @@ bool isDirEmpty(const QString& aDirPath);
 
 // Launch App
 bool launchApp(const QString& aAppName, const QStringList& aArgs, const QString& aWorkingDir = "");
+
+// RGB To String - #AARRGGBB
+QString rgb2string(const QRgb& aColor);
+// String To RGB - #AARRGGBB
+QRgb string2Rgb(const QString& aColor);
 
 
 #endif // UTILITY

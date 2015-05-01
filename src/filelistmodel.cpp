@@ -252,6 +252,9 @@ void FileListModel::clear()
     // End Reset Model
     endResetModel();
 
+    // Emit Count Changed Signal
+    emit countChanged(itemList.count());
+
     // Clear File Name List
     fileNameList.clear();
 
@@ -689,20 +692,20 @@ void FileListModel::dirListItemFound(const unsigned int& aID,
     // Create New File List Item
     FileListModelItem* newItem = new FileListModelItem(aPath, aFileName);
 
-    // Get Count
-    int count = rowCount();
-
     // Begin Insert Row
-    beginInsertRows(QModelIndex(), count, count);
+    beginInsertRows(QModelIndex(), rowCount(), rowCount());
 
     // Add Item To Item List
     itemList << newItem;
 
+    // End Insert Row
+    endInsertRows();
+
     // Add File Name To File Name List
     fileNameList << aFileName;
 
-    // End Insert Row
-    endInsertRows();
+    // Emit Count Changed Signal
+    emit countChanged(itemList.count());
 }
 
 //==============================================================================
@@ -1037,6 +1040,9 @@ void FileListModel::insertItem(const QString& aFileName)
 
     // Add File Name To File Name List
     fileNameList.insert(i, aFileName);
+
+    // Emit Count Changed Signal
+    emit countChanged(itemList.count());
 }
 
 //==============================================================================

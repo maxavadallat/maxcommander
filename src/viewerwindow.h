@@ -38,9 +38,9 @@ public:
 public slots:
 
     // New File
-    void newFile(const QString& aDirPath);
+    bool newFile(const QString& aDirPath);
     // Load File
-    void loadFile(const QString& aFileName, const QString& aPanelName);
+    bool loadFile(const QString& aFileName, const QString& aPanelName);
     // Save File As
     void saveFileAs(const QString& aFileName);
 

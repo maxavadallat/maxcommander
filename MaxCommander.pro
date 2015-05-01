@@ -47,7 +47,10 @@ SOURCES                 += src/main.cpp \
                         src/helpwindow.cpp \
                         src/audiotagimageprovider.cpp \
                         src/viewerwindow.cpp \
-                        src/testdialog.cpp
+                        src/testdialog.cpp \
+                        src/infodialog.cpp \
+                        src/passworddialog.cpp \
+                        src/colorpickerbutton.cpp
 
 # Heders
 HEADERS                 += src/constants.h \
@@ -72,7 +75,11 @@ HEADERS                 += src/constants.h \
                         src/helpwindow.h \
                         src/audiotagimageprovider.h \
                         src/viewerwindow.h \
-                        src/testdialog.h
+                        src/testdialog.h \
+                        src/infodialog.h \
+                        src/passworddialog.h \
+                        src/colorpickerbutton.h \
+                        src/defaultsettings.h
 
 # Include Path
 INCLUDEPATH             += \
@@ -92,7 +99,9 @@ FORMS                   += \
                         ui/preferencesdialog.ui \
                         ui/helpwindow.ui \
                         ui/viewerwindow.ui \
-                        ui/testdialog.ui
+                        ui/testdialog.ui \
+                        ui/infodialog.ui \
+                        ui/passworddialog.ui
 
 # Resources
 RESOURCES               += \

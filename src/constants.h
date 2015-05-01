@@ -53,6 +53,11 @@
 
 #define SETTINGS_KEY_MAIN_SPLITTER                          SETTINGS_GROUP_UI"/mainSplitter"
 
+#define SETTINGS_KEY_SHOW_FUNCTION_KEYS                     SETTINGS_GROUP_UI"/showFunctionKeys"
+#define SETTINGS_KEY_SHOW_DIR_HOT_KEYS                      SETTINGS_GROUP_UI"/showDirHotKeys"
+#define SETTINGS_KEY_SHOW_DRIVE_BUTTONS                     SETTINGS_GROUP_UI"/showDriveButtons"
+
+
 #define SETTINGS_KEY_THUMBS_WIDTH                           SETTINGS_GROUP_UI"/thumbsWidth"
 #define SETTINGS_KEY_THUMBS_HEIGHT                          SETTINGS_GROUP_UI"/thumbsHeiight"
 
@@ -61,11 +66,43 @@
 #define SETTINGS_KEY_CLOSE_WHEN_FINISHED                    SETTINGS_GROUP_UI"/closeWhenFinished"
 
 
+#define SETTINGS_KEY_PANEL_COLOR_TEXT                       SETTINGS_GROUP_UI"/textColor"
+#define SETTINGS_KEY_PANEL_COLOR_TEXT_BG                    SETTINGS_GROUP_UI"/textBGColor"
+
+#define SETTINGS_KEY_PANEL_COLOR_CURRENT                    SETTINGS_GROUP_UI"/currentColor"
+#define SETTINGS_KEY_PANEL_COLOR_CURRENT_BG                 SETTINGS_GROUP_UI"/currentBGColor"
+
+#define SETTINGS_KEY_PANEL_COLOR_SELECTED                   SETTINGS_GROUP_UI"/selectedColor"
+#define SETTINGS_KEY_PANEL_COLOR_SELECTED_BG                SETTINGS_GROUP_UI"/selectedBGColor"
+
+#define SETTINGS_KEY_PANEL_COLOR_CURRENT_SELECTED           SETTINGS_GROUP_UI"/currentSelectedColor"
+#define SETTINGS_KEY_PANEL_COLOR_CURRENT_SELECTED_BG        SETTINGS_GROUP_UI"/currentSelectedBGColor"
+
+#define SETTINGS_KEY_PANEL_COLOR_HIDDEN                     SETTINGS_GROUP_UI"/hiddenColor"
+#define SETTINGS_KEY_PANEL_COLOR_HIDDEN_BG                  SETTINGS_GROUP_UI"/hiddenBGColor"
+
+#define SETTINGS_KEY_PANEL_COLOR_LINK                       SETTINGS_GROUP_UI"/linkColor"
+#define SETTINGS_KEY_PANEL_COLOR_LINK_BG                    SETTINGS_GROUP_UI"/linkBGColor"
+
+#define SETTINGS_KEY_PANEL_FONT_NAME                        SETTINGS_GROUP_UI"/fontName"
+#define SETTINGS_KEY_PANEL_FONT_SIZE                        SETTINGS_GROUP_UI"/fontSize"
+#define SETTINGS_KEY_PANEL_FONT_BOLD                        SETTINGS_GROUP_UI"/fontBold"
+#define SETTINGS_KEY_PANEL_FONT_ITALIC                      SETTINGS_GROUP_UI"/fontItalic"
+
+
+#define SETTINGS_KEY_APPS_VIEWER                            SETTINGS_GROUP_APPS"/viewer"
+#define SETTINGS_KEY_APPS_EDITOR                            SETTINGS_GROUP_APPS"/editor"
+#define SETTINGS_KEY_APPS_COMPARE                           SETTINGS_GROUP_APPS"/compare"
+#define SETTINGS_KEY_APPS_PACKER                            SETTINGS_GROUP_APPS"/packer"
+#define SETTINGS_KEY_APPS_UNPACKER                          SETTINGS_GROUP_APPS"/unpacker"
+
+
 // Common
 
 #define SETTINGS_KEY_SHOW_HIDDEN_FILES                      SETTINGS_GROUP_PANEL_COMMON"/showHidden"
 #define SETTINGS_KEY_DIRFIRST                               SETTINGS_GROUP_PANEL_COMMON"/dirFirst"
 #define SETTINGS_KEY_CASE_SENSITIVE                         SETTINGS_GROUP_PANEL_COMMON"/caseSensitive"
+#define SETTINGS_KEY_SELECT_DIRS                            SETTINGS_GROUP_PANEL_COMMON"/selectDirs"
 
 
 // File Panels
@@ -106,7 +143,7 @@
 #define SETTINGS_KEY_VIEWER_WORDWRAP                        SETTINGS_GROUP_VIEWER"/wordwrap"
 
 
-
+#define DEFAULT_MIME_TEXT                                   "text"
 #define DEFAULT_MIME_PREFIX_TEXT                            "text/"
 #define DEFAULT_MIME_PREFIX_IMAGE                           "image/"
 #define DEFAULT_MIME_PREFIX_AUDIO                           "audio/"
@@ -128,9 +165,11 @@
 
 // Constants
 
+// Default Transparent Color
+#define DEFAULT_TRANSPARENT_COLOR                           "#00000000"
 
 #define DEFAULT_PANEL_FOCUSED_STYLE_SHEET                   "background-color: #11000077"
-#define DEFAULT_PANEL_TRASPARENT_STYLE_SHEET                "background-color: #00000000"
+#define DEFAULT_PANEL_TRASPARENT_STYLE_SHEET                "background-color: "DEFAULT_TRANSPARENT_COLOR
 
 #define DEFAULT_AVAILABLE_SPACE_FORMAT_STRING               "%1 files, %2 of %3 Kbytes free"
 
@@ -140,7 +179,7 @@
 #define DEFAULT_IMAGE_VIEWER_CONTENT                        "viewerContent"
 #define DEFAULT_IMAGE_BROWSER                               "imageBrowser"
 #define DEFAULT_CLIENT_LIST_MODEL_NAME                      "clientListModel"
-
+#define DEFAULT_PREVIEW_CONTROLLER                          "previewController"
 
 #define DEFAULT_FILE_ICON_PROVIDER_ID                       "fileicon"
 #define DEFAULT_AUDIO_TAG_PROVIDER_ID                       "audiotag"
@@ -194,6 +233,14 @@
 
 #define DEFAULT_PROGRESS_DIALOG_SEMI_TRANSPARENCY           0.4
 
+
+// Icons
+#define DEFAULT_ICON_PATH_OK                                ":/resources/images/check_256.png"
+#define DEFAULT_ICON_PATH_CANCEL                            ":/resources/images/delete_256.png"
+#define DEFAULT_ICON_PATH_PROGRESS                          ":/resources/images/synchronize_256.png"
+
+
+
 // Localization Constants
 
 #define DEFAULT_ERROR_TITLE_DELETE_FILE                     "File Deleting Error"
@@ -239,18 +286,25 @@
 #define DEFAULT_PROGRESS_DIALOG_FILENAME_TEXT_TEMPLATE      "%1 @ %2 KB/s"
 
 
+#define DEFAULT_TITLE_VIEWER                                "Viewer - "
+
 #define DEFAULT_TITLE_SAVE_NEW_FILE                         "Save New File"
 #define DEFAULT_TITLE_SAVE_FILE                             "Save File"
 
+#define DEFAULT_TITLE_INFO                                  "Information"
+#define DEFAULT_TITLE_WARNING                               "Warning"
+#define DEFAULT_TITLE_ERROR                                 "Error"
 
 
-// Icons
-#define DEFAULT_ICON_PATH_OK                                ":/resources/images/check_256.png"
-#define DEFAULT_ICON_PATH_CANCEL                            ":/resources/images/delete_256.png"
-#define DEFAULT_ICON_PATH_PROGRESS                          ":/resources/images/synchronize_256.png"
+#define DEFAULT_TEXT_WORD_WRAP_ON                           "Wrap On"
+#define DEFAULT_TEXT_WORD_WRAP_OFF                          "Wrap Off"
 
 
+#define DEFAULT_WARNING_TEXT_CANT_CREATE_NEW_FILE           "Could not Create New File!"
+#define DEFAULT_WARNING_TEXT_UNSUPPORTED_FILE_FORMAT        "Unsupported File Format!"
 
+
+#define DEFAULT_TITLE_FONT_SIZE                             "size: "
 
 
 

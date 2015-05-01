@@ -61,6 +61,9 @@ public slots:
     // Launch Create Dir
     void launchCreateDir();
 
+    // Launch Create Link
+    void launchCreateLink();
+
     // Launch Delete
     void launchDelete();
 
@@ -72,8 +75,6 @@ public slots:
 
     // Shut Down
     void shutDown();
-
-signals:
 
 
 protected:
@@ -98,13 +99,13 @@ protected slots:
     // Modifier Keys Changed Slot
     void modifierKeysChanged(const int& aModifiers);
 
-    // Update Function Keys
+    // Update Function Keys Slot
     void updateFunctionKeys();
 
-    // Update Menu
+    // Update Menu Slot
     void updateMenu();
 
-    // Toggle Hidden Files
+    // Toggle Hidden Files Slot
     void toggleHiddenFile();
 
     // Viewer Window Closed Slot
@@ -117,8 +118,11 @@ protected slots:
     // Focused Panel Changed Slot
     void focusedPanelChanged(FilePanel* aFocusedPanel);
 
-    // Launch Transfer
+    // Launch Transfer Slot
     void launchTransfer(const QString& aOperation);
+
+    // Settings Has Changed Slot
+    void settingsHasChanged();
 
 protected slots: // Actions & Button
 

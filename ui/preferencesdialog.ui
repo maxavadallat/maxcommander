@@ -6,14 +6,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>576</width>
-    <height>416</height>
+    <width>600</width>
+    <height>520</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>576</width>
-    <height>416</height>
+    <width>600</width>
+    <height>520</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>600</width>
+    <height>520</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -41,6 +47,29 @@
    <property name="verticalSpacing">
     <number>8</number>
    </property>
+   <item row="1" column="0">
+    <widget class="QFrame" name="frame">
+     <property name="frameShape">
+      <enum>QFrame::HLine</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Sunken</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="focusPolicy">
+      <enum>Qt::StrongFocus</enum>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Apply|QDialogButtonBox::Close|QDialogButtonBox::Reset</set>
+     </property>
+    </widget>
+   </item>
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="minimumSize">
@@ -62,37 +91,1188 @@
       <attribute name="title">
        <string>General</string>
       </attribute>
+      <widget class="QCheckBox" name="showHiddenFilesCheckBox">
+       <property name="geometry">
+        <rect>
+         <x>308</x>
+         <y>138</y>
+         <width>193</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::RightToLeft</enum>
+       </property>
+       <property name="text">
+        <string>Show Hidden Files</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="functionKeysCheckBox">
+       <property name="geometry">
+        <rect>
+         <x>44</x>
+         <y>138</y>
+         <width>193</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::RightToLeft</enum>
+       </property>
+       <property name="text">
+        <string>Show Function Keys</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="dirHotKeysCheckBox">
+       <property name="geometry">
+        <rect>
+         <x>44</x>
+         <y>212</y>
+         <width>193</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::RightToLeft</enum>
+       </property>
+       <property name="text">
+        <string>Show Directory Hot Keys</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="selectDirsCheckBox">
+       <property name="geometry">
+        <rect>
+         <x>308</x>
+         <y>176</y>
+         <width>193</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::RightToLeft</enum>
+       </property>
+       <property name="text">
+        <string>Select Directories</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="showDirsFirstCheckBox">
+       <property name="geometry">
+        <rect>
+         <x>308</x>
+         <y>214</y>
+         <width>193</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::RightToLeft</enum>
+       </property>
+       <property name="text">
+        <string>Show Directories First</string>
+       </property>
+      </widget>
+      <widget class="Line" name="line">
+       <property name="geometry">
+        <rect>
+         <x>275</x>
+         <y>14</y>
+         <width>16</width>
+         <height>407</height>
+        </rect>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="driveButtonsCheckBox">
+       <property name="geometry">
+        <rect>
+         <x>44</x>
+         <y>176</y>
+         <width>193</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::RightToLeft</enum>
+       </property>
+       <property name="text">
+        <string>Show Drive Buttons</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="caseSensitiveSortCheckBox">
+       <property name="geometry">
+        <rect>
+         <x>308</x>
+         <y>252</y>
+         <width>193</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::RightToLeft</enum>
+       </property>
+       <property name="text">
+        <string>Case Sensitive Sorting</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="interfaceTab">
+      <attribute name="title">
+       <string>File List</string>
+      </attribute>
+      <widget class="QComboBox" name="iconSizeComboBox">
+       <property name="geometry">
+        <rect>
+         <x>235</x>
+         <y>9</y>
+         <width>84</width>
+         <height>26</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>84</width>
+         <height>26</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>84</width>
+         <height>26</height>
+        </size>
+       </property>
+       <property name="currentIndex">
+        <number>1</number>
+       </property>
+       <item>
+        <property name="text">
+         <string>16x16</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>32x32</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>64x64</string>
+        </property>
+       </item>
+      </widget>
+      <widget class="QQuickWidget" name="previewWidget">
+       <property name="geometry">
+        <rect>
+         <x>350</x>
+         <y>12</y>
+         <width>220</width>
+         <height>413</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>220</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="resizeMode">
+        <enum>QQuickWidget::SizeRootObjectToView</enum>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_7">
+       <property name="geometry">
+        <rect>
+         <x>106</x>
+         <y>42</y>
+         <width>120</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Normal Text Color:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="ColorPickerButton" name="textColorButton">
+       <property name="geometry">
+        <rect>
+         <x>232</x>
+         <y>40</y>
+         <width>88</width>
+         <height>30</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>58</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>90</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+       <property name="flat">
+        <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_8">
+       <property name="geometry">
+        <rect>
+         <x>66</x>
+         <y>74</y>
+         <width>160</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Normal Text Background:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="ColorPickerButton" name="textBgButton">
+       <property name="geometry">
+        <rect>
+         <x>232</x>
+         <y>69</y>
+         <width>88</width>
+         <height>30</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>58</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>90</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+       <property name="flat">
+        <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_10">
+       <property name="geometry">
+        <rect>
+         <x>102</x>
+         <y>104</y>
+         <width>121</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Current Text Color:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="ColorPickerButton" name="currentColorButton">
+       <property name="geometry">
+        <rect>
+         <x>232</x>
+         <y>98</y>
+         <width>88</width>
+         <height>30</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>58</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>90</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+       <property name="flat">
+        <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_9">
+       <property name="geometry">
+        <rect>
+         <x>62</x>
+         <y>132</y>
+         <width>162</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Current Text Background:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="ColorPickerButton" name="currentBGButton">
+       <property name="geometry">
+        <rect>
+         <x>232</x>
+         <y>128</y>
+         <width>88</width>
+         <height>30</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>58</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>90</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+       <property name="flat">
+        <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_12">
+       <property name="geometry">
+        <rect>
+         <x>98</x>
+         <y>164</y>
+         <width>126</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Selected Text Color:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="ColorPickerButton" name="selectedColorButton">
+       <property name="geometry">
+        <rect>
+         <x>232</x>
+         <y>158</y>
+         <width>88</width>
+         <height>30</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>58</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>90</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+       <property name="flat">
+        <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_11">
+       <property name="geometry">
+        <rect>
+         <x>60</x>
+         <y>192</y>
+         <width>166</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Selected Text Background:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="ColorPickerButton" name="selectedBGButton">
+       <property name="geometry">
+        <rect>
+         <x>232</x>
+         <y>188</y>
+         <width>88</width>
+         <height>30</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>58</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>90</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+       <property name="flat">
+        <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_14">
+       <property name="geometry">
+        <rect>
+         <x>50</x>
+         <y>222</y>
+         <width>178</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Current Selected Text Color:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="ColorPickerButton" name="currentSelectedColorButton">
+       <property name="geometry">
+        <rect>
+         <x>232</x>
+         <y>218</y>
+         <width>88</width>
+         <height>30</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>58</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>90</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+       <property name="flat">
+        <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_13">
+       <property name="geometry">
+        <rect>
+         <x>8</x>
+         <y>252</y>
+         <width>218</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Current Selected Text Background:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="ColorPickerButton" name="currentSelectedBGButton">
+       <property name="geometry">
+        <rect>
+         <x>232</x>
+         <y>248</y>
+         <width>88</width>
+         <height>30</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>58</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>90</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+       <property name="flat">
+        <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_16">
+       <property name="geometry">
+        <rect>
+         <x>108</x>
+         <y>284</y>
+         <width>119</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Hidden Text Color:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="ColorPickerButton" name="hiddenTextColorButton">
+       <property name="geometry">
+        <rect>
+         <x>232</x>
+         <y>278</y>
+         <width>88</width>
+         <height>30</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>58</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>90</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+       <property name="flat">
+        <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_15">
+       <property name="geometry">
+        <rect>
+         <x>68</x>
+         <y>312</y>
+         <width>159</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Hidden Text Background:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="ColorPickerButton" name="hiddenTextBgButton">
+       <property name="geometry">
+        <rect>
+         <x>232</x>
+         <y>308</y>
+         <width>88</width>
+         <height>30</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>58</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>90</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+       <property name="flat">
+        <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_17">
+       <property name="geometry">
+        <rect>
+         <x>82</x>
+         <y>410</y>
+         <width>32</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Font:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="fontButton">
+       <property name="geometry">
+        <rect>
+         <x>117</x>
+         <y>404</y>
+         <width>205</width>
+         <height>32</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>160</width>
+         <height>32</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Font Name</string>
+       </property>
+       <property name="flat">
+        <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_6">
+       <property name="geometry">
+        <rect>
+         <x>168</x>
+         <y>12</y>
+         <width>61</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Icon Size:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="clearCurrentBGButton">
+       <property name="geometry">
+        <rect>
+         <x>324</x>
+         <y>132</y>
+         <width>18</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>18</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>18</width>
+         <height>18</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../maxcommanderimages.qrc">
+         <normaloff>:/resources/images/delete_256.png</normaloff>:/resources/images/delete_256.png</iconset>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="clearSelectedBGButton">
+       <property name="geometry">
+        <rect>
+         <x>324</x>
+         <y>192</y>
+         <width>18</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>18</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>18</width>
+         <height>18</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../maxcommanderimages.qrc">
+         <normaloff>:/resources/images/delete_256.png</normaloff>:/resources/images/delete_256.png</iconset>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="clearCurrentSelectedBGButton">
+       <property name="geometry">
+        <rect>
+         <x>324</x>
+         <y>252</y>
+         <width>18</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>18</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>18</width>
+         <height>18</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../maxcommanderimages.qrc">
+         <normaloff>:/resources/images/delete_256.png</normaloff>:/resources/images/delete_256.png</iconset>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="clearHiddenBGButton">
+       <property name="geometry">
+        <rect>
+         <x>324</x>
+         <y>312</y>
+         <width>18</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>18</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>18</width>
+         <height>18</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../maxcommanderimages.qrc">
+         <normaloff>:/resources/images/delete_256.png</normaloff>:/resources/images/delete_256.png</iconset>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="ColorPickerButton" name="linkTextBgButton">
+       <property name="geometry">
+        <rect>
+         <x>232</x>
+         <y>368</y>
+         <width>88</width>
+         <height>30</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>58</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>90</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+       <property name="flat">
+        <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_18">
+       <property name="geometry">
+        <rect>
+         <x>108</x>
+         <y>344</y>
+         <width>119</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Link Text Color:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="ColorPickerButton" name="linkTextColorButton">
+       <property name="geometry">
+        <rect>
+         <x>232</x>
+         <y>338</y>
+         <width>88</width>
+         <height>30</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>58</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>90</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+       <property name="flat">
+        <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="clearLinkBGButton">
+       <property name="geometry">
+        <rect>
+         <x>324</x>
+         <y>372</y>
+         <width>18</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>18</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>18</width>
+         <height>18</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../maxcommanderimages.qrc">
+         <normaloff>:/resources/images/delete_256.png</normaloff>:/resources/images/delete_256.png</iconset>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_19">
+       <property name="geometry">
+        <rect>
+         <x>68</x>
+         <y>372</y>
+         <width>159</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Link Text Background:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <zorder>fontButton</zorder>
+      <zorder>iconSizeComboBox</zorder>
+      <zorder>previewWidget</zorder>
+      <zorder>label_7</zorder>
+      <zorder>label_8</zorder>
+      <zorder>label_9</zorder>
+      <zorder>label_10</zorder>
+      <zorder>label_11</zorder>
+      <zorder>label_12</zorder>
+      <zorder>label_13</zorder>
+      <zorder>label_14</zorder>
+      <zorder>textColorButton</zorder>
+      <zorder>currentBGButton</zorder>
+      <zorder>selectedColorButton</zorder>
+      <zorder>selectedBGButton</zorder>
+      <zorder>currentSelectedColorButton</zorder>
+      <zorder>currentSelectedBGButton</zorder>
+      <zorder>currentColorButton</zorder>
+      <zorder>textBgButton</zorder>
+      <zorder>hiddenTextColorButton</zorder>
+      <zorder>hiddenTextBgButton</zorder>
+      <zorder>label_15</zorder>
+      <zorder>label_16</zorder>
+      <zorder>label_17</zorder>
+      <zorder>label_6</zorder>
+      <zorder>clearCurrentBGButton</zorder>
+      <zorder>clearSelectedBGButton</zorder>
+      <zorder>clearCurrentSelectedBGButton</zorder>
+      <zorder>clearHiddenBGButton</zorder>
+      <zorder>linkTextBgButton</zorder>
+      <zorder>label_18</zorder>
+      <zorder>linkTextColorButton</zorder>
+      <zorder>clearLinkBGButton</zorder>
+      <zorder>label_19</zorder>
      </widget>
      <widget class="QWidget" name="toolsTab">
       <attribute name="title">
        <string>Tools</string>
       </attribute>
+      <layout class="QGridLayout" name="toolsLayout">
+       <property name="leftMargin">
+        <number>8</number>
+       </property>
+       <property name="topMargin">
+        <number>8</number>
+       </property>
+       <property name="rightMargin">
+        <number>8</number>
+       </property>
+       <property name="bottomMargin">
+        <number>8</number>
+       </property>
+       <property name="spacing">
+        <number>8</number>
+       </property>
+       <item row="3" column="0" colspan="2">
+        <widget class="QLineEdit" name="editorEditor"/>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Viewer:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>Packer:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0" colspan="2">
+        <widget class="QLineEdit" name="compareEditor"/>
+       </item>
+       <item row="1" column="0" colspan="2">
+        <widget class="QLineEdit" name="vieverEditor"/>
+       </item>
+       <item row="9" column="0" colspan="2">
+        <widget class="QLineEdit" name="unpackerEditor"/>
+       </item>
+       <item row="4" column="0" colspan="2">
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Compare/Diff:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="0">
+        <widget class="QLabel" name="label_5">
+         <property name="text">
+          <string>Unpacker</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0" colspan="2">
+        <widget class="QLineEdit" name="packerEditor"/>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>Editor:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="10" column="0" colspan="2">
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
      </widget>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QFrame" name="frame">
-     <property name="frameShape">
-      <enum>QFrame::HLine</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Sunken</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="0">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Apply|QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
     </widget>
    </item>
   </layout>
  </widget>
- <resources/>
+ <customwidgets>
+  <customwidget>
+   <class>QQuickWidget</class>
+   <extends>QWidget</extends>
+   <header>QQuickWidget</header>
+  </customwidget>
+  <customwidget>
+   <class>ColorPickerButton</class>
+   <extends>QPushButton</extends>
+   <header>src/colorpickerbutton.h</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>vieverEditor</tabstop>
+  <tabstop>editorEditor</tabstop>
+  <tabstop>compareEditor</tabstop>
+  <tabstop>packerEditor</tabstop>
+  <tabstop>unpackerEditor</tabstop>
+ </tabstops>
+ <resources>
+  <include location="../maxcommanderimages.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

@@ -9,6 +9,7 @@
 #include <QThread>
 #include <QSettings>
 #include <QStorageInfo>
+#include <QColor>
 #include <QDebug>
 
 #if defined(Q_OS_WIN)
@@ -160,7 +161,7 @@ QImage getFileIconImage(const QString& aFilePath, const int& aWidth, const int& 
 
         // Check Status
         if (status != noErr) {
-            qDebug() << "### getFileIconImage - FSPathMakeRef: " << status;
+            //qDebug() << "### getFileIconImage - FSPathMakeRef: " << status;
             // Increase Safe Count
             safeCount++;
             //return QImage(0, 0, QImage::Format_ARGB32_Premultiplied);
@@ -231,7 +232,7 @@ QImage getFileIconImage(const QString& aFilePath, const int& aWidth, const int& 
         // Fill Image
         newImage.fill(QColor(0, 0, 0, 0));
         // Draw Default Icon
-        painter.drawImage(newImage.rect(), QImage(QString(":defaultIcon32x32")));
+        painter.drawImage(newImage.rect(), QImage(QString(":/resources/images/icons/default_file.png")));
     }
 
 #elif defined(Q_OS_WIN)
@@ -540,3 +541,30 @@ bool launchApp(const QString& aAppName, const QStringList& aArgs, const QString&
 }
 
 
+//==============================================================================
+// RGB To String
+//==============================================================================
+QString rgb2string(const QRgb& aColor)
+{
+    // Convert To Result
+    QString result = QString("#%1%2%3%4").arg(qAlpha(aColor), 2, 16, QChar('0'))
+                                         .arg(qRed(aColor), 2, 16, QChar('0'))
+                                         .arg(qGreen(aColor), 2, 16, QChar('0'))
+                                         .arg(qBlue(aColor), 2, 16, QChar('0'));
+
+    return result;
+}
+
+//==============================================================================
+// String To RGB
+//==============================================================================
+QRgb string2Rgb(const QString& aColor)
+{
+    // Convert To Result
+    QRgb result = qRgba(aColor.mid(3, 2).toInt(NULL, 16),
+                        aColor.mid(5, 2).toInt(NULL, 16),
+                        aColor.mid(7, 2).toInt(NULL, 16),
+                        aColor.mid(1, 2).toInt(NULL, 16));
+
+    return result;
+}

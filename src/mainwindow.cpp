@@ -19,6 +19,7 @@
 #include "helpwindow.h"
 #include "viewerwindow.h"
 #include "remotefileutilclient.h"
+#include "infodialog.h"
 #include "utility.h"
 #include "constants.h"
 
@@ -294,18 +295,38 @@ void MainWindow::launchViewer(const bool& aEditMode, const bool& aNewFile)
     // Create New Viewer Window
     ViewerWindow* newViewer = new ViewerWindow();
 
-    // Check New File
-    if (aNewFile) {
-
-    } else {
-        // Load File
-        newViewer->loadFile(focusedPanel->getCurrFileInfo().absoluteFilePath(), focusedPanel->getPanelName());
-    }
-
-    // Setup Viewer Window
-
     // Set Edit Mode
     newViewer->setEditModeEnabled(aEditMode);
+
+    // Check New File
+    if (aNewFile) {
+        // New File
+        if (!newViewer->newFile(focusedPanel->getCurrentDir())) {
+            // Show Info - Can't Save
+            InfoDialog warningDialog(tr(DEFAULT_WARNING_TEXT_CANT_CREATE_NEW_FILE), EIDTWarning);
+            // Exec Dialog
+            warningDialog.exec();
+
+            // Delete New Viewer
+            delete newViewer;
+
+            return;
+        }
+    } else {
+        // Load File
+        if (!newViewer->loadFile(focusedPanel->getCurrFileInfo().absoluteFilePath(), focusedPanel->getPanelName())) {
+
+            // Show Info - Unsupported Format
+            InfoDialog warningDialog(tr(DEFAULT_WARNING_TEXT_UNSUPPORTED_FILE_FORMAT), EIDTWarning);
+            // Exec Dialog
+            warningDialog.exec();
+
+            // Delete New Viewer
+            delete newViewer;
+
+            return;
+        }
+    }
 
     // Connect Signal
     connect(newViewer, SIGNAL(viewerClosed(ViewerWindow*)), this, SLOT(viewerWindowClosed(ViewerWindow*)));
@@ -446,8 +467,26 @@ void MainWindow::launchTransfer(const QString& aOperation)
             newTransferProgressDialog->launch(transferSource, transferTarget, selectedFiles);
         }
     }
+}
 
+//==============================================================================
+// Settings Has Changed Slot
+//==============================================================================
+void MainWindow::settingsHasChanged()
+{
+    qDebug() << "MainWindow::settingsHasChanged";
 
+    // Check Left Panel
+    if (leftPanel) {
+        // Reload
+        leftPanel->reload();
+    }
+
+    // Check Right Panel
+    if (rightPanel) {
+        // Reload
+        rightPanel->reload();
+    }
 }
 
 //==============================================================================
@@ -489,6 +528,22 @@ void MainWindow::launchCreateDir()
         // Create Directory
         focusedPanel->createDir(dirPath);
     }
+}
+
+//==============================================================================
+// Launch Create Link
+//==============================================================================
+void MainWindow::launchCreateLink()
+{
+    // Check Focused Panel
+    if (!focusedPanel) {
+        return;
+    }
+
+    qDebug() << "MainWindow::launchCreateLink";
+
+    // ...
+
 }
 
 //==============================================================================
@@ -641,7 +696,7 @@ void MainWindow::shutDown()
 //==============================================================================
 void MainWindow::modifierKeysChanged(const int& aModifiers)
 {
-    qDebug() << "MainWindow::modifierKeysChanged - aModifiers: " << aModifiers;
+    //qDebug() << "MainWindow::modifierKeysChanged - aModifiers: " << aModifiers;
 
     // Check Modifier Keys
     if (modifierKeys != aModifiers) {
@@ -662,7 +717,7 @@ void MainWindow::updateFunctionKeys()
 
     // Check Modifier Keys
     if (modifierKeys & Qt::ShiftModifier) {
-        qDebug() << "MainWindow::updateFunctionKeys - SHIFT";
+        //qDebug() << "MainWindow::updateFunctionKeys - SHIFT";
 
         // Set Button Text
         ui->helpButton->setText(tr(""));
@@ -677,7 +732,7 @@ void MainWindow::updateFunctionKeys()
         ui->exitButton->setText(tr(""));
 
     } else if (modifierKeys & Qt::ControlModifier) {
-        qDebug() << "MainWindow::updateFunctionKeys - CONTROL";
+        //qDebug() << "MainWindow::updateFunctionKeys - CONTROL";
 
         // Set Button Text
         ui->helpButton->setText(tr(""));
@@ -692,7 +747,7 @@ void MainWindow::updateFunctionKeys()
         ui->exitButton->setText(tr(""));
 
     } else if (modifierKeys & Qt::AltModifier) {
-        qDebug() << "MainWindow::updateFunctionKeys - ALT";
+        //qDebug() << "MainWindow::updateFunctionKeys - ALT";
 
         // Set Button Text
         ui->helpButton->setText(tr(""));
@@ -707,7 +762,7 @@ void MainWindow::updateFunctionKeys()
         ui->exitButton->setText(tr(""));
 
     } else if (modifierKeys & Qt::MetaModifier) {
-        qDebug() << "MainWindow::updateFunctionKeys - META";
+        //qDebug() << "MainWindow::updateFunctionKeys - META";
 
         // Set Button Text
         ui->helpButton->setText(tr(""));
@@ -743,7 +798,7 @@ void MainWindow::updateFunctionKeys()
 //==============================================================================
 void MainWindow::updateMenu()
 {
-    qDebug() << "MainWindow::updateMenu";
+    //qDebug() << "MainWindow::updateMenu";
 
     // Check Focused Panel
     if (focusedPanel) {

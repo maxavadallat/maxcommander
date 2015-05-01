@@ -18,6 +18,7 @@
         <file>qml/VideoViewer.qml</file>
         <file>qml/FileListItemRenamer.qml</file>
         <file>qml/testMain.qml</file>
+        <file>qml/previewMain.qml</file>
     </qresource>
 </RCC>
 

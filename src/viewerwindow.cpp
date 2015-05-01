@@ -62,7 +62,6 @@ void ViewerWindow::init()
     // Text Edit Set Visible
     ui->textEdit->setVisible(false);
 
-
     // Set Context Properties
     QQmlContext* ctx = ui->quickWidget->rootContext();
     // Set Context Properties - Dummy Model
@@ -90,7 +89,7 @@ QString ViewerWindow::getContentSource()
 //==============================================================================
 // New File
 //==============================================================================
-void ViewerWindow::newFile(const QString& aDirPath)
+bool ViewerWindow::newFile(const QString& aDirPath)
 {
     qDebug() << "ViewerWindow::newFile - aDirPath: " << aDirPath;
 
@@ -105,12 +104,14 @@ void ViewerWindow::newFile(const QString& aDirPath)
     currentDir = aDirPath;
 
     // ...
+
+    return true;
 }
 
 //==============================================================================
 // Load File
 //==============================================================================
-void ViewerWindow::loadFile(const QString& aFileName, const QString& aPanelName)
+bool ViewerWindow::loadFile(const QString& aFileName, const QString& aPanelName)
 {
     // Init Mime Database
     QMimeDatabase mimeDatabase;
@@ -130,8 +131,8 @@ void ViewerWindow::loadFile(const QString& aFileName, const QString& aPanelName)
     // Set Context Properties - Dummy Model
     ctx->setContextProperty(DEFAULT_IMAGE_VIEWER_CONTENT, fileName);
 
-    // Check Mime Type
-    if (mime.startsWith(DEFAULT_MIME_PREFIX_TEXT)) {
+    // Edit Mode & Check Mime Type - Load All Files As Text in Edit Mode
+    if ((editMode && mime.contains(DEFAULT_MIME_TEXT)) || mime.startsWith(DEFAULT_MIME_PREFIX_TEXT)) {
         // Configure View
 
         // Quick Widget Set Visible
@@ -164,8 +165,8 @@ void ViewerWindow::loadFile(const QString& aFileName, const QString& aPanelName)
         // Quick Widget Set Visible
         ui->quickWidget->setVisible(true);
 
-        // Set Source
-        ui->quickWidget->setSource(QUrl("qrc:/qml/ImageViewer.qml"));
+            // Set Source
+            ui->quickWidget->setSource(QUrl("qrc:/qml/ImageViewer.qml"));
 
         // Check Image Browser
         if (!imageBrowser) {
@@ -208,9 +209,12 @@ void ViewerWindow::loadFile(const QString& aFileName, const QString& aPanelName)
         // Reset File Name
         fileName = "";
 
+        return false;
     }
 
     // ...
+
+    return true;
 }
 
 //==============================================================================
@@ -220,9 +224,26 @@ void ViewerWindow::saveFileAs(const QString& aFileName)
 {
     qDebug() << "ViewerWindow::saveFileAs - aFileName: " << aFileName;
 
-    // Save To File
+    // Init File
+    QFile file(aFileName);
 
-    // ...
+    // Open File
+    if (file.open(QIODevice::WriteOnly)) {
+        // Init Text Stream
+        QTextStream textStream(&file);
+
+        // Load From File
+        textStream << ui->textEdit->toPlainText();
+
+        // Reset Dirty Flag
+        dirty = false;
+
+        // Reset Dirty Flag
+
+
+        // Close File
+        file.close();
+    }
 }
 
 //==============================================================================
@@ -297,7 +318,7 @@ void ViewerWindow::restoreUI()
         // Set Word Wrap Mode
         ui->textEdit->setWordWrapMode(QTextOption::NoWrap);
         // Show Message
-        ui->statusbar->showMessage(tr("Wrap Off"), DEFAULT_STATUS_BAR_MESSAGE_TIMEOUT);
+        ui->statusbar->showMessage(tr(DEFAULT_TEXT_WORD_WRAP_OFF), DEFAULT_STATUS_BAR_MESSAGE_TIMEOUT);
     } else {
         // Get Wrap Mode
         bool wrapMode = settings.value(SETTINGS_KEY_VIEWER_WORDWRAP, false).toBool();
@@ -308,12 +329,12 @@ void ViewerWindow::restoreUI()
                 // Set Word Wrap Mode
                 ui->textEdit->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
                 // Show Message
-                ui->statusbar->showMessage(tr("Wrap ON"), DEFAULT_STATUS_BAR_MESSAGE_TIMEOUT);
+                ui->statusbar->showMessage(tr(DEFAULT_TEXT_WORD_WRAP_ON), DEFAULT_STATUS_BAR_MESSAGE_TIMEOUT);
             } else {
                 // Set Word Wrap Mode
                 ui->textEdit->setWordWrapMode(QTextOption::NoWrap);
                 // Show Message
-                ui->statusbar->showMessage(tr("Wrap Off"), DEFAULT_STATUS_BAR_MESSAGE_TIMEOUT);
+                ui->statusbar->showMessage(tr(DEFAULT_TEXT_WORD_WRAP_OFF), DEFAULT_STATUS_BAR_MESSAGE_TIMEOUT);
             }
         } else {
 
@@ -323,7 +344,7 @@ void ViewerWindow::restoreUI()
     }
 
     // Set Window Title
-    setWindowTitle(tr("Viewer - ") + fileName);
+    setWindowTitle(tr(DEFAULT_TITLE_VIEWER) + fileName);
 
     // ...
 }
@@ -442,23 +463,8 @@ void ViewerWindow::closeEvent(QCloseEvent* aEvent)
 
             // Check Save File Name
             if (!saveFileName.isEmpty()) {
-                // Init File
-                QFile file(saveFileName);
-
-                // Open File
-                if (file.open(QIODevice::WriteOnly)) {
-                    // Init Text Stream
-                    QTextStream textStream(&file);
-
-                    // Load From File
-                    textStream << ui->textEdit->toPlainText();
-
-                    // Reset Dirty Flag
-                    dirty = false;
-
-                    // Close File
-                    file.close();
-                }
+                // Save File As
+                saveFileAs(saveFileName);
             }
         }
 
@@ -532,6 +538,13 @@ void ViewerWindow::keyReleaseEvent(QKeyEvent* aEvent)
                 if (imageBrowser) {
                     // Go To Last
                     imageBrowser->gotoLast();
+                }
+            break;
+
+            case Qt::Key_S:
+                // Check Modifiers
+                if (aEvent->modifiers() & Qt::ControlModifier) {
+
                 }
             break;
 

@@ -43,13 +43,13 @@ Rectangle {
         id: fileListView
         anchors.fill: parent
         anchors.topMargin: fileListHeader.height
-        anchors.bottomMargin: 1 // I don't no why the fuck fileListRoot is not properly sized X (
+        anchors.bottomMargin: 1 // I don't no why the fuck fileListRoot is not properly sized.... X (
         spacing: 1
         clip: true
-        snapMode: ListView.SnapToItem
         focus: true
         highlightMoveDuration: 50
-        highlightFollowsCurrentItem: true
+        //highlightFollowsCurrentItem: true
+        snapMode: ListView.SnapToItem
 
         property int delegateHeight: 32
         property int visualItemsCount: Math.floor((fileListView.height + fileListView.spacing) / fileListView.delegateHeight);
@@ -121,7 +121,7 @@ Rectangle {
                     // Check Button
                     if (mouse.button === Qt.LeftButton) {
                         // Set Current Index
-                        fileListView.currentIndex = index;
+                        mainController.currentIndex = index;
                         // Set Panel Has Focus
                         mainController.panelHasFocus = true;
                     }
@@ -186,8 +186,18 @@ Rectangle {
         // On Current Index Changed
         onCurrentIndexChanged: {
             //console.log("fileListView.onCurrentIndexChanged - currentIndex: " + fileListView.currentIndex);
-            // Set Main Controller Current Index
-            mainController.currentIndex = fileListView.currentIndex;
+
+            // Check File List View Current Index
+            if (fileListView.currentIndex > fileListModel.count-1) {
+                // Reset
+                //fileListView.currentIndex = fileListModel.count-1;
+            }
+
+            // Check Current Index
+            if (mainController.currentIndex != fileListView.currentIndex) {
+                // Set Main Controller Current Index
+                mainController.currentIndex = fileListView.currentIndex;
+            }
 
             // Check If Shift Pressed
             if (mainController.modifierKeys & Qt.ShiftModifier) {
@@ -233,7 +243,6 @@ Rectangle {
 
             // Set Previous Index
             fileListView.prevIndex = fileListView.currentIndex;
-
         }
 
         // On Visual Items Count Changed
@@ -393,13 +402,15 @@ Rectangle {
         target: mainController
         // On Current Index Changed
         onCurrentIndexChanged: {
-            //console.log("fileListRoot.Connections.mainController.onCurrentIndexChanged - aIndex: " + aIndex);
             // Check List View Current Index
             if (fileListView.currentIndex != aIndex) {
+                //console.log("fileListRoot.Connections.mainController.onCurrentIndexChanged - aIndex: " + aIndex);
                 // Set File List View Current Index
                 fileListView.currentIndex = aIndex;
                 // Position View
                 fileListView.positionViewAtIndex(aIndex + 1, ListView.Center);
+            } else {
+                //console.log("fileListRoot.Connections.mainController.onCurrentIndexChanged - aIndex: " + aIndex + " - MATCHES!");
             }
         }
 
@@ -407,27 +418,27 @@ Rectangle {
         onModifierKeysChanged: {
             // Check Modifier Keys
             if (aModifierKeys === 0) {
-                console.log("fileListRoot.Connections.mainController.onModifierKeysChanged - NO MODIFIER");
+                //console.log("fileListRoot.Connections.mainController.onModifierKeysChanged - NO MODIFIER");
             }
 
             // Check Modifier Keys
             if (aModifierKeys & Qt.ShiftModifier) {
-                console.log("fileListRoot.Connections.mainController.onModifierKeysChanged - SHIFT");
+                //console.log("fileListRoot.Connections.mainController.onModifierKeysChanged - SHIFT");
             }
 
             // Check Modifier Keys
             if (aModifierKeys & Qt.AltModifier) {
-                console.log("fileListRoot.Connections.mainController.onModifierKeysChanged - ALT");
+                //console.log("fileListRoot.Connections.mainController.onModifierKeysChanged - ALT");
             }
 
             // Check Modifier Keys
             if (aModifierKeys & Qt.ControlModifier) {
-                console.log("fileListRoot.Connections.mainController.onModifierKeysChanged - CONTROL");
+                //console.log("fileListRoot.Connections.mainController.onModifierKeysChanged - CONTROL");
             }
 
             // Check Modifier Keys
             if (aModifierKeys & Qt.MetaModifier) {
-                console.log("fileListRoot.Connections.mainController.onModifierKeysChanged - META");
+                //console.log("fileListRoot.Connections.mainController.onModifierKeysChanged - META");
             }
 
 

@@ -889,7 +889,7 @@ void FilePanel::reload(const int& aIndex)
 
     // Check File List Model
     if (fileListModel) {
-        qDebug() << "FilePanel::reload - panelName: " << panelName;
+        qDebug() << "#### FilePanel::reload - panelName: " << panelName << " - aIndex: " << aIndex;
         // Reload
         fileListModel->reload();
     }
@@ -1160,6 +1160,9 @@ void FilePanel::clear()
     if (fileListModel) {
         // Clear
         fileListModel->clear();
+
+        // Reset Current Index
+        setCurrentIndex(-1);
     }
 }
 

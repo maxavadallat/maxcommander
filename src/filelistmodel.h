@@ -38,6 +38,7 @@ class FileListModel : public QAbstractListModel
 
     Q_PROPERTY(QString currentDir READ getCurrentDir WRITE setCurrentDir NOTIFY currentDirChanged)
     Q_PROPERTY(bool busy READ getBusy NOTIFY busyChanged)
+    Q_PROPERTY(int count READ rowCount NOTIFY countChanged)
 
 public:
 
@@ -133,6 +134,9 @@ signals:
 
     // Current Dir Changed Signal
     void currentDirChanged(const QString& aCurrentDir);
+
+    // Count Changed Signal
+    void countChanged(const int& aCount);
 
     // Dir Fetch Finished Signal
     void dirFetchFinished();

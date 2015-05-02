@@ -1921,6 +1921,13 @@ void FilePanel::fileModelDirFetchFinished()
 
         // Set Current Index
         setCurrentIndex(lastIndex);
+
+        // Check Last Index
+        if (lastIndex == 0) {
+            // Set Loading
+            setLoading(false);
+        }
+
         // Reset LAst Index
         lastIndex = -1;
 

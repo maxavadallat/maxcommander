@@ -72,6 +72,9 @@ protected slots:
     // Toggle Wrap Mode
     void toggleWrapMode();
 
+    // Is Mime Supported As Text
+    bool isSupportedTextMime(const bool& aEditMode, const QString& aMime);
+
 protected slots: // For QTextEdit
 
     // Text Changed Slot

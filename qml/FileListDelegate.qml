@@ -47,24 +47,40 @@ Rectangle {
     property string textColor: {
         // Check If Selected
         if (fileListDelegateRoot.fileSelected) {
-            return Const.DEFAULT_FILE_LIST_SELECTED_TEXT_COLOR;
+            // Check Item Index
+            if (itemIndex == listIndex) {
+                return mainController.currentSelectedColor;
+            }
+
+            return mainController.selectedColor;
         }
 
+        // Check If Hidden
         if (fileListDelegateRoot.fileHidden) {
-            return Const.DEFAULT_FILE_LIST_HIDDEN_TEXT_COLOR;
+            return mainController.hiddenColor;
         }
 
+        // Check If Link
         if (fileListDelegateRoot.fileSymLink) {
-            return Const.DEFAULT_FILE_LIST_LINK_TEXT_COLOR;
+            return mainController.linkColor;
         }
 
-        return Const.DEFAULT_FILE_LIST_TEXT_COLOR;
+        // Check If Current
+        if (itemIndex == listIndex) {
+            return mainController.currentColor;
+        }
+
+        return mainController.textColor;
     }
 
     width: 320
     height: 32
 
-    color: mouseHovered ? "#07000044" : "transparent"
+    //color: mouseHovered ? "#07000044" : "transparent"
+    color: "transparent"
+    //color: itemIndex % 2 == 0 ? "transparent" : "#0A111111"
+
+    // Background Colors
 
     Row {
         id: fileListDelegateItemsContainerRow

@@ -132,7 +132,8 @@ bool ViewerWindow::loadFile(const QString& aFileName, const QString& aPanelName)
     ctx->setContextProperty(DEFAULT_IMAGE_VIEWER_CONTENT, fileName);
 
     // Edit Mode & Check Mime Type - Load All Files As Text in Edit Mode
-    if ((editMode && mime.contains(DEFAULT_MIME_TEXT)) || mime.startsWith(DEFAULT_MIME_PREFIX_TEXT)) {
+    if (isSupportedTextMime(editMode, mime)) {
+
         // Configure View
 
         // Quick Widget Set Visible
@@ -148,8 +149,15 @@ bool ViewerWindow::loadFile(const QString& aFileName, const QString& aPanelName)
             // Init Text Stream
             QTextStream textStream(&file);
 
-            // Load From File
-            ui->textEdit->setText(textStream.readAll());
+            // Check Mime Again
+            if (mime.startsWith(QString(DEFAULT_MIME_PREFIX_APP) + QString(DEFAULT_MIME_XML)) ||
+                mime.startsWith(QString(DEFAULT_MIME_PREFIX_APP) + QString(DEFAULT_MIME_SHELLSCRIPT))) {
+                // Load From File
+                ui->textEdit->setPlainText(textStream.readAll());
+            } else {
+                // Load From File
+                ui->textEdit->setText(textStream.readAll());
+            }
 
             // Reset Dirty Flag
             dirty = false;
@@ -176,7 +184,6 @@ bool ViewerWindow::loadFile(const QString& aFileName, const QString& aPanelName)
             // Connect Signals
             connect(imageBrowser, SIGNAL(currentIndexChanged(int)), this, SLOT(imageBrowserCurrentIndexChanged(int)));
             connect(imageBrowser, SIGNAL(currentFileChanged(QString)), this, SLOT(imageBrowserCurrentFileChanged(QString)));
-
         }
 
         // Set Context Property
@@ -393,6 +400,35 @@ void ViewerWindow::toggleWrapMode()
         //ui->statusLabel->setText(tr("Wrap On"));
         ui->statusbar->showMessage(tr("Wrap On"), DEFAULT_STATUS_BAR_MESSAGE_TIMEOUT);
     }
+}
+
+//==============================================================================
+// Is Mime Supported
+//==============================================================================
+bool ViewerWindow::isSupportedTextMime(const bool& aEditMode, const QString& aMime)
+{
+    // Check Edit Mode
+    if (aEditMode) {
+
+    }
+
+    // Check Contains
+    if (aMime.contains(DEFAULT_MIME_TEXT))
+        return true;
+
+    // Check Contains
+    if (aMime.contains(DEFAULT_MIME_XML))
+        return true;
+
+    // Check Contains
+    if (aMime.contains(DEFAULT_MIME_SHELLSCRIPT))
+        return true;
+
+    // Check Contains
+    if (aMime.contains(DEFAULT_MIME_JAVASCRIPT))
+        return true;
+
+    return false;
 }
 
 //==============================================================================

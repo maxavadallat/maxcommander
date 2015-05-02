@@ -55,7 +55,7 @@ Rectangle {
 
         snapMode: ListView.SnapToItem
 
-        property int delegateHeight: 32
+        property int delegateHeight: mainController.thumbHeight
         property int visualItemsCount: Math.floor((fileListView.height + fileListView.spacing) / fileListView.delegateHeight);
         property int prevIndex: -1
 
@@ -114,11 +114,11 @@ Rectangle {
                 id: delegateMouseArea
                 anchors.fill: parent
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
+                // Press Occured Inside Delegate
                 property bool pressedInside: false
                 // On Clicked
                 onClicked: {
                     //console.log("fileListDelegateRoot.MouseArea.onClicked - index: " + index);
-
                     // Check Button
                     if (mouse.button === Qt.LeftButton) {
                         // Set Current Index
@@ -130,7 +130,6 @@ Rectangle {
                 // On Pressed
                 onPressed: {
                     //console.log("fileListDelegateRoot.MouseArea.onPressed - index: " + index);
-
                     // Check Mouse Button
                     if (mouse.button === Qt.RightButton) {
                         // Set Pressed Inside
@@ -144,7 +143,6 @@ Rectangle {
                 // On Released
                 onReleased: {
                     //console.log("fileListDelegateRoot.MouseArea.onReleased - index: " + index);
-
                     // Check Pressed Inside
                     if (delegateMouseArea.pressedInside && mouse.button === Qt.RightButton) {
                         // Reset Pressed Inside
@@ -168,6 +166,7 @@ Rectangle {
 
                 // Double Clicked
                 onDoubleClicked: {
+                    //console.log("fileListDelegateRoot.MouseArea.onDoubleClicked - index: " + index);
                     // Check Pressed Buttons
                     if (delegateMouseArea.pressedButtons === Qt.LeftButton) {
                         //console.log("fileListDelegateRoot.MouseArea.onDoubleClicked - index: " + index + " - pressedButtons: " + delegateMouseArea.pressedButtons);
@@ -180,6 +179,7 @@ Rectangle {
 
         // Highlight
         highlight: FileListHightLight {
+            id: itemHighlight
             width: fileListView.delegate.width
             height: fileListView.delegate.height
         }

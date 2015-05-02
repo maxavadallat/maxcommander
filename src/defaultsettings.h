@@ -48,7 +48,7 @@
 // Link Item BG Color
 #define DEFAULT_SETTINGS_LINK_BG_COLOR                      "#FFEFEFEF"     // linkBGColor
 // Font Name
-#define DEFAULT_SETTINGS_FONT_NAME                          "Tahoma"        // fontName
+#define DEFAULT_SETTINGS_FONT_NAME                          "System"        // fontName
 // Font Size
 #define DEFAULT_SETTINGS_FONT_SIZE                          12              // fontSize
 // Font Bold

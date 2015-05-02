@@ -666,6 +666,12 @@ void FilePanel::setShowHidden(const bool& aHidden)
         // Set Show Hidden
         showHiddenFiles = aHidden;
 
+        // Check File Model
+        if (fileListModel) {
+            // Set Show Hidden Files
+            fileListModel->setShowHiddenFiles(showHiddenFiles);
+        }
+
         // Init Settings
         QSettings settings;
         // Set Value

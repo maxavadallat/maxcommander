@@ -748,7 +748,7 @@ void RemoteFileUtilClient::writeData(const QVariantMap& aData)
 //==============================================================================
 void RemoteFileUtilClient::socketHostFound()
 {
-    qDebug() << "RemoteFileUtilClient::socketHostFound";
+    //qDebug() << "RemoteFileUtilClient::socketHostFound";
 
     // ...
 }
@@ -758,7 +758,7 @@ void RemoteFileUtilClient::socketHostFound()
 //==============================================================================
 void RemoteFileUtilClient::socketConnected()
 {
-    qDebug() << "RemoteFileUtilClient::socketConnected - cID: " << cID;
+    //qDebug() << "RemoteFileUtilClient::socketConnected";
 
     // ...
 

@@ -86,10 +86,10 @@ protected:
     void init();
 
     // Restore UI
-    void restoreUI();
+    void restoreUI(const bool& aReload = true, const int& aFocusedPanel = 0);
 
     // Save Settings
-    void saveSettings();
+    void loadSettings();
 
     // Destructor
     virtual ~MainWindow();

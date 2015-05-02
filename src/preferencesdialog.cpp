@@ -25,12 +25,13 @@ PreferencesDialog::PreferencesDialog(QWidget* aParent)
     , dirty(false)
     , showFunctionKeys(DEFAULT_SETTINGS_SHOW_FUNCTION_KEYS)
     , showDirHotKeys(DEFAULT_SETTINGS_SHOW_DIRECTORIY_HOT_KEYS)
-    , showDriveButtons(DEFAULT_SETTINGS_SHOW_DRIVE_BUTTONSS)
-    , showHiddenFiles(DEFAULT_SETTINGS_SHOW_HIDDEN_FILES)
+    , showDriveButtons(DEFAULT_SETTINGS_SHOW_DRIVE_BUTTONS)
     , selectDirectories(DEFAULT_SETTINGS_SELECT_DIRECTORIES)
+
+    , showHiddenFiles(DEFAULT_SETTINGS_SHOW_HIDDEN_FILES)
     , showDirsFirst(DEFAULT_SETTINGS_SHOW_DIRECTORIES_FIRST)
     , caseSensitiveSort(DEFAULT_SETTINGS_CASE_SENSITIVE_SORTING)
-    // ...
+
     , textColor(DEFAULT_SETTINGS_TEXT_COLOR)
     , textBGColor(DEFAULT_SETTINGS_TEXT_BG_COLOR)
     , currentColor(DEFAULT_SETTINGS_CURRENT_COLOR)
@@ -47,10 +48,10 @@ PreferencesDialog::PreferencesDialog(QWidget* aParent)
     , fontSize(DEFAULT_SETTINGS_FONT_SIZE)
     , fontBold(DEFAULT_SETTINGS_FONT_BOLD)
     , fontItalic(DEFAULT_SETTINGS_FONT_ITALIC)
-    // ...
+
     , thumbWidth(DEFAULT_SETTINGS_THUMB_WIDTH)
     , thumbHeight(DEFAULT_SETTINGS_THUMB_HEIGHT)
-    // ...
+
     , viewerPath(DEFAULT_SETTINGS_VIEWER_PATH)
     , editorPath(DEFAULT_SETTINGS_EDITOR_PATH)
     , comparePath(DEFAULT_SETTINGS_COMPARE_PATH)
@@ -148,7 +149,7 @@ void PreferencesDialog::loadSettings()
     // Set Show Directory Hot Keys
     setShowDirHotKeys(settings.value(SETTINGS_KEY_SHOW_DIR_HOT_KEYS, DEFAULT_SETTINGS_SHOW_DIRECTORIY_HOT_KEYS).toBool());
     // Set Show Drive Buttons
-    setShowDriveButtons(settings.value(SETTINGS_KEY_SHOW_DRIVE_BUTTONS, DEFAULT_SETTINGS_SHOW_DRIVE_BUTTONSS).toBool());
+    setShowDriveButtons(settings.value(SETTINGS_KEY_SHOW_DRIVE_BUTTONS, DEFAULT_SETTINGS_SHOW_DRIVE_BUTTONS).toBool());
 
     // Set Show Hidden Files
     setShowHiddenFiles(settings.value(SETTINGS_KEY_SHOW_HIDDEN_FILES, DEFAULT_SETTINGS_SHOW_HIDDEN_FILES).toBool());
@@ -288,7 +289,7 @@ void PreferencesDialog::restoreDefaults()
     // Set Show Directory Hot Keys
     setShowDirHotKeys(DEFAULT_SETTINGS_SHOW_DIRECTORIY_HOT_KEYS);
     // Set Show Drive Buttons
-    setShowDriveButtons(DEFAULT_SETTINGS_SHOW_DRIVE_BUTTONSS);
+    setShowDriveButtons(DEFAULT_SETTINGS_SHOW_DRIVE_BUTTONS);
 
     // Set Show Hidden Files
     setShowHiddenFiles(DEFAULT_SETTINGS_SHOW_HIDDEN_FILES);
@@ -799,6 +800,8 @@ void PreferencesDialog::setThumbWidth(const int& aWidth)
     if (thumbWidth != aWidth) {
         // Set Thumb Width
         thumbWidth = aWidth;
+        // Set Dirty Flag
+        setDirty(true);
         // Emit Thumb Width Changed
         emit thumbWidthChanged(thumbWidth);
     }
@@ -821,6 +824,8 @@ void PreferencesDialog::setThumbHeight(const int& aHeight)
     if (thumbHeight != aHeight) {
         // Set Thumb Height
         thumbHeight = aHeight;
+        // Set Dirty Flag
+        setDirty(true);
         // Emit Thumb Height Changed Signal
         emit thumbHeightChanged(thumbHeight);
     }

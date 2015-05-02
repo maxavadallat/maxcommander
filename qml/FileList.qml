@@ -106,6 +106,9 @@ Rectangle {
             permsVisible: fileListHeader.permsVisible
             attrVisible : fileListHeader.attrVisible
 
+            itemIndex   : index
+            listIndex   : fileListView.currentIndex
+
             // Mouse Area
             MouseArea {
                 id: delegateMouseArea

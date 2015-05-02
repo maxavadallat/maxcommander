@@ -8,6 +8,7 @@
 #include "utility.h"
 #include "constants.h"
 
+//#include "testdialog.h"
 
 //==============================================================================
 // Main
@@ -47,6 +48,10 @@ int main(int argc, char* argv[])
 
     // Release Main Window Instance
     mainWindow->release();
+
+//    TestDialog testDialog;
+//    testDialog.show();
+//    app.exec();
 
     qDebug() << " ";
     qDebug() << "================================================================================";

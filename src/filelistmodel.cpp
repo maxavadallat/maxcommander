@@ -39,6 +39,9 @@ FileListModel::FileListModel(QObject* aParent)
     , fileUtil(NULL)
     , sorting(0)
     , reverseOrder(false)
+    , showHiddenFiles(false)
+    , showDirsFirst(true)
+    , caseSensitiveSort(false)
     , selectedCount(0)
 {
     qDebug() << "FileListModel::FileListModel";
@@ -91,7 +94,7 @@ void FileListModel::setCurrentDir(const QString& aCurrentDir)
 {
     // Check Current Dir
     if (currentDir != aCurrentDir) {
-        qDebug() << "FileListModel::setCurrentDir - aCurrentDir: " << aCurrentDir;
+        //qDebug() << "FileListModel::setCurrentDir - aCurrentDir: " << aCurrentDir;
 
         // Set Current Dir
         currentDir = aCurrentDir;
@@ -133,6 +136,48 @@ void FileListModel::setReverse(const bool& aReverse)
         // ...
 
 
+    }
+}
+
+//==============================================================================
+// Set Show hidden Files
+//==============================================================================
+void FileListModel::setShowHiddenFiles(const bool& aShow)
+{
+    // Check Show Hidden Files
+    if (showHiddenFiles != aShow) {
+        // Set Show Hidden Files
+        showHiddenFiles = aShow;
+
+        // ...
+    }
+}
+
+//==============================================================================
+// Set Show Dirs First
+//==============================================================================
+void FileListModel::setShowDirsFirst(const bool& aShowDirsFirst)
+{
+    // Check Show Dirs First
+    if (showDirsFirst != aShowDirsFirst) {
+        // Set Show Dirs First
+        showDirsFirst = aShowDirsFirst;
+
+        // ...
+    }
+}
+
+//==============================================================================
+// Set Case Sensitive Sorting
+//==============================================================================
+void FileListModel::setCaseSensitiveSorting(const bool& aCaseSensitiveSort)
+{
+    // Check Case Sensitive Sorting
+    if (caseSensitiveSort != aCaseSensitiveSort) {
+        // Set Case Sensitive Sorting
+        caseSensitiveSort = aCaseSensitiveSort;
+
+        // ...
     }
 }
 
@@ -232,7 +277,7 @@ void FileListModel::clear()
         return;
     }
 
-    qDebug() << "FileListModel::clear";
+    //qDebug() << "FileListModel::clear";
 
     // Begin Reset Model
     beginResetModel();
@@ -267,7 +312,7 @@ void FileListModel::clear()
 //==============================================================================
 void FileListModel::reload()
 {
-    qDebug() << "FileListModel::reload";
+    //qDebug() << "FileListModel::reload";
 
     // Clear
     clear();
@@ -476,23 +521,27 @@ void FileListModel::fetchDirItems()
 
     qDebug() << "FileListModel::fetchDirItems - currentDir: " << currentDir;
 
-    // Init Settings
-    QSettings settings;
-
     // Init Filters
-    int filters = settings.value(SETTINGS_KEY_SHOW_HIDDEN_FILES, true).toBool() ? DEFAULT_FILTER_SHOW_HIDDEN : 0;
+    int filters = showHiddenFiles ? DEFAULT_FILTER_SHOW_HIDDEN : 0;
 
     // ...
 
     // Init Sort Flags
-    int sortFlags = settings.value(SETTINGS_KEY_DIRFIRST, true).toBool() ? DEFAULT_SORT_DIRFIRST : 0;
+    int sortFlags = showDirsFirst ? DEFAULT_SORT_DIRFIRST : 0;
 
     // Adding Sorting Method
     sortFlags |= sorting;
 
     // Check Reverse Order
     if (reverseOrder) {
+        // Adjust Sort Flags
         sortFlags |= DEFAULT_SORT_REVERSE;
+    }
+
+    // Check Case Sensitve Sorting
+    if (caseSensitiveSort) {
+        // Adjust Sort Flags
+        sortFlags |= DEFAULT_SORT_CASE;
     }
 
     // ...

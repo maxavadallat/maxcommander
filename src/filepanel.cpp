@@ -22,6 +22,7 @@
 #include "transferprogressmodel.h"
 #include "utility.h"
 #include "constants.h"
+#include "defaultsettings.h"
 
 
 //==============================================================================
@@ -40,7 +41,6 @@ FilePanel::FilePanel(QWidget* aParent)
     , lastDirName("")
     , lastFileName("")
     , lastIndex(-1)
-    , showHidden(true)
     , extVisible(true)
     , typeVisible(false)
     , sizeVisible(true)
@@ -55,6 +55,34 @@ FilePanel::FilePanel(QWidget* aParent)
     , ownerWidth(60)
     , permsWidth(100)
     , attrsWidth(60)
+
+    , sorting(DEFAULT_SORT_EXT)
+    , reverseOrder(false)
+
+    , showHiddenFiles(true)
+    , showDirsFirst(true)
+    , caseSensitiveSort(false)
+
+    , textColor(DEFAULT_SETTINGS_TEXT_COLOR)
+    , textBGColor(DEFAULT_SETTINGS_TEXT_BG_COLOR)
+    , currentColor(DEFAULT_SETTINGS_CURRENT_COLOR)
+    , currentBGColor(DEFAULT_SETTINGS_CURRENT_BG_COLOR)
+    , selectedColor(DEFAULT_SETTINGS_SELECTED_COLOR)
+    , selectedBGColor(DEFAULT_SETTINGS_SELECTED_BG_COLOR)
+    , currentSelectedColor(DEFAULT_SETTINGS_CURRENT_SELECTED_COLOR)
+    , currentSelectedBGColor(DEFAULT_SETTINGS_CURRENT_SELECTED_BG_COLOR)
+    , hiddenColor(DEFAULT_SETTINGS_HIDDEN_COLOR)
+    , hiddenBGColor(DEFAULT_SETTINGS_HIDDEN_BG_COLOR)
+    , linkColor(DEFAULT_SETTINGS_LINK_COLOR)
+    , linkBGColor(DEFAULT_SETTINGS_LINK_BG_COLOR)
+    , fontName(DEFAULT_SETTINGS_FONT_NAME)
+    , fontSize(DEFAULT_SETTINGS_FONT_SIZE)
+    , fontBold(DEFAULT_SETTINGS_FONT_BOLD)
+    , fontItalic(DEFAULT_SETTINGS_FONT_ITALIC)
+
+    , thumbWidth(DEFAULT_SETTINGS_THUMB_WIDTH)
+    , thumbHeight(DEFAULT_SETTINGS_THUMB_HEIGHT)
+
     , dirWatcherTimerID(-1)
     , dwDirChanged(false)
     , dwFileChanged(false)
@@ -66,7 +94,6 @@ FilePanel::FilePanel(QWidget* aParent)
     , fileDeleteUpdate(false)
     , dirScanner(NULL)
     , loading(false)
-
 {
     // Setup UI
     ui->setupUi(this);
@@ -238,40 +265,6 @@ int FilePanel::getCurrentIndex()
 int FilePanel::getvisualItemsCount()
 {
     return visualItemsCount;
-}
-
-//==============================================================================
-// Get Show Hidden
-//==============================================================================
-bool FilePanel::getShowHidden()
-{
-    return showHidden;
-}
-
-//==============================================================================
-// Set Show Hidden
-//==============================================================================
-void FilePanel::setShowHidden(const bool& aHidden)
-{
-    // Check Show Hidden
-    if (showHidden != aHidden) {
-        qDebug() << "FilePanel::setShowHidden - panelName: " << panelName << " - aHidden: " << aHidden;
-        // Set Show Hidden
-        showHidden = aHidden;
-
-        // Init Settings
-        QSettings settings;
-        // Set Value
-        settings.setValue(SETTINGS_KEY_SHOW_HIDDEN_FILES, showHidden);
-        // Sync
-        settings.sync();
-
-        // Reload
-        reload(0);
-
-        // Emit Show Hidden Changed Signal
-        emit showHiddenChanged(showHidden);
-    }
 }
 
 //==============================================================================
@@ -651,6 +644,480 @@ void FilePanel::setReverseOrder(const bool& aReverse)
 
         // Emit Reverse Order Changed Signal
         emit reverseOrderChanged(reverseOrder);
+    }
+}
+
+//==============================================================================
+// Get Show Hidden
+//==============================================================================
+bool FilePanel::getShowHidden()
+{
+    return showHiddenFiles;
+}
+
+//==============================================================================
+// Set Show Hidden
+//==============================================================================
+void FilePanel::setShowHidden(const bool& aHidden)
+{
+    // Check Show Hidden
+    if (showHiddenFiles != aHidden) {
+        qDebug() << "FilePanel::setShowHidden - panelName: " << panelName << " - aHidden: " << aHidden;
+        // Set Show Hidden
+        showHiddenFiles = aHidden;
+
+        // Init Settings
+        QSettings settings;
+        // Set Value
+        settings.setValue(SETTINGS_KEY_SHOW_HIDDEN_FILES, showHiddenFiles);
+        // Sync
+        settings.sync();
+
+        // Reload
+        reload(0);
+
+        // Emit Show Hidden Changed Signal
+        emit showHiddenChanged(showHiddenFiles);
+    }
+}
+
+//==============================================================================
+// Get Show Directories First
+//==============================================================================
+bool FilePanel::getShowDirsFirst()
+{
+    return showDirsFirst;
+}
+
+//==============================================================================
+// Set Show Directories First
+//==============================================================================
+void FilePanel::setShowDirsFirst(const bool& aShow)
+{
+    // Check Show Dirs First
+    if (showDirsFirst != aShow) {
+        // Set Show Dirs First
+        showDirsFirst = aShow;
+        // Emit Show Dirs First Changed Signal
+        emit showDirsFirstChanged(showDirsFirst);
+    }
+}
+
+//==============================================================================
+// Get Case Sensitive Sorting
+//==============================================================================
+bool FilePanel::getCaseSensitiveSort()
+{
+    return caseSensitiveSort;
+}
+
+//==============================================================================
+// Set Case Sensitive Sorting
+//==============================================================================
+void FilePanel::setCaseSensitiveSort(const bool& aCaseSensitive)
+{
+    // Check Case Sensitive Sorting
+    if (caseSensitiveSort != aCaseSensitive) {
+        // Set Case Sensitive Sorting
+        caseSensitiveSort = aCaseSensitive;
+        // Emit Case Sensitive Sorting hanged Signal
+        emit caseSensitiveSortChanged(caseSensitiveSort);
+    }
+}
+
+//==============================================================================
+// Get Normal Text Color
+//==============================================================================
+QString FilePanel::getTextColor()
+{
+    return textColor;
+}
+
+//==============================================================================
+// Set Normal Text Color
+//==============================================================================
+void FilePanel::setTextColor(const QString& aColor)
+{
+    // Check Text Color
+    if (textColor != aColor) {
+        // Set Text Color
+        textColor = aColor;
+        // Emit Text Color Changed Signal
+        emit textColorChanged(textColor);
+    }
+}
+
+//==============================================================================
+// Get Normal Text BG Color
+//==============================================================================
+QString FilePanel::gettextBGColor()
+{
+    return textBGColor;
+}
+
+//==============================================================================
+// Set Normal Text BG Color
+//==============================================================================
+void FilePanel::setTextBGColor(const QString& aColor)
+{
+    // Check Text BG Color
+    if (textBGColor != aColor) {
+        // Set Text BG Color
+        textBGColor = aColor;
+        // Emit Text BG Color Changed Signal
+        emit textBGColorChanged(textBGColor);
+    }
+}
+
+//==============================================================================
+// Get Current Text Color
+//==============================================================================
+QString FilePanel::getCurrentColor()
+{
+    return currentColor;
+}
+
+//==============================================================================
+// Set Current Text Color
+//==============================================================================
+void FilePanel::setCurrentColor(const QString& aColor)
+{
+    // Check Current Color
+    if (currentColor != aColor) {
+        // Set Current Color
+        currentColor = aColor;
+        // Emit Current color Changed Signal
+        emit currentColorChanged(currentColor);
+    }
+}
+
+//==============================================================================
+// Get Current Text BG Color
+//==============================================================================
+QString FilePanel::getCurrentBGColor()
+{
+    return currentBGColor;
+}
+
+//==============================================================================
+// Set Current Text BG Color
+//==============================================================================
+void FilePanel::setCurrentBGColor(const QString& aColor)
+{
+    // Check Current BG Color
+    if (currentBGColor != aColor) {
+        // Set Current BG Color
+        currentBGColor = aColor;
+        // Emit Current BG Color Changed Signal
+        emit currentBGColorChanged(currentBGColor);
+    }
+}
+
+//==============================================================================
+// Get Selected Text Color
+//==============================================================================
+QString FilePanel::getSelectedColor()
+{
+    return selectedColor;
+}
+
+//==============================================================================
+// Set Selected Text Color
+//==============================================================================
+void FilePanel::setSelectedColor(const QString& aColor)
+{
+    // Check Selected Color
+    if (selectedColor != aColor) {
+        // Set Selected Color
+        selectedColor = aColor;
+        // Emit Selected Color Changed Signal
+        emit selectedColorChanged(selectedColor);
+    }
+}
+
+//==============================================================================
+// Get Selected Text BG Color
+//==============================================================================
+QString FilePanel::getSelectedBGColor()
+{
+    return selectedBGColor;
+}
+
+//==============================================================================
+// Set Selected Text BG Color
+//==============================================================================
+void FilePanel::setSelectedBGColor(const QString& aColor)
+{
+    // Check Selected BG Color
+    if (selectedBGColor != aColor) {
+        // Set Selected BG Color
+        selectedBGColor = aColor;
+        // Emit Selected BG Color Changed Signal
+        emit selectedBGColorChanged(selectedBGColor);
+    }
+}
+
+//==============================================================================
+// Get Current Selected Text Color
+//==============================================================================
+QString FilePanel::getCurrentSelectedColor()
+{
+    return currentSelectedColor;
+}
+
+//==============================================================================
+// Set Current Selected Text Color
+//==============================================================================
+void FilePanel::setCurrentSelectedColor(const QString& aColor)
+{
+    // Check Current Selected Color
+    if (currentSelectedColor != aColor) {
+        // Set Current Selected Color
+        currentSelectedColor = aColor;
+        // Emit Current Selected Color Changed Signal
+        emit currentSelectedColorChanged(currentSelectedColor);
+    }
+}
+
+//==============================================================================
+// Get Current Selected Text BG Color
+//==============================================================================
+QString FilePanel::getCurrentSelectedBGColor()
+{
+    return currentSelectedBGColor;
+}
+
+//==============================================================================
+// Set Current Selected Text BG Color
+//==============================================================================
+void FilePanel::setCurrentSelectedBGColor(const QString& aColor)
+{
+    // Check Current Selected BG Color
+    if (currentSelectedBGColor != aColor) {
+        // Set Current Selected BG Color
+        currentSelectedBGColor = aColor;
+        // Emit Currnt Selected BG Color Changed Signal
+        emit currentSelectedBGColorChanged(currentSelectedBGColor);
+    }
+}
+
+//==============================================================================
+// Get Hidden Text Color
+//==============================================================================
+QString FilePanel::getHiddenColor()
+{
+    return hiddenColor;
+}
+
+//==============================================================================
+// Set Hidden Text Color
+//==============================================================================
+void FilePanel::setHiddenColor(const QString& aColor)
+{
+    // Check Hidden Color
+    if (hiddenColor != aColor) {
+        // Set Hidden Color
+        hiddenColor = aColor;
+        // Emit Hidden Color Changed Signal
+        emit hiddenColorChanged(hiddenColor);
+    }
+}
+
+//==============================================================================
+// Get Hidden Text BG Color
+//==============================================================================
+QString FilePanel::getHiddenBGColor()
+{
+    return hiddenBGColor;
+}
+
+//==============================================================================
+// Set Hidden Text BG Color
+//==============================================================================
+void FilePanel::setHiddenBGColor(const QString& aColor)
+{
+    // Check Hidden BG Color
+    if (hiddenBGColor != aColor) {
+        // Set Hidden BG Color
+        hiddenBGColor = aColor;
+        // Emit hidden BG Color Changed Signal
+        emit hiddenBGColorChanged(hiddenBGColor);
+    }
+}
+
+//==============================================================================
+// Get Link Text Color
+//==============================================================================
+QString FilePanel::getLinkColor()
+{
+    return linkColor;
+}
+
+//==============================================================================
+// Set Link Text Color
+//==============================================================================
+void FilePanel::setLinkColor(const QString& aColor)
+{
+    // Check Link Color
+    if (linkColor != aColor) {
+        // Set Link Color
+        linkColor = aColor;
+        // Emit Link Color Changed Signal
+        emit linkColorChanged(linkColor);
+    }
+}
+
+//==============================================================================
+// Get Link Text BG Color
+//==============================================================================
+QString FilePanel::getLinkBGColor()
+{
+    return linkBGColor;
+}
+
+//==============================================================================
+// Set Link Text BG Color
+//==============================================================================
+void FilePanel::setLinkBGColor(const QString& aColor)
+{
+    // Check Link BG Color
+    if (linkBGColor != aColor) {
+        // Set Link BG Color
+        linkBGColor = aColor;
+        // Emit hidden BG Color Changed Signal
+        emit linkBGColorChanged(linkBGColor);
+    }
+}
+
+//==============================================================================
+// Get Font Name
+//==============================================================================
+QString FilePanel::getFontName()
+{
+    return fontName;
+}
+
+//==============================================================================
+// Set Font Name
+//==============================================================================
+void FilePanel::setFontName(const QString& aFontName)
+{
+    // Check Font Name
+    if (fontName != aFontName) {
+        // Set Fonr name
+        fontName = aFontName;
+        // Emit Font name Changed Signal
+        fontNameChanged(fontName);
+    }
+}
+
+//==============================================================================
+// Get Font Size
+//==============================================================================
+int FilePanel::getFontSize()
+{
+    return fontSize;
+}
+
+//==============================================================================
+// Set Font Size
+//==============================================================================
+void FilePanel::setFontSize(const int& aSize)
+{
+    // Check Font Size
+    if (fontSize != aSize) {
+        // Set Font Size
+        fontSize = aSize;
+        // Emit Font Size Changed
+        emit fontSizeChanged(fontSize);
+    }
+}
+
+//==============================================================================
+// Get Font Bold
+//==============================================================================
+bool FilePanel::getFontBold()
+{
+    return fontBold;
+}
+
+//==============================================================================
+// Set Font Bold
+//==============================================================================
+void FilePanel::setFontBold(const bool& aBold)
+{
+    // Check Font Bold
+    if (fontBold != aBold) {
+        // Set Font Bold
+        fontBold = aBold;
+        // Emit Font Bold Changed
+        emit fontBoldChanged(fontBold);
+    }
+}
+
+//==============================================================================
+// Get Font Italic
+//==============================================================================
+bool FilePanel::getFontItalic()
+{
+    return fontItalic;
+}
+
+//==============================================================================
+// Set Font Italic
+//==============================================================================
+void FilePanel::setFontItalic(const bool& aItalic)
+{
+    // Check Font Italic
+    if (fontItalic != aItalic) {
+        // Set Font Italic
+        fontItalic = aItalic;
+        // Emit Font Italic Changed Signal
+        emit fontItalicChanged(fontItalic);
+    }
+}
+
+//==============================================================================
+// Get Thumb Width
+//==============================================================================
+int FilePanel::getThumbWidth()
+{
+    return thumbWidth;
+}
+
+//==============================================================================
+// Set Thumb Width
+//==============================================================================
+void FilePanel::setThumbWidth(const int& aWidth)
+{
+    // Check Thumb Width
+    if (thumbWidth != aWidth) {
+        // Set Thumb Width
+        thumbWidth = aWidth;
+        // Emit Thumb Width Changed
+        emit thumbWidthChanged(thumbWidth);
+    }
+}
+
+//==============================================================================
+// Get Thumb Height
+//==============================================================================
+int FilePanel::getThumbHeight()
+{
+    return thumbHeight;
+}
+
+//==============================================================================
+// Set Thumb height
+//==============================================================================
+void FilePanel::setThumbHeight(const int& aHeight)
+{
+    // Check Thumb Height
+    if (thumbHeight != aHeight) {
+        // Set Thumb Height
+        thumbHeight = aHeight;
+        // Emit Thumb Height Changed Signal
+        emit thumbHeightChanged(thumbHeight);
     }
 }
 
@@ -1128,8 +1595,6 @@ void FilePanel::handleItemExec()
     // Get File Info
     QFileInfo fileInfo = fileListModel->getFileInfo(currentIndex);
 
-    qDebug() << "FilePanel::handleItemExec - panelName: " << panelName << " - fileName: " << fileInfo.fileName();
-
     // Check If Dir
     if (fileInfo.isDir() || fileInfo.isBundle()) {
         // Check File Name
@@ -1143,6 +1608,7 @@ void FilePanel::handleItemExec()
             setCurrentIndex(0);
         }
     } else {
+        qDebug() << "FilePanel::handleItemExec - panelName: " << panelName << " - fileName: " << fileInfo.fileName();
 
         // Handle Exec Files
 
@@ -1200,18 +1666,15 @@ void FilePanel::clear()
 //==============================================================================
 // Restore UI
 //==============================================================================
-void FilePanel::restoreUI()
+void FilePanel::restoreUI(const bool& aReload)
 {
-    qDebug() << "FilePanel::restoreUI - panelName: " << panelName;
+    qDebug() << "#### FilePanel::restoreUI - panelName: " << panelName << " - aReload: " << aReload;
 
     // Init Settings
     QSettings settings;
 
     // Get Saved Current Dir
     QString savedDir = settings.value(panelName + SETTINGS_KEY_PANEL_DIR, QDir::homePath()).toString();
-
-    // Get Show Hidden
-    showHidden = settings.value(SETTINGS_KEY_SHOW_HIDDEN_FILES, true).toBool();
 
     // Set Ext Visible
     setExtVisible(settings.value(panelName + SETTINGS_KEY_PANEL_COL_ENABLED_EXT, true).toBool());
@@ -1244,15 +1707,20 @@ void FilePanel::restoreUI()
     setAttrsWidth(settings.value(panelName + SETTINGS_KEY_PANEL_COL_WIDTH_ATTR, attrsWidth).toInt());
 
     // Set Sorting
-    //setSorting(settings.value(panelName + SETTINGS_KEY_PANEL_SORTTYPE, DEFAULT_SORT_NAME).toInt());
     sorting = settings.value(panelName + SETTINGS_KEY_PANEL_SORTTYPE, DEFAULT_SORT_NAME).toInt();
     // Emit Sorting Changed Signal
     emit sortingChanged(sorting);
     // Set Reverse Order
-    //setSorting(settings.value(panelName + SETTINGS_KEY_PANEL_REVERSE, false).toBool());
     reverseOrder = settings.value(panelName + SETTINGS_KEY_PANEL_REVERSE, false).toBool();
     // Emit Reverse Order Changed signal
     emit reverseOrderChanged(reverseOrder);
+
+    // Get Show Hidden Files
+    showHiddenFiles = settings.value(SETTINGS_KEY_SHOW_HIDDEN_FILES, DEFAULT_SETTINGS_SHOW_HIDDEN_FILES).toBool();
+    // Get Show Dirs First
+    showDirsFirst = settings.value(SETTINGS_KEY_DIRFIRST, DEFAULT_SETTINGS_SHOW_DIRECTORIES_FIRST).toBool();
+    // Get Case Sensitive Sorting
+    caseSensitiveSort = settings.value(SETTINGS_KEY_CASE_SENSITIVE, DEFAULT_SETTINGS_CASE_SENSITIVE_SORTING).toBool();
 
     // Check File List Model
     if (fileListModel) {
@@ -1260,13 +1728,61 @@ void FilePanel::restoreUI()
         fileListModel->setSorting(sorting);
         // Set Reverse Order
         fileListModel->setReverse(reverseOrder);
+        // Set Dirs First
+        fileListModel->setShowDirsFirst(showDirsFirst);
+        // Set Show Hidden Files
+        fileListModel->setShowHiddenFiles(showHiddenFiles);
+        // Set Case Sensitive Sorting
+        fileListModel->setCaseSensitiveSorting(caseSensitiveSort);
     }
 
-    // Set Current Dir
-    setCurrentDir(savedDir);
+    // Set Normal Text Color
+    setTextColor(settings.value(SETTINGS_KEY_PANEL_COLOR_TEXT, DEFAULT_SETTINGS_TEXT_COLOR).toString());
+    // Set Normal Text BG Color
+    setTextBGColor(settings.value(SETTINGS_KEY_PANEL_COLOR_TEXT_BG, DEFAULT_SETTINGS_TEXT_BG_COLOR).toString());
+    // Set Current Text Color
+    setCurrentColor(settings.value(SETTINGS_KEY_PANEL_COLOR_CURRENT, DEFAULT_SETTINGS_CURRENT_COLOR).toString());
+    // Set Current Text BG Color
+    setCurrentBGColor(settings.value(SETTINGS_KEY_PANEL_COLOR_CURRENT_BG, DEFAULT_SETTINGS_CURRENT_BG_COLOR).toString());
+    // Set Selected Text Color
+    setSelectedColor(settings.value(SETTINGS_KEY_PANEL_COLOR_SELECTED, DEFAULT_SETTINGS_SELECTED_COLOR).toString());
+    // Set Selected Text BG Color
+    setSelectedBGColor(settings.value(SETTINGS_KEY_PANEL_COLOR_SELECTED_BG, DEFAULT_SETTINGS_SELECTED_BG_COLOR).toString());
+    // Set Current Selected Text Color
+    setCurrentSelectedColor(settings.value(SETTINGS_KEY_PANEL_COLOR_CURRENT_SELECTED, DEFAULT_SETTINGS_CURRENT_SELECTED_COLOR).toString());
+    // Set Current Selected Text BG Color
+    setCurrentSelectedBGColor(settings.value(SETTINGS_KEY_PANEL_COLOR_CURRENT_SELECTED_BG, DEFAULT_SETTINGS_CURRENT_SELECTED_BG_COLOR).toString());
+    // Set Hidden Text Color
+    setHiddenColor(settings.value(SETTINGS_KEY_PANEL_COLOR_HIDDEN, DEFAULT_SETTINGS_HIDDEN_COLOR).toString());
+    // Set Hidden Text BG Color
+    setHiddenBGColor(settings.value(SETTINGS_KEY_PANEL_COLOR_HIDDEN_BG, DEFAULT_SETTINGS_HIDDEN_BG_COLOR).toString());
+    // Set Link Text Color
+    setLinkColor(settings.value(SETTINGS_KEY_PANEL_COLOR_LINK, DEFAULT_SETTINGS_LINK_COLOR).toString());
+    // Set Link Text BG Color
+    setLinkBGColor(settings.value(SETTINGS_KEY_PANEL_COLOR_LINK_BG, DEFAULT_SETTINGS_LINK_BG_COLOR).toString());
+
+    // Set Font Name
+    setFontName(settings.value(SETTINGS_KEY_PANEL_FONT_NAME, DEFAULT_SETTINGS_FONT_NAME).toString());
+    // Set Font Size
+    setFontSize(settings.value(SETTINGS_KEY_PANEL_FONT_SIZE, DEFAULT_SETTINGS_FONT_SIZE).toInt());
+    // Set Font Bold
+    setFontBold(settings.value(SETTINGS_KEY_PANEL_FONT_BOLD, DEFAULT_SETTINGS_FONT_BOLD).toBool());
+    // Set Font Italic
+    setFontItalic(settings.value(SETTINGS_KEY_PANEL_FONT_ITALIC, DEFAULT_SETTINGS_FONT_ITALIC).toBool());
+
+    // Set Thumb Width
+    setThumbWidth(settings.value(SETTINGS_KEY_THUMBS_WIDTH, DEFAULT_SETTINGS_THUMB_WIDTH).toInt());
+    // Set Thumb height
+    setThumbHeight(settings.value(SETTINGS_KEY_THUMBS_HEIGHT, DEFAULT_SETTINGS_THUMB_HEIGHT).toInt());
+
 
     // ...
 
+    // Check Reload
+    if (aReload) {
+        // Set Current Dir
+        setCurrentDir(savedDir);
+    }
 }
 
 //==============================================================================
@@ -1282,7 +1798,7 @@ void FilePanel::saveSettings()
     // Set Value - Current Dir
     settings.setValue(panelName + SETTINGS_KEY_PANEL_DIR, currentDir);
     // Set Value - Show Hidden
-    settings.setValue(SETTINGS_KEY_SHOW_HIDDEN_FILES, showHidden);
+    settings.setValue(SETTINGS_KEY_SHOW_HIDDEN_FILES, showHiddenFiles);
 
     // Set Value - Extension Visible
     settings.setValue(panelName + SETTINGS_KEY_PANEL_COL_ENABLED_EXT, extVisible);

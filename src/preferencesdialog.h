@@ -15,6 +15,15 @@ class PreferencesDialog : public QDialog
 {
     Q_OBJECT
 
+    Q_PROPERTY(bool showFunctionKeys READ getShowFunctionKeys WRITE setShowFunctionKeys NOTIFY showFunctionKeysChanged)
+    Q_PROPERTY(bool showDirHotKeys READ getShowDirHotKeys WRITE setShowDirHotKeys NOTIFY showDirHotKeysChanged)
+    Q_PROPERTY(bool showDriveButtons READ getShowDriveButtons WRITE setShowDriveButtons NOTIFY showDriveButtonsChanged)
+    Q_PROPERTY(bool selectDirectories READ getSelectDirectories WRITE setSelectDirectories NOTIFY selectDirectoriesChanged)
+
+    Q_PROPERTY(bool showHiddenFiles READ getShowHiddenFiles WRITE setShowHiddenFiles NOTIFY showHiddenFilesChanged)
+    Q_PROPERTY(bool showDirsFirst READ getShowDirsFirst WRITE setShowDirsFirst NOTIFY showDirsFirstChanged)
+    Q_PROPERTY(bool caseSensitiveSort READ getCaseSensitiveSort WRITE setCaseSensitiveSort NOTIFY caseSensitiveSortChanged)
+
     Q_PROPERTY(QString textColor READ getTextColor WRITE setTextColor NOTIFY textColorChanged)
     Q_PROPERTY(QString textBGColor READ gettextBGColor WRITE setTextBGColor NOTIFY textBGColorChanged)
 
@@ -40,15 +49,6 @@ class PreferencesDialog : public QDialog
 
     Q_PROPERTY(int thumbWidth READ getThumbWidth WRITE setThumbWidth NOTIFY thumbWidthChanged)
     Q_PROPERTY(int thumbHeight READ getThumbHeight WRITE setThumbHeight NOTIFY thumbHeightChanged)
-
-    Q_PROPERTY(bool showFunctionKeys READ getShowFunctionKeys WRITE setShowFunctionKeys NOTIFY showFunctionKeysChanged)
-    Q_PROPERTY(bool showDirHotKeys READ getShowDirHotKeys WRITE setShowDirHotKeys NOTIFY showDirHotKeysChanged)
-    Q_PROPERTY(bool showDriveButtons READ getShowDriveButtons WRITE setShowDriveButtons NOTIFY showDriveButtonsChanged)
-    Q_PROPERTY(bool showHiddenFiles READ getShowHiddenFiles WRITE setShowHiddenFiles NOTIFY showHiddenFilesChanged)
-    Q_PROPERTY(bool selectDirectories READ getSelectDirectories WRITE setSelectDirectories NOTIFY selectDirectoriesChanged)
-    Q_PROPERTY(bool showDirsFirst READ getShowDirsFirst WRITE setShowDirsFirst NOTIFY showDirsFirstChanged)
-    Q_PROPERTY(bool caseSensitiveSort READ getCaseSensitiveSort WRITE setCaseSensitiveSort NOTIFY caseSensitiveSortChanged)
-
 
     // ...
 
@@ -161,15 +161,15 @@ public:
     // Set Show Drive Buttons
     void setShowDriveButtons(const bool& aShow);
 
-    // Get Show Hidden Files
-    bool getShowHiddenFiles();
-    // Set Show Hidden Files
-    void setShowHiddenFiles(const bool& aShow);
-
     // Get Select Directories
     bool getSelectDirectories();
     // Set Select Directories
     void setSelectDirectories(const bool& aSelect);
+
+    // Get Show Hidden Files
+    bool getShowHiddenFiles();
+    // Set Show Hidden Files
+    void setShowHiddenFiles(const bool& aShow);
 
     // Get Show Directories First
     bool getShowDirsFirst();
@@ -240,13 +240,12 @@ signals:
     // Show Drive Buttons changed Signal
     void showDriveButtonsChanged(const bool& aShow);
 
-    // Show Hidden Files Changed Signal
-    void showHiddenFilesChanged(const bool& aShow);
     // Select Directries Changed Signal
     void selectDirectoriesChanged(const bool& aSelect);
+    // Show Hidden Files Changed Signal
+    void showHiddenFilesChanged(const bool& aShow);
     // Show Directories First Changed Signal
     void showDirsFirstChanged(const bool& aShow);
-
     // Case Sensitive Sorting Changed Signal
     void caseSensitiveSortChanged(const bool& aCaseSensitive);
 
@@ -350,8 +349,6 @@ private:
     // Dirty
     bool                    dirty;
 
-
-
     // ...
 
     // Show Function Keys
@@ -361,10 +358,10 @@ private:
     // Show Drive Buttons
     bool                    showDriveButtons;
 
-    // Show Hidden Files
-    bool                    showHiddenFiles;
     // Select Directories
     bool                    selectDirectories;
+    // Show Hidden Files
+    bool                    showHiddenFiles;
     // Show Directories First
     bool                    showDirsFirst;
     // Case Sensitive Sorting

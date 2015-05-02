@@ -76,6 +76,12 @@ public:
     void setSorting(const int& aSorting);
     // Set Reverse Mode
     void setReverse(const bool& aReverse);
+    // Set Show hidden Files
+    void setShowHiddenFiles(const bool& aShow);
+    // Set Show Dirs First
+    void setShowDirsFirst(const bool& aShowDirsFirst);
+    // Set Case Sensitive Sorting
+    void setCaseSensitiveSorting(const bool& aCaseSensitiveSort);
 
     // Get File Count
     int getFileCount();
@@ -269,9 +275,14 @@ protected:
 
     // Sorting Mode
     int                                 sorting;
-
     // Reverse Order
     bool                                reverseOrder;
+    // Show Hidden Files
+    bool                                showHiddenFiles;
+    // Show Dirs First
+    bool                                showDirsFirst;
+    // Case Sensitive Sorting
+    bool                                caseSensitiveSort;
 
     // Selected Count
     int                                 selectedCount;

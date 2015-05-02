@@ -151,30 +151,44 @@ void MainWindow::init()
 //==============================================================================
 // Restore UI
 //==============================================================================
-void MainWindow::restoreUI()
+void MainWindow::restoreUI(const bool& aReload, const int& aFocusedPanel)
 {
-    qDebug() << "MainWindow::restoreUI";
+    qDebug() << "MainWindow::restoreUI - aReload: " << aReload;
 
-    // ...
+    // Check Left Panel
+    if (leftPanel) {
+        // Restore Left Panel UI
+        leftPanel->restoreUI(aReload);
+    }
 
-    // Restore Left Panel UI
-    leftPanel->restoreUI();
-    // Restore Right Panel UI
-    rightPanel->restoreUI();
+    // Check Right Panel
+    if (rightPanel) {
+        // Restore Right Panel UI
+        rightPanel->restoreUI(aReload);
+    }
 
-    // Set Focus
-    leftPanel->setPanelFocus(true);
+    // Check FocusedPanel
+    if (aFocusedPanel == 0) {
+        // Set Focus
+        leftPanel->setPanelFocus(true);
+    } else {
+        // Set Focus
+        rightPanel->setPanelFocus(true);
+    }
 
     // Update Function Keys
     updateFunctionKeys();
+
+    // Update Menu
+    updateMenu();
 }
 
 //==============================================================================
-// Save Settings
+// Load Settings
 //==============================================================================
-void MainWindow::saveSettings()
+void MainWindow::loadSettings()
 {
-    qDebug() << "MainWindow::saveSettings";
+    qDebug() << "MainWindow::loadSettings";
 
     // ...
 }
@@ -185,6 +199,9 @@ void MainWindow::saveSettings()
 void MainWindow::showWindow()
 {
     qDebug() << "MainWindow::showWindow";
+
+    // Load Settings
+    loadSettings();
 
     // Restore UI
     restoreUI();
@@ -470,26 +487,6 @@ void MainWindow::launchTransfer(const QString& aOperation)
 }
 
 //==============================================================================
-// Settings Has Changed Slot
-//==============================================================================
-void MainWindow::settingsHasChanged()
-{
-    qDebug() << "MainWindow::settingsHasChanged";
-
-    // Check Left Panel
-    if (leftPanel) {
-        // Reload
-        leftPanel->reload();
-    }
-
-    // Check Right Panel
-    if (rightPanel) {
-        // Reload
-        rightPanel->reload();
-    }
-}
-
-//==============================================================================
 // Launch Create Dir
 //==============================================================================
 void MainWindow::launchCreateDir()
@@ -634,10 +631,40 @@ void MainWindow::showPreferences()
     if (!preferencesDialog) {
         // Create Preferences Dialog
         preferencesDialog = new PreferencesDialog();
+
+        // Connect Signals
+        connect(preferencesDialog, SIGNAL(settingsHasChanged()), this, SLOT(settingsHasChanged()));
     }
 
     // Show Dialog
     preferencesDialog->execDialog();
+}
+
+//==============================================================================
+// Settings Has Changed Slot
+//==============================================================================
+void MainWindow::settingsHasChanged()
+{
+    qDebug() << "####> MainWindow::settingsHasChanged";
+
+    // Restore UI
+    restoreUI(false, (focusedPanel == leftPanel) ? 0 : 1);
+
+    // Check Left Panel
+    if (leftPanel) {
+        // Set Last File Name
+        leftPanel->lastFileName = leftPanel->getCurrFileInfo().fileName();
+        // Reload
+        leftPanel->reload();
+    }
+
+    // Check Right Panel
+    if (rightPanel) {
+        // Set Last File Name
+        rightPanel->lastFileName = rightPanel->getCurrFileInfo().fileName();
+        // Reload
+        rightPanel->reload();
+    }
 }
 
 //==============================================================================
@@ -1431,9 +1458,6 @@ void MainWindow::on_actionExit_triggered()
 //==============================================================================
 MainWindow::~MainWindow()
 {
-    // Save Settings
-    saveSettings();
-
     // Shut Down
     shutDown();
 

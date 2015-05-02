@@ -8,7 +8,7 @@
 // Show Directory Hot Keys
 #define DEFAULT_SETTINGS_SHOW_DIRECTORIY_HOT_KEYS           true            // showDirHotKeys
 // Show Drive Buttons
-#define DEFAULT_SETTINGS_SHOW_DRIVE_BUTTONSS                true            // showDriveButtons
+#define DEFAULT_SETTINGS_SHOW_DRIVE_BUTTONS                 true            // showDriveButtons
 
 
 // Show Hidden Files

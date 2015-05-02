@@ -65,6 +65,7 @@ FilePanel::FilePanel(QWidget* aParent)
     , fileTransferUpdate(false)
     , fileDeleteUpdate(false)
     , dirScanner(NULL)
+    , loading(false)
 
 {
     // Setup UI
@@ -177,6 +178,8 @@ void FilePanel::setCurrentDir(const QString& aCurrentDir)
 
         // Check Model
         if (fileListModel) {
+            // Set Loading
+            setLoading(true);
             // Set Current Dir
             fileListModel->setCurrentDir(currentDir);
         }
@@ -680,6 +683,28 @@ bool FilePanel::busy()
 }
 
 //==============================================================================
+// Get Loading
+//==============================================================================
+bool FilePanel::getloading()
+{
+    return loading;
+}
+
+//==============================================================================
+// Set Loading
+//==============================================================================
+void FilePanel::setLoading(const bool& aLoading)
+{
+    // Check Loading
+    if (loading != aLoading) {
+        // Set Loading
+        loading = aLoading;
+        // Emit Loading Changed Signal
+        emit loadingChanged(loading);
+    }
+}
+
+//==============================================================================
 // Get File Index By File Name
 //==============================================================================
 int FilePanel::getFileIndex(const QString& aFileName)
@@ -884,12 +909,18 @@ QStringList FilePanel::getSupportedImageFormats()
 //==============================================================================
 void FilePanel::reload(const int& aIndex)
 {
+    qDebug() << "FilePanel::reload - panelName: " << panelName << " - aIndex: " << aIndex;
+
     // Get Last Index
     lastIndex = aIndex;
 
+    // Reset Current Index
+    currentIndex = -1;
+
     // Check File List Model
     if (fileListModel) {
-        qDebug() << "#### FilePanel::reload - panelName: " << panelName << " - aIndex: " << aIndex;
+        // Set Loading
+        setLoading(true);
         // Reload
         fileListModel->reload();
     }
@@ -992,7 +1023,7 @@ void FilePanel::gotoRoot()
 //==============================================================================
 void FilePanel::gotoDrive(const int& aDriveIndex)
 {
-    qDebug() << "FilePanel::goUp - panelName: " << panelName << " - aDriveIndex: " << aDriveIndex;
+    qDebug() << "FilePanel::gotoDrive - panelName: " << panelName << " - aDriveIndex: " << aDriveIndex;
 
     // ...
 }
@@ -1348,10 +1379,10 @@ void FilePanel::fileModelBusyChanged(const bool& aBusy)
 //==============================================================================
 void FilePanel::fileModelDirFetchFinished()
 {
-    qDebug() << "FilePanel::fileModelDirFetchFinished - panelName: " << panelName << " - lastDirName: " << lastDirName;
-
     // Check Last Dir Name
     if (!lastDirName.isEmpty()) {
+        qDebug() << "FilePanel::fileModelDirFetchFinished - panelName: " << panelName << " - lastDirName: " << lastDirName;
+
         // Find Index
         int lastDirIndex = fileListModel ? fileListModel->findIndex(lastDirName) : 0;
         // Reset Last Dir Name
@@ -1360,6 +1391,8 @@ void FilePanel::fileModelDirFetchFinished()
         setCurrentIndex(lastDirIndex);
 
     } else if (!lastFileName.isEmpty()) {
+        qDebug() << "FilePanel::fileModelDirFetchFinished - panelName: " << panelName << " - lastFileName: " << lastFileName;
+
         // Find Index
         int lastFileIndex = fileListModel ? fileListModel->findIndex(lastFileName) : 0;
         // Reset Last File Name
@@ -1368,10 +1401,20 @@ void FilePanel::fileModelDirFetchFinished()
         setCurrentIndex(lastFileIndex);
 
     } else if (lastIndex != -1) {
+        qDebug() << "FilePanel::fileModelDirFetchFinished - panelName: " << panelName << " - lastIndex: " << lastIndex;
+
         // Set Current Index
         setCurrentIndex(lastIndex);
         // Reset LAst Index
         lastIndex = -1;
+
+    } else {
+        qDebug() << "FilePanel::fileModelDirFetchFinished - panelName: " << panelName;
+
+        // Set Current Index
+        setCurrentIndex(0);
+
+        // ...
     }
 
     // Update Available Space Label
@@ -1379,7 +1422,7 @@ void FilePanel::fileModelDirFetchFinished()
 
     // Check If Dir Watcher Has Changes
     if (dwDirChanged || dwFileChanged) {
-        qDebug() << "FilePanel::fileModelDirFetchFinished - panelName: " << panelName << " - lastDirName: " << lastDirName << " - CHANGED!!";
+        qDebug() << "FilePanel::fileModelDirFetchFinished - panelName: " << panelName << " - CHANGED!!";
 
         // Reload
 
@@ -1853,6 +1896,30 @@ void FilePanel::keyPressEvent(QKeyEvent* aEvent)
                 // Check If Shift Is Pressed -> Tray
             break;
 
+            case Qt::Key_Up:
+/*
+                // Check If Auto Repeat
+                if (aEvent->isAutoRepeat()) {
+                    // Accept
+                    aEvent->accept();
+                    // Go Prev
+                    goPrev();
+                }
+*/
+            break;
+
+            case Qt::Key_Down:
+/*
+                // Check If Auto Repeat
+                if (aEvent->isAutoRepeat()) {
+                    // Accept
+                    aEvent->accept();
+                    // Go Next
+                    goNext();
+                }
+*/
+            break;
+
             case Qt::Key_Backspace:
             case Qt::Key_Left:
                 // Check If Auto Repeat
@@ -1948,6 +2015,9 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
                         // Set Selected
                         fileListModel->setSelected(currentIndex, !fileListModel->getSelected(currentIndex));
                     }
+                } else if (modifierKeys == Qt::NoModifier) {
+                    // Go Prev
+                    //goPrev();
                 }
             break;
 
@@ -1959,6 +2029,9 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
                         // Set Selected
                         fileListModel->setSelected(currentIndex, !fileListModel->getSelected(currentIndex));
                     }
+                } else if (modifierKeys == Qt::NoModifier) {
+                    // Go Next
+                    //goNext();
                 }
             break;
 
@@ -2150,6 +2223,7 @@ void FilePanel::timerEvent(QTimerEvent* aEvent)
                     dwDirChanged = false;
                     // Reset File Changed
                     dwFileChanged = false;
+
                     // Reload
                     reload(currentIndex);
                 }

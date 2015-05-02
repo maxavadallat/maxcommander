@@ -96,16 +96,11 @@ void FileListModel::setCurrentDir(const QString& aCurrentDir)
         // Set Current Dir
         currentDir = aCurrentDir;
 
-        // Clear
-        clear();
-
-        // Fetch Current Dir Items
-        fetchDirItems();
-
-        // ...
+        // Reload
+        reload();
 
         // Emit Current dir Changed Signal
-        currentDirChanged(currentDir);
+        emit currentDirChanged(currentDir);
     }
 }
 
@@ -232,7 +227,12 @@ void FileListModel::sendUserResponse(const int& aConfirm, const QString& aNewPat
 //==============================================================================
 void FileListModel::clear()
 {
-    //qDebug() << "FileListModel::clear";
+    // Check Item List
+    if (itemList.count() <= 0) {
+        return;
+    }
+
+    qDebug() << "FileListModel::clear";
 
     // Begin Reset Model
     beginResetModel();
@@ -267,7 +267,7 @@ void FileListModel::clear()
 //==============================================================================
 void FileListModel::reload()
 {
-    //qDebug() << "FileListModel::reload";
+    qDebug() << "FileListModel::reload";
 
     // Clear
     clear();

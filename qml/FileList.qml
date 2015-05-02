@@ -46,9 +46,13 @@ Rectangle {
         anchors.bottomMargin: 1 // I don't no why the fuck fileListRoot is not properly sized.... X (
         spacing: 1
         clip: true
+
         focus: true
-        highlightMoveDuration: 50
-        //highlightFollowsCurrentItem: true
+
+        highlightFollowsCurrentItem: true
+        highlightMoveDuration: 0
+        highlightResizeDuration: 0
+
         snapMode: ListView.SnapToItem
 
         property int delegateHeight: 32
@@ -66,12 +70,9 @@ Rectangle {
             height: fileListView.delegateHeight
 
             fileIconSource: {
-                //"/resources/images/icons/default_file.png"
-
                 // Check File Name
                 if (Utility.isImage(fileFullName)) {
                     Const.DEFAULT_FILE_PREFIX + mainController.currentDir + "/" + fileFullName
-                    //"/resources/images/icons/default_file.png"
                 } else {
                     // Image Provider
                     Const.DEFAULT_FILE_ICON_PREFIX + mainController.currentDir + "/" + fileFullName
@@ -105,16 +106,13 @@ Rectangle {
             permsVisible: fileListHeader.permsVisible
             attrVisible : fileListHeader.attrVisible
 
-            //color: (Math.floor(index / 2) == index / 2) ? "transparent" : "#77FFFFFF"
-
             // Mouse Area
             MouseArea {
                 id: delegateMouseArea
                 anchors.fill: parent
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
-                //hoverEnabled: true
-                //preventStealing: true
                 property bool pressedInside: false
+                // On Clicked
                 onClicked: {
                     //console.log("fileListDelegateRoot.MouseArea.onClicked - index: " + index);
 
@@ -126,7 +124,7 @@ Rectangle {
                         mainController.panelHasFocus = true;
                     }
                 }
-
+                // On Pressed
                 onPressed: {
                     //console.log("fileListDelegateRoot.MouseArea.onPressed - index: " + index);
 
@@ -140,7 +138,7 @@ Rectangle {
 
                     // ...
                 }
-
+                // On Released
                 onReleased: {
                     //console.log("fileListDelegateRoot.MouseArea.onReleased - index: " + index);
 
@@ -187,16 +185,18 @@ Rectangle {
         onCurrentIndexChanged: {
             //console.log("fileListView.onCurrentIndexChanged - currentIndex: " + fileListView.currentIndex);
 
-            // Check File List View Current Index
-            if (fileListView.currentIndex > fileListModel.count-1) {
-                // Reset
-                //fileListView.currentIndex = fileListModel.count-1;
-            }
-
-            // Check Current Index
-            if (mainController.currentIndex != fileListView.currentIndex) {
-                // Set Main Controller Current Index
-                mainController.currentIndex = fileListView.currentIndex;
+            // Check Loading
+            if (mainController.loading) {
+                // Reset List View Current Index - Because ListView Fucked Up!!! Sets Weird Values Sometimes for now fucking Reason... X (((
+                fileListView.currentIndex = mainController.currentIndex;
+                // Reset Loading
+                mainController.loading = false;
+            } else {
+                // Check If Current Index Matches
+                if (mainController.currentIndex != fileListView.currentIndex) {
+                    // Set Main Controller Current Index
+                    mainController.currentIndex = fileListView.currentIndex;
+                }
             }
 
             // Check If Shift Pressed
@@ -255,10 +255,6 @@ Rectangle {
         // On Width Changed
         onWidthChanged: {
             //console.log("fileListView.onWidthChanged - width: " + fileListView.width);
-            // Init Rest Of The Header Items Width
-            //var restWidth = 0;
-            // Set Name Width
-            //fileListHeader.nameWidth = fileListView.width - restWidth;
 
             // Init Remaining Width
             var remainingWidth = fileListView.width;
@@ -321,14 +317,14 @@ Rectangle {
        anchors.horizontalCenterOffset: 4
        anchors.verticalCenterOffset: 4
        radius: fileRenamer.radius
-       color: "#44000000"
+       color: Const.DEFAULT_FILE_LIST_ITEM_RENAMER_SHADOW_COLOR
    }
 
     // File Renamer
     FileListItemRenamer {
         id: fileRenamer
         opacity: 0.0
-
+        // On Accepted
         onAccepted: {
             // Check File Name
             if (fileName.length > 0) {
@@ -340,7 +336,7 @@ Rectangle {
             // Set Focus
             fileListView.focus = true;
         }
-
+        // On Rejected
         onRejected: {
             // Set Focus
             fileListView.focus = true;
@@ -350,25 +346,27 @@ Rectangle {
     // Busy Indicator
     BusyIndicator {
         id: busyIndicator
-
         width: Const.DEFAULT_BUSY_INDICATOR_WIDTH
         height: Const.DEFAULT_BUSY_INDICATOR_HEIGHT
-
         anchors.right: parent.right
         anchors.rightMargin: Const.DEFAULT_MARGIN_WIDTH
         anchors.bottom: parent.bottom
         anchors.bottomMargin: Const.DEFAULT_MARGIN_WIDTH
-
-        running: mainController.busy;
-
+        running: mainController.busy
         opacity: running ? 1.0 : 0.0
-
         visible: opacity > 0.0
+        Behavior on opacity { NumberAnimation { duration: 500 } }
+    }
 
-        Behavior on opacity {
-            NumberAnimation {
-                duration: 500
-            }
+    // Helper Timer
+    Timer {
+        id: helperTimer
+        repeat: false
+        interval: 100
+        // On Triggered
+        onTriggered: {
+            // Set Highlight Move Duration
+            fileListView.highlightMoveDuration = 100;
         }
     }
 
@@ -412,6 +410,28 @@ Rectangle {
             } else {
                 //console.log("fileListRoot.Connections.mainController.onCurrentIndexChanged - aIndex: " + aIndex + " - MATCHES!");
             }
+
+            // Loading Finishes When Proper Indexes Are Set.
+            // For Some reason the Fucking ListView does set some weird value for currentIndex after loading
+
+            // Reset Loading
+            //mainController.loading = false;
+        }
+
+        // On Loading Changed
+        onLoadingChanged: {
+            //console.log("#### fileListRoot.Connections.mainController.onLoadingChanged - loading: " + mainController.loading);
+
+            // Check Loading
+            if (mainController.loading) {
+                // Reset Highlight Move Duration
+                fileListView.highlightMoveDuration = 0;
+            } else {
+                // Restart Helper Timer
+                helperTimer.restart();
+            }
+
+            // ...
         }
 
         // On Modifier Keys Pressed
@@ -440,7 +460,6 @@ Rectangle {
             if (aModifierKeys & Qt.MetaModifier) {
                 //console.log("fileListRoot.Connections.mainController.onModifierKeysChanged - META");
             }
-
 
             // ...
         }

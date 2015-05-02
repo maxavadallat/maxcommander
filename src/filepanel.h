@@ -68,6 +68,9 @@ class FilePanel : public QFrame
     // Busy
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
 
+    // Loading
+    Q_PROPERTY(bool loading READ getloading WRITE setLoading NOTIFY loadingChanged)
+
     // File Rename Active
     Q_PROPERTY(bool fileRenameActive READ getFileRenameActive WRITE setFileRenameActive NOTIFY fileRenameActiveChanged)
 
@@ -189,6 +192,11 @@ public:
 
     // Busy
     bool busy();
+
+    // Get Loading
+    bool getloading();
+    // Set Loading
+    void setLoading(const bool& aLoading);
 
     // Get File Index By File Name
     int getFileIndex(const QString& aFileName);
@@ -317,6 +325,9 @@ signals:
 
     // Busy Changed Signal
     void busyChanged(const bool& aBusy);
+
+    // Loading Changed Signal
+    void loadingChanged(const bool& aLoading);
 
     // Show Help Signal
     void showHelp();
@@ -507,7 +518,7 @@ private:
     // Attributes Column Width
     int                     attrsWidth;
 
-    // Sorting
+    // Sorting Type
     int                     sorting;
     // Reverse Order
     bool                    reverseOrder;
@@ -537,6 +548,9 @@ private:
 
     // Dir Scanner
     DirScanner*             dirScanner;
+
+    // Loading State Indicator
+    bool                    loading;
 };
 
 

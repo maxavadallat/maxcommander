@@ -9,6 +9,7 @@ Text {
     verticalAlignment: Text.AlignVCenter
     horizontalAlignment: Text.AlignHCenter
     anchors.fill: parent
+    anchors.topMargin: 2
     anchors.rightMargin: Const.DEFAULT_FILE_LIST_HEADER_SEPARATOR_WIDTH + 1
     visible: parent.width > Const.DEFAULT_FILE_LIST_HEADER_SEPARATOR_WIDTH
     elide: Text.ElideMiddle

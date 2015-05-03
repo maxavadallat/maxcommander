@@ -50,7 +50,8 @@ SOURCES                 += src/main.cpp \
                         src/testdialog.cpp \
                         src/infodialog.cpp \
                         src/passworddialog.cpp \
-                        src/colorpickerbutton.cpp
+                        src/colorpickerbutton.cpp \
+                        src/searchdialog.cpp
 
 # Heders
 HEADERS                 += src/constants.h \
@@ -79,7 +80,8 @@ HEADERS                 += src/constants.h \
                         src/infodialog.h \
                         src/passworddialog.h \
                         src/colorpickerbutton.h \
-                        src/defaultsettings.h
+                        src/defaultsettings.h \
+                        src/searchdialog.h
 
 # Include Path
 INCLUDEPATH             += \
@@ -101,7 +103,8 @@ FORMS                   += \
                         ui/viewerwindow.ui \
                         ui/testdialog.ui \
                         ui/infodialog.ui \
-                        ui/passworddialog.ui
+                        ui/passworddialog.ui \
+                        ui/searchdialog.ui
 
 # Resources
 RESOURCES               += \

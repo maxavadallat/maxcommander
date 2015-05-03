@@ -375,6 +375,24 @@ void PreferencesDialog::restoreUI()
     // Set Check Box Checked
     ui->caseSensitiveSortCheckBox->setChecked(caseSensitiveSort);
 
+    switch (thumbWidth) {
+        case DEFAULT_ICON_WIDTH_16:
+            // Set Current Index
+            ui->iconSizeComboBox->setCurrentIndex(0);
+        break;
+
+        default:
+        case DEFAULT_ICON_WIDTH_32:
+            // Set Current Index
+            ui->iconSizeComboBox->setCurrentIndex(1);
+        break;
+
+        case DEFAULT_ICON_WIDTH_64:
+            // Set Current Index
+            ui->iconSizeComboBox->setCurrentIndex(2);
+        break;
+    }
+
     // ...
 }
 

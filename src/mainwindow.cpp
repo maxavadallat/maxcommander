@@ -18,6 +18,7 @@
 #include "transferprogressdialog.h"
 #include "helpwindow.h"
 #include "viewerwindow.h"
+#include "searchdialog.h"
 #include "remotefileutilclient.h"
 #include "infodialog.h"
 #include "utility.h"
@@ -71,6 +72,7 @@ MainWindow::MainWindow(QWidget* aParent)
     , deleteFileDialog(NULL)
     , transferFileDialog(NULL)
     , helpWindow(NULL)
+    , searchFileDialog(NULL)
 
 {
     qDebug() << "MainWindow::MainWindow";
@@ -138,6 +140,9 @@ void MainWindow::init()
 
     connect(leftPanel, SIGNAL(launchCreateDir()), this, SLOT(launchCreateDir()));
     connect(rightPanel, SIGNAL(launchCreateDir()), this, SLOT(launchCreateDir()));
+
+    connect(leftPanel, SIGNAL(launchSearch()), this, SLOT(launchSearch()));
+    connect(rightPanel, SIGNAL(launchSearch()), this, SLOT(launchSearch()));
 
     connect(leftPanel, SIGNAL(launchDelete()), this, SLOT(launchDelete()));
     connect(rightPanel, SIGNAL(launchDelete()), this, SLOT(launchDelete()));
@@ -524,6 +529,40 @@ void MainWindow::launchCreateDir()
 
         // Create Directory
         focusedPanel->createDir(dirPath);
+    }
+}
+
+//==============================================================================
+// Launch Search Slot
+//==============================================================================
+void MainWindow::launchSearch()
+{
+    // Clear Modifier Keys
+    modifierKeys = Qt::NoModifier;
+    // Update Function Keys
+    updateFunctionKeys();
+
+    // Check Focused Panel
+    if (!focusedPanel) {
+        return;
+    }
+
+    // Reset Modifier Keys
+    focusedPanel->modifierKeys = Qt::NoModifier;
+
+    // Check Search Dialog
+    if (!searchFileDialog) {
+        // Create Search File Dialog
+        searchFileDialog = new SearchDialog();
+    }
+
+    // Check If Dialog Shown
+    if (!searchFileDialog->isDialogShown()) {
+        qDebug() << "MainWindow::launchSearch";
+        // Init Dir Path
+        QString dirPath = focusedPanel->getCurrentDir();
+        // Show Dialog
+        searchFileDialog->showDialog(dirPath);
     }
 }
 
@@ -1513,6 +1552,12 @@ MainWindow::~MainWindow()
         helpWindow = NULL;
     }
 
+    // Check Search File Dialog
+    if (searchFileDialog) {
+        // Delete Search File Dialog
+        delete searchFileDialog;
+        searchFileDialog = NULL;
+    }
 
     qDebug() << "MainWindow::~MainWindow";
 }

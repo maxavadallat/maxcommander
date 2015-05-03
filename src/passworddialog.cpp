@@ -18,5 +18,8 @@ PasswordDialog::PasswordDialog(QWidget* aParent)
 //==============================================================================
 PasswordDialog::~PasswordDialog()
 {
+    // Delete UI
     delete ui;
 }
+
+

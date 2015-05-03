@@ -204,7 +204,6 @@ QHash<int, QByteArray> TransferProgressModel::roleNames() const
     roles[ERIDState]     = "fileOpState";
 
     return roles;
-
 }
 
 //==============================================================================

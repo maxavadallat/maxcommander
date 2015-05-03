@@ -88,9 +88,6 @@ public slots:
     // Clear
     void clear();
 
-signals:
-
-
 public: // From QAbstractListModel
 
     // Get Role Names

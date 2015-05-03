@@ -1911,6 +1911,8 @@ void FilePanel::fileModelDirFetchFinished()
         lastDirName = "";
         // Set Current Index
         setCurrentIndex(lastDirIndex);
+        // Set Loading
+        setLoading(false);
 
     } else if (!lastFileName.isEmpty()) {
         qDebug() << "FilePanel::fileModelDirFetchFinished - panelName: " << panelName << " - lastFileName: " << lastFileName;
@@ -1921,6 +1923,8 @@ void FilePanel::fileModelDirFetchFinished()
         lastFileName = "";
         // Set Current Index
         setCurrentIndex(lastFileIndex);
+        // Set Loading
+        setLoading(false);
 
     } else if (lastIndex != -1) {
         qDebug() << "FilePanel::fileModelDirFetchFinished - panelName: " << panelName << " - lastIndex: " << lastIndex;
@@ -2692,6 +2696,17 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
                 if (modifierKeys == Qt::NoModifier) {
                     // Emit Launch Create Dir
                     emit launchCreateDir();
+                } else if (modifierKeys == Qt::AltModifier) {
+                    // Emit Launch Search
+                    emit launchSearch();
+                }
+            break;
+
+            case Qt::Key_S:
+                // Check Modifier Keys
+                if (modifierKeys == Qt::ControlModifier) {
+                    // Emit Launch Search
+                    emit launchSearch();
                 }
             break;
 

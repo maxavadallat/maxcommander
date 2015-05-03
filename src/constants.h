@@ -310,7 +310,7 @@
 
 #define DEFAULT_TITLE_FONT_SIZE                             "size: "
 
-
+#define DEFAULT_BUTTON_TEXT_START                           "Start"
 
 
 #endif // CONSTANTS_H

@@ -9,7 +9,7 @@ import "qrc:/qml/js/utility.js" as Utility
 Rectangle {
     id: fileListRoot
 
-    color: Const.DEFAULT_FILE_LIST_BACKGROUND_COLOR
+    color: mainController.textBGColor
 
     width: 480
     height: 640
@@ -409,7 +409,7 @@ Rectangle {
                 // Set File List View Current Index
                 fileListView.currentIndex = aIndex;
                 // Position View
-                fileListView.positionViewAtIndex(aIndex + 1, ListView.Center);
+                //fileListView.positionViewAtIndex(aIndex + 1, ListView.Center);
             } else {
                 //console.log("fileListRoot.Connections.mainController.onCurrentIndexChanged - aIndex: " + aIndex + " - MATCHES!");
             }

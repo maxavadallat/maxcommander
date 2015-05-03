@@ -21,6 +21,8 @@ class ViewerWindow;
 class HelpWindow;
 class DeleteProgressDialog;
 class TransferProgressDialog;
+class SearchDialog;
+
 
 //==============================================================================
 // Main Window Class
@@ -42,35 +44,38 @@ public:
 
 public slots:
 
-    // Show About
+    // Show About Slot
     void showAbout();
-    // Show Help
+    // Show Help Slot
     void showHelp();
 
-    // Launch Terminal
+    // Launch Terminal Slot
     void launchTerminal(const QString& aDirPath);
 
     // Launch Viewer
     void launchViewer(const bool& aEditMode = false, const bool& aNewFile = false);
 
-    // Launch File Copy
+    // Launch File Copy Slot
     void launchFileCopy();
-    // Launch File Move/REname
+    // Launch File Move/Rename Slot
     void launchFileMove();
 
-    // Launch Create Dir
+    // Launch Create Dir Slot
     void launchCreateDir();
 
-    // Launch Create Link
+    // Launch Search Slot
+    void launchSearch();
+
+    // Launch Create Link Slot
     void launchCreateLink();
 
-    // Launch Delete
+    // Launch Delete Slot
     void launchDelete();
 
-    // Show Preferences
+    // Show Preferences Slot
     void showPreferences();
 
-    // Quit Application
+    // Quit Application Slot
     void quitApp();
 
     // Shut Down
@@ -246,6 +251,8 @@ private:
     TransferFileDialog*             transferFileDialog;
     // Help Window
     HelpWindow*                     helpWindow;
+    // Search File Dialog
+    SearchDialog*                   searchFileDialog;
 
     // Transfer Progress Dialogs
     QList<TransferProgressDialog*>  transferProgressDialogs;

@@ -183,7 +183,7 @@
        <property name="geometry">
         <rect>
          <x>308</x>
-         <y>214</y>
+         <y>212</y>
          <width>193</width>
          <height>20</height>
         </rect>
@@ -240,7 +240,7 @@
        <property name="geometry">
         <rect>
          <x>308</x>
-         <y>252</y>
+         <y>250</y>
          <width>193</width>
          <height>20</height>
         </rect>
@@ -256,6 +256,28 @@
        </property>
        <property name="text">
         <string>Case Sensitive Sorting</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="closeWhenFinishedCheckBox">
+       <property name="geometry">
+        <rect>
+         <x>44</x>
+         <y>250</y>
+         <width>193</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::RightToLeft</enum>
+       </property>
+       <property name="text">
+        <string>Close When Finished</string>
        </property>
       </widget>
      </widget>

@@ -26,8 +26,9 @@ PreferencesDialog::PreferencesDialog(QWidget* aParent)
     , showFunctionKeys(DEFAULT_SETTINGS_SHOW_FUNCTION_KEYS)
     , showDirHotKeys(DEFAULT_SETTINGS_SHOW_DIRECTORIY_HOT_KEYS)
     , showDriveButtons(DEFAULT_SETTINGS_SHOW_DRIVE_BUTTONS)
-    , selectDirectories(DEFAULT_SETTINGS_SELECT_DIRECTORIES)
+    , closeWhenFinished(DEFAULT_SETTINGS_CLOSE_WHEN_FINISHED)
 
+    , selectDirectories(DEFAULT_SETTINGS_SELECT_DIRECTORIES)
     , showHiddenFiles(DEFAULT_SETTINGS_SHOW_HIDDEN_FILES)
     , showDirsFirst(DEFAULT_SETTINGS_SHOW_DIRECTORIES_FIRST)
     , caseSensitiveSort(DEFAULT_SETTINGS_CASE_SENSITIVE_SORTING)
@@ -150,6 +151,8 @@ void PreferencesDialog::loadSettings()
     setShowDirHotKeys(settings.value(SETTINGS_KEY_SHOW_DIR_HOT_KEYS, DEFAULT_SETTINGS_SHOW_DIRECTORIY_HOT_KEYS).toBool());
     // Set Show Drive Buttons
     setShowDriveButtons(settings.value(SETTINGS_KEY_SHOW_DRIVE_BUTTONS, DEFAULT_SETTINGS_SHOW_DRIVE_BUTTONS).toBool());
+    // Set Close When Finished
+    setCloseWhenFinished(settings.value(SETTINGS_KEY_CLOSE_WHEN_FINISHED, DEFAULT_SETTINGS_CLOSE_WHEN_FINISHED).toBool());
 
     // Set Show Hidden Files
     setShowHiddenFiles(settings.value(SETTINGS_KEY_SHOW_HIDDEN_FILES, DEFAULT_SETTINGS_SHOW_HIDDEN_FILES).toBool());
@@ -221,6 +224,8 @@ void PreferencesDialog::saveSettings()
     settings.setValue(SETTINGS_KEY_SHOW_DIR_HOT_KEYS, showDirHotKeys);
     // Set Show Drive Buttons
     settings.setValue(SETTINGS_KEY_SHOW_DRIVE_BUTTONS, showDriveButtons);
+    // Set Close When Finished
+    settings.setValue(SETTINGS_KEY_CLOSE_WHEN_FINISHED, closeWhenFinished);
 
     // Set Show Hidden Files
     settings.setValue(SETTINGS_KEY_SHOW_HIDDEN_FILES, showHiddenFiles);
@@ -290,6 +295,8 @@ void PreferencesDialog::restoreDefaults()
     setShowDirHotKeys(DEFAULT_SETTINGS_SHOW_DIRECTORIY_HOT_KEYS);
     // Set Show Drive Buttons
     setShowDriveButtons(DEFAULT_SETTINGS_SHOW_DRIVE_BUTTONS);
+    // Set Close When Finished
+    setCloseWhenFinished(DEFAULT_SETTINGS_CLOSE_WHEN_FINISHED);
 
     // Set Show Hidden Files
     setShowHiddenFiles(DEFAULT_SETTINGS_SHOW_HIDDEN_FILES);
@@ -372,6 +379,8 @@ void PreferencesDialog::restoreUI()
     ui->driveButtonsCheckBox->setChecked(showDriveButtons);
     // Set CheckBox Checked
     ui->dirHotKeysCheckBox->setChecked(showDirHotKeys);
+    // Set CheckBox Checked
+    ui->closeWhenFinishedCheckBox->setChecked(closeWhenFinished);
     // Set Check Box Checked
     ui->caseSensitiveSortCheckBox->setChecked(caseSensitiveSort);
 
@@ -922,6 +931,28 @@ void PreferencesDialog::setShowDriveButtons(const bool& aShow)
 }
 
 //==============================================================================
+// Get Close When Finished
+//==============================================================================
+bool PreferencesDialog::getCloseWhenFinished()
+{
+    return closeWhenFinished;
+}
+
+//==============================================================================
+// Set Close When Finished
+//==============================================================================
+void PreferencesDialog::setCloseWhenFinished(const bool& aClose)
+{
+    // Check Close When Finished
+    if (closeWhenFinished != aClose) {
+        // Set Close When Finished
+        closeWhenFinished = aClose;
+        // Emit Close When Finished Changed Signal
+        emit closeWhenFinishedChanged(closeWhenFinished);
+    }
+}
+
+//==============================================================================
 // Get Show Hidden Files
 //==============================================================================
 bool PreferencesDialog::getShowHiddenFiles()
@@ -1088,6 +1119,15 @@ void PreferencesDialog::on_dirHotKeysCheckBox_clicked()
 {
     // Set Show Dir Hot Keys
     setShowDirHotKeys(ui->dirHotKeysCheckBox->isChecked());
+}
+
+//==============================================================================
+// On Close When Finished Check Box Clicked Slot
+//==============================================================================
+void PreferencesDialog::on_closeWhenFinishedCheckBox_clicked()
+{
+    // Set Close When Finished
+    setCloseWhenFinished(ui->closeWhenFinishedCheckBox->isChecked());
 }
 
 //==============================================================================

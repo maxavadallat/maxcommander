@@ -90,6 +90,9 @@ public:
     // Abort
     void abort();
 
+    // Get Last Operation Target
+    QString getLastTarget();
+
     // Destructor
     virtual ~TransferProgressDialog();
 
@@ -117,6 +120,11 @@ protected slots:
 
     // Configure Buttons
     void configureButtons(const QDialogButtonBox::StandardButtons& aButtons = QDialogButtonBox::Close);
+
+    // Configure Current Progress Bar
+    void configureCurrentProgressBar(const quint64& aMax);
+    // Configure Overall Progress Bar
+    void configureOverallProgressBar(const quint64& aMax);
 
     // Start Transfer Speed Timer
     void startTransferSpeedTimer();
@@ -213,7 +221,14 @@ protected: // From QDialog
     // Close Event
     virtual void closeEvent(QCloseEvent* aEvent);
 
+protected slots:
+
+    // On Close When Finished Check Box Clicked Slot
+    void on_closeWhenFinishedCheckBox_clicked();
+
 private:
+    friend class MainWindow;
+
     // UI
     Ui::TransferProgressDialog*     ui;
     // Queue Model
@@ -247,10 +262,21 @@ private:
     // Transfer Speed
     int                             transferSpeed;
 
+    // Current File Progress
+    quint64                         currentProgress;
+    // Current File Size
+    quint64                         currentSize;
+
+    // Current Progress Scale
+    int                             currentProgressScale;
+
     // Overall Progress
     quint64                         overallProgress;
     // Overall Size
     quint64                         overallSize;
+
+    // Overall Progress Scale
+    int                             overallProgressScale;
 
 };
 

@@ -165,6 +165,32 @@ TransferProgressState TransferProgressModel::getProgressState(const int& aIndex)
 }
 
 //==============================================================================
+// Get Source
+//==============================================================================
+QString TransferProgressModel::getSource(const int& aIndex)
+{
+    // Check Index
+    if (aIndex >= 0 && aIndex < rowCount()) {
+        return items[aIndex]->source;
+    }
+
+    return "";
+}
+
+//==============================================================================
+// Get Target
+//==============================================================================
+QString TransferProgressModel::getTarget(const int& aIndex)
+{
+    // Check Index
+    if (aIndex >= 0 && aIndex < rowCount()) {
+        return items[aIndex]->target;
+    }
+
+    return "";
+}
+
+//==============================================================================
 // Find Index
 //==============================================================================
 int TransferProgressModel::findIndex(const QString& aSourceFileName)
@@ -252,7 +278,7 @@ QVariant TransferProgressModel::data(const QModelIndex& aIndex, int aRole) const
             case ERIDOp:        return item->op;
             case ERIDSource:    return item->source;
             case ERIDTarget:    return item->target;
-            case ERIDState:      return item->state;
+            case ERIDState:     return item->state;
 
             default:
             break;
@@ -298,6 +324,7 @@ bool TransferProgressModel::setData(const QModelIndex& aIndex, const QVariant& a
             case ERIDState:
                 // Check State
                 if (item->state != (TransferProgressState)aValue.toInt()) {
+                    qDebug() << "## TransferProgressModel::setData - aRole: ERIDState";
                     // Set State
                     item->state = (TransferProgressState)aValue.toInt();
                     // Emit Data Changed Signal

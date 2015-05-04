@@ -18,8 +18,9 @@ class PreferencesDialog : public QDialog
     Q_PROPERTY(bool showFunctionKeys READ getShowFunctionKeys WRITE setShowFunctionKeys NOTIFY showFunctionKeysChanged)
     Q_PROPERTY(bool showDirHotKeys READ getShowDirHotKeys WRITE setShowDirHotKeys NOTIFY showDirHotKeysChanged)
     Q_PROPERTY(bool showDriveButtons READ getShowDriveButtons WRITE setShowDriveButtons NOTIFY showDriveButtonsChanged)
-    Q_PROPERTY(bool selectDirectories READ getSelectDirectories WRITE setSelectDirectories NOTIFY selectDirectoriesChanged)
+    Q_PROPERTY(bool closeWhenFinished READ getCloseWhenFinished WRITE setCloseWhenFinished NOTIFY closeWhenFinishedChanged)
 
+    Q_PROPERTY(bool selectDirectories READ getSelectDirectories WRITE setSelectDirectories NOTIFY selectDirectoriesChanged)
     Q_PROPERTY(bool showHiddenFiles READ getShowHiddenFiles WRITE setShowHiddenFiles NOTIFY showHiddenFilesChanged)
     Q_PROPERTY(bool showDirsFirst READ getShowDirsFirst WRITE setShowDirsFirst NOTIFY showDirsFirstChanged)
     Q_PROPERTY(bool caseSensitiveSort READ getCaseSensitiveSort WRITE setCaseSensitiveSort NOTIFY caseSensitiveSortChanged)
@@ -161,6 +162,11 @@ public:
     // Set Show Drive Buttons
     void setShowDriveButtons(const bool& aShow);
 
+    // Get Close When Finished
+    bool getCloseWhenFinished();
+    // Set Close When Finished
+    void setCloseWhenFinished(const bool& aClose);
+
     // Get Select Directories
     bool getSelectDirectories();
     // Set Select Directories
@@ -239,6 +245,8 @@ signals:
     void showDirHotKeysChanged(const bool& aShow);
     // Show Drive Buttons changed Signal
     void showDriveButtonsChanged(const bool& aShow);
+    // Close When Finished Signal
+    void closeWhenFinishedChanged(const bool& aClose);
 
     // Select Directries Changed Signal
     void selectDirectoriesChanged(const bool& aSelect);
@@ -288,6 +296,8 @@ protected slots:
     void on_driveButtonsCheckBox_clicked();
     // On Show Directory Hot Keys Check Box Clicked Slot
     void on_dirHotKeysCheckBox_clicked();
+    // On Close When Finished Check Box Clicked Slot
+    void on_closeWhenFinishedCheckBox_clicked();
     // On Show Hidden Files Check Box Clicked Slot
     void on_showHiddenFilesCheckBox_clicked();
     // On Select Dirs Check Box Clicked Slot
@@ -343,6 +353,7 @@ protected slots:
     // Button Box Button Clicked
     void buttonBoxButtonPressed(QAbstractButton* aButton);
 
+
 private:
     // UI
     Ui::PreferencesDialog*  ui;
@@ -357,7 +368,8 @@ private:
     bool                    showDirHotKeys;
     // Show Drive Buttons
     bool                    showDriveButtons;
-
+    // Close When Finished
+    bool                    closeWhenFinished;
     // Select Directories
     bool                    selectDirectories;
     // Show Hidden Files

@@ -333,8 +333,6 @@ void DeleteProgressDialog::launch(const QString& aDirPath, const QStringList& aS
     // Restore UI
     restoreUI();
 
-    // ...
-
     // Show
     show();
 
@@ -854,6 +852,19 @@ void DeleteProgressDialog::resizeEvent(QResizeEvent* aEvent)
 }
 
 //==============================================================================
+// On Close When Finished Check Box Clicked
+//==============================================================================
+void DeleteProgressDialog::on_closeWhenFinishedCheckBox_clicked()
+{
+    // Init Settings
+    QSettings settings;
+    // Get Close When Finished
+    closeWhenFinished = ui->closeWhenFinishedCheckBox->isChecked();
+    // Set Settings Value
+    settings.setValue(SETTINGS_KEY_CLOSE_WHEN_FINISHED, closeWhenFinished);
+}
+
+//==============================================================================
 // Destructor
 //==============================================================================
 DeleteProgressDialog::~DeleteProgressDialog()
@@ -889,3 +900,4 @@ DeleteProgressDialog::~DeleteProgressDialog()
 
     qDebug() << "DeleteProgressDialog::~DeleteProgressDialog";
 }
+

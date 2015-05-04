@@ -201,7 +201,14 @@ protected: // From QDialog
     // Resize Event
     virtual void resizeEvent(QResizeEvent* aEvent);
 
+private slots:
+
+    // On Close When Finished Check Box Clicked
+    void on_closeWhenFinishedCheckBox_clicked();
+
 private:
+    friend class MainWindow;
+
     // UI
     Ui::DeleteProgressDialog*   ui;
     // Queue Model

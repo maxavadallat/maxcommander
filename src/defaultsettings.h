@@ -9,6 +9,8 @@
 #define DEFAULT_SETTINGS_SHOW_DIRECTORIY_HOT_KEYS           true            // showDirHotKeys
 // Show Drive Buttons
 #define DEFAULT_SETTINGS_SHOW_DRIVE_BUTTONS                 true            // showDriveButtons
+// Close When Finished
+#define DEFAULT_SETTINGS_CLOSE_WHEN_FINISHED                false           // closeWhenFinished
 
 
 // Show Hidden Files

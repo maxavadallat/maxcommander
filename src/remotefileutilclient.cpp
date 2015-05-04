@@ -877,7 +877,7 @@ void RemoteFileUtilClient::sendAcknowledge()
 void RemoteFileUtilClient::parseLastBuffer()
 {
     // Mutex Locker
-    QMutexLocker locker(&mutex);
+    //QMutexLocker locker(&mutex);
 
     // Check ID
     if (cID == 0) {
@@ -1110,7 +1110,7 @@ void RemoteFileUtilClient::handleProgress()
                         lastDataMap[DEFAULT_KEY_CURRTOTAL].toULongLong());
 
     // Send Acknowledge
-    //sendAcknowledge();
+    sendAcknowledge();
 }
 
 //==============================================================================

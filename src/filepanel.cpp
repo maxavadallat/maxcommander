@@ -1390,6 +1390,11 @@ void FilePanel::reload(const int& aIndex)
     // Reset Current Index
     currentIndex = -1;
 
+    // Reset DW Dir Changed
+    dwDirChanged = false;
+    // Reset DW File Changed
+    dwFileChanged = false;
+
     // Check File List Model
     if (fileListModel) {
         // Set Loading
@@ -1958,7 +1963,7 @@ void FilePanel::fileModelDirFetchFinished()
         qDebug() << "FilePanel::fileModelDirFetchFinished - panelName: " << panelName << " - CHANGED!!";
 
         // Reload
-
+        //reload();
     }
 }
 

@@ -77,6 +77,11 @@ public:
     // Get Progress State
     TransferProgressState getProgressState(const int& aIndex);
 
+    // Get Source
+    QString getSource(const int& aIndex);
+    // Get Target
+    QString getTarget(const int& aIndex);
+
     // Find Index
     int findIndex(const QString& aSourceFileName);
 

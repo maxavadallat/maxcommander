@@ -962,6 +962,25 @@ void MainWindow::deleteProgressClosed(DeleteProgressDialog* aDeleteProgressDialo
             DeleteProgressDialog* dialog = deleteProgressDialogs[i];
             // Check Dialog
             if (dialog == aDeleteProgressDialog) {
+
+                // Check Left Panel
+                if (leftPanel) {
+                    // Check Current Dir
+                    if (dialog->dirPath == leftPanel->currentDir) {
+                        // Reload
+                        leftPanel->reload(leftPanel->currentIndex);
+                    }
+                }
+
+                // Check Right Panel
+                if (rightPanel) {
+                    // Check Current Dir
+                    if (dialog->dirPath == rightPanel->currentDir) {
+                        // Reload
+                        rightPanel->reload(rightPanel->currentIndex);
+                    }
+                }
+
                 // Remove Dialog From Delete Progress Dialogs
                 deleteProgressDialogs.removeAt(i);
                 // Delete Dialog
@@ -988,12 +1007,38 @@ void MainWindow::transferProgressClosed(TransferProgressDialog* aTransferProgres
         for (int i=0; i<tpdCount; ++i) {
             // Get Dialog
             TransferProgressDialog* dialog = transferProgressDialogs[i];
+
             // Check Dialog
             if (dialog == aTransferProgressDialog) {
+                // Check Left Panel
+                if (leftPanel) {
+                    // Check Source Path
+                    if (dialog->targetPath == leftPanel->currentDir) {
+                        // Set Last File Name
+                        leftPanel->lastFileName = QFileInfo(dialog->getLastTarget()).fileName();
+                        // Try To Find Lat Item File Name & Reload
+                        leftPanel->reload();
 
+                    } else if (dialog->operation == DEFAULT_OPERATION_MOVE_FILE && dialog->sourcePath == leftPanel->currentDir) {
+                        // Reload
+                        leftPanel->reload(leftPanel->currentIndex);
+                    }
+                }
 
-                // Reload Panels
+                // Check Right Panel
+                if (rightPanel) {
+                    // Check Dialog Target Path
+                    if (dialog->targetPath == rightPanel->currentDir) {
+                        // Set Last Target File Name
+                        rightPanel->lastFileName = QFileInfo(dialog->getLastTarget()).fileName();
+                        // Reload
+                        rightPanel->reload();
 
+                    } else if (dialog->operation == DEFAULT_OPERATION_MOVE_FILE && dialog->sourcePath == rightPanel->currentDir) {
+                        // Reload
+                        rightPanel->reload(rightPanel->currentIndex);
+                    }
+                }
 
                 // Remove Dialog From Transfer Progress Dialogs
                 transferProgressDialogs.removeAt(i);

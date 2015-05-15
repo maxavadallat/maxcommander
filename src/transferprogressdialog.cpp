@@ -15,7 +15,6 @@
 
 
 
-
 //==============================================================================
 // Constructor
 //==============================================================================
@@ -169,6 +168,7 @@ TransferProgressDialog::TransferProgressDialog(const QString& aOperation, QWidge
     , overallProgress(0)
     , overallSize(0)
     , overallProgressScale(0)
+    , progressRefreshTimerID(-1)
 {
     qDebug() << "TransferProgressDialog::TransferProgressDialog";
 
@@ -618,6 +618,32 @@ void TransferProgressDialog::updateQueueColumnSizes()
 }
 
 //==============================================================================
+// Start Progress Refresh Timer
+//==============================================================================
+void TransferProgressDialog::startProgressRefreshTimer()
+{
+    // Check Timer ID
+    if (progressRefreshTimerID == -1) {
+        // Start Timer
+        progressRefreshTimerID = startTimer(DEFAULT_ONE_SEC / 10);
+    }
+}
+
+//==============================================================================
+// Stop Progress Refresh Timer
+//==============================================================================
+void TransferProgressDialog::stopProgressRefreshTimer()
+{
+    // Chekc Timer ID
+    if (progressRefreshTimerID != -1) {
+        // Kill Timer
+        killTimer(progressRefreshTimerID);
+        // Reset Timer ID
+        progressRefreshTimerID = -1;
+    }
+}
+
+//==============================================================================
 // Suspend
 //==============================================================================
 void TransferProgressDialog::suspend()
@@ -631,6 +657,8 @@ void TransferProgressDialog::suspend()
 
         // Stop Transfer Speed Timer
         stopTransferSpeedTimer();
+        // Stop Refresh Progress Timer
+        stopProgressRefreshTimer();
     }
 }
 
@@ -648,6 +676,8 @@ void TransferProgressDialog::resume()
 
         // Start Transfer Speed Timer
         startTransferSpeedTimer();
+        // Start Progress Refresh Timer
+        startProgressRefreshTimer();
     }
 }
 
@@ -666,6 +696,8 @@ void TransferProgressDialog::abort()
 
     // Stop Transfer Speed Timer
     stopTransferSpeedTimer();
+    // Stop Refresh Progress Timer
+    stopProgressRefreshTimer();
 }
 
 //==============================================================================
@@ -732,31 +764,19 @@ void TransferProgressDialog::setCurrentFileName(const QString& aCurrentFileName,
 //==============================================================================
 // Set Current File Progress
 //==============================================================================
-void TransferProgressDialog::setCurrentProgress(const quint64& aProgress, const quint64& aTotal)
+void TransferProgressDialog::setCurrentProgress(const quint64& aProgress)
 {
-    Q_UNUSED(aTotal);
-
-    //qDebug() << "TransferProgressDialog::setCurrentProgress - aProgress: " << aProgress << " - aTotal: " << aTotal;
-
     // Set Current Progress
     ui->currentProgress->setValue(aProgress >> currentProgressScale);
-
-    //qDebug() << "TransferProgressDialog::setCurrentProgress - value: " << ui->currentProgress->value();
 }
 
 //==============================================================================
 // Set Overall Progress
 //==============================================================================
-void TransferProgressDialog::setOverallProgress(const quint64& aProgress, const quint64& aTotal)
+void TransferProgressDialog::setOverallProgress(const quint64& aProgress)
 {
-    Q_UNUSED(aTotal);
-
-    //qDebug() << "TransferProgressDialog::setOverallProgress - aProgress: " << aProgress << " - aTotal: " << aTotal;
-
     // Set Overall Progress
     ui->overallProgress->setValue(aProgress >> overallProgressScale);
-
-    //qDebug() << "TransferProgressDialog::setOverallProgress - value: " << ui->overallProgress->value();
 }
 
 //==============================================================================
@@ -832,6 +852,9 @@ void TransferProgressDialog::fileOpStarted(const unsigned int& aID,
 
     // Start Transfer Speed Timer
     startTransferSpeedTimer();
+
+    // Start Progress Refresh Timer
+    startProgressRefreshTimer();
 }
 
 //==============================================================================
@@ -870,10 +893,9 @@ void TransferProgressDialog::fileOpProgress(const unsigned int& aID,
     lastTransferedSize = currTransferedSize;
 
     // Set Current Progress
-    setCurrentProgress(currentProgress, currentSize);
-
+    //setCurrentProgress(currentProgress, currentSize);
     // Set Overall Progress
-    setOverallProgress(overallProgress, overallSize);
+    //setOverallProgress(overallProgress, overallSize);
 }
 
 //==============================================================================
@@ -903,8 +925,10 @@ void TransferProgressDialog::fileOpSkipped(const unsigned int& aID,
         // Init Source Info
         QFileInfo sourceInfo(aSource);
 
+        // Configure Current Progress
+        configureCurrentProgressBar(1);
         // Set Current Progress
-        setCurrentProgress(sourceInfo.size(), sourceInfo.size());
+        setCurrentProgress(1);
 
         // Calculate Overall Progress
         overallProgress += sourceInfo.size();
@@ -913,7 +937,7 @@ void TransferProgressDialog::fileOpSkipped(const unsigned int& aID,
         lastTransferedSize = 0;
 
         // Set Overall Progress
-        setOverallProgress(overallProgress, overallSize);
+        setOverallProgress(overallProgress);
 
         // Increase Current Queue Index
         queueIndex++;
@@ -958,7 +982,7 @@ void TransferProgressDialog::fileOpFinished(const unsigned int& aID,
             // Configure Current Progress
             configureCurrentProgressBar(1);
             // Set Current Progress
-            setCurrentProgress(1, 1);
+            setCurrentProgress(1);
 
             // Update Label
             ui->currentFileTitleLabel->setText(tr(DEFAULT_LABEL_CURRENT_FILE_TITLE_FINISHED));
@@ -993,7 +1017,7 @@ void TransferProgressDialog::fileOpFinished(const unsigned int& aID,
             // Configure Current Progress
             configureCurrentProgressBar(1);
             // Set Current Progress
-            setCurrentProgress(1, 1);
+            setCurrentProgress(1);
 
             // Update Label
             ui->currentFileTitleLabel->setText(tr(DEFAULT_LABEL_CURRENT_FILE_TITLE_FINISHED));
@@ -1250,7 +1274,7 @@ void TransferProgressDialog::buttonBoxAccepted()
     // ...
 
     // Emit Dialog Closed Signal
-    emit dialogClosed(this);
+    //emit dialogClosed(this);
 }
 
 //==============================================================================
@@ -1263,7 +1287,7 @@ void TransferProgressDialog::buttonBoxRejected()
     // ...
 
     // Emit Dialog Closed Signal
-    emit dialogClosed(this);
+    //emit dialogClosed(this);
 }
 
 //==============================================================================
@@ -1324,16 +1348,30 @@ void TransferProgressDialog::timerEvent(QTimerEvent* aEvent)
             }
 
             // ...
+
+        } else if (aEvent->timerId() == progressRefreshTimerID) {
+            // Check File Util Client
+            if (fileUtil && (fileUtil->getStatus() == ECSTBusy || fileUtil->getStatus() == ECSTWaiting)) {
+                // Set Current Progress
+                setCurrentProgress(currentProgress);
+                // Set Overall Progress
+                setOverallProgress(overallProgress);
+            } else {
+                // Stop Progress Refresh Timer
+                stopProgressRefreshTimer();
+            }
         }
     }
 }
 
 //==============================================================================
-// Close Event
+// Hide Event
 //==============================================================================
-void TransferProgressDialog::closeEvent(QCloseEvent* aEvent)
+void TransferProgressDialog::hideEvent(QHideEvent* aEvent)
 {
-    QDialog::closeEvent(aEvent);
+    //qDebug() << "TransferProgressDialog::hideEvent";
+
+    QDialog::hideEvent(aEvent);
 
     // Emit Dialog Closed Signal
     emit dialogClosed(this);
@@ -1366,6 +1404,7 @@ TransferProgressDialog::~TransferProgressDialog()
     // Clear Queue
     clearQueue();
 
+    // Delete UI
     delete ui;
 
     // Check Qeuue Model
@@ -1379,12 +1418,13 @@ TransferProgressDialog::~TransferProgressDialog()
     if (fileUtil) {
         // Close
         fileUtil->close();
+
         // Delete File Util
         delete fileUtil;
         fileUtil = NULL;
     }
 
-    qDebug() << "TransferProgressDialog::~TransferProgressDialog";
+    //qDebug() << "TransferProgressDialog::~TransferProgressDialog";
 }
 
 

@@ -493,7 +493,7 @@ void MainWindow::launchTransfer(const QString& aOperation)
         TransferProgressDialog* newTransferProgressDialog = new TransferProgressDialog(aOperation);
 
         // Connect Closed Signal
-        connect(newTransferProgressDialog, SIGNAL(dialogClosed(TransferProgressDialog*)), this, SLOT(transferProgressClosed(TransferProgressDialog*)));
+        connect(newTransferProgressDialog, SIGNAL(dialogClosed(TransferProgressDialog*)), this, SLOT(transferProgressClosed(TransferProgressDialog*)), Qt::QueuedConnection);
 
         // Add To Transfer Progress Dialog List
         transferProgressDialogs << newTransferProgressDialog;
@@ -670,7 +670,7 @@ void MainWindow::launchDelete()
         DeleteProgressDialog* newDialog = new DeleteProgressDialog();
 
         // Connect Signal
-        connect(newDialog, SIGNAL(dialogClosed(DeleteProgressDialog*)), this, SLOT(deleteProgressClosed(DeleteProgressDialog*)));
+        connect(newDialog, SIGNAL(dialogClosed(DeleteProgressDialog*)), this, SLOT(deleteProgressClosed(DeleteProgressDialog*)), Qt::QueuedConnection);
 
         // Add To Delete Progress Dialog List
         deleteProgressDialogs << newDialog;
@@ -1010,9 +1010,9 @@ void MainWindow::deleteProgressClosed(DeleteProgressDialog* aDeleteProgressDialo
 
                 // Remove Dialog From Delete Progress Dialogs
                 deleteProgressDialogs.removeAt(i);
-                // Delete Dialog
-                delete dialog;
-                dialog = NULL;
+
+                // Delete Later
+                dialog->deleteLater();
             }
         }
     }
@@ -1069,9 +1069,9 @@ void MainWindow::transferProgressClosed(TransferProgressDialog* aTransferProgres
 
                 // Remove Dialog From Transfer Progress Dialogs
                 transferProgressDialogs.removeAt(i);
-                // Delete Dialog
-                delete dialog;
-                dialog = NULL;
+
+                // Delete Later
+                dialog->deleteLater();
             }
         }
     }

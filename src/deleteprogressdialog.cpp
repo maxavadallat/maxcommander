@@ -116,11 +116,15 @@ DeleteProgressDialog::DeleteProgressDialog(QWidget* aParent)
     , closeWhenFinished(false)
     , queueIndex(-1)
     , dirPath("")
+    , progressRefreshTimerID(-1)
 {
     qDebug() << "DeleteProgressDialog::DeleteProgressDialog";
 
     // Setup UI
     ui->setupUi(this);
+
+    // Set Minimum
+    ui->currentProgress->setMinimum(0);
 
     // Init
     init();
@@ -239,6 +243,10 @@ void DeleteProgressDialog::processQueue()
                 configureButtons(QDialogButtonBox::Close);
                 // Set Current File
                 setCurrentFileName("");
+                // Set Maximum
+                ui->currentProgress->setMaximum(1);
+                // Set Current Value
+                ui->currentProgress->setValue(1);
             }
         }
     }
@@ -318,6 +326,32 @@ void DeleteProgressDialog::updateQueueColumnSizes()
     ui->deleteQueue->setColumnWidth(0, ui->deleteQueue->width() - DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_DONE - DEFAULT_PROGRESS_DIALOG_SCROLLBAR_WIDTH);
     // Set Column Width
     ui->deleteQueue->setColumnWidth(1, DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_DONE);
+}
+
+//==============================================================================
+// Start Progress Refresh Timer
+//==============================================================================
+void DeleteProgressDialog::startProgressRefreshTimer()
+{
+    // Check Timer ID
+    if (progressRefreshTimerID == -1) {
+        // Start Timer
+        progressRefreshTimerID = startTimer(DEFAULT_ONE_SEC / 10);
+    }
+}
+
+//==============================================================================
+// Stop Progress Refresh Timer
+//==============================================================================
+void DeleteProgressDialog::stopProgressRefreshTimer()
+{
+    // Chekc Timer ID
+    if (progressRefreshTimerID != -1) {
+        // Kill Timer
+        killTimer(progressRefreshTimerID);
+        // Reset Timer ID
+        progressRefreshTimerID = -1;
+    }
 }
 
 //==============================================================================
@@ -416,28 +450,24 @@ void DeleteProgressDialog::setCurrentFileName(const QString& aCurrentFileName)
 {
     // Set Text
     ui->currentFileNameLabel->setText(aCurrentFileName);
+
+    // Check Current File Name
+    if (aCurrentFileName.isEmpty()) {
+        // Set Title Label
+        ui->currentFileTitleLabel->setText("");
+    } else {
+        // Set Title Label
+        ui->currentFileTitleLabel->setText(tr(DEFAULT_LABEL_CURRENT_FILE_TITLE));
+    }
 }
 
 //==============================================================================
 // Set Current File Progress
 //==============================================================================
-void DeleteProgressDialog::setCurrentProgress(const quint64& aProgress, const quint64& aTotal)
+void DeleteProgressDialog::setCurrentProgress(const int& aProgress)
 {
-    // Set Minimum
-    ui->currentProgress->setMinimum(0);
-
-    // Check Total
-    if (aTotal > INT_MAX) {
-        // Set Maximum
-        ui->currentProgress->setMaximum(aTotal >> 32);
-        // Set Value
-        ui->currentProgress->setValue(aProgress >> 32);
-    } else {
-        // Set Maximum
-        ui->currentProgress->setMaximum(aTotal);
-        // Set Value
-        ui->currentProgress->setValue(aProgress);
-    }
+    // Set Value
+    ui->currentProgress->setValue(aProgress);
 }
 
 //==============================================================================
@@ -485,8 +515,15 @@ void DeleteProgressDialog::fileOpStarted(const unsigned int& aID,
 
     // Set Current File Name
     setCurrentFileName(aPath);
+
+    // Set Maximum
+    ui->currentProgress->setMaximum(queueModel->rowCount());
+
     // Set Current Progress
-    setCurrentProgress(queueIndex, queueModel->rowCount());
+    setCurrentProgress(queueIndex);
+
+    // Start Progress Refresh Timer
+    startProgressRefreshTimer();
 
     // Configure Buttons
     //configureButtons(QDialogButtonBox::Abort);
@@ -538,7 +575,7 @@ void DeleteProgressDialog::fileOpSkipped(const unsigned int& aID,
         queueIndex++;
 
         // Set Current Progress
-        setCurrentProgress(queueIndex, queueModel->rowCount());
+        //setCurrentProgress(queueIndex);
     }
 
     // ...
@@ -575,7 +612,7 @@ void DeleteProgressDialog::fileOpFinished(const unsigned int& aID,
         queueIndex++;
 
         // Set Current Progress
-        setCurrentProgress(queueIndex, queueModel->rowCount());
+        //setCurrentProgress(queueIndex);
 
     // Check Operation - Queue
     } else if (aOp == DEFAULT_OPERATION_QUEUE) {
@@ -779,8 +816,8 @@ void DeleteProgressDialog::fileOpQueueItemFound(const unsigned int& aID,
         // Insert Item To Queue
         queueModel->insertItem(queueIndex, aPath);
 
-        // Set Current Progress
-        setCurrentProgress(queueIndex, queueModel->rowCount());
+        // Set Maximum
+        ui->currentProgress->setMaximum(queueModel->rowCount());
     }
 }
 
@@ -789,12 +826,12 @@ void DeleteProgressDialog::fileOpQueueItemFound(const unsigned int& aID,
 //==============================================================================
 void DeleteProgressDialog::buttonBoxAccepted()
 {
-    qDebug() << "DeleteProgressDialog::buttonBoxAccepted";
+    //qDebug() << "DeleteProgressDialog::buttonBoxAccepted";
 
     // ...
 
     // Emit Dialog Closed Signal
-    emit dialogClosed(this);
+    //emit dialogClosed(this);
 }
 
 //==============================================================================
@@ -802,12 +839,12 @@ void DeleteProgressDialog::buttonBoxAccepted()
 //==============================================================================
 void DeleteProgressDialog::buttonBoxRejected()
 {
-    qDebug() << "DeleteProgressDialog::buttonBoxRejected";
+    //qDebug() << "DeleteProgressDialog::buttonBoxRejected";
 
     // ...
 
     // Emit Dialog Closed Signal
-    emit dialogClosed(this);
+    //emit dialogClosed(this);
 }
 
 //==============================================================================
@@ -825,19 +862,6 @@ void DeleteProgressDialog::tabChanged(const int& aIndex)
 }
 
 //==============================================================================
-// Close Event
-//==============================================================================
-void DeleteProgressDialog::closeEvent(QCloseEvent* aEvent)
-{
-    //qDebug() << "DeleteProgressDialog::closeEvent";
-
-    QDialog::closeEvent(aEvent);
-
-    // Emit Dialog Closed Signal
-    emit dialogClosed(this);
-}
-
-//==============================================================================
 // Resize Event
 //==============================================================================
 void DeleteProgressDialog::resizeEvent(QResizeEvent* aEvent)
@@ -849,6 +873,40 @@ void DeleteProgressDialog::resizeEvent(QResizeEvent* aEvent)
         // Update Queue Column Sizes
         updateQueueColumnSizes();
     }
+}
+
+//==============================================================================
+// Timer Event
+//==============================================================================
+void DeleteProgressDialog::timerEvent(QTimerEvent* aEvent)
+{
+    // Check Event
+    if (aEvent) {
+        // Check Timer ID
+        if (aEvent->timerId() == progressRefreshTimerID) {
+            // Check File Util Client
+            if (fileUtil && (fileUtil->getStatus() == ECSTBusy || fileUtil->getStatus() == ECSTWaiting)) {
+                // Set Current Progress
+                setCurrentProgress(queueIndex);
+            } else {
+                // Stop Progress Refresh Timer
+                stopProgressRefreshTimer();
+            }
+        }
+    }
+}
+
+//==============================================================================
+// Hide Event
+//==============================================================================
+void DeleteProgressDialog::hideEvent(QHideEvent* aEvent)
+{
+    //qDebug() << "DeleteProgressDialog::hideEvent";
+
+    QDialog::hideEvent(aEvent);
+
+    // Emit Dialog Closed Signal
+    emit dialogClosed(this);
 }
 
 //==============================================================================
@@ -898,6 +956,6 @@ DeleteProgressDialog::~DeleteProgressDialog()
         fileUtil = NULL;
     }
 
-    qDebug() << "DeleteProgressDialog::~DeleteProgressDialog";
+    //qDebug() << "DeleteProgressDialog::~DeleteProgressDialog";
 }
 

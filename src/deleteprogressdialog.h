@@ -70,7 +70,7 @@ public:
     // Set Current File Name
     void setCurrentFileName(const QString& aCurrentFileName);
     // Set Current File Progress
-    void setCurrentProgress(const quint64& aProgress, const quint64& aTotal);
+    void setCurrentProgress(const int& aProgress);
 
     // Launch Progress Dialog
     void launch(const QString& aDirPath, const QStringList& aSelectedFiles);
@@ -115,6 +115,10 @@ protected slots:
     // Update Queue Column Sizes
     void updateQueueColumnSizes();
 
+    // Start Progress Refresh Timer
+    void startProgressRefreshTimer();
+    // Stop Progress Refresh Timer
+    void stopProgressRefreshTimer();
 
 protected slots: // for RemoteFileUtilClient
 
@@ -196,10 +200,12 @@ protected slots: // For QTabWidget
 
 protected: // From QDialog
 
-    // Close Event
-    virtual void closeEvent(QCloseEvent* aEvent);
+    // Timer Event
+    virtual void timerEvent(QTimerEvent* aEvent);
     // Resize Event
     virtual void resizeEvent(QResizeEvent* aEvent);
+    // Hide Event
+    virtual void hideEvent(QHideEvent* aEvent);
 
 private slots:
 
@@ -221,6 +227,9 @@ private:
     int                         queueIndex;
     // Dir Path
     QString                     dirPath;
+
+    // Progress Refresh Timer ID
+    int                         progressRefreshTimerID;
 };
 
 #endif // DELETEPROGRESSDIALOG_H

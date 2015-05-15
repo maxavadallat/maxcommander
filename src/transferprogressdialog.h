@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QStyledItemDelegate>
 #include <QCloseEvent>
+#include <QHideEvent>
 #include <QResizeEvent>
 #include <QTimerEvent>
 #include <QDialogButtonBox>
@@ -74,9 +75,9 @@ public:
     // Set Current File Name
     void setCurrentFileName(const QString& aCurrentFileName, const int& aSpeed = 0);
     // Set Current File Progress
-    void setCurrentProgress(const quint64& aProgress, const quint64& aTotal);
+    void setCurrentProgress(const quint64& aProgress);
     // Set Overall Progress
-    void setOverallProgress(const quint64& aProgress, const quint64& aTotal);
+    void setOverallProgress(const quint64& aProgress);
 
     // Launch Progress Dialog
     void launch(const QString& aSourcePath, const QString& aTargetPath, const QStringList& aSelectedFiles);
@@ -133,6 +134,11 @@ protected slots:
 
     // Update Queue Column Sizes
     void updateQueueColumnSizes();
+
+    // Start Progress Refresh Timer
+    void startProgressRefreshTimer();
+    // Stop Progress Refresh Timer
+    void stopProgressRefreshTimer();
 
 protected slots: // For RemoteFileUtilClient
 
@@ -218,8 +224,8 @@ protected: // From QDialog
     virtual void resizeEvent(QResizeEvent* aEvent);
     // Timer Event
     virtual void timerEvent(QTimerEvent* aEvent);
-    // Close Event
-    virtual void closeEvent(QCloseEvent* aEvent);
+    // Hide Event
+    virtual void hideEvent(QHideEvent* aEvent);
 
 protected slots:
 
@@ -278,6 +284,8 @@ private:
     // Overall Progress Scale
     int                             overallProgressScale;
 
+    // Progress Refresh Timer ID
+    int                             progressRefreshTimerID;
 };
 
 #endif // TRANSFERPROGRESSDIALOG_H

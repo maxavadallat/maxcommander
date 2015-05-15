@@ -936,7 +936,7 @@ void TransferProgressDialog::fileOpFinished(const unsigned int& aID,
 {
     Q_UNUSED(aPath);
 
-    qDebug() << "TransferProgressDialog::fileOpFinished - aID: " << aID << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget;
+    qDebug() << "TransferProgressDialog::fileOpFinished - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath << " - aSource: " << aSource << " - aTarget: " << aTarget;
     //qDebug() << " ";
     //qDebug() << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<";
     //qDebug() << " ";
@@ -948,6 +948,7 @@ void TransferProgressDialog::fileOpFinished(const unsigned int& aID,
 
         // Check Finished Operation
         if (aOp == DEFAULT_OPERATION_QUEUE || aOp == DEFAULT_OPERATION_COPY_FILE) {
+
             // Check Queue Model
             if (queueModel) {
                 // Set Done
@@ -972,6 +973,8 @@ void TransferProgressDialog::fileOpFinished(const unsigned int& aID,
 
             // Unhandled
 
+            qDebug() << "TransferProgressDialog::fileOpFinished - aID: " << aID << " - aOp: " << aOp << " - WTF?!?";
+
             // ...
         }
 
@@ -987,8 +990,13 @@ void TransferProgressDialog::fileOpFinished(const unsigned int& aID,
                 queueModel->setProgressState(queueIndex, ETPFinished);
             }
 
+            // Configure Current Progress
+            configureCurrentProgressBar(1);
             // Set Current Progress
             setCurrentProgress(1, 1);
+
+            // Update Label
+            ui->currentFileTitleLabel->setText(tr(DEFAULT_LABEL_CURRENT_FILE_TITLE_FINISHED));
 
             // Increase Current Queue Index
             queueIndex++;
@@ -1001,20 +1009,15 @@ void TransferProgressDialog::fileOpFinished(const unsigned int& aID,
         // Check Finished Operation - Copy
         } else if (aOp == DEFAULT_OPERATION_COPY_FILE) {
 
-            // Return, Delete Suppose to Follow
+            // Return, Delete Ready Suppose to Follow
 
             return;
 
         } else if (aOp == DEFAULT_OPERATION_DELETE_FILE) {
 
-            // Check Queue Model
-            if (queueModel) {
-                // Set Done
-                queueModel->setProgressState(queueIndex, ETPFinished);
-            }
+            // Return, Move Ready Suppose to Follow
 
-            // Increase Current Queue Index
-            queueIndex++;
+            return;
 
         } else {
 
@@ -1024,6 +1027,7 @@ void TransferProgressDialog::fileOpFinished(const unsigned int& aID,
 
             // ...
 
+            return;
         }
 
         // Process Queue

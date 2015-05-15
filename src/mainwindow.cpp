@@ -408,6 +408,15 @@ void MainWindow::launchTransfer(const QString& aOperation)
         transferFileDialog = new TransferFileDialog();
     }
 
+    // Check Operation
+    if (aOperation == DEFAULT_OPERATION_COPY_FILE) {
+        // Set Title
+        transferFileDialog->setWindowTitle(tr(DEFAULT_TITLE_COPY_FILES));
+    } else if (aOperation == DEFAULT_OPERATION_MOVE_FILE) {
+        // Set Title
+        transferFileDialog->setWindowTitle(tr(DEFAULT_TITLE_MOVE_FILES));
+    }
+
     // Init Selected Files
     QStringList selectedFiles = focusedPanel->getSelectedFiles();
 

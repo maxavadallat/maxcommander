@@ -19,6 +19,7 @@
         <file>qml/FileListItemRenamer.qml</file>
         <file>qml/testMain.qml</file>
         <file>qml/previewMain.qml</file>
+        <file>qml/SearchResults.qml</file>
     </qresource>
 </RCC>
 

@@ -46,13 +46,10 @@ Rectangle {
         anchors.bottomMargin: 1 // I don't no why the fuck fileListRoot is not properly sized.... X (
         spacing: 1
         clip: true
-
         focus: true
-
         highlightFollowsCurrentItem: true
         highlightMoveDuration: 0
         highlightResizeDuration: 0
-
         snapMode: ListView.SnapToItem
 
         property int delegateHeight: mainController.thumbHeight
@@ -71,7 +68,7 @@ Rectangle {
 
             fileIconSource: {
                 // Check File Name
-                if (Utility.isImage(fileFullName)) {
+                if (Utility.isImage(fileFullName, mainController)) {
                     Const.DEFAULT_FILE_PREFIX + mainController.currentDir + "/" + fileFullName
                 } else {
                     // Image Provider

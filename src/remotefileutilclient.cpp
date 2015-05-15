@@ -1054,6 +1054,14 @@ void RemoteFileUtilClient::parseLastDataMap()
         goto finished;
     }
 
+    // Check Response
+    if (lastDataMap[DEFAULT_KEY_RESPONSE].toString() == QString(DEFAULT_RESPONSE_SEARCH)) {
+        // Handle Search Item Found
+        handleSearchItemFound();
+
+        goto finished;
+    }
+
     qDebug() << "RemoteFileUtilClient::parseLastDataMap - WTF?!??";
 
 finished:

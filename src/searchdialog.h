@@ -41,6 +41,11 @@ public:
     // Destructor
     virtual ~SearchDialog();
 
+public slots:
+
+    // Get Supported Image Formats
+    QStringList getSupportedImageFormats();
+
 protected slots:
 
     // Init
@@ -172,6 +177,9 @@ private:
 
     // Start Button
     QPushButton*            startButton;
+
+    // Supported Image Formats
+    QStringList             supportedImageFormats;
 };
 
 

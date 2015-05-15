@@ -2,7 +2,7 @@
 //==============================================================================
 // Check If File Is Image
 //==============================================================================
-function isImage(filePath)
+function isImage(filePath, controller)
 {
     // Get Last Index Of "."
     var lastIndexOfDot = filePath.lastIndexOf(".");
@@ -11,7 +11,7 @@ function isImage(filePath)
         // Extract Suffix
         var suffix = filePath.substr(lastIndexOfDot + 1, filePath.length - lastIndexOfDot - 1).toLowerCase();
         // Get Supported Image Formats
-        var supportedFormats = mainController.getSupportedImageFormats();
+        var supportedFormats = controller.getSupportedImageFormats();
         // Check Suffix
         if (supportedFormats.indexOf(suffix) >= 0) {
             return true;

@@ -1,5 +1,7 @@
 #include <QDir>
 #include <QTimer>
+#include <QQmlContext>
+#include <QImageReader>
 #include <QDebug>
 
 #include <mcwinterface.h>
@@ -58,6 +60,44 @@ void SearchDialog::init()
 
     // ...
 
+    // Get Supported Image Formats Bye Array
+    QList<QByteArray> formats = QImageReader::supportedImageFormats();
+    // Get Count
+    int flCount = formats.count();
+    // Go Thru Formats
+    for (int i=0; i<flCount; ++i) {
+        // Add Format String
+        supportedImageFormats << QString(formats[i]);
+    }
+
+    // Set Context Properties
+    QQmlContext* ctx = ui->searchResultView->rootContext();
+    // Set Context Properties - Search Result Controller
+    ctx->setContextProperty(DEFAULT_SEARCH_RESULT_CONTROLLER, this);
+    // Set Context Properties - Search Result Model
+    ctx->setContextProperty(DEFAULT_SEARCH_RESULT_MODEL, resultModel);
+
+    // Get Engine
+    QQmlEngine* engine = ui->searchResultView->engine();
+    // Add Image Provider
+    engine->addImageProvider(QLatin1String(DEFAULT_FILE_ICON_PROVIDER_ID), new FileListImageProvider());
+
+    // Set Resize Mode
+    ui->searchResultView->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    // Set Source
+    ui->searchResultView->setSource(QUrl("qrc:/qml/SearchResults.qml"));
+
+    // ...
+
+    //ui->buttonBox
+}
+
+//==============================================================================
+// Get Supported Image Formats
+//==============================================================================
+QStringList SearchDialog::getSupportedImageFormats()
+{
+    return supportedImageFormats;
 }
 
 //==============================================================================
@@ -101,6 +141,12 @@ void SearchDialog::restoreUI()
     // Set Current Dir Label
     ui->currentDirLabel->setText(currentDir);
 
+    // Reset File Pattern Combo Current Text
+    ui->filePatternComboBox->setCurrentText("");
+
+    // Reset Content Pattern Combo Current Text
+    ui->contentPatternComboBox->setCurrentText("");
+
     // ...
 
 }
@@ -126,6 +172,9 @@ void SearchDialog::showResults()
 
     // Set Results Shown/Visible
     resultsVisible = true;
+
+    // Set Focus
+    ui->searchResultView->setFocus();
 }
 
 //==============================================================================
@@ -262,6 +311,20 @@ void SearchDialog::buttonBoxClicked(QAbstractButton* aButton)
             //dialogShown = false;
             // Close
             close();
+        break;
+
+        case QDialogButtonBox::Reset:
+            // Restore UI
+            restoreUI();
+
+            // ...
+
+            // Check Result Model
+            if (resultModel) {
+                // Clear
+                resultModel->clear();
+            }
+
         break;
 
         default:
@@ -447,7 +510,13 @@ void SearchDialog::fileOpFinished(const unsigned int& aID,
         searchFinished = true;
 
         // Set Button Box
-        ui->buttonBox->setStandardButtons(QDialogButtonBox::Close);
+        ui->buttonBox->setStandardButtons(QDialogButtonBox::Reset | QDialogButtonBox::Close);
+
+        // Check Results
+        if (resultModel && resultModel->rowCount() > 0) {
+            // Show Results
+            showResults();
+        }
     }
 }
 
@@ -668,8 +737,12 @@ QString SearchResultModel::getItem(const int& aIndex)
 //==============================================================================
 void SearchResultModel::clear()
 {
+    // Begin Reset Model
+    beginResetModel();
     // Clear
     resultList.clear();
+    // End Reset Model
+    endResetModel();
 }
 
 //==============================================================================

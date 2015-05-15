@@ -184,6 +184,8 @@
 #define DEFAULT_IMAGE_BROWSER                               "imageBrowser"
 #define DEFAULT_CLIENT_LIST_MODEL_NAME                      "clientListModel"
 #define DEFAULT_PREVIEW_CONTROLLER                          "previewController"
+#define DEFAULT_SEARCH_RESULT_CONTROLLER                    "searchResultController"
+#define DEFAULT_SEARCH_RESULT_MODEL                         "searchResultModel"
 
 #define DEFAULT_FILE_ICON_PROVIDER_ID                       "fileicon"
 #define DEFAULT_AUDIO_TAG_PROVIDER_ID                       "audiotag"

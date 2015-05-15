@@ -76,9 +76,7 @@ Rectangle {
     width: 320
     height: 32
 
-    //color: mouseHovered ? "#07000044" : "transparent"
     color: "transparent"
-    //color: itemIndex % 2 == 0 ? "transparent" : "#0A111111"
 
     // Background Colors
 

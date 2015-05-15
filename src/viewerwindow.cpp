@@ -173,8 +173,8 @@ bool ViewerWindow::loadFile(const QString& aFileName, const QString& aPanelName)
         // Quick Widget Set Visible
         ui->quickWidget->setVisible(true);
 
-            // Set Source
-            ui->quickWidget->setSource(QUrl("qrc:/qml/ImageViewer.qml"));
+        // Set Source
+        ui->quickWidget->setSource(QUrl("qrc:/qml/ImageViewer.qml"));
 
         // Check Image Browser
         if (!imageBrowser) {

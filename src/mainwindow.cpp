@@ -580,6 +580,7 @@ void MainWindow::launchSearch()
     // Check If Dialog Shown
     if (!searchFileDialog->isDialogShown()) {
         qDebug() << "MainWindow::launchSearch";
+
         // Init Dir Path
         QString dirPath = focusedPanel->getCurrentDir();
         // Show Dialog

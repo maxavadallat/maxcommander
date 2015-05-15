@@ -93,8 +93,11 @@ protected:
     // Restore UI
     void restoreUI(const bool& aReload = true, const int& aFocusedPanel = 0);
 
-    // Save Settings
+    // Load Settings
     void loadSettings();
+
+    // Save Settings
+    void saveSettings();
 
     // Destructor
     virtual ~MainWindow();

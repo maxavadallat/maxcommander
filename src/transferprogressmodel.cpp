@@ -324,7 +324,7 @@ bool TransferProgressModel::setData(const QModelIndex& aIndex, const QVariant& a
             case ERIDState:
                 // Check State
                 if (item->state != (TransferProgressState)aValue.toInt()) {
-                    qDebug() << "## TransferProgressModel::setData - aRole: ERIDState";
+                    //qDebug() << "TransferProgressModel::setData - aRole: ERIDState";
                     // Set State
                     item->state = (TransferProgressState)aValue.toInt();
                     // Emit Data Changed Signal

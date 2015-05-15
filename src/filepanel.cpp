@@ -1679,7 +1679,7 @@ void FilePanel::clear()
 //==============================================================================
 void FilePanel::restoreUI(const bool& aReload)
 {
-    qDebug() << "#### FilePanel::restoreUI - panelName: " << panelName << " - aReload: " << aReload;
+    qDebug() << "FilePanel::restoreUI - panelName: " << panelName << " - aReload: " << aReload;
 
     // Init Settings
     QSettings settings;

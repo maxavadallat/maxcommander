@@ -545,7 +545,7 @@ void TransferProgressDialog::configureCurrentProgressBar(const quint64& aMax)
     // Set Maximum
     ui->currentProgress->setMaximum(aMax >> currentProgressScale);
 
-    qDebug() << "#### TransferProgressDialog::configureCurrentProgressBar - maximum: " << ui->currentProgress->maximum();
+    //qDebug() << "TransferProgressDialog::configureCurrentProgressBar - maximum: " << ui->currentProgress->maximum();
 }
 
 //==============================================================================
@@ -565,7 +565,7 @@ void TransferProgressDialog::configureOverallProgressBar(const quint64& aMax)
     // Set Maximum
     ui->overallProgress->setMaximum(aMax >> overallProgressScale);
 
-    qDebug() << "#### TransferProgressDialog::configureOverallProgressBar - maximum: " << ui->overallProgress->maximum();
+    //qDebug() << "TransferProgressDialog::configureOverallProgressBar - maximum: " << ui->overallProgress->maximum();
 }
 
 //==============================================================================
@@ -717,6 +717,15 @@ void TransferProgressDialog::setCurrentFileName(const QString& aCurrentFileName,
 
         // Set Text
         ui->currentFileNameLabel->setText(fontMetrics.elidedText(nameLabelText, Qt::ElideMiddle, ui->currentFileNameLabel->width()));
+
+        // Check Current File Name
+        if (currentFileName.isEmpty()) {
+            // Set Label
+            ui->currentFileTitleLabel->setText("");
+        } else {
+            // Set Label
+            ui->currentFileTitleLabel->setText(tr(DEFAULT_LABEL_CURRENT_FILE_TITLE));
+        }
     }
 }
 
@@ -948,6 +957,14 @@ void TransferProgressDialog::fileOpFinished(const unsigned int& aID,
                 // Set Done
                 queueModel->setProgressState(queueIndex, ETPFinished);
             }
+
+            // Configure Current Progress
+            configureCurrentProgressBar(1);
+            // Set Current Progress
+            setCurrentProgress(1, 1);
+
+            // Update Label
+            ui->currentFileTitleLabel->setText(tr(DEFAULT_LABEL_CURRENT_FILE_TITLE_FINISHED));
 
             // Increase Current Queue Index
             queueIndex++;

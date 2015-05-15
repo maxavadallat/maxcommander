@@ -312,6 +312,9 @@
 
 #define DEFAULT_BUTTON_TEXT_START                           "Start"
 
+#define DEFAULT_LABEL_CURRENT_FILE_TITLE                    "Current File:"
+#define DEFAULT_LABEL_CURRENT_FILE_TITLE_FINISHED           "Finished"
+
 
 #endif // CONSTANTS_H
 

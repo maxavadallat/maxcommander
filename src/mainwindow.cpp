@@ -199,6 +199,16 @@ void MainWindow::loadSettings()
 }
 
 //==============================================================================
+// Save Settings
+//==============================================================================
+void MainWindow::saveSettings()
+{
+    qDebug() << "MainWindow::loadSettings";
+
+    // ...
+}
+
+//==============================================================================
 // Show Window
 //==============================================================================
 void MainWindow::showWindow()
@@ -684,7 +694,7 @@ void MainWindow::showPreferences()
 //==============================================================================
 void MainWindow::settingsHasChanged()
 {
-    qDebug() << "####> MainWindow::settingsHasChanged";
+    qDebug() << "MainWindow::settingsHasChanged";
 
     // Restore UI
     restoreUI(false, (focusedPanel == leftPanel) ? 0 : 1);
@@ -723,6 +733,9 @@ void MainWindow::quitApp()
 void MainWindow::shutDown()
 {
     qDebug() << "MainWindow::shutDown";
+
+    // Save Settings
+    saveSettings();
 
     // Abort & Clear Transfer Progress Dialogs
     while (transferProgressDialogs.count() > 0) {
@@ -964,7 +977,7 @@ void MainWindow::deleteProgressClosed(DeleteProgressDialog* aDeleteProgressDialo
             if (dialog == aDeleteProgressDialog) {
 
                 // Check Left Panel
-                if (leftPanel) {
+                if (leftPanel && (leftPanel->dwDirChanged || leftPanel->dwFileChanged)) {
                     // Check Current Dir
                     if (dialog->dirPath == leftPanel->currentDir) {
                         // Reload
@@ -973,7 +986,7 @@ void MainWindow::deleteProgressClosed(DeleteProgressDialog* aDeleteProgressDialo
                 }
 
                 // Check Right Panel
-                if (rightPanel) {
+                if (rightPanel && (rightPanel->dwDirChanged || rightPanel->dwFileChanged)) {
                     // Check Current Dir
                     if (dialog->dirPath == rightPanel->currentDir) {
                         // Reload
@@ -1011,7 +1024,7 @@ void MainWindow::transferProgressClosed(TransferProgressDialog* aTransferProgres
             // Check Dialog
             if (dialog == aTransferProgressDialog) {
                 // Check Left Panel
-                if (leftPanel) {
+                if (leftPanel && (leftPanel->dwDirChanged || leftPanel->dwFileChanged)) {
                     // Check Source Path
                     if (dialog->targetPath == leftPanel->currentDir) {
                         // Set Last File Name
@@ -1026,7 +1039,7 @@ void MainWindow::transferProgressClosed(TransferProgressDialog* aTransferProgres
                 }
 
                 // Check Right Panel
-                if (rightPanel) {
+                if (rightPanel && (rightPanel->dwDirChanged || rightPanel->dwFileChanged)) {
                     // Check Dialog Target Path
                     if (dialog->targetPath == rightPanel->currentDir) {
                         // Set Last Target File Name

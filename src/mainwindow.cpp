@@ -480,7 +480,6 @@ void MainWindow::launchTransfer(const QString& aOperation)
 
     // Launch Dialog
     if (transferFileDialog->exec()) {
-
         // Create Transfer Progress Dialog
         TransferProgressDialog* newTransferProgressDialog = new TransferProgressDialog(aOperation);
 
@@ -498,6 +497,9 @@ void MainWindow::launchTransfer(const QString& aOperation)
             // Launch Progress Dialog
             newTransferProgressDialog->launch(transferSource, transferTarget, selectedFiles);
         }
+
+        // Clear Selected Files
+        focusedPanel->deselectAllFiles();
     }
 }
 
@@ -666,6 +668,9 @@ void MainWindow::launchDelete()
 
         // Launch
         newDialog->launch(focusedPanel->getCurrentDir(), focusedPanel->getSelectedFiles());
+
+        // Clear Selected Files
+        focusedPanel->deselectAllFiles();
     }
 }
 
@@ -977,7 +982,7 @@ void MainWindow::deleteProgressClosed(DeleteProgressDialog* aDeleteProgressDialo
             if (dialog == aDeleteProgressDialog) {
 
                 // Check Left Panel
-                if (leftPanel && (leftPanel->dwDirChanged || leftPanel->dwFileChanged)) {
+                if (leftPanel /*&& (leftPanel->dwDirChanged || leftPanel->dwFileChanged)*/) {
                     // Check Current Dir
                     if (dialog->dirPath == leftPanel->currentDir) {
                         // Reload
@@ -986,7 +991,7 @@ void MainWindow::deleteProgressClosed(DeleteProgressDialog* aDeleteProgressDialo
                 }
 
                 // Check Right Panel
-                if (rightPanel && (rightPanel->dwDirChanged || rightPanel->dwFileChanged)) {
+                if (rightPanel /*&& (rightPanel->dwDirChanged || rightPanel->dwFileChanged)*/) {
                     // Check Current Dir
                     if (dialog->dirPath == rightPanel->currentDir) {
                         // Reload
@@ -1024,7 +1029,7 @@ void MainWindow::transferProgressClosed(TransferProgressDialog* aTransferProgres
             // Check Dialog
             if (dialog == aTransferProgressDialog) {
                 // Check Left Panel
-                if (leftPanel && (leftPanel->dwDirChanged || leftPanel->dwFileChanged)) {
+                if (leftPanel /*&& (leftPanel->dwDirChanged || leftPanel->dwFileChanged)*/) {
                     // Check Source Path
                     if (dialog->targetPath == leftPanel->currentDir) {
                         // Set Last File Name
@@ -1039,7 +1044,7 @@ void MainWindow::transferProgressClosed(TransferProgressDialog* aTransferProgres
                 }
 
                 // Check Right Panel
-                if (rightPanel && (rightPanel->dwDirChanged || rightPanel->dwFileChanged)) {
+                if (rightPanel /*&& (rightPanel->dwDirChanged || rightPanel->dwFileChanged)*/) {
                     // Check Dialog Target Path
                     if (dialog->targetPath == rightPanel->currentDir) {
                         // Set Last Target File Name

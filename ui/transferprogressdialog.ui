@@ -70,18 +70,24 @@
         <number>8</number>
        </property>
        <item row="3" column="0" colspan="2">
-        <widget class="QProgressBar" name="currentProgress">
+        <widget class="QProgressBar" name="currentProgress" native="true">
          <property name="sizePolicy">
           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
-         <property name="maximum">
-          <number>0</number>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>20</height>
+          </size>
          </property>
-         <property name="value">
-          <number>0</number>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>20</height>
+          </size>
          </property>
         </widget>
        </item>
@@ -112,30 +118,36 @@
         </widget>
        </item>
        <item row="5" column="0" colspan="2">
-        <widget class="QProgressBar" name="overallProgress">
+        <widget class="QProgressBar" name="overallProgress" native="true">
          <property name="sizePolicy">
           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
-         <property name="maximum">
-          <number>0</number>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>20</height>
+          </size>
          </property>
-         <property name="value">
-          <number>0</number>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>20</height>
+          </size>
          </property>
         </widget>
        </item>
        <item row="0" column="0">
-        <spacer name="verticalSpacer">
+        <spacer name="spacerTop">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>21</height>
+           <height>16</height>
           </size>
          </property>
         </spacer>
@@ -154,7 +166,7 @@
         </widget>
        </item>
        <item row="6" column="0">
-        <spacer name="verticalSpacer_2">
+        <spacer name="spacerBottom">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
@@ -243,6 +255,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ProgressBarWidget</class>
+   <extends>QWidget</extends>
+   <header>src/progressbarwidget.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>

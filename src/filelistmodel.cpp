@@ -344,14 +344,13 @@ void FileListModel::setSelected(const int& aIndex, const bool& aSelected)
 
         // Check File Name
         if (itemList[aIndex]->fileInfo.fileName() == "." || itemList[aIndex]->fileInfo.fileName() == ".."  ) {
-
             // Skip
             return;
         }
 
         // Check If Item Selected
         if (itemList[aIndex]->selected != aSelected) {
-            qDebug() << "FileListModel::setSelected - aIndex: " << aIndex << " - aSelected: " << aSelected;
+            //qDebug() << "FileListModel::setSelected - aIndex: " << aIndex << " - aSelected: " << aSelected;
             // Set Item Selected
             itemList[aIndex]->selected = aSelected;
             // Create Model Index

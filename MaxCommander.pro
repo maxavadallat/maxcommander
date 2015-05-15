@@ -51,7 +51,8 @@ SOURCES                 += src/main.cpp \
                         src/infodialog.cpp \
                         src/passworddialog.cpp \
                         src/colorpickerbutton.cpp \
-                        src/searchdialog.cpp
+                        src/searchdialog.cpp \
+                        src/progressbarwidget.cpp
 
 # Heders
 HEADERS                 += src/constants.h \
@@ -81,7 +82,8 @@ HEADERS                 += src/constants.h \
                         src/passworddialog.h \
                         src/colorpickerbutton.h \
                         src/defaultsettings.h \
-                        src/searchdialog.h
+                        src/searchdialog.h \
+                        src/progressbarwidget.h
 
 # Include Path
 INCLUDEPATH             += \

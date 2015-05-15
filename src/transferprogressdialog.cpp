@@ -738,8 +738,6 @@ void TransferProgressDialog::setCurrentProgress(const quint64& aProgress, const 
 
     //qDebug() << "TransferProgressDialog::setCurrentProgress - aProgress: " << aProgress << " - aTotal: " << aTotal;
 
-    // Check Total
-
     // Set Current Progress
     ui->currentProgress->setValue(aProgress >> currentProgressScale);
 
@@ -754,8 +752,6 @@ void TransferProgressDialog::setOverallProgress(const quint64& aProgress, const 
     Q_UNUSED(aTotal);
 
     //qDebug() << "TransferProgressDialog::setOverallProgress - aProgress: " << aProgress << " - aTotal: " << aTotal;
-
-    // Check Total
 
     // Set Overall Progress
     ui->overallProgress->setValue(aProgress >> overallProgressScale);

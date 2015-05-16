@@ -169,7 +169,7 @@ QString FilePanel::getCurrentDir()
 //==============================================================================
 // Set Current Dir
 //==============================================================================
-void FilePanel::setCurrentDir(const QString& aCurrentDir)
+void FilePanel::setCurrentDir(const QString& aCurrentDir, const QString& aLastFileName)
 {
     // Check Current Dir
     if (currentDir != aCurrentDir) {
@@ -202,6 +202,12 @@ void FilePanel::setCurrentDir(const QString& aCurrentDir)
 
         // Set Current Dir
         currentDir = aCurrentDir;
+
+        // Check LAst File Name
+        if (!aLastFileName.isEmpty()) {
+            // Set Last File Name
+            lastFileName = aLastFileName;
+        }
 
         // Check Model
         if (fileListModel) {

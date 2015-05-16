@@ -8,6 +8,7 @@
 #include <QList>
 #include <QStringList>
 #include <QCloseEvent>
+#include <QHideEvent>
 #include <QAbstractButton>
 #include <QPushButton>
 
@@ -19,6 +20,7 @@ class SearchDialog;
 class RemoteFileUtilClient;
 class SearchResultModel;
 class FileListImageProvider;
+class FilePanel;
 
 
 //==============================================================================
@@ -28,23 +30,55 @@ class SearchDialog : public QDialog
 {
     Q_OBJECT
 
+    Q_PROPERTY(int currentIndex READ getCurrentIndex WRITE setCurrentIndex NOTIFY currentIndexChanged)
+    Q_PROPERTY(int visualItemCount READ getVisualItemCount WRITE setVisualItemCount NOTIFY visualItemCountChanged)
+
 public:
     // Constructor
     explicit SearchDialog(QWidget* aParent = NULL);
 
     // Show Dialog
-    void showDialog(const QString& aDirPath);
+    void showDialog(const QString& aDirPath, FilePanel* aFocusedPanel);
+    // Hide Dialog
+    void hideDialog();
 
     // Is Dialog Shown
     bool isDialogShown();
 
+    // Get Current Index
+    int getCurrentIndex();
+    // Set Current index
+    void setCurrentIndex(const int& aIndex);
+
+    // Get Visual Item Count
+    int getVisualItemCount();
+    // Set Visual item Count
+    void setVisualItemCount(const int& aVisualCount);
+
     // Destructor
     virtual ~SearchDialog();
+
+signals:
+
+    // Current Index Changed Signal
+    void currentIndexChanged(const int& aIndex);
+    // Visual Item Count Changed Signal
+    void visualItemCountChanged(const int& aVisualCount);
+
+    // Search Result Selected
+    void searchResultSelected(const QString& aFilePath);
+
+    void searchResultView(const QString& aFilePath, const bool& aEdit);
 
 public slots:
 
     // Get Supported Image Formats
     QStringList getSupportedImageFormats();
+
+    // Item Selected
+    void itemSelected();
+    // Item View
+    void itemView(const bool& aEdit);
 
 protected slots:
 
@@ -139,8 +173,14 @@ protected slots: // For RemoteFileUtilClient
 
 protected: // From QDialog
 
+    // Key Press Event
+    virtual void keyPressEvent(QKeyEvent* aEvent);
+    // Key Release Event
+    virtual void keyReleaseEvent(QKeyEvent* aEvent);
     // Close Event
     virtual void closeEvent(QCloseEvent* aEvent);
+    // Hide Event
+    virtual void hideEvent(QHideEvent* aEvent);
 
 private:
 
@@ -150,6 +190,9 @@ private:
     RemoteFileUtilClient*   fileUtil;
     // Search Result Model
     SearchResultModel*      resultModel;
+
+    // Focused Panel
+    FilePanel*              focusedPanel;
 
     // Current Dir
     QString                 currentDir;
@@ -180,6 +223,15 @@ private:
 
     // Supported Image Formats
     QStringList             supportedImageFormats;
+
+    // Search Result List Current Index
+    int                     currentIndex;
+
+    // Search Result List Visual Item Count
+    int                     visualItemCount;
+
+    // Result List Key Event
+    bool                    resultListKeyEvent;
 };
 
 

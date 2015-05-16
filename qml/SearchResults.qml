@@ -26,6 +26,8 @@ Rectangle {
         highlightResizeDuration: 0
         snapMode: ListView.SnapToItem
 
+        property int visualItemCount: Math.min(count, Math.ceil(searchResultList.height / Const.DEFAULT_SEARCH_RESULTS_DELEGATE_HEIGHT))
+
         // Model
         model: searchResultModel
 
@@ -33,6 +35,7 @@ Rectangle {
         delegate: Rectangle {
             id: delegateRoot
             color: "transparent"
+
             width: searchResultList.width
             height: Const.DEFAULT_SEARCH_RESULTS_DELEGATE_HEIGHT
 
@@ -86,6 +89,10 @@ Rectangle {
                     // Set Current Index
                     searchResultList.currentIndex = index;
                 }
+                onDoubleClicked: {
+                    // Item Selected
+                    searchResultController.itemSelected();
+                }
             }
         }
 
@@ -94,6 +101,23 @@ Rectangle {
             width: searchResultList.width
             height: Const.DEFAULT_SEARCH_RESULTS_DELEGATE_HEIGHT
             color: "#44444477"
+        }
+
+        // On Visual Item Coun Changed
+        onVisualItemCountChanged: {
+            console.log("searchResultList.onVisualItemCountChanged - visualItemCount: " + searchResultList.visualItemCount);
+
+            // Set Visual Item Count
+            searchResultController.visualItemCount = searchResultList.visualItemCount;
+        }
+
+        // On Current Index Changed
+        onCurrentIndexChanged: {
+            // Check Search Result Controller Current Index
+            if (searchResultController.currentIndex != searchResultList.currentIndex) {
+                // Set Current Index
+                searchResultController.currentIndex = searchResultList.currentIndex;
+            }
         }
     }
 
@@ -110,6 +134,19 @@ Rectangle {
 
     }
 
+    // Connections
+    Connections {
+        target: searchResultController
+        // On Current index Changed
+        onCurrentIndexChanged: {
+            //console.log("searchResultsRoot.Connections.searchResultController.onCurrentIndexChanged - currentIndex: " + searchResultController.currentIndex);
 
+            // Check Result List View Current Index
+            if (searchResultList.currentIndex != searchResultController.currentIndex) {
+                // Set Current Index
+                searchResultList.currentIndex = searchResultController.currentIndex;
+            }
+        }
+    }
 }
 

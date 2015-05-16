@@ -2,6 +2,11 @@
 #define DEFAULTSETTINGS
 
 
+// Default Main Window Width
+#define DEFAULT_MAIN_WINDOW_WIDTH                           800             // width
+// Default Main Window Height
+#define DEFAULT_MAIN_WINDOW_HEIGHT                          540             // height
+
 
 // Show Function Keys
 #define DEFAULT_SETTINGS_SHOW_FUNCTION_KEYS                 true            // showFunctionKeys

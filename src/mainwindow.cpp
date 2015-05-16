@@ -2,6 +2,7 @@
 #include <QFileInfo>
 #include <QKeyEvent>
 #include <QDir>
+#include <QDesktopWidget>
 #include <QDebug>
 
 #include <QDialogButtonBox>
@@ -22,6 +23,7 @@
 #include "remotefileutilclient.h"
 #include "infodialog.h"
 #include "utility.h"
+#include "defaultsettings.h"
 #include "constants.h"
 
 
@@ -195,6 +197,28 @@ void MainWindow::loadSettings()
 {
     qDebug() << "MainWindow::loadSettings";
 
+    // Init Settings
+    QSettings settings;
+
+    // Get Window Width
+    int windowWidth = settings.value(SETTINGS_KEY_MAIN_WIDTH, DEFAULT_MAIN_WINDOW_WIDTH).toInt();
+    // Get Window height
+    int windowHeight = settings.value(SETTINGS_KEY_MAIN_HEIGHT, DEFAULT_MAIN_WINDOW_HEIGHT).toInt();
+
+    // Get Desktop Widget
+    QDesktopWidget desktop;
+
+    // Get First Screen
+    QWidget* screen = desktop.screen();
+
+    // Calculate X Pos
+    int posX = screen ? (screen->width() - windowWidth) / 2 : 0;
+    // Calculate Y Pos
+    int posY = screen ? (screen->height() - windowHeight) / 2 : 0;
+
+    // Set Geometry
+    setGeometry(posX, posY, windowWidth, windowHeight);
+
     // ...
 }
 
@@ -204,6 +228,15 @@ void MainWindow::loadSettings()
 void MainWindow::saveSettings()
 {
     qDebug() << "MainWindow::loadSettings";
+
+    // Init Settings
+    QSettings settings;
+
+    // Set Value - Width
+    settings.setValue(SETTINGS_KEY_MAIN_WIDTH, geometry().width());
+    // Set Value - Height
+    settings.setValue(SETTINGS_KEY_MAIN_HEIGHT, geometry().height());
+
 
     // ...
 }
@@ -584,7 +617,7 @@ void MainWindow::launchSearch()
         // Init Dir Path
         QString dirPath = focusedPanel->getCurrentDir();
         // Show Dialog
-        searchFileDialog->showDialog(dirPath);
+        searchFileDialog->showDialog(dirPath, focusedPanel);
     }
 }
 

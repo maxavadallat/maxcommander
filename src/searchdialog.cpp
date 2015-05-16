@@ -6,7 +6,8 @@
 
 #include <mcwinterface.h>
 
-#include "src/searchdialog.h"
+#include "filepanel.h"
+#include "searchdialog.h"
 #include "ui_searchdialog.h"
 #include "remotefileutilclient.h"
 #include "filelistimageprovider.h"
@@ -23,10 +24,17 @@ SearchDialog::SearchDialog(QWidget* aParent)
     , ui(new Ui::SearchDialog)
     , fileUtil(new RemoteFileUtilClient)
     , resultModel(new SearchResultModel)
+    , focusedPanel(NULL)
+    , caseSensitiveSearch(false)
+    , wholeWordSearch(false)
+    , dialogShown(false)
     , searchActive(false)
     , searchFinished(false)
     , resultsVisible(true)
     , startButton(NULL)
+    , currentIndex(-1)
+    , visualItemCount(0)
+    , resultListKeyEvent(false)
 {
     // Setup UI
     ui->setupUi(this);
@@ -98,6 +106,24 @@ void SearchDialog::init()
 QStringList SearchDialog::getSupportedImageFormats()
 {
     return supportedImageFormats;
+}
+
+//==============================================================================
+// Item Selected
+//==============================================================================
+void SearchDialog::itemSelected()
+{
+    qDebug() << "SearchDialog::itemSelected - currentIndex: " << currentIndex;
+
+}
+
+//==============================================================================
+// Item View
+//==============================================================================
+void SearchDialog::itemView(const bool& aEdit)
+{
+    qDebug() << "SearchDialog::itemView - currentIndex: " << currentIndex << " - aEdit: " << aEdit;
+
 }
 
 //==============================================================================
@@ -205,6 +231,7 @@ void SearchDialog::hideresults()
 //==============================================================================
 void SearchDialog::abort()
 {
+    qDebug() << "SearchDialog::abort";
 
 }
 
@@ -213,6 +240,7 @@ void SearchDialog::abort()
 //==============================================================================
 void SearchDialog::suspend()
 {
+    qDebug() << "SearchDialog::suspend";
 
 }
 
@@ -221,6 +249,7 @@ void SearchDialog::suspend()
 //==============================================================================
 void SearchDialog::resume()
 {
+    qDebug() << "SearchDialog::resume";
 
 }
 
@@ -335,10 +364,14 @@ void SearchDialog::buttonBoxClicked(QAbstractButton* aButton)
 //==============================================================================
 // Show Dialog
 //==============================================================================
-void SearchDialog::showDialog(const QString& aDirPath)
+void SearchDialog::showDialog(const QString& aDirPath, FilePanel* aFocusedPanel)
 {
+    qDebug() << "SearchDialog::showDialog";
+
     // Set Current Dir
     currentDir = aDirPath;
+    // Set Focused Panel
+    focusedPanel = aFocusedPanel;
 
     // Check Current Dir
     if (!currentDir.endsWith("/")) {
@@ -365,6 +398,25 @@ void SearchDialog::showDialog(const QString& aDirPath)
 
     // Set Dialog Shown
     dialogShown = true;
+
+    // Set Focus
+    ui->filePatternComboBox->setFocus();
+}
+
+//==============================================================================
+// Hide Dialog
+//==============================================================================
+void SearchDialog::hideDialog()
+{
+    qDebug() << "SearchDialog::hideDialog";
+
+    // Save Settings
+    saveSettings();
+
+    // Close
+    close();
+
+    // ...
 }
 
 //==============================================================================
@@ -373,6 +425,59 @@ void SearchDialog::showDialog(const QString& aDirPath)
 bool SearchDialog::isDialogShown()
 {
     return dialogShown;
+}
+
+//==============================================================================
+// Get Current Index
+//==============================================================================
+int SearchDialog::getCurrentIndex()
+{
+    return currentIndex;
+}
+
+//==============================================================================
+// Set Current index
+//==============================================================================
+void SearchDialog::setCurrentIndex(const int& aIndex)
+{
+    // Get Bounded Index
+    int boundedIndex = qBound(0, aIndex, (resultModel ? resultModel->rowCount() - 1 : 0));
+
+    // Check Current Index
+    if (currentIndex != boundedIndex) {
+        // Set Current Index
+        currentIndex = boundedIndex;
+
+        // ...
+
+        // Emit Current Index Changed Signal
+        emit currentIndexChanged(currentIndex);
+    }
+}
+
+//==============================================================================
+// Get Visual Item Count
+//==============================================================================
+int SearchDialog::getVisualItemCount()
+{
+    return visualItemCount;
+}
+
+//==============================================================================
+// Set Visual item Count
+//==============================================================================
+void SearchDialog::setVisualItemCount(const int& aVisualCount)
+{
+    // Check Visual Item Count
+    if (visualItemCount != aVisualCount) {
+        // Set Visual Item Count
+        visualItemCount = aVisualCount;
+
+        // ...
+
+        // Emit Visual Item Count Changed Signal
+        emit visualItemCountChanged(visualItemCount);
+    }
 }
 
 //==============================================================================
@@ -599,6 +704,111 @@ void SearchDialog::fileSearchResultItemFound(const unsigned int& aID,
 }
 
 //==============================================================================
+// Key Press Event
+//==============================================================================
+void SearchDialog::keyPressEvent(QKeyEvent* aEvent)
+{
+    QDialog::keyPressEvent(aEvent);
+
+    // Set Result List Key Event
+    resultListKeyEvent = ui->searchResultView->hasFocus();
+
+    // Check Event
+    if (aEvent) {
+        // Switch Key
+        switch (aEvent->key()) {
+            default:
+
+                // ...
+
+            break;
+        }
+    }
+}
+
+//==============================================================================
+// Key Release Event
+//==============================================================================
+void SearchDialog::keyReleaseEvent(QKeyEvent* aEvent)
+{
+    QDialog::keyReleaseEvent(aEvent);
+
+    // Check Event
+    if (aEvent) {
+        // Switch Key
+        switch (aEvent->key()) {
+            case Qt::Key_Home:
+                // Check Focus
+                if (resultListKeyEvent && ui->searchResultView->hasFocus()) {
+                    // Set Current Index
+                    setCurrentIndex(0);
+                }
+            break;
+
+            case Qt::Key_End:
+                // Check Focus
+                if (resultListKeyEvent && ui->searchResultView->hasFocus()) {
+                    // Set Current index
+                    setCurrentIndex(resultModel ? resultModel->rowCount() - 1 : 0);
+                }
+            break;
+
+            case Qt::Key_PageUp:
+                // Check Focus
+                if (resultListKeyEvent && ui->searchResultView->hasFocus()) {
+                    // Set Current Index
+                    setCurrentIndex(currentIndex - (visualItemCount - 1));
+                }
+            break;
+
+            case Qt::Key_PageDown:
+                // Check Focus
+                if (resultListKeyEvent && ui->searchResultView->hasFocus()) {
+                    // Set Current Index
+                    setCurrentIndex(currentIndex + (visualItemCount - 1));
+                }
+            break;
+
+            case Qt::Key_Enter:
+            case Qt::Key_Return:
+                // Check Focus
+                if (resultListKeyEvent && ui->searchResultView->hasFocus()) {
+                    // ItemSelected
+                    itemSelected();
+                }
+            break;
+
+            case Qt::Key_F3:
+                // Check Focus
+                if (resultListKeyEvent && ui->searchResultView->hasFocus()) {
+                    // Item View
+                    itemView(false);
+                }
+            break;
+
+            case Qt::Key_F4:
+                // Check Focus
+                if (resultListKeyEvent && ui->searchResultView->hasFocus()) {
+                    // Item View
+                    itemView(true);
+                }
+            break;
+
+            default:
+
+                // Unhandled Keys
+
+                // ...
+
+            break;
+        }
+    }
+
+    // Reset Result List Key Event
+    resultListKeyEvent = false;
+}
+
+//==============================================================================
 // Close Event
 //==============================================================================
 void SearchDialog::closeEvent(QCloseEvent* aEvent)
@@ -625,8 +835,27 @@ void SearchDialog::closeEvent(QCloseEvent* aEvent)
 
     // ...
 
+}
+
+//==============================================================================
+// Hide Event
+//==============================================================================
+void SearchDialog::hideEvent(QHideEvent* aEvent)
+{
+    Q_UNUSED(aEvent);
+
+    qDebug() << "SearchDialog::hideEvent";
+
     // Reset Dialog Shown
     dialogShown = false;
+
+    // Set Visibility
+    setVisible(false);
+
+    // Raise
+    lower();
+
+    // ...
 }
 
 //==============================================================================

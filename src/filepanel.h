@@ -96,7 +96,7 @@ public:
     // Get Current Dir
     QString getCurrentDir();
     // Set Current Dir
-    void setCurrentDir(const QString& aCurrentDir);
+    void setCurrentDir(const QString& aCurrentDir, const QString& aLastFileName = "");
 
     // Get Panel Name
     QString getPanelName();

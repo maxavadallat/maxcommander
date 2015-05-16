@@ -17,7 +17,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Search File(s)</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <property name="leftMargin">
@@ -231,6 +231,9 @@
        <height>22</height>
       </size>
      </property>
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
+     </property>
      <property name="text">
       <string>...</string>
      </property>
@@ -245,6 +248,13 @@
    <header>QQuickWidget</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>filePatternComboBox</tabstop>
+  <tabstop>contentPatternComboBox</tabstop>
+  <tabstop>caseSensitiveCheckBox</tabstop>
+  <tabstop>wholeWordCheckBox</tabstop>
+  <tabstop>searchResultView</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

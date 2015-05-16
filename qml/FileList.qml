@@ -167,8 +167,8 @@ Rectangle {
                     // Check Pressed Buttons
                     if (delegateMouseArea.pressedButtons === Qt.LeftButton) {
                         //console.log("fileListDelegateRoot.MouseArea.onDoubleClicked - index: " + index + " - pressedButtons: " + delegateMouseArea.pressedButtons);
-                        // Handle Item Select
-                        mainController.handleItemExec();
+                        // Handle Item Selection
+                        mainController.handleItemSelection();
                     }
                 }
             }

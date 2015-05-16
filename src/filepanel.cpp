@@ -1599,13 +1599,13 @@ void FilePanel::goLast()
 }
 
 //==============================================================================
-// Handle Item Exec
+// Handle Item Selection
 //==============================================================================
-void FilePanel::handleItemExec()
+void FilePanel::handleItemSelection()
 {
     // Check File List Model
     if (!fileListModel) {
-        qWarning() << "FilePanel::handleItemExec - panelName: " << panelName << " - NO FILE LIST MODEL!!";
+        qWarning() << "FilePanel::handleItemSelection - panelName: " << panelName << " - NO FILE LIST MODEL!!";
         return;
     }
 
@@ -1613,7 +1613,7 @@ void FilePanel::handleItemExec()
     QFileInfo fileInfo = fileListModel->getFileInfo(currentIndex);
 
     // Check If Dir
-    if (fileInfo.isDir() || fileInfo.isBundle()) {
+    if (fileInfo.isDir() && !fileInfo.isBundle() /*|| fileInfo.isBundle()*/) {
         // Check File Name
         if (fileInfo.fileName() == QString("..")) {
             // Go Up
@@ -1625,9 +1625,42 @@ void FilePanel::handleItemExec()
             setCurrentIndex(0);
         }
     } else {
-        qDebug() << "FilePanel::handleItemExec - panelName: " << panelName << " - fileName: " << fileInfo.fileName();
+        qDebug() << "FilePanel::handleItemSelection - panelName: " << panelName << " - fileName: " << fileInfo.fileName();
 
         // Handle Exec Files
+
+        // Check If File is Executeable
+        if (fileInfo.isExecutable()) {
+
+#if defined(Q_OS_MACX)
+
+            // Execute
+            system(QString(DEFAULT_EXEC_APP_SYSTEM_COMMAND_MAC_OSX).arg(fileInfo.absoluteFilePath()).toLocal8Bit().data());
+
+#elif defined(Q_OS_UNIX)
+
+
+#else defined(Q_OS_WIN)
+
+
+#endif // Q_OS_WIN
+
+        } else {
+
+#if defined(Q_OS_MACX)
+
+            // Open
+            system(QString(DEFAULT_OPEN_FILE_SYSTEM_COMMAND_MAC_OSX).arg(fileInfo.absoluteFilePath()).toLocal8Bit().data());
+
+#elif defined(Q_OS_UNIX)
+
+
+#else defined(Q_OS_WIN)
+
+
+#endif // Q_OS_WIN
+
+        }
 
         // ...
 
@@ -2539,7 +2572,7 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
                 // Check Modifier Keys
                 if (modifierKeys == Qt::NoModifier) {
                     // Handle Item Exec
-                    handleItemExec();
+                    handleItemSelection();
                 }
             break;
 

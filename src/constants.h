@@ -246,6 +246,12 @@
 #define DEFAULT_ICON_PATH_PROGRESS                          ":/resources/images/synchronize_256.png"
 
 
+// Exec Command
+#define DEFAULT_EXEC_APP_SYSTEM_COMMAND_MAC_OSX             "open -a \"%1\" &"
+
+// Open Files
+#define DEFAULT_OPEN_FILE_SYSTEM_COMMAND_MAC_OSX            "open \"%1\" &"
+
 
 // Localization Constants
 

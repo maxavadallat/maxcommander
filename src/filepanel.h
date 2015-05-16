@@ -535,8 +535,8 @@ protected slots:
     // Stop Dir Watcher Slot
     void stopDirWatcher();
 
-    // Handle Item Exec
-    void handleItemExec();
+    // Handle Item Selection - Dir/Execution
+    void handleItemSelection();
     // Handle Item Select
     void handleItemSelect();
 

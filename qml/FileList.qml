@@ -469,10 +469,11 @@ Rectangle {
             console.log("fileListRoot.Connections.mainController.onLaunchFileRename");
 
             // Set File Renamer Pos & Size
-            fileRenamer.x = fileListView.currentItem.mapToItem(fileListRoot).x;
-            fileRenamer.y = fileListView.currentItem.mapToItem(fileListRoot).y;
             fileRenamer.width = fileListView.width - 4;
-            fileRenamer.height = fileListView.currentItem.height;
+            fileRenamer.height = Math.max(fileListView.currentItem.height, Const.DEFAULT_FILE_LIST_ITEM_RENAMER_MINIMUM_HEIGHT);
+
+            fileRenamer.x = fileListView.currentItem.mapToItem(fileListRoot).x;
+            fileRenamer.y = Math.min(fileListView.currentItem.mapToItem(fileListRoot).y - (fileRenamer.height - fileListView.currentItem.height) / 2, fileListRoot.height - fileRenamer.height);
 
             // Set Original File Name
             fileRenamer.originalFileName = fileListModel.getFileName(fileListView.currentIndex);

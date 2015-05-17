@@ -1967,8 +1967,13 @@ void FilePanel::fileModelDirFetchFinished()
         lastFileName = "";
         // Set Current Index
         setCurrentIndex(lastFileIndex);
-        // Set Loading
-        setLoading(false);
+
+        // Check Last Index
+        if (lastIndex == 0) {
+            // Set Loading
+            setLoading(false);
+        }
+
 
     } else if (lastIndex != -1) {
         qDebug() << "FilePanel::fileModelDirFetchFinished - panelName: " << panelName << " - lastIndex: " << lastIndex;

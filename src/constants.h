@@ -89,7 +89,7 @@
 #define SETTINGS_KEY_PANEL_FONT_BOLD                        SETTINGS_GROUP_UI"/fontBold"
 #define SETTINGS_KEY_PANEL_FONT_ITALIC                      SETTINGS_GROUP_UI"/fontItalic"
 
-
+#define SETTINGS_KEY_APPS_TERMINAL                          SETTINGS_GROUP_APPS"/terminal"
 #define SETTINGS_KEY_APPS_VIEWER                            SETTINGS_GROUP_APPS"/viewer"
 #define SETTINGS_KEY_APPS_EDITOR                            SETTINGS_GROUP_APPS"/editor"
 #define SETTINGS_KEY_APPS_COMPARE                           SETTINGS_GROUP_APPS"/compare"
@@ -240,6 +240,9 @@
 #define DEFAULT_PROGRESS_DIALOG_SEMI_TRANSPARENCY           0.4
 
 
+#define DEFAULT_CONFIRM_BUTTON_MINIMAL_WIDTH                80
+
+
 // Icons
 #define DEFAULT_ICON_PATH_OK                                ":/resources/images/check_256.png"
 #define DEFAULT_ICON_PATH_CANCEL                            ":/resources/images/delete_256.png"
@@ -274,8 +277,6 @@
 #define DEFAULT_CONFIRM_BUTTON_TEXT_SKIPALL                 "Skip All"
 #define DEFAULT_CONFIRM_BUTTON_TEXT_RETRY                   "Retry"
 #define DEFAULT_CONFIRM_BUTTON_TEXT_ASADMIN                 "As Admin"
-
-#define DEFAULT_CONFIRM_BUTTON_MINIMAL_WIDTH                80
 
 
 #define DEFAULT_CONFIRM_TEXT_DIRECTORY_EXISTS               "Directory Exists:"

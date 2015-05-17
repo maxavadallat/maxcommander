@@ -1187,7 +1187,7 @@
       <attribute name="title">
        <string>Tools</string>
       </attribute>
-      <layout class="QGridLayout" name="toolsLayout">
+      <layout class="QGridLayout" name="gridLayout">
        <property name="leftMargin">
         <number>8</number>
        </property>
@@ -1200,60 +1200,151 @@
        <property name="bottomMargin">
         <number>8</number>
        </property>
-       <property name="spacing">
-        <number>8</number>
-       </property>
-       <item row="3" column="0" colspan="2">
-        <widget class="QLineEdit" name="editorEditor"/>
+       <item row="0" column="0" colspan="2">
+        <widget class="QLabel" name="label_20">
+         <property name="text">
+          <string>Terminal:</string>
+         </property>
+        </widget>
        </item>
-       <item row="0" column="0">
+       <item row="1" column="0">
+        <widget class="QLineEdit" name="terminalEditor">
+         <property name="clearButtonEnabled">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QToolButton" name="browseTerminalButton">
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="text">
+          <string>...</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0" colspan="2">
         <widget class="QLabel" name="label">
          <property name="text">
           <string>Viewer:</string>
          </property>
         </widget>
        </item>
-       <item row="6" column="0">
-        <widget class="QLabel" name="label_4">
-         <property name="text">
-          <string>Packer:</string>
+       <item row="3" column="0">
+        <widget class="QLineEdit" name="vieverEditor">
+         <property name="clearButtonEnabled">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
-       <item row="5" column="0" colspan="2">
-        <widget class="QLineEdit" name="compareEditor"/>
-       </item>
-       <item row="1" column="0" colspan="2">
-        <widget class="QLineEdit" name="vieverEditor"/>
-       </item>
-       <item row="9" column="0" colspan="2">
-        <widget class="QLineEdit" name="unpackerEditor"/>
+       <item row="3" column="1">
+        <widget class="QToolButton" name="browseViewerButton">
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="text">
+          <string>...</string>
+         </property>
+        </widget>
        </item>
        <item row="4" column="0" colspan="2">
-        <widget class="QLabel" name="label_3">
-         <property name="text">
-          <string>Compare/Diff:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="8" column="0">
-        <widget class="QLabel" name="label_5">
-         <property name="text">
-          <string>Unpacker</string>
-         </property>
-        </widget>
-       </item>
-       <item row="7" column="0" colspan="2">
-        <widget class="QLineEdit" name="packerEditor"/>
-       </item>
-       <item row="2" column="0">
         <widget class="QLabel" name="label_2">
          <property name="text">
           <string>Editor:</string>
          </property>
         </widget>
        </item>
+       <item row="5" column="0">
+        <widget class="QLineEdit" name="editorEditor">
+         <property name="clearButtonEnabled">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QToolButton" name="browseEditorButton">
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="text">
+          <string>...</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0" colspan="2">
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Compare/Diff:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0">
+        <widget class="QLineEdit" name="compareEditor">
+         <property name="clearButtonEnabled">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="1">
+        <widget class="QToolButton" name="browseCompareButton">
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="text">
+          <string>...</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="0" colspan="2">
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>Packer:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="0">
+        <widget class="QLineEdit" name="packerEditor">
+         <property name="clearButtonEnabled">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="1">
+        <widget class="QToolButton" name="browsePackerButton">
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="text">
+          <string>...</string>
+         </property>
+        </widget>
+       </item>
        <item row="10" column="0" colspan="2">
+        <widget class="QLabel" name="label_5">
+         <property name="text">
+          <string>Unpacker:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="11" column="0">
+        <widget class="QLineEdit" name="unpackerEditor">
+         <property name="clearButtonEnabled">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="11" column="1">
+        <widget class="QToolButton" name="browseUnpackerButton">
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="text">
+          <string>...</string>
+         </property>
+        </widget>
+       </item>
+       <item row="12" column="0">
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -1285,12 +1376,42 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>tabWidget</tabstop>
+  <tabstop>terminalEditor</tabstop>
   <tabstop>vieverEditor</tabstop>
   <tabstop>editorEditor</tabstop>
   <tabstop>compareEditor</tabstop>
   <tabstop>packerEditor</tabstop>
   <tabstop>unpackerEditor</tabstop>
+  <tabstop>buttonBox</tabstop>
+  <tabstop>showHiddenFilesCheckBox</tabstop>
+  <tabstop>functionKeysCheckBox</tabstop>
+  <tabstop>dirHotKeysCheckBox</tabstop>
+  <tabstop>selectDirsCheckBox</tabstop>
+  <tabstop>showDirsFirstCheckBox</tabstop>
+  <tabstop>driveButtonsCheckBox</tabstop>
+  <tabstop>caseSensitiveSortCheckBox</tabstop>
+  <tabstop>closeWhenFinishedCheckBox</tabstop>
+  <tabstop>iconSizeComboBox</tabstop>
+  <tabstop>previewWidget</tabstop>
+  <tabstop>textColorButton</tabstop>
+  <tabstop>textBgButton</tabstop>
+  <tabstop>currentColorButton</tabstop>
+  <tabstop>currentBGButton</tabstop>
+  <tabstop>selectedColorButton</tabstop>
+  <tabstop>selectedBGButton</tabstop>
+  <tabstop>currentSelectedColorButton</tabstop>
+  <tabstop>currentSelectedBGButton</tabstop>
+  <tabstop>hiddenTextColorButton</tabstop>
+  <tabstop>hiddenTextBgButton</tabstop>
+  <tabstop>fontButton</tabstop>
+  <tabstop>clearCurrentBGButton</tabstop>
+  <tabstop>clearSelectedBGButton</tabstop>
+  <tabstop>clearCurrentSelectedBGButton</tabstop>
+  <tabstop>clearHiddenBGButton</tabstop>
+  <tabstop>linkTextBgButton</tabstop>
+  <tabstop>linkTextColorButton</tabstop>
+  <tabstop>clearLinkBGButton</tabstop>
+  <tabstop>tabWidget</tabstop>
  </tabstops>
  <resources>
   <include location="../maxcommanderimages.qrc"/>

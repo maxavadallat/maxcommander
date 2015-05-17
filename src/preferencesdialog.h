@@ -345,6 +345,19 @@ protected slots:
     // Clear Link BG Color Button Clicked Slot
     void on_clearLinkBGButton_clicked();
 
+    // On Browse Terminal Button Clicked Slot
+    void on_browseTerminalButton_clicked();
+    // On Browse Viewer Button Clicked Slot
+    void on_browseViewerButton_clicked();
+    // On Browse Editor Button Clicked Slot
+    void on_browseEditorButton_clicked();
+    // On Browse Compare Button Clicked Slot
+    void on_browseCompareButton_clicked();
+    // On Browse Packer Button Clicked Slot
+    void on_browsePackerButton_clicked();
+    // On Browse Unpacker Button Clicked Slot
+    void on_browseUnpackerButton_clicked();
+
     // Icon/Thumb Size Combo Box Current Index Changed Slot
     void on_iconSizeComboBox_currentIndexChanged(const QString& arg1);
 
@@ -352,7 +365,6 @@ protected slots:
 
     // Button Box Button Clicked
     void buttonBoxButtonPressed(QAbstractButton* aButton);
-
 
 private:
     // UI
@@ -421,6 +433,8 @@ private:
 
     // ...
 
+    // Terminal App Path
+    QString                 terminalPath;
     // Viewer App Path
     QString                 viewerPath;
     // Editor App Path

@@ -70,10 +70,12 @@
 
 // ...
 
+// Terminal App Path
+#define DEFAULT_SETTINGS_TERMINAL_PATH                      "Terminal"      // terminalPath
 // Viewer App Path
-#define DEFAULT_SETTINGS_VIEWER_PATH                        ""              // viewerPath
+#define DEFAULT_SETTINGS_VIEWER_PATH                        "Preview"       // viewerPath
 // Editor App Path
-#define DEFAULT_SETTINGS_EDITOR_PATH                        ""              // editorPath
+#define DEFAULT_SETTINGS_EDITOR_PATH                        "TextEdit"      // editorPath
 // Compare Path
 #define DEFAULT_SETTINGS_COMPARE_PATH                       ""              // comparePath
 // Packer Path

@@ -53,6 +53,7 @@ PreferencesDialog::PreferencesDialog(QWidget* aParent)
     , thumbWidth(DEFAULT_SETTINGS_THUMB_WIDTH)
     , thumbHeight(DEFAULT_SETTINGS_THUMB_HEIGHT)
 
+    , terminalPath(DEFAULT_SETTINGS_TERMINAL_PATH)
     , viewerPath(DEFAULT_SETTINGS_VIEWER_PATH)
     , editorPath(DEFAULT_SETTINGS_EDITOR_PATH)
     , comparePath(DEFAULT_SETTINGS_COMPARE_PATH)
@@ -1463,6 +1464,54 @@ void PreferencesDialog::on_clearLinkBGButton_clicked()
 {
     // Set Link BG Color
     setLinkBGColor(DEFAULT_TRANSPARENT_COLOR);
+}
+
+//==============================================================================
+// On Browse Terminal Button Clicked Slot
+//==============================================================================
+void PreferencesDialog::on_browseTerminalButton_clicked()
+{
+
+}
+
+//==============================================================================
+// On Browse Viewer Button Clicked Slot
+//==============================================================================
+void PreferencesDialog::on_browseViewerButton_clicked()
+{
+
+}
+
+//==============================================================================
+// On Browse Editor Button Clicked Slot
+//==============================================================================
+void PreferencesDialog::on_browseEditorButton_clicked()
+{
+
+}
+
+//==============================================================================
+// On Browse Compare Button Clicked Slot
+//==============================================================================
+void PreferencesDialog::on_browseCompareButton_clicked()
+{
+
+}
+
+//==============================================================================
+// On Browse Packer Button Clicked Slot
+//==============================================================================
+void PreferencesDialog::on_browsePackerButton_clicked()
+{
+
+}
+
+//==============================================================================
+// On Browse Unpacker Button Clicked Slot
+//==============================================================================
+void PreferencesDialog::on_browseUnpackerButton_clicked()
+{
+
 }
 
 //==============================================================================

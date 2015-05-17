@@ -1118,7 +1118,7 @@ void RemoteFileUtilClient::handleProgress()
                         lastDataMap[DEFAULT_KEY_CURRTOTAL].toULongLong());
 
     // Send Acknowledge
-    sendAcknowledge();
+    //sendAcknowledge();
 }
 
 //==============================================================================

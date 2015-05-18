@@ -54,6 +54,8 @@ public slots:
 
     // Launch Viewer
     void launchViewer(const bool& aEditMode = false, const bool& aNewFile = false);
+    // Launch Viewer
+    void launchViewer(const QString& aFileName, FilePanel* aFilePanel, const bool& aEditMode, const bool& aNewFile);
 
     // Launch File Copy Slot
     void launchFileCopy();
@@ -81,7 +83,6 @@ public slots:
     // Shut Down
     void shutDown();
 
-
 protected:
 
     // Constructor
@@ -95,7 +96,6 @@ protected:
 
     // Load Settings
     void loadSettings();
-
     // Save Settings
     void saveSettings();
 
@@ -109,7 +109,6 @@ protected slots:
 
     // Update Function Keys Slot
     void updateFunctionKeys();
-
     // Update Menu Slot
     void updateMenu();
 
@@ -131,6 +130,11 @@ protected slots:
 
     // Settings Has Changed Slot
     void settingsHasChanged();
+
+    // Search Result Item Selected Slot
+    void searchResultSelected(const QString& aFilePath);
+    // Search Result Item View Slot
+    void searchResultView(const QString& aFilePath, const bool& aEdit);
 
 protected slots: // Actions & Button
 

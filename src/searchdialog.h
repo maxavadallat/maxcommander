@@ -55,6 +55,9 @@ public:
     // Set Visual item Count
     void setVisualItemCount(const int& aVisualCount);
 
+    // Get Focused Panel
+    FilePanel* getFocusedPanel();
+
     // Destructor
     virtual ~SearchDialog();
 
@@ -65,9 +68,9 @@ signals:
     // Visual Item Count Changed Signal
     void visualItemCountChanged(const int& aVisualCount);
 
-    // Search Result Selected
+    // Search Result Item Selected Signal
     void searchResultSelected(const QString& aFilePath);
-
+    // Search Result Item View Signal
     void searchResultView(const QString& aFilePath, const bool& aEdit);
 
 public slots:

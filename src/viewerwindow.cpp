@@ -133,9 +133,6 @@ bool ViewerWindow::loadFile(const QString& aFileName, const QString& aPanelName)
 
     // Edit Mode & Check Mime Type - Load All Files As Text in Edit Mode
     if (isSupportedTextMime(editMode, mime)) {
-
-        // Configure View
-
         // Quick Widget Set Visible
         ui->quickWidget->setVisible(false);
         // Text Edit Set Visible
@@ -426,6 +423,9 @@ bool ViewerWindow::isSupportedTextMime(const bool& aEditMode, const QString& aMi
 
     // Check Contains
     if (aMime.contains(DEFAULT_MIME_JAVASCRIPT))
+        return true;
+
+    if (aMime.contains(DEFAULT_MIME_SUBRIP))
         return true;
 
     return false;

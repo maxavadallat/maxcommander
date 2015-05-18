@@ -357,6 +357,16 @@ void MainWindow::launchViewer(const bool& aEditMode, const bool& aNewFile)
     // Check Settings For Using External Viewer
 
 
+    // Launch Viewer
+    launchViewer(focusedPanel->getCurrFileInfo().absoluteFilePath(), focusedPanel, aEditMode, aNewFile);
+
+}
+
+//==============================================================================
+// Launch Viewer
+//==============================================================================
+void MainWindow::launchViewer(const QString& aFileName, FilePanel* aFilePanel, const bool& aEditMode, const bool& aNewFile)
+{
     // Create New Viewer Window
     ViewerWindow* newViewer = new ViewerWindow();
 
@@ -366,7 +376,7 @@ void MainWindow::launchViewer(const bool& aEditMode, const bool& aNewFile)
     // Check New File
     if (aNewFile) {
         // New File
-        if (!newViewer->newFile(focusedPanel->getCurrentDir())) {
+        if (!newViewer->newFile(aFilePanel->getCurrentDir())) {
             // Show Info - Can't Save
             InfoDialog warningDialog(tr(DEFAULT_WARNING_TEXT_CANT_CREATE_NEW_FILE), EIDTWarning);
             // Exec Dialog
@@ -379,7 +389,7 @@ void MainWindow::launchViewer(const bool& aEditMode, const bool& aNewFile)
         }
     } else {
         // Load File
-        if (!newViewer->loadFile(focusedPanel->getCurrFileInfo().absoluteFilePath(), focusedPanel->getPanelName())) {
+        if (!newViewer->loadFile(aFileName, aFilePanel->getPanelName())) {
 
             // Show Info - Unsupported Format
             InfoDialog warningDialog(tr(DEFAULT_WARNING_TEXT_UNSUPPORTED_FILE_FORMAT), EIDTWarning);
@@ -394,7 +404,7 @@ void MainWindow::launchViewer(const bool& aEditMode, const bool& aNewFile)
     }
 
     // Connect Signal
-    connect(newViewer, SIGNAL(viewerClosed(ViewerWindow*)), this, SLOT(viewerWindowClosed(ViewerWindow*)));
+    connect(newViewer, SIGNAL(viewerClosed(ViewerWindow*)), this, SLOT(viewerWindowClosed(ViewerWindow*)), Qt::QueuedConnection);
 
     // Add To Viewer List
     viewerWindows << newViewer;
@@ -608,6 +618,10 @@ void MainWindow::launchSearch()
     if (!searchFileDialog) {
         // Create Search File Dialog
         searchFileDialog = new SearchDialog();
+
+        // Connect Signals
+        connect(searchFileDialog, SIGNAL(searchResultSelected(QString)), this, SLOT(searchResultSelected(QString)));
+        connect(searchFileDialog, SIGNAL(searchResultView(QString,bool)), this, SLOT(searchResultView(QString,bool)));
     }
 
     // Check If Dialog Shown
@@ -761,6 +775,47 @@ void MainWindow::settingsHasChanged()
         rightPanel->lastFileName = rightPanel->getCurrFileInfo().fileName();
         // Reload
         rightPanel->reload();
+    }
+}
+
+//==============================================================================
+// Search Result Item Selected Slot
+//==============================================================================
+void MainWindow::searchResultSelected(const QString& aFilePath)
+{
+    // Check Search File Dialog
+    if (searchFileDialog) {
+        qDebug() << "MainWindow::searchResultSelected - aFilePath: " << aFilePath;
+
+        // Close Dialog
+        searchFileDialog->hide();
+
+        // Get Search File Dialog focused Panel
+        FilePanel* searchFocusedPanel = searchFileDialog->getFocusedPanel();
+
+        // Check Focused Panel
+        if (searchFocusedPanel) {
+            // Refocus
+            searchFocusedPanel->setFocus();
+            // Init Selected File Info
+            QFileInfo selectedFileInfo(aFilePath);
+            // Set Current Dir
+            searchFocusedPanel->setCurrentDir(selectedFileInfo.absolutePath(), selectedFileInfo.fileName());
+        }
+    }
+}
+
+//==============================================================================
+// Search Result Item View Slot
+//==============================================================================
+void MainWindow::searchResultView(const QString& aFilePath, const bool& aEdit)
+{
+    // Check Search File Dialog
+    if (searchFileDialog) {
+        qDebug() << "MainWindow::searchResultView - aFilePath: " << aFilePath << " - aEdit: " << aEdit;
+
+        // Launch Viewer
+        launchViewer(aFilePath, searchFileDialog->getFocusedPanel(), aEdit, false);
     }
 }
 

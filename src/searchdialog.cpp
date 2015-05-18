@@ -115,6 +115,14 @@ void SearchDialog::itemSelected()
 {
     qDebug() << "SearchDialog::itemSelected - currentIndex: " << currentIndex;
 
+    // Get Current File Name
+    QString currentFilePath = resultModel ? resultModel->getItem(currentIndex) : "";
+
+    // Check Current File Path
+    if (!currentFilePath.isEmpty()) {
+        // Emit Search REsult Item Selected Signal
+        emit searchResultSelected(currentFilePath);
+    }
 }
 
 //==============================================================================
@@ -124,6 +132,14 @@ void SearchDialog::itemView(const bool& aEdit)
 {
     qDebug() << "SearchDialog::itemView - currentIndex: " << currentIndex << " - aEdit: " << aEdit;
 
+    // Get Current File Name
+    QString currentFilePath = resultModel ? resultModel->getItem(currentIndex) : "";
+
+    // Check Current File Path
+    if (!currentFilePath.isEmpty()) {
+        // Emit Search Result Item View Signal
+        emit searchResultView(currentFilePath, aEdit);
+    }
 }
 
 //==============================================================================
@@ -172,6 +188,12 @@ void SearchDialog::restoreUI()
 
     // Reset Content Pattern Combo Current Text
     ui->contentPatternComboBox->setCurrentText("");
+
+    // Check Results Model
+    if (resultModel) {
+        // Clear
+        resultModel->clear();
+    }
 
     // ...
 
@@ -478,6 +500,14 @@ void SearchDialog::setVisualItemCount(const int& aVisualCount)
         // Emit Visual Item Count Changed Signal
         emit visualItemCountChanged(visualItemCount);
     }
+}
+
+//==============================================================================
+// Get Focused Panel
+//==============================================================================
+FilePanel* SearchDialog::getFocusedPanel()
+{
+    return focusedPanel;
 }
 
 //==============================================================================
@@ -817,22 +847,6 @@ void SearchDialog::closeEvent(QCloseEvent* aEvent)
 
     qDebug() << "SearchDialog::closeEvent";
 
-    // Check Model
-    if (resultModel) {
-        // Clear
-        resultModel->clear();
-    }
-
-    // Check Start Button
-    if (startButton) {
-        // Remove Button
-        ui->buttonBox->removeButton(startButton);
-
-        // Reset Start Button
-        delete startButton;
-        startButton = NULL;
-    }
-
     // ...
 
 }
@@ -854,6 +868,16 @@ void SearchDialog::hideEvent(QHideEvent* aEvent)
 
     // Raise
     lower();
+
+    // Check Start Button
+    if (startButton) {
+        // Remove Button
+        ui->buttonBox->removeButton(startButton);
+
+        // Reset Start Button
+        delete startButton;
+        startButton = NULL;
+    }
 
     // ...
 }

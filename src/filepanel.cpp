@@ -224,6 +224,16 @@ void FilePanel::setCurrentDir(const QString& aCurrentDir, const QString& aLastFi
 
         // Emit Current dir Changed Signal
         emit currentDirChanged(currentDir);
+
+    } else {
+        // Check Last File Name
+        if (!lastFileName.isEmpty()) {
+            // Get Index
+            int lastFileIndex = getFileIndex(aLastFileName);
+
+            // Set Current Index
+            setCurrentIndex(lastFileIndex);
+        }
     }
 }
 
@@ -1341,12 +1351,13 @@ void FilePanel::setPanelFocus(const bool& aFocus)
 //==============================================================================
 void FilePanel::setCurrentIndex(const int& aCurrentIndex)
 {
+    //qDebug() << "FilePanel::setCurrentIndex - aCurrentIndex: " << aCurrentIndex;
+
     // Get Bounded Index
     int boundedIndex = fileListModel ? qBound(0, aCurrentIndex, fileListModel->rowCount()-1) : 0;
 
     // Check Current Index
     if (currentIndex != boundedIndex) {
-        //qDebug() << "FilePanel::setCurrentIndex - boundedIndex: " << boundedIndex;
 
         // Set Current Index
         currentIndex = boundedIndex;
@@ -2428,6 +2439,12 @@ void FilePanel::focusInEvent(QFocusEvent* aEvent)
         ui->currDirLabel->setStyleSheet(DEFAULT_PANEL_TRASPARENT_STYLE_SHEET);
         // Set Style Sheet
         ui->availableSpaceLabel->setStyleSheet(DEFAULT_PANEL_TRASPARENT_STYLE_SHEET);
+
+        // Check Focus
+        if (!ui->fileListWidget->hasFocus()) {
+            // Set Focus
+            ui->fileListWidget->setFocus();
+        }
 
         // Emit Focused Panel Changed Signal
         emit focusedPanelChanged(this);

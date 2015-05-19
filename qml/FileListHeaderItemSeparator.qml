@@ -45,7 +45,7 @@ Rectangle {
         }
     }
 
-    // N Completed
+    // On Completed
     Component.onCompleted: {
         separatorRoot.x = target.width - Const.DEFAULT_FILE_LIST_HEADER_SEPARATOR_WIDTH + 1;
     }

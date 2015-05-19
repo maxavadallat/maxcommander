@@ -268,6 +268,9 @@ private:
     // Viewer Windows
     QList<ViewerWindow*>            viewerWindows;
 
+    // View Search Result
+    bool                            viewSearchResult;
+
 };
 
 #endif // MAINWINDOW_H

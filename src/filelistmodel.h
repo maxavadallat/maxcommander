@@ -287,6 +287,9 @@ protected:
     // Selected Count
     int                                 selectedCount;
 
+    // Fetch Dir On Connection
+    bool                                fetchOnConnection;
+
     // ...
 };
 

@@ -866,9 +866,6 @@ void SearchDialog::hideEvent(QHideEvent* aEvent)
     // Set Visibility
     setVisible(false);
 
-    // Raise
-    lower();
-
     // Check Start Button
     if (startButton) {
         // Remove Button

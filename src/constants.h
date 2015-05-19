@@ -48,6 +48,8 @@
 #define SETTINGS_KEY_MAIN_WIDTH                             SETTINGS_GROUP_MAIN"/width"
 #define SETTINGS_KEY_MAIN_HEIGHT                            SETTINGS_GROUP_MAIN"/height"
 
+#define SETTINGS_KEY_MAIN_ACTIVEPANEL                       SETTINGS_GROUP_MAIN"/activePanel"
+
 
 // UI
 

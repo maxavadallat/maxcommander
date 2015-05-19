@@ -35,7 +35,7 @@ FileListModelItem::FileListModelItem(const QString& aPath, const QString& aFileN
 //==============================================================================
 FileListModel::FileListModel(QObject* aParent)
     : QAbstractListModel(aParent)
-    , currentDir(QDir::homePath())
+    , currentDir("")
     , fileUtil(NULL)
     , sorting(0)
     , reverseOrder(false)
@@ -43,6 +43,7 @@ FileListModel::FileListModel(QObject* aParent)
     , showDirsFirst(true)
     , caseSensitiveSort(false)
     , selectedCount(0)
+    , fetchOnConnection(false)
 {
     qDebug() << "FileListModel::FileListModel";
 
@@ -94,7 +95,7 @@ void FileListModel::setCurrentDir(const QString& aCurrentDir)
 {
     // Check Current Dir
     if (currentDir != aCurrentDir) {
-        //qDebug() << "FileListModel::setCurrentDir - aCurrentDir: " << aCurrentDir;
+        qDebug() << "FileListModel::setCurrentDir - aCurrentDir: " << aCurrentDir;
 
         // Set Current Dir
         currentDir = aCurrentDir;
@@ -118,8 +119,6 @@ void FileListModel::setSorting(const int& aSorting)
         sorting = aSorting;
 
         // ...
-
-
     }
 }
 
@@ -134,8 +133,6 @@ void FileListModel::setReverse(const bool& aReverse)
         reverseOrder = aReverse;
 
         // ...
-
-
     }
 }
 
@@ -518,6 +515,14 @@ void FileListModel::fetchDirItems()
         return;
     }
 
+    // Check If File Util Connected
+    if (!fileUtil->isConnected()) {
+        // Set Fetch On Connection
+        fetchOnConnection = true;
+
+        return;
+    }
+
     qDebug() << "FileListModel::fetchDirItems - currentDir: " << currentDir;
 
     // Init Filters
@@ -582,7 +587,10 @@ void FileListModel::clientConnectionChanged(const unsigned int& aID, const bool&
     qDebug() << "FileListModel::clientConnectionChanged - aID: " << aID << " - aConnected: " << aConnected;
 
     // Check If Connected
-    if (aConnected) {
+    if (aConnected && fetchOnConnection) {
+        // Reset Fetch On Connection
+        fetchOnConnection = false;
+
         // Fetch Dir Items
         fetchDirItems();
     }

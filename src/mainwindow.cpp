@@ -75,6 +75,7 @@ MainWindow::MainWindow(QWidget* aParent)
     , transferFileDialog(NULL)
     , helpWindow(NULL)
     , searchFileDialog(NULL)
+    , viewSearchResult(false)
 
 {
     qDebug() << "MainWindow::MainWindow";
@@ -237,6 +238,8 @@ void MainWindow::saveSettings()
     // Set Value - Height
     settings.setValue(SETTINGS_KEY_MAIN_HEIGHT, geometry().height());
 
+    // Set Active Panel
+    settings.setValue(SETTINGS_KEY_MAIN_ACTIVEPANEL, focusedPanel ? focusedPanel->getPanelName() : "");
 
     // ...
 }
@@ -315,13 +318,9 @@ void MainWindow::launchTerminal(const QString& aDirPath)
 
     // Check Terminal App
     if (!terminalApp.isEmpty()) {
-        // Init Args
-        QStringList args;
-        // Add Current Dir To Args
-        args << focusedPanel->getCurrentDir();
 
-        // Launch App
-        launchApp(terminalApp, args, focusedPanel->getCurrentDir());
+        // ...
+
     }
 
     // ...
@@ -356,10 +355,11 @@ void MainWindow::launchViewer(const bool& aEditMode, const bool& aNewFile)
 
     // Check Settings For Using External Viewer
 
+    // Reset Search Result View
+    viewSearchResult = false;
 
     // Launch Viewer
     launchViewer(focusedPanel->getCurrFileInfo().absoluteFilePath(), focusedPanel, aEditMode, aNewFile);
-
 }
 
 //==============================================================================
@@ -814,6 +814,9 @@ void MainWindow::searchResultView(const QString& aFilePath, const bool& aEdit)
     if (searchFileDialog) {
         qDebug() << "MainWindow::searchResultView - aFilePath: " << aFilePath << " - aEdit: " << aEdit;
 
+        // Set Search Result View
+        viewSearchResult = true;
+
         // Launch Viewer
         launchViewer(aFilePath, searchFileDialog->getFocusedPanel(), aEdit, false);
     }
@@ -1047,15 +1050,28 @@ void MainWindow::viewerWindowClosed(ViewerWindow* aViewer)
                 // Remove From Window List
                 viewerWindows.removeAt(i);
 
-                try {
-                    // Delete Viewer Window
-                    delete window;
-                } catch (...) {
-                    qCritical() << "#### MainWindow::viewerWindowClosed - ERROR DELETING WIEVER WINDOW!!";
-                }
+                // Delete Viewer Window
+                delete window;
 
-                return;
+                break;
             }
+        }
+    }
+
+
+    // Check Search Result View
+    if (viewSearchResult) {
+        // Reset Serach Result View
+        viewSearchResult = false;
+
+        // Check Search File Dialog
+        if (searchFileDialog && searchFileDialog->isVisible()) {
+            // Show Normal
+            searchFileDialog->showNormal();
+            // Raise
+            searchFileDialog->raise();
+            // Activate Window
+            searchFileDialog->activateWindow();
         }
     }
 }

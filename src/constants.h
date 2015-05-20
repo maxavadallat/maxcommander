@@ -32,13 +32,14 @@
 #define SETTINGS_GROUP_UI                                   "ui"
 #define SETTINGS_GROUP_VIEWER                               "viewer"
 #define SETTINGS_GROUP_APPS                                 "apps"
+#define SETTINGS_GROUP_SEARCH                               "search"
 
 
 // Settings Keys
 
 // Main
 
-#define SETTINGS_KEY_EXEC_PATH                              SETTINGS_GROUP_MAIN"/execpath"
+#define SETTINGS_KEY_MAIN_EXEC_PATH                         SETTINGS_GROUP_MAIN"/execpath"
 
 #define SETTINGS_KEY_MAIN_MAXIMIZED                         SETTINGS_GROUP_MAIN"/maximized"
 
@@ -97,6 +98,8 @@
 #define SETTINGS_KEY_APPS_COMPARE                           SETTINGS_GROUP_APPS"/compare"
 #define SETTINGS_KEY_APPS_PACKER                            SETTINGS_GROUP_APPS"/packer"
 #define SETTINGS_KEY_APPS_UNPACKER                          SETTINGS_GROUP_APPS"/unpacker"
+
+
 
 
 // Common
@@ -166,6 +169,14 @@
 #define SETTINGS_KEY_APPS_COMPARE                           SETTINGS_GROUP_APPS"/compare"
 #define SETTINGS_KEY_APPS_PACKER                            SETTINGS_GROUP_APPS"/packer"
 #define SETTINGS_KEY_APPS_UNPACKER                          SETTINGS_GROUP_APPS"/unpacker"
+
+
+// Search
+
+#define SETTINGS_KEY_SEARCH_CASE_SENSITIVE                  SETTINGS_GROUP_SEARCH"/caseSensitive"
+#define SETTINGS_KEY_SEARCH_WHOLE_WORD                      SETTINGS_GROUP_SEARCH"/wholeWord"
+
+
 
 // Default Settings
 
@@ -258,6 +269,37 @@
 // Open Files
 #define DEFAULT_OPEN_FILE_SYSTEM_COMMAND_MAC_OSX            "open \"%1\" &"
 
+// Default Min Height - Results
+#define DEFAULT_FILE_SEARCH_DIALOG_MIN_HEIGHT_RESULTS       480
+// Default Max Height - Results
+#define DEFAULT_FILE_SEARCH_DIALOG_MAX_HEIGHT_RESULTS       1200
+
+// Default Min Height - No Results
+#define DEFAULT_FILE_SEARCH_DIALOG_MIN_HEIGHT_NO_RESULTS    190
+// Default Max Height - No Results
+#define DEFAULT_FILE_SEARCH_DIALOG_MAX_HEIGHT_NO_RESULTS    190
+
+// File Search - File Name Pattern List
+#define DEFAULT_FILE_SEARCH_FILE_NAME_PATTERN_LIST          ".searchfilename.list"
+// File Search - Content Pattern List
+#define DEFAULT_FILE_SEARCH_CONTENT_PATTERN_LIST            ".searchcontent.list"
+
+// Max Numbers Of Patterns To Save
+#define DEFAULT_FILE_SEARCH_MAX_PATTERNS                    16
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Localization Constants
 
@@ -326,6 +368,8 @@
 
 #define DEFAULT_LABEL_CURRENT_FILE_TITLE                    "Current File:"
 #define DEFAULT_LABEL_CURRENT_FILE_TITLE_FINISHED           "Finished"
+
+
 
 
 #endif // CONSTANTS_H

@@ -457,7 +457,7 @@ void storeAppExecPath(const char* aPath)
     // Init Settings
     QSettings settings;
     // Set Value
-    settings.setValue(SETTINGS_KEY_EXEC_PATH, exeInfo.absolutePath());
+    settings.setValue(SETTINGS_KEY_MAIN_EXEC_PATH, exeInfo.absolutePath());
     // Sync/Save Settings
     settings.sync();
 }
@@ -470,7 +470,7 @@ QString getAppExecPath()
     // Init Settings
     QSettings settings;
 
-    return settings.value(SETTINGS_KEY_EXEC_PATH).toString();
+    return settings.value(SETTINGS_KEY_MAIN_EXEC_PATH).toString();
 }
 
 //==============================================================================

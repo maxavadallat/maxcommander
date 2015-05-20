@@ -2,6 +2,9 @@
 #include <QTimer>
 #include <QQmlContext>
 #include <QImageReader>
+#include <QSettings>
+#include <QFile>
+#include <QTextStream>
 #include <QDebug>
 
 #include <mcwinterface.h>
@@ -97,7 +100,10 @@ void SearchDialog::init()
 
     // ...
 
-    //ui->buttonBox
+    // Set Duplicates Enabled
+    ui->filePatternComboBox->setDuplicatesEnabled(false);
+    // Set Duplicates Enabled
+    ui->contentPatternComboBox->setDuplicatesEnabled(false);
 }
 
 //==============================================================================
@@ -149,6 +155,15 @@ void SearchDialog::loadSettings()
 {
     qDebug() << "SearchDialog::loadSettings";
 
+    // Init Settings
+    QSettings settings;
+
+    // Case Senstive Search
+    caseSensitiveSearch = settings.value(SETTINGS_KEY_SEARCH_CASE_SENSITIVE, DEFAULT_SETTINGS_SEARCH_CASE_SENSITIVE).toBool();
+
+    // Whole Word Search
+    wholeWordSearch = settings.value(SETTINGS_KEY_SEARCH_WHOLE_WORD, DEFAULT_SETTINGS_SEARCH_WHOLE_WORD).toBool();
+
     // ...
 
 }
@@ -160,8 +175,23 @@ void SearchDialog::saveSettings()
 {
     qDebug() << "SearchDialog::saveSettings";
 
+    // Init Settings
+    QSettings settings;
+
+    // Save Case Sensitive Setting
+    settings.setValue(SETTINGS_KEY_SEARCH_CASE_SENSITIVE, caseSensitiveSearch);
+
+    // Save Whole Word Search
+    settings.setValue(SETTINGS_KEY_SEARCH_WHOLE_WORD, wholeWordSearch);
+
     // ...
 
+    // Save File Search Patterns
+    saveFileSearchPatterns();
+    // Save Content Search Patterns
+    saveContentSearchPatterns();
+
+    // ...
 }
 
 //==============================================================================
@@ -189,6 +219,11 @@ void SearchDialog::restoreUI()
     // Reset Content Pattern Combo Current Text
     ui->contentPatternComboBox->setCurrentText("");
 
+    // Case Sensitive Search
+    ui->caseSensitiveCheckBox->setChecked(caseSensitiveSearch);
+    // Whole Word Search
+    ui->wholeWordCheckBox->setChecked(wholeWordSearch);
+
     // Check Results Model
     if (resultModel) {
         // Clear
@@ -197,6 +232,12 @@ void SearchDialog::restoreUI()
 
     // ...
 
+    // Load File Search Patterns
+    loadFileSearchPatterns();
+    // Load Content Search Patterns
+    loadContentSearchPatterns();
+
+    // ...
 }
 
 //==============================================================================
@@ -212,9 +253,9 @@ void SearchDialog::showResults()
     ui->resultsFrame->setVisible(true);
 
     // Set Minimum Height
-    setMinimumHeight(480);
+    setMinimumHeight(DEFAULT_FILE_SEARCH_DIALOG_MIN_HEIGHT_RESULTS);
     // Set Maximum Height
-    setMaximumHeight(1200);
+    setMaximumHeight(DEFAULT_FILE_SEARCH_DIALOG_MAX_HEIGHT_RESULTS);
 
     // ...
 
@@ -238,9 +279,9 @@ void SearchDialog::hideresults()
     ui->resultsFrame->setVisible(false);
 
     // Set Minimum Height
-    setMinimumHeight(190);
+    setMinimumHeight(DEFAULT_FILE_SEARCH_DIALOG_MIN_HEIGHT_NO_RESULTS);
     // Set Maximum Height
-    setMaximumHeight(190);
+    setMaximumHeight(DEFAULT_FILE_SEARCH_DIALOG_MAX_HEIGHT_NO_RESULTS);
 
     // ...
 
@@ -290,6 +331,134 @@ void SearchDialog::shutDown()
     }
 
     // ...
+}
+
+//==============================================================================
+// Load File Search Patterns
+//==============================================================================
+void SearchDialog::loadFileSearchPatterns()
+{
+    qDebug() << "SearchDialog::loadFileSearchPatterns";
+
+    // Clear File Patterns
+    ui->filePatternComboBox->clear();
+
+    // Init File Search Pattern List File
+    QFile fspFile(QDir::homePath() + "/" + DEFAULT_FILE_SEARCH_FILE_NAME_PATTERN_LIST);
+
+    // Open File
+    if (fspFile.open(QIODevice::ReadOnly)) {
+        // Init Text Stream
+        QTextStream fspStream(&fspFile);
+
+        // Go Thru File Pattern List File
+        while (!fspStream.atEnd()) {
+            // Read Line
+            QString line = fspStream.readLine();
+            // Append To List
+            ui->filePatternComboBox->addItem(line);
+        }
+
+        // Close File
+        fspFile.close();
+    }
+}
+
+//==============================================================================
+// Load Content Search Patterns
+//==============================================================================
+void SearchDialog::loadContentSearchPatterns()
+{
+    qDebug() << "SearchDialog::loadContentSearchPatterns";
+
+    // Clear Content Patterns
+    ui->contentPatternComboBox->clear();
+
+    // Init Content Search Pattern List File
+    QFile cspFile(QDir::homePath() + "/" + DEFAULT_FILE_SEARCH_CONTENT_PATTERN_LIST);
+
+    // Open File
+    if (cspFile.open(QIODevice::ReadOnly)) {
+        // Init Text Stream
+        QTextStream cspStream(&cspFile);
+
+        // Go Thru Content Patterns List File
+        while (!cspStream.atEnd()) {
+            // Read Line
+            QString line = cspStream.readLine();
+            // Append To List
+            ui->contentPatternComboBox->addItem(line);
+        }
+
+        // Close File
+        cspFile.close();
+    }
+}
+
+//==============================================================================
+// Save File Search Patterns
+//==============================================================================
+void SearchDialog::saveFileSearchPatterns()
+{
+    qDebug() << "SearchDialog::saveFileSearchPatterns";
+
+    // Init File Search Pattern List File
+    QFile fspFile(QDir::homePath() + "/" + DEFAULT_FILE_SEARCH_FILE_NAME_PATTERN_LIST);
+
+    // Open File
+    if (fspFile.open(QIODevice::WriteOnly)) {
+        // Init Text Stream
+        QTextStream fspStream(&fspFile);
+
+        // Get File Search Patterns Count
+        int fspCount = ui->filePatternComboBox->count();
+
+        // Go Thru File Search Patterns
+        for (int i=0; i<fspCount; ++i) {
+            // Get Item Text
+            QString itemText = ui->filePatternComboBox->itemText(i);
+            // Write Item
+            fspStream << itemText;
+            // Write New Line
+            fspStream << "\n";
+        }
+
+        // Close File
+        fspFile.close();
+    }
+}
+
+//==============================================================================
+// Save Content Search Patterns
+//==============================================================================
+void SearchDialog::saveContentSearchPatterns()
+{
+    qDebug() << "SearchDialog::saveContentSearchPatterns";
+
+    // Init Content Search Pattern List File
+    QFile cspFile(QDir::homePath() + "/" + DEFAULT_FILE_SEARCH_CONTENT_PATTERN_LIST);
+
+    // Open File
+    if (cspFile.open(QIODevice::WriteOnly)) {
+        // Init Text Stream
+        QTextStream cspStream(&cspFile);
+
+        // Get Content Search Patterns Count
+        int cspCount = ui->contentPatternComboBox->count();
+
+        // Go Thru File Search Patterns
+        for (int i=0; i<cspCount; ++i) {
+            // Get Item Text
+            QString itemText = ui->contentPatternComboBox->itemText(i);
+            // Write Item
+            cspStream << itemText;
+            // Write New Line
+            cspStream << "\n";
+        }
+
+        // Close File
+        cspFile.close();
+    }
 }
 
 //==============================================================================
@@ -432,9 +601,6 @@ void SearchDialog::hideDialog()
 {
     qDebug() << "SearchDialog::hideDialog";
 
-    // Save Settings
-    saveSettings();
-
     // Close
     close();
 
@@ -515,6 +681,42 @@ FilePanel* SearchDialog::getFocusedPanel()
 //==============================================================================
 void SearchDialog::startSearch()
 {
+    // Check File Pattern Combo Current Text
+    if (!ui->filePatternComboBox->currentText().isEmpty()) {
+        // Find Current File Pattern Text
+        int fpcPos = ui->filePatternComboBox->findText(ui->filePatternComboBox->currentText());
+
+        // Insert Current Text
+        ui->filePatternComboBox->insertItem(0, ui->filePatternComboBox->currentText());
+
+        // Check Current Text Pos
+        if (fpcPos >= 0) {
+            // Remove Item
+            ui->filePatternComboBox->removeItem(fpcPos + 1);
+        }
+
+        // Set Current Index
+        ui->filePatternComboBox->setCurrentIndex(0);
+    }
+
+    // Check Content Pattern Combo Current Text
+    if (!ui->contentPatternComboBox->currentText().isEmpty()) {
+        // Find Current Content Pattern Text
+        int cpcPos = ui->contentPatternComboBox->findText(ui->contentPatternComboBox->currentText());
+
+        // Insert Current Text
+        ui->contentPatternComboBox->insertItem(0, ui->contentPatternComboBox->currentText());
+
+        // Check Current Text Pos
+        if (cpcPos >= 0) {
+            // Remove Item
+            ui->contentPatternComboBox->removeItem(cpcPos + 1);
+        }
+
+        // Set Current Index
+        ui->contentPatternComboBox->setCurrentIndex(0);
+    }
+
     // Check File Util
     if (fileUtil) {
         // Get File Name Pattern
@@ -865,6 +1067,9 @@ void SearchDialog::hideEvent(QHideEvent* aEvent)
 
     // Set Visibility
     setVisible(false);
+
+    // Save Settings
+    saveSettings();
 
     // Check Start Button
     if (startButton) {

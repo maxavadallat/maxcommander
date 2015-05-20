@@ -84,5 +84,10 @@
 #define DEFAULT_SETTINGS_UNPACKER_PATH                      ""              // unPackerPath
 
 
+// Search - Case Sensitve
+#define DEFAULT_SETTINGS_SEARCH_CASE_SENSITIVE              false
+// Search - Whole Word
+#define DEFAULT_SETTINGS_SEARCH_WHOLE_WORD                  false
+
 #endif // DEFAULTSETTINGS
 

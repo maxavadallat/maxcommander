@@ -111,6 +111,16 @@ protected slots:
     // Shut Down
     void shutDown();
 
+    // Load File Search Patterns
+    void loadFileSearchPatterns();
+    // Load Content Search Patterns
+    void loadContentSearchPatterns();
+
+    // Save File Search Patterns
+    void saveFileSearchPatterns();
+    // Save Content Search Patterns
+    void saveContentSearchPatterns();
+
     // Check If Path IS Valid
     bool isPathValid(const QString& aDirPath);
 

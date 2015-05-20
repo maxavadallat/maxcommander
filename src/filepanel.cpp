@@ -1186,6 +1186,8 @@ void FilePanel::setLoading(const bool& aLoading)
 {
     // Check Loading
     if (loading != aLoading) {
+        //qDebug() << "FilePanel::setLoading - aLoading: " << aLoading;
+
         // Set Loading
         loading = aLoading;
         // Emit Loading Changed Signal
@@ -1351,13 +1353,12 @@ void FilePanel::setPanelFocus(const bool& aFocus)
 //==============================================================================
 void FilePanel::setCurrentIndex(const int& aCurrentIndex)
 {
-    //qDebug() << "FilePanel::setCurrentIndex - aCurrentIndex: " << aCurrentIndex;
-
     // Get Bounded Index
     int boundedIndex = fileListModel ? qBound(0, aCurrentIndex, fileListModel->rowCount()-1) : 0;
 
     // Check Current Index
     if (currentIndex != boundedIndex) {
+        //qDebug() << "FilePanel::setCurrentIndex - aCurrentIndex: " << aCurrentIndex;
 
         // Set Current Index
         currentIndex = boundedIndex;
@@ -2002,10 +2003,13 @@ void FilePanel::fileModelDirFetchFinished()
         lastIndex = -1;
 
     } else {
-        qDebug() << "FilePanel::fileModelDirFetchFinished - panelName: " << panelName;
+        qDebug() << "FilePanel::fileModelDirFetchFinished - panelName: " << panelName << " - currentDir: " << currentDir;
 
         // Set Current Index
         setCurrentIndex(0);
+
+        // Set Loading
+        setLoading(false);
 
         // ...
     }
@@ -2020,6 +2024,11 @@ void FilePanel::fileModelDirFetchFinished()
         // Reload
         //reload();
     }
+
+    // Emit Current Index Changed Signal For Sync
+    emit currentIndexChanged(currentIndex);
+
+    // ...
 }
 
 //==============================================================================
@@ -2195,6 +2204,7 @@ void FilePanel::directoryChanged(const QString& aDirPath)
         }
 
         qDebug() << "#### FilePanel::directoryChanged - aDirPath: " << aDirPath;
+
         // Set Dir Changed
         dwDirChanged = true;
 
@@ -2211,7 +2221,9 @@ void FilePanel::fileChanged(const QString& aFilePath)
     QFileInfo fileInfo(aFilePath);
     // Check File Path
     if (currentDir == fileInfo.absolutePath()) {
+
         qDebug() << "#### FilePanel::fileChanged - aFilePath: " << aFilePath;
+
         // Set File Changed
         dwFileChanged = true;
 

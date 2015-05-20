@@ -183,15 +183,17 @@ Rectangle {
 
         // On Current Index Changed
         onCurrentIndexChanged: {
-            //console.log("fileListView.onCurrentIndexChanged - currentIndex: " + fileListView.currentIndex);
-
             // Check Loading
             if (mainController.loading) {
+                //console.log("fileListView.onCurrentIndexChanged - currentIndex: " + fileListView.currentIndex + " - LOADING IS ON!!");
                 // Reset List View Current Index - Because ListView Fucked Up!!! Sets Weird Values Sometimes for now fucking Reason... X (((
                 fileListView.currentIndex = mainController.currentIndex;
                 // Reset Loading
                 mainController.loading = false;
+
             } else {
+                //console.log("fileListView.onCurrentIndexChanged - currentIndex: " + fileListView.currentIndex);
+
                 // Check If Current Index Matches
                 if (mainController.currentIndex != fileListView.currentIndex) {
                     // Set Main Controller Current Index
@@ -407,15 +409,7 @@ Rectangle {
                 fileListView.currentIndex = aIndex;
                 // Position View
                 //fileListView.positionViewAtIndex(aIndex + 1, ListView.Center);
-            } else {
-                //console.log("fileListRoot.Connections.mainController.onCurrentIndexChanged - aIndex: " + aIndex + " - MATCHES!");
             }
-
-            // Loading Finishes When Proper Indexes Are Set.
-            // For Some reason the Fucking ListView does set some weird value for currentIndex after loading
-
-            // Reset Loading
-            //mainController.loading = false;
         }
 
         // On Loading Changed

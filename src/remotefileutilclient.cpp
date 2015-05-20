@@ -150,7 +150,7 @@ void RemoteFileUtilClient::getDirList(const QString& aDirPath, const int& aFilte
         // ...
     }
 
-    qDebug() << "RemoteFileUtilClient::getDirList - aDirPath: " << aDirPath << " - aFilters: " << aFilters << " - aSortFlags: " << aSortFlags;
+    //qDebug() << "RemoteFileUtilClient::getDirList - aDirPath: " << aDirPath << " - aFilters: " << aFilters << " - aSortFlags: " << aSortFlags;
 
     // Init New Data
     QVariantMap newData;
@@ -884,7 +884,7 @@ void RemoteFileUtilClient::parseLastBuffer()
         // Set ID
         cID = QString(lastBuffer).toULongLong();
 
-        qDebug() << "RemoteFileUtilClient::parseLastBuffer - cID: " << cID << " - Client ID is SET!!";
+        //qDebug() << "RemoteFileUtilClient::parseLastBuffer - cID: " << cID << " - Client ID is SET!!";
 
         // Set Status
         setStatus(ECSTIdle);

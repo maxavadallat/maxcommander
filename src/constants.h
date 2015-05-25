@@ -109,6 +109,10 @@
 #define SETTINGS_KEY_CASE_SENSITIVE                         SETTINGS_GROUP_PANEL_COMMON"/caseSensitive"
 #define SETTINGS_KEY_SELECT_DIRS                            SETTINGS_GROUP_PANEL_COMMON"/selectDirs"
 
+#define SETTINGS_KEY_PANEL_COPY_HIDDEN_FILES                SETTINGS_GROUP_PANEL_COMMON"/copyHidden"
+#define SETTINGS_KEY_PANEL_USE_DEFAULT_ICONS                SETTINGS_GROUP_UI"/defaultIcons"
+#define SETTINGS_KEY_SHOW_FULL_SIZES                        SETTINGS_GROUP_UI"/showFullSizes"
+
 
 // File Panels
 

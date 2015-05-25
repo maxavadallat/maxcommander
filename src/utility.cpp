@@ -580,7 +580,7 @@ QString formattedSize(const qint64& aSize)
     }
 
     // Init Units
-    QStringList units = QString("B,kB,MB,GB,TB,EB").split(",", QString::SkipEmptyParts);
+    QStringList units = QString("B,kB,MB,GB,TB,EB").split(",");
 
     // Calculate Digit Group
     //int digitGroups = (int) (log10(aSize) / log10(DEFAULT_ONE_KILO));

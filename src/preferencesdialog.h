@@ -8,6 +8,8 @@ namespace Ui {
 class PreferencesDialog;
 }
 
+class SettingsController;
+
 //==============================================================================
 // Preferences Dialog Class
 //==============================================================================
@@ -24,6 +26,10 @@ class PreferencesDialog : public QDialog
     Q_PROPERTY(bool showHiddenFiles READ getShowHiddenFiles WRITE setShowHiddenFiles NOTIFY showHiddenFilesChanged)
     Q_PROPERTY(bool showDirsFirst READ getShowDirsFirst WRITE setShowDirsFirst NOTIFY showDirsFirstChanged)
     Q_PROPERTY(bool caseSensitiveSort READ getCaseSensitiveSort WRITE setCaseSensitiveSort NOTIFY caseSensitiveSortChanged)
+
+    Q_PROPERTY(bool useDefaultIcons READ getUseDefaultIcons WRITE setUseDefaultIcons NOTIFY useDefaultIconsChanged)
+    Q_PROPERTY(bool showFullSizes READ getShowFullSizes WRITE setShowFullSizes NOTIFY showFullSizesChanged)
+    Q_PROPERTY(bool copyHiddenFiles READ getCopyHiddenFiles WRITE setCopyHiddenFiles NOTIFY copyHiddenFilesChanged)
 
     Q_PROPERTY(QString textColor READ getTextColor WRITE setTextColor NOTIFY textColorChanged)
     Q_PROPERTY(QString textBGColor READ gettextBGColor WRITE setTextBGColor NOTIFY textBGColorChanged)
@@ -56,6 +62,61 @@ class PreferencesDialog : public QDialog
 public:
     // Constructor
     explicit PreferencesDialog(QWidget* aParent = NULL);
+
+    // Get Show Function Keys
+    bool getShowFunctionKeys();
+    // Set Show Function Keys
+    void setShowFunctionKeys(const bool& aShow);
+
+    // Get Show Directory Hot Keys
+    bool getShowDirHotKeys();
+    // Set Show Directory Hot Keys
+    void setShowDirHotKeys(const bool& aShow);
+
+    // Get Show Drive Buttons
+    bool getShowDriveButtons();
+    // Set Show Drive Buttons
+    void setShowDriveButtons(const bool& aShow);
+
+    // Get Close When Finished
+    bool getCloseWhenFinished();
+    // Set Close When Finished
+    void setCloseWhenFinished(const bool& aClose);
+
+    // Get Select Directories
+    bool getSelectDirectories();
+    // Set Select Directories
+    void setSelectDirectories(const bool& aSelect);
+
+    // Get Show Hidden Files
+    bool getShowHiddenFiles();
+    // Set Show Hidden Files
+    void setShowHiddenFiles(const bool& aShow);
+
+    // Get Show Directories First
+    bool getShowDirsFirst();
+    // Set Show Directories First
+    void setShowDirsFirst(const bool& aShow);
+
+    // Get Case Sensitive Sorting
+    bool getCaseSensitiveSort();
+    // Set Case Sensitive Sorting
+    void setCaseSensitiveSort(const bool& aCaseSensitive);
+
+    // Get Use Default Icons
+    bool getUseDefaultIcons();
+    // Set Use Default Icons
+    void setUseDefaultIcons(const bool& aUseDefaultIcons);
+
+    // Get Show Full File Sizes
+    bool getShowFullSizes();
+    // Set Show Full File Sizes
+    void setShowFullSizes(const bool& aShowFullSizes);
+
+    // Get Copy Hidden Files
+    bool getCopyHiddenFiles();
+    // Set Copy Hidden Files
+    void setCopyHiddenFiles(const bool& aCopyHiddenFile);
 
     // Get Normal Text Color
     QString getTextColor();
@@ -147,47 +208,6 @@ public:
     // Set Thumb height
     void setThumbHeight(const int& aheight);
 
-    // Get Show Function Keys
-    bool getShowFunctionKeys();
-    // Set Show Function Keys
-    void setShowFunctionKeys(const bool& aShow);
-
-    // Get Show Directory Hot Keys
-    bool getShowDirHotKeys();
-    // Set Show Directory Hot Keys
-    void setShowDirHotKeys(const bool& aShow);
-
-    // Get Show Drive Buttons
-    bool getShowDriveButtons();
-    // Set Show Drive Buttons
-    void setShowDriveButtons(const bool& aShow);
-
-    // Get Close When Finished
-    bool getCloseWhenFinished();
-    // Set Close When Finished
-    void setCloseWhenFinished(const bool& aClose);
-
-    // Get Select Directories
-    bool getSelectDirectories();
-    // Set Select Directories
-    void setSelectDirectories(const bool& aSelect);
-
-    // Get Show Hidden Files
-    bool getShowHiddenFiles();
-    // Set Show Hidden Files
-    void setShowHiddenFiles(const bool& aShow);
-
-    // Get Show Directories First
-    bool getShowDirsFirst();
-    // Set Show Directories First
-    void setShowDirsFirst(const bool& aShow);
-
-    // Get Case Sensitive Sorting
-    bool getCaseSensitiveSort();
-    // Set Case Sensitive Sorting
-    void setCaseSensitiveSort(const bool& aCaseSensitive);
-
-
     // Destructor
     virtual ~PreferencesDialog();
 
@@ -200,6 +220,31 @@ signals:
 
     // Settings Has changed Slot
     void settingsHasChanged();
+
+    // Show Function Keys Changed Signal
+    void showFunctionKeysChanged(const bool& aShow);
+    // Show Directory Hot Keys Changed Signal
+    void showDirHotKeysChanged(const bool& aShow);
+    // Show Drive Buttons changed Signal
+    void showDriveButtonsChanged(const bool& aShow);
+    // Close When Finished Signal
+    void closeWhenFinishedChanged(const bool& aClose);
+
+    // Select Directries Changed Signal
+    void selectDirectoriesChanged(const bool& aSelect);
+    // Show Hidden Files Changed Signal
+    void showHiddenFilesChanged(const bool& aShow);
+    // Show Directories First Changed Signal
+    void showDirsFirstChanged(const bool& aShow);
+    // Case Sensitive Sorting Changed Signal
+    void caseSensitiveSortChanged(const bool& aCaseSensitive);
+
+    // Use Default Icons Changed Signal
+    void useDefaultIconsChanged(const bool& aUseDefaultIcons);
+    // Show Full File Sizes Changed Signal
+    void showFullSizesChanged(const bool& aShowFullSizes);
+    // Copy Hidden Files Changed Signal
+    void copyHiddenFilesChanged(const bool& aCopyHidden);
 
     // Text Color Changed Signal
     void textColorChanged(const QString& aColor);
@@ -238,24 +283,6 @@ signals:
     void thumbWidthChanged(const int& aWidth);
     // Thumb Height Changed Signal
     void thumbHeightChanged(const int& aHeight);
-
-    // Show Function Keys Changed Signal
-    void showFunctionKeysChanged(const bool& aShow);
-    // Show Directory Hot Keys Changed Signal
-    void showDirHotKeysChanged(const bool& aShow);
-    // Show Drive Buttons changed Signal
-    void showDriveButtonsChanged(const bool& aShow);
-    // Close When Finished Signal
-    void closeWhenFinishedChanged(const bool& aClose);
-
-    // Select Directries Changed Signal
-    void selectDirectoriesChanged(const bool& aSelect);
-    // Show Hidden Files Changed Signal
-    void showHiddenFilesChanged(const bool& aShow);
-    // Show Directories First Changed Signal
-    void showDirsFirstChanged(const bool& aShow);
-    // Case Sensitive Sorting Changed Signal
-    void caseSensitiveSortChanged(const bool& aCaseSensitive);
 
 protected slots:
 
@@ -390,6 +417,13 @@ private:
     bool                    showDirsFirst;
     // Case Sensitive Sorting
     bool                    caseSensitiveSort;
+
+    // Use Default Icons
+    bool                    useDefaultIcons;
+    // Show Full File Sizes
+    bool                    showFullSizes;
+    // Copy Hidden Files
+    bool                    copyHiddenFiles;
 
     // ...
 

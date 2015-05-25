@@ -20,6 +20,7 @@
 #include "remotefileutilclient.h"
 #include "confirmdialog.h"
 #include "transferprogressmodel.h"
+#include "settingscontroller.h"
 #include "utility.h"
 #include "constants.h"
 #include "defaultsettings.h"

@@ -27,6 +27,13 @@
 // Case Sensitive Sorting
 #define DEFAULT_SETTINGS_CASE_SENSITIVE_SORTING             false           // caseSensitiveSort
 
+// Use Default Icons
+#define DEAFULT_SETTINGS_USE_DEFAULT_ICONS                  false           // useDefaultIcons
+// Show Full File Sizes
+#define DEFAULT_SETTINGS_SHOW_FULL_FILE_SIZES               false           // showFullSizes
+// Copy Hidden Files
+#define DEFAULT_SETTINGS_COPY_HIDDEN_FILES                  true            // copyHiddenFiles
+
 
 // ...
 

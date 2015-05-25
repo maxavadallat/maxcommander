@@ -22,6 +22,7 @@
 #include "searchdialog.h"
 #include "remotefileutilclient.h"
 #include "infodialog.h"
+#include "settingscontroller.h"
 #include "utility.h"
 #include "defaultsettings.h"
 #include "constants.h"

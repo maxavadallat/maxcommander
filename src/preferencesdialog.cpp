@@ -11,6 +11,7 @@
 #include "ui_preferencesdialog.h"
 #include "colorpickerbutton.h"
 #include "filelistimageprovider.h"
+#include "settingscontroller.h"
 #include "utility.h"
 #include "constants.h"
 #include "defaultsettings.h"
@@ -23,6 +24,7 @@ PreferencesDialog::PreferencesDialog(QWidget* aParent)
     : QDialog(aParent)
     , ui(new Ui::PreferencesDialog)
     , dirty(false)
+
     , showFunctionKeys(DEFAULT_SETTINGS_SHOW_FUNCTION_KEYS)
     , showDirHotKeys(DEFAULT_SETTINGS_SHOW_DIRECTORIY_HOT_KEYS)
     , showDriveButtons(DEFAULT_SETTINGS_SHOW_DRIVE_BUTTONS)
@@ -32,6 +34,10 @@ PreferencesDialog::PreferencesDialog(QWidget* aParent)
     , showHiddenFiles(DEFAULT_SETTINGS_SHOW_HIDDEN_FILES)
     , showDirsFirst(DEFAULT_SETTINGS_SHOW_DIRECTORIES_FIRST)
     , caseSensitiveSort(DEFAULT_SETTINGS_CASE_SENSITIVE_SORTING)
+
+    , useDefaultIcons(DEAFULT_SETTINGS_USE_DEFAULT_ICONS)
+    , showFullSizes(DEFAULT_SETTINGS_SHOW_FULL_FILE_SIZES)
+    , copyHiddenFiles(DEFAULT_SETTINGS_COPY_HIDDEN_FILES)
 
     , textColor(DEFAULT_SETTINGS_TEXT_COLOR)
     , textBGColor(DEFAULT_SETTINGS_TEXT_BG_COLOR)
@@ -164,6 +170,13 @@ void PreferencesDialog::loadSettings()
     // Set Case Sensitive Sorting
     setCaseSensitiveSort(settings.value(SETTINGS_KEY_CASE_SENSITIVE, DEFAULT_SETTINGS_CASE_SENSITIVE_SORTING).toBool());
 
+    // Set Copy Hidden Files
+    setCopyHiddenFiles(settings.value(SETTINGS_KEY_PANEL_COPY_HIDDEN_FILES, DEFAULT_SETTINGS_COPY_HIDDEN_FILES).toBool());
+    // Set Show Full File Sizes
+    setShowFullSizes(settings.value(SETTINGS_KEY_SHOW_FULL_SIZES, DEFAULT_SETTINGS_SHOW_FULL_FILE_SIZES).toBool());
+    // Set Use Default File Icons
+    setUseDefaultIcons(settings.value(SETTINGS_KEY_PANEL_USE_DEFAULT_ICONS, DEAFULT_SETTINGS_USE_DEFAULT_ICONS).toBool());
+
     // ...
 
     // Reset Dirty
@@ -237,6 +250,12 @@ void PreferencesDialog::saveSettings()
     // Set Case Sensitive Sorting
     settings.setValue(SETTINGS_KEY_CASE_SENSITIVE, caseSensitiveSort);
 
+    // Set Copy Hidden Files
+    settings.setValue(SETTINGS_KEY_PANEL_COPY_HIDDEN_FILES, copyHiddenFiles);
+    // Set Show Full File Sizes
+    settings.setValue(SETTINGS_KEY_SHOW_FULL_SIZES, showFullSizes);
+    // Set Use Default File Icons
+    settings.setValue(SETTINGS_KEY_PANEL_USE_DEFAULT_ICONS, useDefaultIcons);
 
     // ...
 
@@ -307,6 +326,13 @@ void PreferencesDialog::restoreDefaults()
     setShowDirsFirst(DEFAULT_SETTINGS_SHOW_DIRECTORIES_FIRST);
     // Set Case Sensitive Sorting
     setCaseSensitiveSort(DEFAULT_SETTINGS_CASE_SENSITIVE_SORTING);
+
+    // Set Copy Hidden Files
+    setCopyHiddenFiles(DEFAULT_SETTINGS_COPY_HIDDEN_FILES);
+    // Set Show Full File Sizes
+    setShowFullSizes(DEFAULT_SETTINGS_SHOW_FULL_FILE_SIZES);
+    // Set Use Default File Icons
+    setUseDefaultIcons(DEAFULT_SETTINGS_USE_DEFAULT_ICONS);
 
     // ...
 
@@ -385,6 +411,15 @@ void PreferencesDialog::restoreUI()
     // Set Check Box Checked
     ui->caseSensitiveSortCheckBox->setChecked(caseSensitiveSort);
 
+    // Set Check Box Checked
+    ui->copyHiddenFilesCheckBox->setChecked(copyHiddenFiles);
+    // Set Check Box Checked
+    ui->showFullFileSizesCheckBox->setChecked(showFullSizes);
+    // Set Check Box Checked
+    ui->defaultFileIconsCheckBox->setChecked(useDefaultIcons);
+
+
+    // Switch Thumb Width
     switch (thumbWidth) {
         case DEFAULT_ICON_WIDTH_16:
             // Set Current Index
@@ -424,6 +459,268 @@ void PreferencesDialog::setDirty(const bool& aDirty)
             // Disable Apply Button
 
         }
+    }
+}
+
+//==============================================================================
+// Get Use Default Icons
+//==============================================================================
+bool PreferencesDialog::getUseDefaultIcons()
+{
+    return useDefaultIcons;
+}
+
+//==============================================================================
+// Set Use Default Icons
+//==============================================================================
+void PreferencesDialog::setUseDefaultIcons(const bool& aUseDefaultIcons)
+{
+    // Check Use Default Icons
+    if (useDefaultIcons != aUseDefaultIcons) {
+        // Set Use Default Icons
+        useDefaultIcons = aUseDefaultIcons;
+        // Set Dirty
+        setDirty(true);
+        // Emit Signal
+        emit useDefaultIconsChanged(useDefaultIcons);
+    }
+}
+
+//==============================================================================
+// Get Show Full File Sizes
+//==============================================================================
+bool PreferencesDialog::getShowFullSizes()
+{
+    return showFullSizes;
+}
+
+//==============================================================================
+// Set Show Full File Sizes
+//==============================================================================
+void PreferencesDialog::setShowFullSizes(const bool& aShowFullSizes)
+{
+    // Check Show Full Sizes
+    if (showFullSizes != aShowFullSizes) {
+        // Set Show Full Sizes
+        showFullSizes = aShowFullSizes;
+        // Set Dirty
+        setDirty(true);
+        // Emit Signal
+        emit showFullSizesChanged(showFullSizes);
+    }
+}
+
+//==============================================================================
+// Get Copy Hidden Files
+//==============================================================================
+bool PreferencesDialog::getCopyHiddenFiles()
+{
+    return copyHiddenFiles;
+}
+
+//==============================================================================
+// Set Copy Hidden Files
+//==============================================================================
+void PreferencesDialog::setCopyHiddenFiles(const bool& aCopyHiddenFile)
+{
+    // Check Copy Hidden Files
+    if (copyHiddenFiles != aCopyHiddenFile) {
+        // Set Copy Hidden Files
+        copyHiddenFiles = aCopyHiddenFile;
+        // Set Dirty
+        setDirty(true);
+        // Emit Signal
+        emit copyHiddenFilesChanged(copyHiddenFiles);
+    }
+}
+
+//==============================================================================
+// Get Show Function Keys
+//==============================================================================
+bool PreferencesDialog::getShowFunctionKeys()
+{
+    return showFunctionKeys;
+}
+
+//==============================================================================
+// Set Show Function Keys
+//==============================================================================
+void PreferencesDialog::setShowFunctionKeys(const bool& aShow)
+{
+    // Check Show Function Keys
+    if (showFunctionKeys != aShow) {
+        // Set Show Function Keys
+        showFunctionKeys = aShow;
+        // Set Dirty
+        setDirty(true);
+        // Emit Show Function Keys Changed Signal
+        emit showFunctionKeysChanged(showFunctionKeys);
+    }
+}
+
+//==============================================================================
+// Get Show Directory Hot Keys
+//==============================================================================
+bool PreferencesDialog::getShowDirHotKeys()
+{
+    return showDirHotKeys;
+}
+
+//==============================================================================
+// Set Show Directory Hot Keys
+//==============================================================================
+void PreferencesDialog::setShowDirHotKeys(const bool& aShow)
+{
+    // Check Show Directory Hot Keys
+    if (showDirHotKeys != aShow) {
+        // Set Show Directory Hot Keya
+        showDirHotKeys = aShow;
+        // Set Dirty
+        setDirty(true);
+        // Emit Show Directory Hot Keys Changed Signal
+        emit showDirHotKeysChanged(showDirHotKeys);
+    }
+}
+
+//==============================================================================
+// Get Show Drive Buttons
+//==============================================================================
+bool PreferencesDialog::getShowDriveButtons()
+{
+    return showDriveButtons;
+}
+
+//==============================================================================
+// Set Show Drive Buttons
+//==============================================================================
+void PreferencesDialog::setShowDriveButtons(const bool& aShow)
+{
+    // Check Show Drive Buttons
+    if (showDriveButtons != aShow) {
+        // Set Show Drive Buttons
+        showDriveButtons = aShow;
+        // Set Dirty
+        setDirty(true);
+        // Emit Show Drive Buttons Changed Signal
+        emit showDriveButtonsChanged(showDriveButtons);
+    }
+}
+
+//==============================================================================
+// Get Close When Finished
+//==============================================================================
+bool PreferencesDialog::getCloseWhenFinished()
+{
+    return closeWhenFinished;
+}
+
+//==============================================================================
+// Set Close When Finished
+//==============================================================================
+void PreferencesDialog::setCloseWhenFinished(const bool& aClose)
+{
+    // Check Close When Finished
+    if (closeWhenFinished != aClose) {
+        // Set Close When Finished
+        closeWhenFinished = aClose;
+        // Emit Close When Finished Changed Signal
+        emit closeWhenFinishedChanged(closeWhenFinished);
+    }
+}
+
+//==============================================================================
+// Get Show Hidden Files
+//==============================================================================
+bool PreferencesDialog::getShowHiddenFiles()
+{
+    return showHiddenFiles;
+}
+
+//==============================================================================
+// Set Show Hidden Files
+//==============================================================================
+void PreferencesDialog::setShowHiddenFiles(const bool& aShow)
+{
+    // Check Show Hidden Files
+    if (showHiddenFiles != aShow) {
+        // Set Show Hidden Files
+        showHiddenFiles = aShow;
+        // Set Dirty
+        setDirty(true);
+        // Emit Show hidden Files Changed Signal
+        emit showHiddenFilesChanged(showHiddenFiles);
+    }
+}
+
+//==============================================================================
+// Get Select Directories
+//==============================================================================
+bool PreferencesDialog::getSelectDirectories()
+{
+    return selectDirectories;
+}
+
+//==============================================================================
+// Set Select Directories
+//==============================================================================
+void PreferencesDialog::setSelectDirectories(const bool& aSelect)
+{
+    // Check Select Directories
+    if (selectDirectories != aSelect) {
+        // Set Select Directories
+        selectDirectories = aSelect;
+        // Set Dirty
+        setDirty(true);
+        // Emit Select Directories Changed Signal
+        emit selectDirectoriesChanged(selectDirectories);
+    }
+}
+
+//==============================================================================
+// Get Show Directories First
+//==============================================================================
+bool PreferencesDialog::getShowDirsFirst()
+{
+    return showDirsFirst;
+}
+
+//==============================================================================
+// Set Show Directories First
+//==============================================================================
+void PreferencesDialog::setShowDirsFirst(const bool& aShow)
+{
+    // Check Show Dirs First
+    if (showDirsFirst != aShow) {
+        // Set Show Dirs First
+        showDirsFirst = aShow;
+        // Set Dirty
+        setDirty(true);
+        // Emit Show Dirs First Changed Signal
+        emit showDirsFirstChanged(showDirsFirst);
+    }
+}
+
+//==============================================================================
+// Get Case Sensitive Sorting
+//==============================================================================
+bool PreferencesDialog::getCaseSensitiveSort()
+{
+    return caseSensitiveSort;
+}
+
+//==============================================================================
+// Set Case Sensitive Sorting
+//==============================================================================
+void PreferencesDialog::setCaseSensitiveSort(const bool& aCaseSensitive)
+{
+    // Check Case Sensitive Sorting
+    if (caseSensitiveSort != aCaseSensitive) {
+        // Set Case Sensitive Sorting
+        caseSensitiveSort = aCaseSensitive;
+        // Set Dirty
+        setDirty(true);
+        // Emit Case Sensitive Sorting hanged Signal
+        emit caseSensitiveSortChanged(caseSensitiveSort);
     }
 }
 
@@ -856,196 +1153,6 @@ void PreferencesDialog::setThumbHeight(const int& aHeight)
         setDirty(true);
         // Emit Thumb Height Changed Signal
         emit thumbHeightChanged(thumbHeight);
-    }
-}
-
-//==============================================================================
-// Get Show Function Keys
-//==============================================================================
-bool PreferencesDialog::getShowFunctionKeys()
-{
-    return showFunctionKeys;
-}
-
-//==============================================================================
-// Set Show Function Keys
-//==============================================================================
-void PreferencesDialog::setShowFunctionKeys(const bool& aShow)
-{
-    // Check Show Function Keys
-    if (showFunctionKeys != aShow) {
-        // Set Show Function Keys
-        showFunctionKeys = aShow;
-        // Set Dirty
-        setDirty(true);
-        // Emit Show Function Keys Changed Signal
-        emit showFunctionKeysChanged(showFunctionKeys);
-    }
-}
-
-//==============================================================================
-// Get Show Directory Hot Keys
-//==============================================================================
-bool PreferencesDialog::getShowDirHotKeys()
-{
-    return showDirHotKeys;
-}
-
-//==============================================================================
-// Set Show Directory Hot Keys
-//==============================================================================
-void PreferencesDialog::setShowDirHotKeys(const bool& aShow)
-{
-    // Check Show Directory Hot Keys
-    if (showDirHotKeys != aShow) {
-        // Set Show Directory Hot Keya
-        showDirHotKeys = aShow;
-        // Set Dirty
-        setDirty(true);
-        // Emit Show Directory Hot Keys Changed Signal
-        emit showDirHotKeysChanged(showDirHotKeys);
-    }
-}
-
-//==============================================================================
-// Get Show Drive Buttons
-//==============================================================================
-bool PreferencesDialog::getShowDriveButtons()
-{
-    return showDriveButtons;
-}
-
-//==============================================================================
-// Set Show Drive Buttons
-//==============================================================================
-void PreferencesDialog::setShowDriveButtons(const bool& aShow)
-{
-    // Check Show Drive Buttons
-    if (showDriveButtons != aShow) {
-        // Set Show Drive Buttons
-        showDriveButtons = aShow;
-        // Set Dirty
-        setDirty(true);
-        // Emit Show Drive Buttons Changed Signal
-        emit showDriveButtonsChanged(showDriveButtons);
-    }
-}
-
-//==============================================================================
-// Get Close When Finished
-//==============================================================================
-bool PreferencesDialog::getCloseWhenFinished()
-{
-    return closeWhenFinished;
-}
-
-//==============================================================================
-// Set Close When Finished
-//==============================================================================
-void PreferencesDialog::setCloseWhenFinished(const bool& aClose)
-{
-    // Check Close When Finished
-    if (closeWhenFinished != aClose) {
-        // Set Close When Finished
-        closeWhenFinished = aClose;
-        // Emit Close When Finished Changed Signal
-        emit closeWhenFinishedChanged(closeWhenFinished);
-    }
-}
-
-//==============================================================================
-// Get Show Hidden Files
-//==============================================================================
-bool PreferencesDialog::getShowHiddenFiles()
-{
-    return showHiddenFiles;
-}
-
-//==============================================================================
-// Set Show Hidden Files
-//==============================================================================
-void PreferencesDialog::setShowHiddenFiles(const bool& aShow)
-{
-    // Check Show Hidden Files
-    if (showHiddenFiles != aShow) {
-        // Set Show Hidden Files
-        showHiddenFiles = aShow;
-        // Set Dirty
-        setDirty(true);
-        // Emit Show hidden Files Changed Signal
-        emit showHiddenFilesChanged(showHiddenFiles);
-    }
-}
-
-//==============================================================================
-// Get Select Directories
-//==============================================================================
-bool PreferencesDialog::getSelectDirectories()
-{
-    return selectDirectories;
-}
-
-//==============================================================================
-// Set Select Directories
-//==============================================================================
-void PreferencesDialog::setSelectDirectories(const bool& aSelect)
-{
-    // Check Select Directories
-    if (selectDirectories != aSelect) {
-        // Set Select Directories
-        selectDirectories = aSelect;
-        // Set Dirty
-        setDirty(true);
-        // Emit Select Directories Changed Signal
-        emit selectDirectoriesChanged(selectDirectories);
-    }
-}
-
-//==============================================================================
-// Get Show Directories First
-//==============================================================================
-bool PreferencesDialog::getShowDirsFirst()
-{
-    return showDirsFirst;
-}
-
-//==============================================================================
-// Set Show Directories First
-//==============================================================================
-void PreferencesDialog::setShowDirsFirst(const bool& aShow)
-{
-    // Check Show Dirs First
-    if (showDirsFirst != aShow) {
-        // Set Show Dirs First
-        showDirsFirst = aShow;
-        // Set Dirty
-        setDirty(true);
-        // Emit Show Dirs First Changed Signal
-        emit showDirsFirstChanged(showDirsFirst);
-    }
-}
-
-//==============================================================================
-// Get Case Sensitive Sorting
-//==============================================================================
-bool PreferencesDialog::getCaseSensitiveSort()
-{
-    return caseSensitiveSort;
-}
-
-//==============================================================================
-// Set Case Sensitive Sorting
-//==============================================================================
-void PreferencesDialog::setCaseSensitiveSort(const bool& aCaseSensitive)
-{
-    // Check Case Sensitive Sorting
-    if (caseSensitiveSort != aCaseSensitive) {
-        // Set Case Sensitive Sorting
-        caseSensitiveSort = aCaseSensitive;
-        // Set Dirty
-        setDirty(true);
-        // Emit Case Sensitive Sorting hanged Signal
-        emit caseSensitiveSortChanged(caseSensitiveSort);
     }
 }
 

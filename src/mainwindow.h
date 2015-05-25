@@ -22,6 +22,7 @@ class HelpWindow;
 class DeleteProgressDialog;
 class TransferProgressDialog;
 class SearchDialog;
+class SettingsController;
 
 
 //==============================================================================

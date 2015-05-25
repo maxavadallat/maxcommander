@@ -20,6 +20,7 @@ class RemoteFileUtilClient;
 class TransferProgressModelItem;
 class FileRenamer;
 class DirScanner;
+class SettingsController;
 
 
 //==============================================================================

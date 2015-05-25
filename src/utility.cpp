@@ -487,7 +487,7 @@ QString getFileNameFromFullName(const QString& aFullFileName)
     }
 
     // Get Specific Extension Positions
-    int tarGzPos = aFullFileName.indexOf(".tar.gz");
+    int tarGzPos = aFullFileName.indexOf(DEFAULT_SUFFIX_TAR_GZ);
 
     // Check File Full Name
     if (tarGzPos > 0) {
@@ -511,8 +511,8 @@ QString getExtensionFromFullName(const QString& aFullFileName)
     }
 
     // Check Specific Ends
-    if (aFullFileName.endsWith(".tar.gz", Qt::CaseInsensitive)) {
-        return "tar.gz";
+    if (aFullFileName.endsWith("."DEFAULT_SUFFIX_TAR_GZ, Qt::CaseInsensitive)) {
+        return DEFAULT_SUFFIX_TAR_GZ;
     }
 
     return aFullFileName.right(aFullFileName.length() - lastDotPos - 1);
@@ -568,3 +568,33 @@ QRgb string2Rgb(const QString& aColor)
 
     return result;
 }
+
+//==============================================================================
+// Formatted Size
+//==============================================================================
+QString formattedSize(const qint64& aSize)
+{
+    // Check Size
+    if (aSize <= 0) {
+        return "0 B";
+    }
+
+    // Init Units
+    QStringList units = QString("B,kB,MB,GB,TB,EB").split(",", QString::SkipEmptyParts);
+
+    // Calculate Digit Group
+    //int digitGroups = (int) (log10(aSize) / log10(DEFAULT_ONE_KILO));
+    int digitGroups = qMax((int) (log10(aSize) / log10(DEFAULT_ONE_KILO)) - 1, 0);
+
+    // Get Result
+    QString result = QString("%L1 %2").arg((qlonglong)(aSize / pow(DEFAULT_ONE_KILO, digitGroups)), 0, 10, QChar('0')).arg(units[digitGroups]);
+
+    return result;
+}
+
+
+
+
+
+
+

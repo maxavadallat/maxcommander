@@ -74,6 +74,9 @@ QString rgb2string(const QRgb& aColor);
 // String To RGB - #AARRGGBB
 QRgb string2Rgb(const QString& aColor);
 
+// Formatted Size
+QString formattedSize(const qint64& aSize);
+
 
 #endif // UTILITY
 

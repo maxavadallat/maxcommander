@@ -878,7 +878,8 @@ QVariant FileListModel::data(const QModelIndex& aIndex, int aRole) const
                 }
 
                 // Check Base Name
-                if (item->fileInfo.baseName().isEmpty() || item->fileInfo.isDir()) {
+                if (/*item->fileInfo.baseName().isEmpty() || */
+                    item->fileInfo.isDir()) {
                     return item->fileInfo.fileName();
                 }
 
@@ -888,7 +889,7 @@ QVariant FileListModel::data(const QModelIndex& aIndex, int aRole) const
 
             case FileExtension: {
                 // Check Base Name
-                if (item->fileInfo.baseName().isEmpty() ||
+                if (/*item->fileInfo.baseName().isEmpty() ||*/
                     item->fileInfo.isDir()              ||
                     item->fileInfo.isBundle()) {
                     return QString("");
@@ -917,7 +918,8 @@ QVariant FileListModel::data(const QModelIndex& aIndex, int aRole) const
                     return QString("[DIR]");
                 }
 
-                return item->fileInfo.size();
+                //return item->fileInfo.size();
+                return formattedSize(item->fileInfo.size());
             } break;
 
             case FileDateTime:      return formatDateTime(item->fileInfo.lastModified());
@@ -1071,13 +1073,13 @@ void FileListModel::insertItem(const QString& aFileName)
     // Check Reverse Order
     if (reverseOrder) {
         // Go Thru List
-        while (itemList[i]->fileInfo.fileName() > aFileName && i < count) {
+        while (itemList[i]->fileInfo.isDir() && itemList[i]->fileInfo.fileName() > aFileName && i < count) {
             // Inc Loop Index
             i++;
         }
     } else {
         // Go Thru List
-        while (itemList[i]->fileInfo.fileName() < aFileName && i < count) {
+        while (itemList[i]->fileInfo.isDir() && itemList[i]->fileInfo.fileName() < aFileName && i < count) {
             // Inc Loop Index
             i++;
         }

@@ -60,7 +60,6 @@
 #define SETTINGS_KEY_SHOW_DIR_HOT_KEYS                      SETTINGS_GROUP_UI"/showDirHotKeys"
 #define SETTINGS_KEY_SHOW_DRIVE_BUTTONS                     SETTINGS_GROUP_UI"/showDriveButtons"
 
-
 #define SETTINGS_KEY_THUMBS_WIDTH                           SETTINGS_GROUP_UI"/thumbsWidth"
 #define SETTINGS_KEY_THUMBS_HEIGHT                          SETTINGS_GROUP_UI"/thumbsHeiight"
 
@@ -68,6 +67,7 @@
 
 #define SETTINGS_KEY_CLOSE_WHEN_FINISHED                    SETTINGS_GROUP_UI"/closeWhenFinished"
 
+#define SETTINGS_KEY_SHOW_FULL_FILE_SIZE                    SETTINGS_GROUP_UI"/showFullFileSize"
 
 #define SETTINGS_KEY_PANEL_COLOR_TEXT                       SETTINGS_GROUP_UI"/textColor"
 #define SETTINGS_KEY_PANEL_COLOR_TEXT_BG                    SETTINGS_GROUP_UI"/textBGColor"
@@ -183,13 +183,15 @@
 
 // Constants
 
+#define DEFAULT_ONE_KILO                                    1024
+
 // Default Transparent Color
 #define DEFAULT_TRANSPARENT_COLOR                           "#00000000"
 
 #define DEFAULT_PANEL_FOCUSED_STYLE_SHEET                   "background-color: #11000077"
 #define DEFAULT_PANEL_TRASPARENT_STYLE_SHEET                "background-color: "DEFAULT_TRANSPARENT_COLOR
 
-#define DEFAULT_AVAILABLE_SPACE_FORMAT_STRING               "%1 files, %2 of %3 Kbytes free"
+#define DEFAULT_AVAILABLE_SPACE_FORMAT_STRING               "%1 files, %2 of %3 free"
 
 #define DEFAULT_MAIN_CONTROLLER_NAME                        "mainController"
 #define DEFAULT_FILE_LIST_MODEL_NAME                        "fileListModel"
@@ -287,8 +289,8 @@
 // Max Numbers Of Patterns To Save
 #define DEFAULT_FILE_SEARCH_MAX_PATTERNS                    16
 
-
-
+// Suffix - .tag.gz
+#define DEFAULT_SUFFIX_TAR_GZ                               "tar.gz"
 
 
 

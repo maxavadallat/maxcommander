@@ -94,8 +94,8 @@
       <widget class="QCheckBox" name="showHiddenFilesCheckBox">
        <property name="geometry">
         <rect>
-         <x>308</x>
-         <y>138</y>
+         <x>320</x>
+         <y>36</y>
          <width>193</width>
          <height>20</height>
         </rect>
@@ -117,7 +117,7 @@
        <property name="geometry">
         <rect>
          <x>44</x>
-         <y>138</y>
+         <y>38</y>
          <width>193</width>
          <height>20</height>
         </rect>
@@ -139,7 +139,7 @@
        <property name="geometry">
         <rect>
          <x>44</x>
-         <y>212</y>
+         <y>112</y>
          <width>193</width>
          <height>20</height>
         </rect>
@@ -160,8 +160,8 @@
       <widget class="QCheckBox" name="selectDirsCheckBox">
        <property name="geometry">
         <rect>
-         <x>308</x>
-         <y>176</y>
+         <x>320</x>
+         <y>74</y>
          <width>193</width>
          <height>20</height>
         </rect>
@@ -182,8 +182,8 @@
       <widget class="QCheckBox" name="showDirsFirstCheckBox">
        <property name="geometry">
         <rect>
-         <x>308</x>
-         <y>212</y>
+         <x>320</x>
+         <y>110</y>
          <width>193</width>
          <height>20</height>
         </rect>
@@ -218,7 +218,7 @@
        <property name="geometry">
         <rect>
          <x>44</x>
-         <y>176</y>
+         <y>76</y>
          <width>193</width>
          <height>20</height>
         </rect>
@@ -239,8 +239,8 @@
       <widget class="QCheckBox" name="caseSensitiveSortCheckBox">
        <property name="geometry">
         <rect>
-         <x>308</x>
-         <y>250</y>
+         <x>320</x>
+         <y>148</y>
          <width>193</width>
          <height>20</height>
         </rect>
@@ -262,7 +262,7 @@
        <property name="geometry">
         <rect>
          <x>44</x>
-         <y>250</y>
+         <y>168</y>
          <width>193</width>
          <height>20</height>
         </rect>
@@ -278,6 +278,72 @@
        </property>
        <property name="text">
         <string>Close When Finished</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="copyHiddenFilesCheckBox">
+       <property name="geometry">
+        <rect>
+         <x>42</x>
+         <y>244</y>
+         <width>193</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::RightToLeft</enum>
+       </property>
+       <property name="text">
+        <string>Copy Hidden Files</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="showFullFileSizesCheckBox">
+       <property name="geometry">
+        <rect>
+         <x>44</x>
+         <y>286</y>
+         <width>193</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::RightToLeft</enum>
+       </property>
+       <property name="text">
+        <string>Show Full File Sizes</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="defaultFileIconsCheckBox">
+       <property name="geometry">
+        <rect>
+         <x>320</x>
+         <y>186</y>
+         <width>193</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::RightToLeft</enum>
+       </property>
+       <property name="text">
+        <string>Use Default File Icons</string>
        </property>
       </widget>
      </widget>
@@ -1376,21 +1442,21 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>terminalEditor</tabstop>
-  <tabstop>vieverEditor</tabstop>
-  <tabstop>editorEditor</tabstop>
-  <tabstop>compareEditor</tabstop>
-  <tabstop>packerEditor</tabstop>
-  <tabstop>unpackerEditor</tabstop>
-  <tabstop>buttonBox</tabstop>
-  <tabstop>showHiddenFilesCheckBox</tabstop>
   <tabstop>functionKeysCheckBox</tabstop>
+  <tabstop>driveButtonsCheckBox</tabstop>
   <tabstop>dirHotKeysCheckBox</tabstop>
+  <tabstop>closeWhenFinishedCheckBox</tabstop>
+  <tabstop>copyHiddenFilesCheckBox</tabstop>
+  <tabstop>showFullFileSizesCheckBox</tabstop>
+  <tabstop>showHiddenFilesCheckBox</tabstop>
   <tabstop>selectDirsCheckBox</tabstop>
   <tabstop>showDirsFirstCheckBox</tabstop>
-  <tabstop>driveButtonsCheckBox</tabstop>
   <tabstop>caseSensitiveSortCheckBox</tabstop>
-  <tabstop>closeWhenFinishedCheckBox</tabstop>
+  <tabstop>defaultFileIconsCheckBox</tabstop>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>buttonBox</tabstop>
+  <tabstop>editorEditor</tabstop>
+  <tabstop>compareEditor</tabstop>
   <tabstop>iconSizeComboBox</tabstop>
   <tabstop>previewWidget</tabstop>
   <tabstop>textColorButton</tabstop>
@@ -1411,7 +1477,10 @@
   <tabstop>linkTextBgButton</tabstop>
   <tabstop>linkTextColorButton</tabstop>
   <tabstop>clearLinkBGButton</tabstop>
-  <tabstop>tabWidget</tabstop>
+  <tabstop>terminalEditor</tabstop>
+  <tabstop>packerEditor</tabstop>
+  <tabstop>unpackerEditor</tabstop>
+  <tabstop>vieverEditor</tabstop>
  </tabstops>
  <resources>
   <include location="../maxcommanderimages.qrc"/>

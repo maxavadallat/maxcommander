@@ -15,6 +15,7 @@ class AboutDialog;
 class ConfirmDialog;
 class PreferencesDialog;
 class CreateDirDialog;
+class CreateLinkDialog;
 class DeleteFileDialog;
 class TransferFileDialog;
 class ViewerWindow;
@@ -65,12 +66,11 @@ public slots:
 
     // Launch Create Dir Slot
     void launchCreateDir();
+    // Launch Create Link Slot
+    void launchCreateLink();
 
     // Launch Search Slot
     void launchSearch();
-
-    // Launch Create Link Slot
-    void launchCreateLink();
 
     // Launch Delete Slot
     void launchDelete();
@@ -253,6 +253,8 @@ private:
     PreferencesDialog*              preferencesDialog;
     // Create Dir Dialog
     CreateDirDialog*                createDirDialog;
+    // Create Link Dialog
+    CreateLinkDialog*               createLinkDialog;
     // Delete File Dialog
     DeleteFileDialog*               deleteFileDialog;
     // Transfer File Dialog

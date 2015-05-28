@@ -78,17 +78,17 @@
 // ...
 
 // Terminal App Path
-#define DEFAULT_SETTINGS_TERMINAL_PATH                      "Terminal"      // terminalPath
+#define DEFAULT_SETTINGS_TERMINAL_PATH_MAC_OSX              "Terminal"      // terminalPath
 // Viewer App Path
-#define DEFAULT_SETTINGS_VIEWER_PATH                        "Preview"       // viewerPath
+#define DEFAULT_SETTINGS_VIEWER_PATH_MAC_OSX                "Preview"       // viewerPath
 // Editor App Path
-#define DEFAULT_SETTINGS_EDITOR_PATH                        "TextEdit"      // editorPath
+#define DEFAULT_SETTINGS_EDITOR_PATH_MAC_OSX                "TextEdit"      // editorPath
 // Compare Path
-#define DEFAULT_SETTINGS_COMPARE_PATH                       ""              // comparePath
+#define DEFAULT_SETTINGS_COMPARE_PATH_MAC_OSX               ""              // comparePath
 // Packer Path
-#define DEFAULT_SETTINGS_PACKER_PATH                        ""              // packerPath
+#define DEFAULT_SETTINGS_PACKER_PATH_MAC_OSX                ""              // packerPath
 // Unpacker Path
-#define DEFAULT_SETTINGS_UNPACKER_PATH                      ""              // unPackerPath
+#define DEFAULT_SETTINGS_UNPACKER_PATH_MAC_OSX              ""              // unPackerPath
 
 
 // Search - Case Sensitve

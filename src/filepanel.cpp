@@ -2780,6 +2780,9 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
                 } else if (modifierKeys == Qt::AltModifier) {
                     // Emit Launch Search
                     emit launchSearch();
+                } else if (modifierKeys == Qt::ShiftModifier) {
+                    // Emit Launch Create Link
+                    emit launchCreateLink();
                 }
             break;
 

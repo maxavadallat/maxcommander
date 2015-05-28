@@ -59,12 +59,12 @@ PreferencesDialog::PreferencesDialog(QWidget* aParent)
     , thumbWidth(DEFAULT_SETTINGS_THUMB_WIDTH)
     , thumbHeight(DEFAULT_SETTINGS_THUMB_HEIGHT)
 
-    , terminalPath(DEFAULT_SETTINGS_TERMINAL_PATH)
-    , viewerPath(DEFAULT_SETTINGS_VIEWER_PATH)
-    , editorPath(DEFAULT_SETTINGS_EDITOR_PATH)
-    , comparePath(DEFAULT_SETTINGS_COMPARE_PATH)
-    , packerPath(DEFAULT_SETTINGS_PACKER_PATH)
-    , unPackerPath(DEFAULT_SETTINGS_UNPACKER_PATH)
+    , terminalPath(DEFAULT_SETTINGS_TERMINAL_PATH_MAC_OSX)
+    , viewerPath(DEFAULT_SETTINGS_VIEWER_PATH_MAC_OSX)
+    , editorPath(DEFAULT_SETTINGS_EDITOR_PATH_MAC_OSX)
+    , comparePath(DEFAULT_SETTINGS_COMPARE_PATH_MAC_OSX)
+    , packerPath(DEFAULT_SETTINGS_PACKER_PATH_MAC_OSX)
+    , unPackerPath(DEFAULT_SETTINGS_UNPACKER_PATH_MAC_OSX)
 
 {
     qDebug() << "PreferencesDialog::PreferencesDialog";

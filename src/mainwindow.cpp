@@ -13,6 +13,7 @@
 #include "aboutdialog.h"
 #include "preferencesdialog.h"
 #include "createdirdialog.h"
+#include "createlinkdialog.h"
 #include "deletefiledialog.h"
 #include "deleteprogressdialog.h"
 #include "transferfiledialog.h"
@@ -72,6 +73,7 @@ MainWindow::MainWindow(QWidget* aParent)
     , aboutDialog(NULL)
     , preferencesDialog(NULL)
     , createDirDialog(NULL)
+    , createLinkDialog(NULL)
     , deleteFileDialog(NULL)
     , transferFileDialog(NULL)
     , helpWindow(NULL)
@@ -144,6 +146,9 @@ void MainWindow::init()
 
     connect(leftPanel, SIGNAL(launchCreateDir()), this, SLOT(launchCreateDir()));
     connect(rightPanel, SIGNAL(launchCreateDir()), this, SLOT(launchCreateDir()));
+
+    connect(leftPanel, SIGNAL(launchCreateLink()), this, SLOT(launchCreateLink()));
+    connect(rightPanel, SIGNAL(launchCreateLink()), this, SLOT(launchCreateLink()));
 
     connect(leftPanel, SIGNAL(launchSearch()), this, SLOT(launchSearch()));
     connect(rightPanel, SIGNAL(launchSearch()), this, SLOT(launchSearch()));
@@ -315,12 +320,27 @@ void MainWindow::launchTerminal(const QString& aDirPath)
     QSettings settings;
 
     // Get Terminal App
-    QString terminalApp = settings.value(SETTINGS_KEY_APPS_TERMINAL).toString();
+    QString terminalApp = settings.value(SETTINGS_KEY_APPS_TERMINAL, DEFAULT_SETTINGS_TERMINAL_PATH_MAC_OSX).toString();
 
     // Check Terminal App
     if (!terminalApp.isEmpty()) {
 
-        // ...
+#if defined(Q_OS_MACX)
+
+            // Set Command Line
+            QString cmdLine = QString(DEFAULT_EXEC_APP_SYSTEM_COMMAND_WITH_PARAM_MAC_OSX).arg(terminalApp).arg(aDirPath);
+
+            // Execute
+            system(cmdLine.toLocal8Bit().data());
+
+#elif defined(Q_OS_UNIX)
+
+
+#else defined(Q_OS_WIN)
+
+
+#endif // Q_OS_WIN
+
 
     }
 
@@ -648,6 +668,34 @@ void MainWindow::launchCreateLink()
 
     qDebug() << "MainWindow::launchCreateLink";
 
+    // Check Create Link Dialog
+    if (!createLinkDialog) {
+        // Create Dialog
+        createLinkDialog = new CreateLinkDialog();
+    }
+
+    // Init Dir Path
+    QString dirPath = focusedPanel->getCurrentDir();
+    // Chekc Dir Path
+    if (!dirPath.endsWith("/")) {
+        // Adjust Dir Path
+        dirPath += "/";
+    }
+
+    // Setup Dialog
+    //createLinkDialog->setDirPath(dirPath);
+
+    // ...
+
+    // Launch Dialog
+    if (createLinkDialog->exec()) {
+
+        // ...
+
+        // Create Link
+        //focusedPanel->createLink(linkName, linkPath);
+    }
+
     // ...
 
 }
@@ -912,7 +960,7 @@ void MainWindow::updateFunctionKeys()
         ui->editButton->setText(tr(""));
         ui->copyButton->setText(tr(""));
         ui->moveButton->setText(tr("Rename"));
-        ui->makeDirButton->setText(tr(""));
+        ui->makeDirButton->setText(tr("MakeLink"));
         ui->delButton->setText(tr(""));
         ui->optionsButton->setText(tr(""));
         ui->exitButton->setText(tr(""));

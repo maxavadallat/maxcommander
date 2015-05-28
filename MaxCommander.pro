@@ -53,7 +53,8 @@ SOURCES                 += src/main.cpp \
                         src/colorpickerbutton.cpp \
                         src/searchdialog.cpp \
                         src/progressbarwidget.cpp \
-                        src/settingscontroller.cpp
+                        src/settingscontroller.cpp \
+                        src/createlinkdialog.cpp
 
 # Heders
 HEADERS                 += src/constants.h \
@@ -85,7 +86,8 @@ HEADERS                 += src/constants.h \
                         src/defaultsettings.h \
                         src/searchdialog.h \
                         src/progressbarwidget.h \
-                        src/settingscontroller.h
+                        src/settingscontroller.h \
+                        src/createlinkdialog.h
 
 # Include Path
 INCLUDEPATH             += \
@@ -108,7 +110,8 @@ FORMS                   += \
                         ui/testdialog.ui \
                         ui/infodialog.ui \
                         ui/passworddialog.ui \
-                        ui/searchdialog.ui
+                        ui/searchdialog.ui \
+                        ui/createlinkdialog.ui
 
 # Resources
 RESOURCES               += \

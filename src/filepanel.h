@@ -500,6 +500,8 @@ signals:
 
     // Launch Create Dir Signal
     void launchCreateDir();
+    // Launch Create Link Signal
+    void launchCreateLink();
 
     // Launch Search
     void launchSearch();

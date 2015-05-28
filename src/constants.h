@@ -272,6 +272,9 @@
 // Exec Command
 #define DEFAULT_EXEC_APP_SYSTEM_COMMAND_MAC_OSX             "open -a \"%1\" &"
 
+// Exec App with Parameter
+#define DEFAULT_EXEC_APP_SYSTEM_COMMAND_WITH_PARAM_MAC_OSX  "open -a %1 \"%2\" &"
+
 // Open Files
 #define DEFAULT_OPEN_FILE_SYSTEM_COMMAND_MAC_OSX            "open \"%1\" &"
 

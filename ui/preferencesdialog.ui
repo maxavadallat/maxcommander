@@ -283,8 +283,8 @@
       <widget class="QCheckBox" name="copyHiddenFilesCheckBox">
        <property name="geometry">
         <rect>
-         <x>42</x>
-         <y>244</y>
+         <x>44</x>
+         <y>232</y>
          <width>193</width>
          <height>20</height>
         </rect>
@@ -306,7 +306,7 @@
        <property name="geometry">
         <rect>
          <x>44</x>
-         <y>286</y>
+         <y>274</y>
          <width>193</width>
          <height>20</height>
         </rect>
@@ -344,6 +344,28 @@
        </property>
        <property name="text">
         <string>Use Default File Icons</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="followLinksCheckBox">
+       <property name="geometry">
+        <rect>
+         <x>44</x>
+         <y>314</y>
+         <width>193</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::RightToLeft</enum>
+       </property>
+       <property name="text">
+        <string>Follow Symbolic Links</string>
        </property>
       </widget>
      </widget>
@@ -1448,39 +1470,40 @@
   <tabstop>closeWhenFinishedCheckBox</tabstop>
   <tabstop>copyHiddenFilesCheckBox</tabstop>
   <tabstop>showFullFileSizesCheckBox</tabstop>
+  <tabstop>followLinksCheckBox</tabstop>
   <tabstop>showHiddenFilesCheckBox</tabstop>
   <tabstop>selectDirsCheckBox</tabstop>
   <tabstop>showDirsFirstCheckBox</tabstop>
   <tabstop>caseSensitiveSortCheckBox</tabstop>
   <tabstop>defaultFileIconsCheckBox</tabstop>
-  <tabstop>tabWidget</tabstop>
   <tabstop>buttonBox</tabstop>
-  <tabstop>editorEditor</tabstop>
-  <tabstop>compareEditor</tabstop>
   <tabstop>iconSizeComboBox</tabstop>
-  <tabstop>previewWidget</tabstop>
   <tabstop>textColorButton</tabstop>
   <tabstop>textBgButton</tabstop>
   <tabstop>currentColorButton</tabstop>
   <tabstop>currentBGButton</tabstop>
+  <tabstop>clearCurrentBGButton</tabstop>
   <tabstop>selectedColorButton</tabstop>
   <tabstop>selectedBGButton</tabstop>
+  <tabstop>clearSelectedBGButton</tabstop>
   <tabstop>currentSelectedColorButton</tabstop>
   <tabstop>currentSelectedBGButton</tabstop>
+  <tabstop>clearCurrentSelectedBGButton</tabstop>
   <tabstop>hiddenTextColorButton</tabstop>
   <tabstop>hiddenTextBgButton</tabstop>
-  <tabstop>fontButton</tabstop>
-  <tabstop>clearCurrentBGButton</tabstop>
-  <tabstop>clearSelectedBGButton</tabstop>
-  <tabstop>clearCurrentSelectedBGButton</tabstop>
   <tabstop>clearHiddenBGButton</tabstop>
-  <tabstop>linkTextBgButton</tabstop>
   <tabstop>linkTextColorButton</tabstop>
+  <tabstop>linkTextBgButton</tabstop>
   <tabstop>clearLinkBGButton</tabstop>
+  <tabstop>fontButton</tabstop>
+  <tabstop>previewWidget</tabstop>
   <tabstop>terminalEditor</tabstop>
+  <tabstop>vieverEditor</tabstop>
+  <tabstop>editorEditor</tabstop>
+  <tabstop>compareEditor</tabstop>
   <tabstop>packerEditor</tabstop>
   <tabstop>unpackerEditor</tabstop>
-  <tabstop>vieverEditor</tabstop>
+  <tabstop>tabWidget</tabstop>
  </tabstops>
  <resources>
   <include location="../maxcommanderimages.qrc"/>

@@ -191,6 +191,26 @@ void RemoteFileUtilClient::createDir(const QString& aDirPath)
 }
 
 //==============================================================================
+// Create Link
+//==============================================================================
+void RemoteFileUtilClient::createLink(const QString& aLinkPath, const QString& aLinkTarget)
+{
+    // Init New Data
+    QVariantMap newData;
+
+    // Set Up New Data
+    newData[DEFAULT_KEY_CID]            = cID;
+    newData[DEFAULT_KEY_OPERATION]      = QString(DEFAULT_OPERATION_MAKE_LINK);
+    newData[DEFAULT_KEY_SOURCE]         = aLinkPath;
+    newData[DEFAULT_KEY_TARGET]         = aLinkTarget;
+
+    // ...
+
+    // Write Data
+    writeData(newData);
+}
+
+//==============================================================================
 // Delete File/Directory
 //==============================================================================
 void RemoteFileUtilClient::deleteFile(const QString& aFilePath)

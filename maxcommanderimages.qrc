@@ -14,6 +14,10 @@
         <file>resources/images/error.png</file>
         <file>resources/images/info.png</file>
         <file>resources/images/warning.png</file>
+        <file>resources/images/icons/default_folder.png</file>
+        <file>resources/images/icons/link_overlay.png</file>
+        <file>resources/images/icons/default_folder_dark.png</file>
+        <file>resources/images/icons/default_folder_yellow.png</file>
     </qresource>
 </RCC>
 

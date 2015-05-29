@@ -63,6 +63,8 @@ FilePanel::FilePanel(QWidget* aParent)
     , showHiddenFiles(true)
     , showDirsFirst(true)
     , caseSensitiveSort(false)
+    , useDefaultIcons(false)
+    , followLinks(true)
 
     , textColor(DEFAULT_SETTINGS_TEXT_COLOR)
     , textBGColor(DEFAULT_SETTINGS_TEXT_BG_COLOR)
@@ -122,8 +124,9 @@ void FilePanel::init()
         connect(fileListModel, SIGNAL(busyChanged(bool)), this, SLOT(fileModelBusyChanged(bool)));
         connect(fileListModel, SIGNAL(dirFetchFinished()), this, SLOT(fileModelDirFetchFinished()));
         connect(fileListModel, SIGNAL(dirCreated(QString)), this, SLOT(fileModelDirCreated(QString)));
+        connect(fileListModel, SIGNAL(linkCreated(QString,QString)), this, SLOT(fileModelLinkCreated(QString,QString)));
         connect(fileListModel, SIGNAL(fileRenamed(QString,QString)), this, SLOT(fileModelFileRenamed(QString,QString)));
-        connect(fileListModel, SIGNAL(error(QString,int)), this, SLOT(fileModelError(QString,int)));
+        connect(fileListModel, SIGNAL(error(QString,QString,QString,int)), this, SLOT(fileModelError(QString,QString,QString,int)));
     }
 
     // Set Context Properties
@@ -749,6 +752,28 @@ void FilePanel::setCaseSensitiveSort(const bool& aCaseSensitive)
 }
 
 //==============================================================================
+// Get Use Default Icons
+//==============================================================================
+bool FilePanel::getUseDefaultIcons()
+{
+    return useDefaultIcons;
+}
+
+//==============================================================================
+// Set Use Default Icons
+//==============================================================================
+void FilePanel::setUseDefaultIcons(const bool& aUseDefaultIcons)
+{
+    // Check Use Default Icons
+    if (useDefaultIcons != aUseDefaultIcons) {
+        // Set Use Default Icons
+        useDefaultIcons = aUseDefaultIcons;
+        // Emit Signal
+        emit useDefaultIconsChanged(useDefaultIcons);
+    }
+}
+
+//==============================================================================
 // Get Normal Text Color
 //==============================================================================
 QString FilePanel::getTextColor()
@@ -1223,6 +1248,18 @@ void FilePanel::createDir(const QString& aDirPath)
 }
 
 //==============================================================================
+// Create Link
+//==============================================================================
+void FilePanel::createLink(const QString& aLinkName, const QString& aLinkTarget)
+{
+    // Check File List Model
+    if (fileListModel) {
+        // Create Link
+        fileListModel->createLink(aLinkName, aLinkTarget);
+    }
+}
+
+//==============================================================================
 // Rename File
 //==============================================================================
 void FilePanel::renameFile(const QString& aSource, const QString& aTarget)
@@ -1632,8 +1669,15 @@ void FilePanel::handleItemSelection()
             // Go Up
             goUp();
         } else {
-            // Set Current Dir
-            setCurrentDir(fileInfo.absoluteFilePath());
+            // Check If Symbolic Link
+            if (fileInfo.isSymLink() && followLinks) {
+                // Set Current Dir
+                setCurrentDir(fileInfo.symLinkTarget());
+            } else {
+                // Set Current Dir
+                setCurrentDir(fileInfo.absoluteFilePath());
+            }
+
             // Set Current Index
             setCurrentIndex(0);
         }
@@ -1784,6 +1828,10 @@ void FilePanel::restoreUI(const bool& aReload)
     showDirsFirst = settings.value(SETTINGS_KEY_DIRFIRST, DEFAULT_SETTINGS_SHOW_DIRECTORIES_FIRST).toBool();
     // Get Case Sensitive Sorting
     caseSensitiveSort = settings.value(SETTINGS_KEY_CASE_SENSITIVE, DEFAULT_SETTINGS_CASE_SENSITIVE_SORTING).toBool();
+    // Get Use Default Icons
+    useDefaultIcons = settings.value(SETTINGS_KEY_PANEL_USE_DEFAULT_ICONS, DEAFULT_SETTINGS_USE_DEFAULT_ICONS).toBool();
+    // Get Follow Links
+    followLinks = settings.value(SETTINGS_KEY_FOLLOW_LINKS, DEFAULT_SETTINGS_FOLLOW_SYMBOLIC_LINKS).toBool();
 
     // Check File List Model
     if (fileListModel) {
@@ -2052,10 +2100,35 @@ void FilePanel::fileModelDirCreated(const QString& aDirPath)
         // Insert Dir Name
         if (fileListModel) {
             // Insert Dir Name
-            fileListModel->insertItem(dirName);
+            fileListModel->insertDirItem(dirName);
             // Set Current Index
             setCurrentIndex(fileListModel->findIndex(dirName));
         }
+    }
+}
+
+//==============================================================================
+// File List Model Link Created Slot
+//==============================================================================
+void FilePanel::fileModelLinkCreated(const QString& aLinkPath, const QString& aLinkTarget)
+{
+    // Get Link Path
+    QString path = getDirPath(aLinkPath);
+
+    // Check Link Path
+    if (path == currentDir) {
+        qDebug() << "FilePanel::fileModelLinkCreated - panelName: " << panelName << " - aLinkPath: " << aLinkPath << " - aLinkTarget: " << aLinkTarget;
+
+        // Init Link File Info
+        QFileInfo linkInfo(aLinkPath);
+
+        // Set Last File Name
+        lastFileName = linkInfo.fileName();
+
+        // Reload
+        reload();
+
+        // ...
     }
 }
 
@@ -2078,11 +2151,11 @@ void FilePanel::fileModelFileRenamed(const QString& aSource, const QString& aTar
 //==============================================================================
 // File Model Error
 //==============================================================================
-void FilePanel::fileModelError(const QString& aPath, const int& aError)
+void FilePanel::fileModelError(const QString& aPath, const QString& aSource, const QString& aTarget, const int& aError)
 {
     // Check File List Model
     if (fileListModel) {
-        qDebug() << "FilePanel::fileModelError - panelName: " << panelName << " - op: " << fileListModel->lastOperation() << " - aPath: " << aPath << " - aError: " << aError;
+        qDebug() << "FilePanel::fileModelError - panelName: " << panelName << " - op: " << fileListModel->lastOperation() << " - aPath: " << aPath << " - aSource: " << aSource << " - aTarget: " << aTarget << " - aError: " << aError;
 
         // Check Last Operation - List Dir
         if (fileListModel->lastOperation() == DEFAULT_OPERATION_LIST_DIR) {
@@ -2129,6 +2202,15 @@ void FilePanel::fileModelError(const QString& aPath, const int& aError)
 
                 default:
                 break;
+            }
+        } else if (fileListModel->lastOperation() == DEFAULT_OPERATION_MAKE_LINK) {
+
+            // Switch Error
+            switch (aError) {
+                default:
+                case DEFAULT_ERROR_GENERAL: {
+
+                } break;
             }
         }
     }

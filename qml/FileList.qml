@@ -68,7 +68,7 @@ Rectangle {
 
             fileIconSource: {
                 // Check File Name
-                if (Utility.isImage(fileFullName, mainController)) {
+                if (Utility.isImage(fileFullName, mainController) && !mainController.useDefaultIcons) {
                     Const.DEFAULT_FILE_PREFIX + mainController.currentDir + "/" + fileFullName
                 } else {
                     // Image Provider
@@ -84,6 +84,7 @@ Rectangle {
             fileHidden  : fileIsHidden
             fileSelected: fileIsSelected
             fileDirSize : dirSize
+            fileSymLink : fileIsLink
 
             nameWidth   : fileListHeader.nameWidth
             extWidth    : fileListHeader.extWidth

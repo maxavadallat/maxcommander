@@ -38,6 +38,7 @@ PreferencesDialog::PreferencesDialog(QWidget* aParent)
     , useDefaultIcons(DEAFULT_SETTINGS_USE_DEFAULT_ICONS)
     , showFullSizes(DEFAULT_SETTINGS_SHOW_FULL_FILE_SIZES)
     , copyHiddenFiles(DEFAULT_SETTINGS_COPY_HIDDEN_FILES)
+    , followLinks(DEFAULT_SETTINGS_FOLLOW_SYMBOLIC_LINKS)
 
     , textColor(DEFAULT_SETTINGS_TEXT_COLOR)
     , textBGColor(DEFAULT_SETTINGS_TEXT_BG_COLOR)
@@ -176,6 +177,8 @@ void PreferencesDialog::loadSettings()
     setShowFullSizes(settings.value(SETTINGS_KEY_SHOW_FULL_SIZES, DEFAULT_SETTINGS_SHOW_FULL_FILE_SIZES).toBool());
     // Set Use Default File Icons
     setUseDefaultIcons(settings.value(SETTINGS_KEY_PANEL_USE_DEFAULT_ICONS, DEAFULT_SETTINGS_USE_DEFAULT_ICONS).toBool());
+    // Set Follow Links
+    setFollowLinks(settings.value(SETTINGS_KEY_FOLLOW_LINKS, DEFAULT_SETTINGS_FOLLOW_SYMBOLIC_LINKS).toBool());
 
     // ...
 
@@ -256,6 +259,11 @@ void PreferencesDialog::saveSettings()
     settings.setValue(SETTINGS_KEY_SHOW_FULL_SIZES, showFullSizes);
     // Set Use Default File Icons
     settings.setValue(SETTINGS_KEY_PANEL_USE_DEFAULT_ICONS, useDefaultIcons);
+    // Set Follow Links
+    settings.setValue(SETTINGS_KEY_FOLLOW_LINKS, followLinks);
+
+    // Sync
+    settings.sync();
 
     // ...
 
@@ -333,6 +341,8 @@ void PreferencesDialog::restoreDefaults()
     setShowFullSizes(DEFAULT_SETTINGS_SHOW_FULL_FILE_SIZES);
     // Set Use Default File Icons
     setUseDefaultIcons(DEAFULT_SETTINGS_USE_DEFAULT_ICONS);
+    // Set Follow Links
+    setFollowLinks(DEFAULT_SETTINGS_FOLLOW_SYMBOLIC_LINKS);
 
     // ...
 
@@ -417,7 +427,8 @@ void PreferencesDialog::restoreUI()
     ui->showFullFileSizesCheckBox->setChecked(showFullSizes);
     // Set Check Box Checked
     ui->defaultFileIconsCheckBox->setChecked(useDefaultIcons);
-
+    // Set Check Box Checked
+    ui->followLinksCheckBox->setChecked(followLinks);
 
     // Switch Thumb Width
     switch (thumbWidth) {
@@ -453,11 +464,11 @@ void PreferencesDialog::setDirty(const bool& aDirty)
 
         // Check Dirty
         if (dirty) {
-            // Enable Apply Button
-
+            // Set Standard Buttons
+            ui->buttonBox->setStandardButtons(QDialogButtonBox::Close | QDialogButtonBox::Apply | QDialogButtonBox::Reset);
         } else {
-            // Disable Apply Button
-
+            // Set Standard Buttons
+            ui->buttonBox->setStandardButtons(QDialogButtonBox::Close);
         }
     }
 }
@@ -531,6 +542,30 @@ void PreferencesDialog::setCopyHiddenFiles(const bool& aCopyHiddenFile)
         setDirty(true);
         // Emit Signal
         emit copyHiddenFilesChanged(copyHiddenFiles);
+    }
+}
+
+//==============================================================================
+// Get Follow Links
+//==============================================================================
+bool PreferencesDialog::getFollowLinks()
+{
+    return followLinks;
+}
+
+//==============================================================================
+// Set Follow Links
+//==============================================================================
+void PreferencesDialog::setFollowLinks(const bool& aFollowLinks)
+{
+    // Check Follow Links
+    if (followLinks != aFollowLinks) {
+        // Set Follow Links
+        followLinks = aFollowLinks;
+        // Set Dirty
+        setDirty(true);
+        // Emit Signal
+        emit followLinksChanged(followLinks);
     }
 }
 
@@ -623,6 +658,8 @@ void PreferencesDialog::setCloseWhenFinished(const bool& aClose)
     if (closeWhenFinished != aClose) {
         // Set Close When Finished
         closeWhenFinished = aClose;
+        // Set Dirty
+        setDirty(true);
         // Emit Close When Finished Changed Signal
         emit closeWhenFinishedChanged(closeWhenFinished);
     }
@@ -1275,6 +1312,42 @@ void PreferencesDialog::on_caseSensitiveSortCheckBox_clicked()
 }
 
 //==============================================================================
+// Show Full File Sizes Checkbox Clicked Slot
+//==============================================================================
+void PreferencesDialog::on_showFullFileSizesCheckBox_clicked()
+{
+    // Set Show Full File Sizes
+    setShowFullSizes(ui->showFullFileSizesCheckBox->isChecked());
+}
+
+//==============================================================================
+// Copy Hidden Files Checkbox Clicked Slot
+//==============================================================================
+void PreferencesDialog::on_copyHiddenFilesCheckBox_clicked()
+{
+    // Set Copy Hidden Files
+    setCopyHiddenFiles(ui->copyHiddenFilesCheckBox->isChecked());
+}
+
+//==============================================================================
+// Follow Symbolic Links Checkbox Clicked Slot
+//==============================================================================
+void PreferencesDialog::on_followLinksCheckBox_clicked()
+{
+    // Set Follow Links
+    setFollowLinks(ui->followLinksCheckBox->isChecked());
+}
+
+//==============================================================================
+// Use Default File Icons Checkbox Clicked Slot
+//==============================================================================
+void PreferencesDialog::on_defaultFileIconsCheckBox_clicked()
+{
+    // Set Use Default File Icons
+    setUseDefaultIcons(ui->defaultFileIconsCheckBox->isChecked());
+}
+
+//==============================================================================
 // On Text Color Button Clicked Slot
 //==============================================================================
 void PreferencesDialog::on_textColorButton_clicked()
@@ -1662,6 +1735,7 @@ PreferencesDialog::~PreferencesDialog()
 
     qDebug() << "PreferencesDialog::~PreferencesDialog";
 }
+
 
 
 

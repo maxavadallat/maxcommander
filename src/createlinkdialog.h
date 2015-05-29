@@ -19,8 +19,21 @@ public:
     // Constructor
     explicit CreateLinkDialog(QWidget* aParent = NULL);
 
+    // Launch Dialog
+    int launchDialog(const QString& aStartDir);
+
+    // Get Link Name
+    QString getLinkName();
+    // Get Link Target
+    QString getLinkTarget();
+
     // Destructor
     virtual ~CreateLinkDialog();
+
+protected:
+
+    // Exec Dialog
+    virtual int exec();
 
 protected slots:
 
@@ -30,7 +43,11 @@ protected slots:
 private:
 
     // UI
-    Ui::CreateLinkDialog*  ui;
+    Ui::CreateLinkDialog*   ui;
+    // Start Dir
+    QString                 startDir;
 };
 
 #endif // CREATELINKDIALOG_H
+
+

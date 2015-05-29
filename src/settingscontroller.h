@@ -53,6 +53,13 @@ class SettingsController : public QObject
     Q_PROPERTY(int thumbWidth READ getThumbWidth WRITE setThumbWidth NOTIFY thumbWidthChanged)
     Q_PROPERTY(int thumbHeight READ getThumbHeight WRITE setThumbHeight NOTIFY thumbHeightChanged)
 
+    Q_PROPERTY(QString terminalPath READ getTerminalPath WRITE setTerminalPath NOTIFY terminalPathChanged)
+    Q_PROPERTY(QString viewerPath READ getViewerPath WRITE setViewerPath NOTIFY viewerPathChanged)
+    Q_PROPERTY(QString editorPath READ getEditorPath WRITE setEditorPath NOTIFY editorPathChanged)
+    Q_PROPERTY(QString comparePath READ getComparePath WRITE setComparePath NOTIFY comparePathChanged)
+    Q_PROPERTY(QString packerPath READ getPackerPath WRITE setPackerPath NOTIFY packerPathChanged)
+    Q_PROPERTY(QString unPackerPath READ getUnPackerPath WRITE setUnPackerPath NOTIFY unpackerPathChanged)
+
 public:
 
     // Get Instance - Static Constructor
@@ -125,6 +132,11 @@ public:
     bool getCopyHiddenFiles();
     // Set Copy Hidden Files
     void setCopyHiddenFiles(const bool& aCopyHiddenFile);
+
+    // Get Follow Links
+    bool getFollowLinks();
+    // Set Follow Links
+    void setFollowLinks(const bool& aFollowLinks);
 
     // Get Normal Text Color
     QString getTextColor();
@@ -216,6 +228,36 @@ public:
     // Set Thumb height
     void setThumbHeight(const int& aheight);
 
+    // Get Terminal Path
+    QString getTerminalPath();
+    // Set Terminal Path
+    void setTerminalPath(const QString& aTerminalPath);
+
+    // Get Viewer Path
+    QString getViewerPath();
+    // Set Viewer Path
+    void setViewerPath(const QString& aViewerPath);
+
+    // Get Editor Path
+    QString getEditorPath();
+    // Set Editor Path
+    void setEditorPath(const QString& aEditorPath);
+
+    // Get Compare Path
+    QString getComparePath();
+    // Set Compare Path
+    void setComparePath(const QString& aComparePath);
+
+    // Get Packer Path
+    QString getPackerPath();
+    // Set Packer Path
+    void setPackerPath(const QString& aPackerPath);
+
+    // Get Unpacker Path
+    QString getUnPackerPath();
+    // Set Unpacker Path
+    void setUnPackerPath(const QString& aUnpackerPath);
+
 signals:
 
     // Show Function Keys Changed Signal
@@ -242,6 +284,8 @@ signals:
     void showFullSizesChanged(const bool& aShowFullSizes);
     // Copy Hidden Files Changed Signal
     void copyHiddenFilesChanged(const bool& aCopyHidden);
+    // Follow Links Changed Signal
+    void followLinksChanged(const bool& aFollowLinks);
 
     // Text Color Changed Signal
     void textColorChanged(const QString& aColor);
@@ -281,6 +325,19 @@ signals:
     void thumbWidthChanged(const int& aWidth);
     // Thumb Height Changed Signal
     void thumbHeightChanged(const int& aHeight);
+
+    // Terminal Path Changed Signal
+    void terminalPathChanged(const QString& aTerminalPath);
+    // Viewer Path Changed Signal
+    void viewerPathChanged(const QString& aViewerPath);
+    // Editor Path Changed Signal
+    void editorPathChanged(const QString& aEditorPath);
+    // Compare Path Changed Signal
+    void comparePathChanged(const QString& aComparePath);
+    // Packer Path Changed Signal
+    void packerPathChanged(const QString& aPackerPath);
+    // Unpacker Path Changed Signal
+    void unpackerPathChanged(const QString& aUnpackerPath);
 
 protected: // Constructor/Destructor
 
@@ -330,6 +387,8 @@ protected:
     bool                    showFullSizes;
     // Copy Hidden Files
     bool                    copyHiddenFiles;
+    // Follow Symbolic Links
+    bool                    followLinks;
 
     // Normal Text Color
     QString                 textColor;

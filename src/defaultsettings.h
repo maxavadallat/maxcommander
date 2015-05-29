@@ -34,6 +34,10 @@
 // Copy Hidden Files
 #define DEFAULT_SETTINGS_COPY_HIDDEN_FILES                  true            // copyHiddenFiles
 
+// Follow Symbolic Links
+#define DEFAULT_SETTINGS_FOLLOW_SYMBOLIC_LINKS              true            // followLinks
+
+
 
 // ...
 
@@ -58,7 +62,7 @@
 // Hidden Item BG Color
 #define DEFAULT_SETTINGS_HIDDEN_BG_COLOR                    "#FFEFEFEF"     // hiddenBGColor
 // Link Item Text Color
-#define DEFAULT_SETTINGS_LINK_COLOR                         "#FF0000FF"     // linkColor
+#define DEFAULT_SETTINGS_LINK_COLOR                         "#FF000077"     // linkColor
 // Link Item BG Color
 #define DEFAULT_SETTINGS_LINK_BG_COLOR                      "#FFEFEFEF"     // linkBGColor
 // Font Name

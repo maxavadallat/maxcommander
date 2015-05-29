@@ -34,6 +34,9 @@ var DEFAULT_FILE_LIST_LINK_TEXT_COLOR                   = "blue";
 
 var DEFAULT_FILE_LIST_HEADER_ITEM_NAME_MIN_WIDTH        = 60;
 
+var DEFAULT_FILE_LIST_ICON_LINK_OVERLAY_WIDTH           = 8;
+var DEFAULT_FILE_LIST_ICON_LINK_OVERLAY_HEIGHT          = 8;
+
 var DEFAULT_MARGIN_WIDTH                                = 4;
 
 var DEFAULT_POPUP_ITEM_HIGHLIGHT_COLOR                  = "#77FFFFFF";

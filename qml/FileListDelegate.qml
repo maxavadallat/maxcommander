@@ -97,6 +97,20 @@ Rectangle {
                 smooth: false
                 asynchronous: true
             }
+
+            Image {
+                id: fileIconLinkOverlay
+                //width: Const.DEFAULT_FILE_LIST_ICON_LINK_OVERLAY_WIDTH
+                //height: Const.DEFAULT_FILE_LIST_ICON_LINK_OVERLAY_HEIGHT
+                anchors.fill: fileIconImage
+                visible: fileListDelegateRoot.fileSymLink
+                fillMode: Image.PreserveAspectFit
+                cache: true
+                smooth: false
+                asynchronous: true
+                source: "qrc:/resources/images/icons/link_overlay.png"
+            }
+
             // File Name
             FileListText {
                 id: fileNameLabel

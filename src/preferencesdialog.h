@@ -30,6 +30,7 @@ class PreferencesDialog : public QDialog
     Q_PROPERTY(bool useDefaultIcons READ getUseDefaultIcons WRITE setUseDefaultIcons NOTIFY useDefaultIconsChanged)
     Q_PROPERTY(bool showFullSizes READ getShowFullSizes WRITE setShowFullSizes NOTIFY showFullSizesChanged)
     Q_PROPERTY(bool copyHiddenFiles READ getCopyHiddenFiles WRITE setCopyHiddenFiles NOTIFY copyHiddenFilesChanged)
+    Q_PROPERTY(bool followLinks READ getFollowLinks WRITE setFollowLinks NOTIFY followLinksChanged)
 
     Q_PROPERTY(QString textColor READ getTextColor WRITE setTextColor NOTIFY textColorChanged)
     Q_PROPERTY(QString textBGColor READ gettextBGColor WRITE setTextBGColor NOTIFY textBGColorChanged)
@@ -117,6 +118,11 @@ public:
     bool getCopyHiddenFiles();
     // Set Copy Hidden Files
     void setCopyHiddenFiles(const bool& aCopyHiddenFile);
+
+    // Get Follow Links
+    bool getFollowLinks();
+    // Set Follow Links
+    void setFollowLinks(const bool& aFollowLinks);
 
     // Get Normal Text Color
     QString getTextColor();
@@ -245,6 +251,8 @@ signals:
     void showFullSizesChanged(const bool& aShowFullSizes);
     // Copy Hidden Files Changed Signal
     void copyHiddenFilesChanged(const bool& aCopyHidden);
+    // Follow Links Changed Signal
+    void followLinksChanged(const bool& aFollowLinks);
 
     // Text Color Changed Signal
     void textColorChanged(const QString& aColor);
@@ -334,6 +342,15 @@ protected slots:
     // On Case Sensitive Sort Checkbox Clicked Slot
     void on_caseSensitiveSortCheckBox_clicked();
 
+    // Show Full File Sizes Checkbox Clicked Slot
+    void on_showFullFileSizesCheckBox_clicked();
+    // Copy Hidden Files Checkbox Clicked Slot
+    void on_copyHiddenFilesCheckBox_clicked();
+    // Follow Symbolic Links Checkbox Clicked Slot
+    void on_followLinksCheckBox_clicked();
+    // Use Default File Icons Checkbox Clicked Slot
+    void on_defaultFileIconsCheckBox_clicked();
+
     // On Text Color Button Clicked Slot
     void on_textColorButton_clicked();
     // On Text BG Color Button Clicked Slot
@@ -393,6 +410,7 @@ protected slots:
     // Button Box Button Clicked
     void buttonBoxButtonPressed(QAbstractButton* aButton);
 
+
 private:
     // UI
     Ui::PreferencesDialog*  ui;
@@ -424,6 +442,8 @@ private:
     bool                    showFullSizes;
     // Copy Hidden Files
     bool                    copyHiddenFiles;
+    // Follow Symbolic Links
+    bool                    followLinks;
 
     // ...
 

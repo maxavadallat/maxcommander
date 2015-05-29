@@ -63,6 +63,7 @@ class FilePanel : public QFrame
     Q_PROPERTY(bool showHiddenFiles READ getShowHidden WRITE setShowHidden NOTIFY showHiddenChanged)
     Q_PROPERTY(bool showDirsFirst READ getShowDirsFirst WRITE setShowDirsFirst NOTIFY showDirsFirstChanged)
     Q_PROPERTY(bool caseSensitiveSort READ getCaseSensitiveSort WRITE setCaseSensitiveSort NOTIFY caseSensitiveSortChanged)
+    Q_PROPERTY(bool useDefaultIcons READ getUseDefaultIcons WRITE setUseDefaultIcons NOTIFY useDefaultIconsChanged)
 
     Q_PROPERTY(QString textColor READ getTextColor WRITE setTextColor NOTIFY textColorChanged)
     Q_PROPERTY(QString textBGColor READ gettextBGColor WRITE setTextBGColor NOTIFY textBGColorChanged)
@@ -210,6 +211,11 @@ public:
     // Set Case Sensitive Sorting
     void setCaseSensitiveSort(const bool& aCaseSensitive);
 
+    // Get Use Default Icons
+    bool getUseDefaultIcons();
+    // Set Use Default Icons
+    void setUseDefaultIcons(const bool& aUseDefaultIcons);
+
     // Get Normal Text Color
     QString getTextColor();
     // Set Normal Text Color
@@ -316,6 +322,8 @@ public:
 
     // Create Dir
     void createDir(const QString& aDirPath);
+    // Create Link
+    void createLink(const QString& aLinkName, const QString& aLinkTarget);
 
     // File Rename Active
     bool getFileRenameActive();
@@ -438,6 +446,8 @@ signals:
     void showDirsFirstChanged(const bool& aShow);
     // Case Sensitive Sorting Changed Signal
     void caseSensitiveSortChanged(const bool& aCaseSensitive);
+    // Use Default Icons Changed Signal
+    void useDefaultIconsChanged(const bool& aUseDefaultIcons);
 
     // Text Color Changed Signal
     void textColorChanged(const QString& aColor);
@@ -551,10 +561,12 @@ protected slots: // From File Model
     void fileModelDirFetchFinished();
     // File List Model Dir Created Slot
     void fileModelDirCreated(const QString& aDirPath);
+    // File List Model Link Created Slot
+    void fileModelLinkCreated(const QString& aLinkPath, const QString& aLinkTarget);
     // File List Model File Renames Slot
     void fileModelFileRenamed(const QString& aSource, const QString& aTarget);
     // File Model Error Slot
-    void fileModelError(const QString& aPath, const int& aError);
+    void fileModelError(const QString& aPath, const QString& aSource, const QString& aTarget, const int& aError);
     // File Model Need Confirm Found Slot
     void fileModelNeedConfirm(const int& aCode, const QString& aPath, const QString& aSource, const QString& aTarget);
 
@@ -684,6 +696,10 @@ private:
     bool                    showDirsFirst;
     // Case Sensitive Sorting
     bool                    caseSensitiveSort;
+    // Use Default Icons
+    bool                    useDefaultIcons;
+    // Follow Symbolic Links
+    bool                    followLinks;
 
     // Normal Text Color
     QString                 textColor;

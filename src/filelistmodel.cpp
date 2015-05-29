@@ -204,6 +204,19 @@ void FileListModel::createDir(const QString& aDirPath)
 }
 
 //==============================================================================
+// Create Link
+//==============================================================================
+void FileListModel::createLink(const QString& aLinkPath, const QString& aLinkTarget)
+{
+    // Check File Util
+    if (fileUtil) {
+        qDebug() << "FileListModel::createLink - aLinkPath: " << aLinkPath << " - aLinkTarget: " << aLinkTarget;
+        // Create Link
+        fileUtil->createLink(aLinkPath, aLinkTarget);
+    }
+}
+
+//==============================================================================
 // Rename File
 //==============================================================================
 void FileListModel::renameFile(const QString& aSource, const QString& aTarget)
@@ -624,10 +637,10 @@ void FileListModel::fileOpFinished(const unsigned int& aID,
                                    const QString& aSource,
                                    const QString& aTarget)
 {
-    Q_UNUSED(aSource);
-    Q_UNUSED(aTarget);
+    //Q_UNUSED(aSource);
+    //Q_UNUSED(aTarget);
 
-    qDebug() << "FileListModel::fileOpFinished - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath;
+    qDebug() << "FileListModel::fileOpFinished - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath << " - aSource: " << aSource << " - aTarget: " << aTarget;
 
     // ...
 
@@ -635,9 +648,15 @@ void FileListModel::fileOpFinished(const unsigned int& aID,
     if (aOp == DEFAULT_OPERATION_LIST_DIR) {
         // Emit Dir Fetch Finished Signal
         emit dirFetchFinished();
+
     } else if (aOp == DEFAULT_OPERATION_MAKE_DIR) {
-        // Emit Dir Create Signal
+        // Emit Dir Created Signal
         emit dirCreated(aPath);
+
+    } else if (aOp == DEFAULT_OPERATION_MAKE_LINK) {
+        // Emit Link Created Signal
+        emit linkCreated(aSource, aTarget);
+
     } else if (aOp == DEFAULT_OPERATION_MOVE_FILE) {
         // Init Source Info
         QFileInfo sourceInfo(aSource);
@@ -689,10 +708,10 @@ void FileListModel::fileOpAborted(const unsigned int& aID,
                                   const QString& aSource,
                                   const QString& aTarget)
 {
-    Q_UNUSED(aSource);
-    Q_UNUSED(aTarget);
+    //Q_UNUSED(aSource);
+    //Q_UNUSED(aTarget);
 
-    qDebug() << "FileListModel::fileOpAborted - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath;
+    qDebug() << "FileListModel::fileOpAborted - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath << " - aSource: " << aSource << " - aTarget: " << aTarget;
 
     // ...
 
@@ -708,13 +727,13 @@ void FileListModel::fileOpError(const unsigned int& aID,
                                 const QString& aTarget,
                                 const int& aError)
 {
-    Q_UNUSED(aSource);
-    Q_UNUSED(aTarget);
+    //Q_UNUSED(aSource);
+    //Q_UNUSED(aTarget);
 
-    qDebug() << "FileListModel::fileOpError - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath << " - aError: " << aError;
+    qDebug() << "FileListModel::fileOpError - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath << " - aSource: " << aSource << " - aTarget: " << aTarget << " - aError: " << aError;
 
     // Emit Error Signal
-    emit error(aPath, aError);
+    emit error(aPath, aSource, aTarget, aError);
 
     // ...
 }
@@ -869,6 +888,10 @@ QVariant FileListModel::data(const QModelIndex& aIndex, int aRole) const
         // Switch Role
         switch (aRole) {
             case FileName: {
+                if (item->fileInfo.isSymLink()) {
+                    return item->fileInfo.fileName() + " -> " + item->fileInfo.symLinkTarget();
+                }
+
                 // Check File Info
                 if (item->fileInfo.isBundle()) {
                     if (!item->fileInfo.bundleName().isEmpty())
@@ -1052,7 +1075,7 @@ int FileListModel::findIndex(const QString& aFileName)
 //==============================================================================
 // Insert Item by File Name - For Newly Create Directory
 //==============================================================================
-void FileListModel::insertItem(const QString& aFileName)
+void FileListModel::insertDirItem(const QString& aFileName)
 {
     // Check File Name
     if (fileNameList.indexOf(aFileName) >= 0) {

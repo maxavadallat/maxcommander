@@ -109,6 +109,8 @@
 #define SETTINGS_KEY_CASE_SENSITIVE                         SETTINGS_GROUP_PANEL_COMMON"/caseSensitive"
 #define SETTINGS_KEY_SELECT_DIRS                            SETTINGS_GROUP_PANEL_COMMON"/selectDirs"
 
+#define SETTINGS_KEY_FOLLOW_LINKS                           SETTINGS_GROUP_PANEL_COMMON"/followLinks"
+
 #define SETTINGS_KEY_PANEL_COPY_HIDDEN_FILES                SETTINGS_GROUP_PANEL_COMMON"/copyHidden"
 #define SETTINGS_KEY_PANEL_USE_DEFAULT_ICONS                SETTINGS_GROUP_UI"/defaultIcons"
 #define SETTINGS_KEY_SHOW_FULL_SIZES                        SETTINGS_GROUP_UI"/showFullSizes"
@@ -299,8 +301,10 @@
 // Suffix - .tag.gz
 #define DEFAULT_SUFFIX_TAR_GZ                               "tar.gz"
 
-
-
+// Default Icons
+#define DEFAULT_FILE_ICON_FILE                              ":/resources/images/icons/default_file.png"
+//#define DEFAULT_FILE_ICON_DIR                               ":/resources/images/icons/default_folder.png"
+#define DEFAULT_FILE_ICON_DIR                               ":/resources/images/icons/default_folder_yellow.png"
 
 
 
@@ -379,6 +383,7 @@
 #define DEFAULT_LABEL_CURRENT_FILE_TITLE_FINISHED           "Finished"
 
 
+#define DEFAULT_TITLE_SELECT_LINK_TARGET                    "Select Link Target"
 
 
 #endif // CONSTANTS_H

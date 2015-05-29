@@ -53,7 +53,7 @@ public:
     // Find Index by File Name
     int findIndex(const QString& aFileName);
     // Insert Item by File Name - For Newly Create Directory
-    void insertItem(const QString& aFileName);
+    void insertDirItem(const QString& aFileName);
 
     // Get File Info
     QFileInfo getFileInfo(const int& aIndex);
@@ -88,6 +88,8 @@ public:
 
     // Create Dir
     void createDir(const QString& aDirPath);
+    // Create Link
+    void createLink(const QString& aLinkPath, const QString& aLinkTarget);
 
     // Has Selection
     bool hasSelection();
@@ -150,16 +152,19 @@ signals:
     // Dir Created Signal
     void dirCreated(const QString& aDirPath);
 
+    // Link Created Signal
+    void linkCreated(const QString& aLinkPath, const QString& aLinkTarget);
+
     // Busy State Changed Signal
     void busyChanged(const bool& aBusy);
 
     // File Renamed Signal
     void fileRenamed(const QString& aSource, const QString& aTarget);
 
-    // Error
-    void error(const QString& aPath, const int& aError);
+    // Error Signal
+    void error(const QString& aPath, const QString aSource, const QString aTarget, const int& aError);
 
-    // Need Confirm
+    // Need Confirm Signal
     void needConfirm(const int& aCode, const QString& aPath, const QString& aSource, const QString& aTarget);
 
 public: // From QAbstractListModel

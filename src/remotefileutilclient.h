@@ -59,6 +59,8 @@ public:
 
     // Create Directory
     void createDir(const QString& aDirPath);
+    // Create Link
+    void createLink(const QString& aLinkPath, const QString& aLinkTarget);
     // Delete File/Directory
     void deleteFile(const QString& aFilePath);
 

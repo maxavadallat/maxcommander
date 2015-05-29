@@ -47,6 +47,7 @@ SettingsController::SettingsController(QObject* aParent)
     , useDefaultIcons(DEAFULT_SETTINGS_USE_DEFAULT_ICONS)
     , showFullSizes(DEFAULT_SETTINGS_SHOW_FULL_FILE_SIZES)
     , copyHiddenFiles(DEFAULT_SETTINGS_COPY_HIDDEN_FILES)
+    , followLinks(DEFAULT_SETTINGS_FOLLOW_SYMBOLIC_LINKS)
 
     , textColor(DEFAULT_SETTINGS_TEXT_COLOR)
     , textBGColor(DEFAULT_SETTINGS_TEXT_BG_COLOR)
@@ -117,6 +118,70 @@ void SettingsController::setValue(const QString& aKey, const QVariant& aValue)
 void SettingsController::restoreDefaults()
 {
     // ...
+
+    // Reset Show Function Keys
+    setShowFunctionKeys(DEFAULT_SETTINGS_SHOW_FUNCTION_KEYS);
+    // Reset Show Directory Hot Keys
+    setShowDirHotKeys(DEFAULT_SETTINGS_SHOW_DIRECTORIY_HOT_KEYS);
+    // Reset Show Drive Buttons
+    setShowDriveButtons(DEFAULT_SETTINGS_SHOW_DRIVE_BUTTONS);
+    // Reset Close When Finished
+    setCloseWhenFinished(DEFAULT_SETTINGS_CLOSE_WHEN_FINISHED);
+    // Reset Select Directories
+    setSelectDirectories(DEFAULT_SETTINGS_SELECT_DIRECTORIES);
+    // Reset Show Hidden Files
+    setShowHiddenFiles(DEFAULT_SETTINGS_SHOW_HIDDEN_FILES);
+    // Reset Show Directories First
+    setShowDirsFirst(DEFAULT_SETTINGS_SHOW_DIRECTORIES_FIRST);
+    // Reset Case Sensitive Sorting
+    setCaseSensitiveSort(DEFAULT_SETTINGS_CASE_SENSITIVE_SORTING);
+    // Reset Use Default Icons
+    setUseDefaultIcons(DEAFULT_SETTINGS_USE_DEFAULT_ICONS);
+    // Reset Show Full File Sizes
+    setShowFullSizes(DEFAULT_SETTINGS_SHOW_FULL_FILE_SIZES);
+    // Reset Copy Hidden Files
+    setCopyHiddenFiles(DEFAULT_SETTINGS_COPY_HIDDEN_FILES);
+    // Reset Follow Links
+    setFollowLinks(DEFAULT_SETTINGS_FOLLOW_SYMBOLIC_LINKS);
+    // Reset Normal Text Color
+    setTextColor(DEFAULT_SETTINGS_TEXT_COLOR);
+    // Reset Normal Text BG Color
+    setTextBGColor(DEFAULT_SETTINGS_TEXT_BG_COLOR);
+    // Reset Current Text Color
+    setCurrentColor(DEFAULT_SETTINGS_CURRENT_COLOR);
+    // Reset Current Text BG Color
+    setCurrentBGColor(DEFAULT_SETTINGS_CURRENT_BG_COLOR);
+    // Reset Selected Text Color
+    setSelectedColor(DEFAULT_SETTINGS_SELECTED_COLOR);
+    // Reset Selected Text BG Color
+    setSelectedBGColor(DEFAULT_SETTINGS_SELECTED_BG_COLOR);
+    // Reset Current Selected Text Color
+    setCurrentSelectedColor(DEFAULT_SETTINGS_CURRENT_SELECTED_COLOR);
+    // Reset Current Selected Text BG Color
+    setCurrentSelectedBGColor(DEFAULT_SETTINGS_CURRENT_SELECTED_BG_COLOR);
+    // Reset Hidden Text Color
+    setHiddenColor(DEFAULT_SETTINGS_HIDDEN_COLOR);
+    // Reset Hidden Text BG Color
+    setHiddenBGColor(DEFAULT_SETTINGS_HIDDEN_BG_COLOR);
+    // Reset Link Text Color
+    setLinkColor(DEFAULT_SETTINGS_LINK_COLOR);
+    // Reset Link Text BG Color
+    setLinkBGColor(DEFAULT_SETTINGS_LINK_BG_COLOR);
+    // Reset Font Name
+    setFontName(DEFAULT_SETTINGS_FONT_NAME);
+    // Reset Font Size
+    setFontSize(DEFAULT_SETTINGS_FONT_SIZE);
+    // Reset Font Bold
+    setFontBold(DEFAULT_SETTINGS_FONT_BOLD);
+    // Reset Font Italic
+    setFontItalic(DEFAULT_SETTINGS_FONT_ITALIC);
+    // Reset Thumb Width
+    setThumbWidth(DEFAULT_SETTINGS_THUMB_WIDTH);
+    // Reset Thumb height
+    setThumbHeight(DEFAULT_SETTINGS_THUMB_HEIGHT);
+
+    // ...
+
 }
 
 //==============================================================================
@@ -392,6 +457,30 @@ void SettingsController::setCopyHiddenFiles(const bool& aCopyHiddenFile)
         setDirty(true);
         // Emit Signal
         emit copyHiddenFilesChanged(copyHiddenFiles);
+    }
+}
+
+//==============================================================================
+// Get Follow Links
+//==============================================================================
+bool SettingsController::getFollowLinks()
+{
+    return followLinks;
+}
+
+//==============================================================================
+// Set Follow Links
+//==============================================================================
+void SettingsController::setFollowLinks(const bool& aFollowLinks)
+{
+    // Check Follow Links
+    if (followLinks != aFollowLinks) {
+        // Set Follow Links
+        followLinks = aFollowLinks;
+        // Set Dirty
+        setDirty(true);
+        // Emit Signal
+        emit followLinksChanged(followLinks);
     }
 }
 
@@ -824,6 +913,150 @@ void SettingsController::setThumbHeight(const int& aHeight)
         setDirty(true);
         // Emit Thumb Height Changed Signal
         emit thumbHeightChanged(thumbHeight);
+    }
+}
+
+//==============================================================================
+// Get Terminal Path
+//==============================================================================
+QString SettingsController::getTerminalPath()
+{
+    return terminalPath;
+}
+
+//==============================================================================
+// Set Terminal Path
+//==============================================================================
+void SettingsController::setTerminalPath(const QString& aTerminalPath)
+{
+    // Check Terminal Path
+    if (terminalPath != aTerminalPath) {
+        // Set Terminal Path
+        terminalPath = aTerminalPath;
+        // Set Dirty
+        setDirty(true);
+        // Emit Terminal Path Changed Signal
+        emit terminalPathChanged(terminalPath);
+    }
+}
+
+//==============================================================================
+// Get Viewer Path
+//==============================================================================
+QString SettingsController::getViewerPath()
+{
+    return viewerPath;
+}
+
+//==============================================================================
+// Set Viewer Path
+//==============================================================================
+void SettingsController::setViewerPath(const QString& aViewerPath)
+{
+    // Check Viewer Path
+    if (viewerPath != aViewerPath) {
+        // Set Viewer Path
+        viewerPath = aViewerPath;
+        // Set Dirty
+        setDirty(true);
+        // Emit Viewer Path Changed Signal
+        emit viewerPathChanged(viewerPath);
+    }
+}
+
+//==============================================================================
+// Get Editor Path
+//==============================================================================
+QString SettingsController::getEditorPath()
+{
+    return editorPath;
+}
+
+//==============================================================================
+// Set Editor Path
+//==============================================================================
+void SettingsController::setEditorPath(const QString& aEditorPath)
+{
+    // Check Editor Path
+    if (editorPath != aEditorPath) {
+        // Set Editor Path
+        editorPath = aEditorPath;
+        // Set Dirty
+        setDirty(true);
+        // Emit Editor Path Changed Signal
+        emit editorPathChanged(editorPath);
+    }
+}
+
+//==============================================================================
+// Get Compare Path
+//==============================================================================
+QString SettingsController::getComparePath()
+{
+    return comparePath;
+}
+
+//==============================================================================
+// Set Compare Path
+//==============================================================================
+void SettingsController::setComparePath(const QString& aComparePath)
+{
+    // Check Compare Path
+    if (comparePath != aComparePath) {
+        // Set Compare Path
+        comparePath = aComparePath;
+        // Set Dirty
+        setDirty(true);
+        // Emit Compare Path Changed Signal
+        emit comparePathChanged(comparePath);
+    }
+}
+
+//==============================================================================
+// Get Packer Path
+//==============================================================================
+QString SettingsController::getPackerPath()
+{
+    return packerPath;
+}
+
+//==============================================================================
+// Set Packer Path
+//==============================================================================
+void SettingsController::setPackerPath(const QString& aPackerPath)
+{
+    // Check Packer Path
+    if (packerPath != aPackerPath) {
+        // Set Packer Path
+        packerPath = aPackerPath;
+        // Set Dirty
+        setDirty(true);
+        // Emit Packer Path Changed Signal
+        emit packerPathChanged(packerPath);
+    }
+}
+
+//==============================================================================
+// Get Unpacker Path
+//==============================================================================
+QString SettingsController::getUnPackerPath()
+{
+    return unPackerPath;
+}
+
+//==============================================================================
+// Set Unpacker Path
+//==============================================================================
+void SettingsController::SettingsController::setUnPackerPath(const QString& aUnpackerPath)
+{
+    // Check Un Packer Path
+    if (unPackerPath != aUnpackerPath) {
+        // Set Un Packer Path
+        unPackerPath = aUnpackerPath;
+        // Set Dirty
+        setDirty(true);
+        // Emit Un Packer Path Changed Signal
+        emit unpackerPathChanged(unPackerPath);
     }
 }
 

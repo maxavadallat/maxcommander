@@ -674,26 +674,23 @@ void MainWindow::launchCreateLink()
         createLinkDialog = new CreateLinkDialog();
     }
 
-    // Init Dir Path
-    QString dirPath = focusedPanel->getCurrentDir();
-    // Chekc Dir Path
-    if (!dirPath.endsWith("/")) {
-        // Adjust Dir Path
-        dirPath += "/";
-    }
-
-    // Setup Dialog
-    //createLinkDialog->setDirPath(dirPath);
-
-    // ...
-
     // Launch Dialog
-    if (createLinkDialog->exec()) {
+    if (createLinkDialog->launchDialog(focusedPanel->getCurrentDir())) {
 
-        // ...
+        // Init Link Path
+        QString linkPath = focusedPanel->getCurrentDir();
+
+        // Check Link Path
+        if (!linkPath.endsWith("/")) {
+            // Adjust Link Path
+            linkPath += "/";
+        }
+
+        // Add Link Name
+        linkPath += createLinkDialog->getLinkName();
 
         // Create Link
-        //focusedPanel->createLink(linkName, linkPath);
+        focusedPanel->createLink(linkPath, createLinkDialog->getLinkTarget());
     }
 
     // ...

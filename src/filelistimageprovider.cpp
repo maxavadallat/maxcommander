@@ -24,6 +24,9 @@ FileListImageProvider::FileListImageProvider()
     // Get Supported Image Formats
     supportedFormats = QImageReader::supportedImageFormats();
 
+    // Get Use Default Icons
+    useDefaultIcons = settings->getUseDefaultIcons();
+
     // Connect Signals
     QObject::connect(settings, SIGNAL(useDefaultIconsChanged(bool)), settingsReciever, SLOT(useDefaultIconsChanged(bool)));
 
@@ -131,6 +134,8 @@ SettingsReciever::SettingsReciever(FileListImageProvider* aParent)
 //==============================================================================
 void SettingsReciever::useDefaultIconsChanged(const bool& aUseDefaultIcons)
 {
+    //qDebug() << "SettingsReciever::useDefaultIconsChanged - aUseDefaultIcons: " << aUseDefaultIcons;
+
     // Set Use Default Image
     ipParent->useDefaultIcons = aUseDefaultIcons;
 }

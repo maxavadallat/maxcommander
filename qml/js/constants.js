@@ -14,6 +14,10 @@ var DEFAULT_AUDIO_TAG_PREFIX                            = "image://audiotag/";
 var DEFAULT_DIR_SIZE_TITLE_LABEL_TEXT_DIR               = "[DIR]";
 var DEFAULT_DIR_SIZE_TITLE_LABEL_TEXT_BUNDLE            = "[BUNDLE]";
 
+var DEFAULT_FILE_LIST_ICON_DIR                          = "qrc:/resources/images/icons/default_folder_yellow.png";
+var DEFAULT_FILE_LIST_ICON_FILE                         = "qrc:/resources/images/icons/default_file.png";
+var DEFAULT_FILE_LIST_ICON_LINK_OVERLAY                 = "qrc:/resources/images/icons/link_overlay.png";
+
 var DEFAULT_BACKGROUND_COLOR                            = "#FFEFEFEF";
 
 var DEFAULT_FILE_LIST_FONT_SIZE                         = 11;

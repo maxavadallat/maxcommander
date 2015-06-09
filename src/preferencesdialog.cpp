@@ -1,4 +1,3 @@
-#include <QSettings>
 #include <QColorDialog>
 #include <QFontDialog>
 #include <QColor>
@@ -23,6 +22,7 @@
 PreferencesDialog::PreferencesDialog(QWidget* aParent)
     : QDialog(aParent)
     , ui(new Ui::PreferencesDialog)
+    , settings(SettingsController::getInstance())
     , dirty(false)
 
     , showFunctionKeys(DEFAULT_SETTINGS_SHOW_FUNCTION_KEYS)
@@ -63,15 +63,16 @@ PreferencesDialog::PreferencesDialog(QWidget* aParent)
     , terminalPath(DEFAULT_SETTINGS_TERMINAL_PATH_MAC_OSX)
     , viewerPath(DEFAULT_SETTINGS_VIEWER_PATH_MAC_OSX)
     , editorPath(DEFAULT_SETTINGS_EDITOR_PATH_MAC_OSX)
-    , comparePath(DEFAULT_SETTINGS_COMPARE_PATH_MAC_OSX)
-    , packerPath(DEFAULT_SETTINGS_PACKER_PATH_MAC_OSX)
-    , unPackerPath(DEFAULT_SETTINGS_UNPACKER_PATH_MAC_OSX)
+    , comparePath(DEFAULT_SETTINGS_COMPARE_PATH)
+    , packerPath(DEFAULT_SETTINGS_PACKER_PATH)
+    , unPackerPath(DEFAULT_SETTINGS_UNPACKER_PATH)
 
 {
     qDebug() << "PreferencesDialog::PreferencesDialog";
 
     // Setup UI
     ui->setupUi(this);
+
     // Init
     init();
 }
@@ -109,76 +110,78 @@ void PreferencesDialog::init()
 //==============================================================================
 void PreferencesDialog::loadSettings()
 {
+    // Check Settings
+    if (!settings) {
+        return;
+    }
+
     qDebug() << "PreferencesDialog::loadSettings";
 
-    // Init Settings
-    QSettings settings;
-
     // Set Normal Text Color
-    setTextColor(settings.value(SETTINGS_KEY_PANEL_COLOR_TEXT, DEFAULT_SETTINGS_TEXT_COLOR).toString());
+    setTextColor(settings->getTextColor());
     // Set Normal Text BG Color
-    setTextBGColor(settings.value(SETTINGS_KEY_PANEL_COLOR_TEXT_BG, DEFAULT_SETTINGS_TEXT_BG_COLOR).toString());
+    setTextBGColor(settings->gettextBGColor());
     // Set Current Text Color
-    setCurrentColor(settings.value(SETTINGS_KEY_PANEL_COLOR_CURRENT, DEFAULT_SETTINGS_CURRENT_COLOR).toString());
+    setCurrentColor(settings->getCurrentColor());
     // Set Current Text BG Color
-    setCurrentBGColor(settings.value(SETTINGS_KEY_PANEL_COLOR_CURRENT_BG, DEFAULT_SETTINGS_CURRENT_BG_COLOR).toString());
+    setCurrentBGColor(settings->getCurrentBGColor());
     // Set Selected Text Color
-    setSelectedColor(settings.value(SETTINGS_KEY_PANEL_COLOR_SELECTED, DEFAULT_SETTINGS_SELECTED_COLOR).toString());
+    setSelectedColor(settings->getSelectedColor());
     // Set Selected Text BG Color
-    setSelectedBGColor(settings.value(SETTINGS_KEY_PANEL_COLOR_SELECTED_BG, DEFAULT_SETTINGS_SELECTED_BG_COLOR).toString());
+    setSelectedBGColor(settings->getSelectedBGColor());
     // Set Current Selected Text Color
-    setCurrentSelectedColor(settings.value(SETTINGS_KEY_PANEL_COLOR_CURRENT_SELECTED, DEFAULT_SETTINGS_CURRENT_SELECTED_COLOR).toString());
+    setCurrentSelectedColor(settings->getCurrentSelectedColor());
     // Set Current Selected Text BG Color
-    setCurrentSelectedBGColor(settings.value(SETTINGS_KEY_PANEL_COLOR_CURRENT_SELECTED_BG, DEFAULT_SETTINGS_CURRENT_SELECTED_BG_COLOR).toString());
+    setCurrentSelectedBGColor(settings->getCurrentSelectedBGColor());
     // Set Hidden Text Color
-    setHiddenColor(settings.value(SETTINGS_KEY_PANEL_COLOR_HIDDEN, DEFAULT_SETTINGS_HIDDEN_COLOR).toString());
+    setHiddenColor(settings->getHiddenColor());
     // Set Hidden Text BG Color
-    setHiddenBGColor(settings.value(SETTINGS_KEY_PANEL_COLOR_HIDDEN_BG, DEFAULT_SETTINGS_HIDDEN_BG_COLOR).toString());
+    setHiddenBGColor(settings->getHiddenBGColor());
     // Set Link Text Color
-    setLinkColor(settings.value(SETTINGS_KEY_PANEL_COLOR_LINK, DEFAULT_SETTINGS_LINK_COLOR).toString());
+    setLinkColor(settings->getLinkColor());
     // Set Link Text BG Color
-    setLinkBGColor(settings.value(SETTINGS_KEY_PANEL_COLOR_LINK_BG, DEFAULT_SETTINGS_LINK_BG_COLOR).toString());
+    setLinkBGColor(settings->getLinkBGColor());
 
     // Set Font Name
-    setFontName(settings.value(SETTINGS_KEY_PANEL_FONT_NAME, DEFAULT_SETTINGS_FONT_NAME).toString());
+    setFontName(settings->getFontName());
     // Set Font Size
-    setFontSize(settings.value(SETTINGS_KEY_PANEL_FONT_SIZE, DEFAULT_SETTINGS_FONT_SIZE).toInt());
+    setFontSize(settings->getFontSize());
     // Set Font Bold
-    setFontBold(settings.value(SETTINGS_KEY_PANEL_FONT_BOLD, DEFAULT_SETTINGS_FONT_BOLD).toBool());
+    setFontBold(settings->getFontBold());
     // Set Font Italic
-    setFontItalic(settings.value(SETTINGS_KEY_PANEL_FONT_ITALIC, DEFAULT_SETTINGS_FONT_ITALIC).toBool());
+    setFontItalic(settings->getFontItalic());
 
     // Set Thumb Width
-    setThumbWidth(settings.value(SETTINGS_KEY_THUMBS_WIDTH, DEFAULT_SETTINGS_THUMB_WIDTH).toInt());
+    setThumbWidth(settings->getThumbWidth());
     // Set Thumb height
-    setThumbHeight(settings.value(SETTINGS_KEY_THUMBS_HEIGHT, DEFAULT_SETTINGS_THUMB_HEIGHT).toInt());
+    setThumbHeight(settings->getThumbHeight());
 
     // Set Show Function Keys
-    setShowFunctionKeys(settings.value(SETTINGS_KEY_SHOW_FUNCTION_KEYS, DEFAULT_SETTINGS_SHOW_FUNCTION_KEYS).toBool());
+    setShowFunctionKeys(settings->getShowFunctionKeys());
     // Set Show Directory Hot Keys
-    setShowDirHotKeys(settings.value(SETTINGS_KEY_SHOW_DIR_HOT_KEYS, DEFAULT_SETTINGS_SHOW_DIRECTORIY_HOT_KEYS).toBool());
+    setShowDirHotKeys(settings->getShowDirHotKeys());
     // Set Show Drive Buttons
-    setShowDriveButtons(settings.value(SETTINGS_KEY_SHOW_DRIVE_BUTTONS, DEFAULT_SETTINGS_SHOW_DRIVE_BUTTONS).toBool());
+    setShowDriveButtons(settings->getShowDriveButtons());
     // Set Close When Finished
-    setCloseWhenFinished(settings.value(SETTINGS_KEY_CLOSE_WHEN_FINISHED, DEFAULT_SETTINGS_CLOSE_WHEN_FINISHED).toBool());
+    setCloseWhenFinished(settings->getCloseWhenFinished());
 
     // Set Show Hidden Files
-    setShowHiddenFiles(settings.value(SETTINGS_KEY_SHOW_HIDDEN_FILES, DEFAULT_SETTINGS_SHOW_HIDDEN_FILES).toBool());
+    setShowHiddenFiles(settings->getShowHiddenFiles());
     // Set Select Directories
-    setSelectDirectories(settings.value(SETTINGS_KEY_SELECT_DIRS, DEFAULT_SETTINGS_SELECT_DIRECTORIES).toBool());
+    setSelectDirectories(settings->getSelectDirectories());
     // Set Show Directories First
-    setShowDirsFirst(settings.value(SETTINGS_KEY_DIRFIRST, DEFAULT_SETTINGS_SHOW_DIRECTORIES_FIRST).toBool());
+    setShowDirsFirst(settings->getShowDirsFirst());
     // Set Case Sensitive Sorting
-    setCaseSensitiveSort(settings.value(SETTINGS_KEY_CASE_SENSITIVE, DEFAULT_SETTINGS_CASE_SENSITIVE_SORTING).toBool());
+    setCaseSensitiveSort(settings->getCaseSensitiveSort());
 
     // Set Copy Hidden Files
-    setCopyHiddenFiles(settings.value(SETTINGS_KEY_PANEL_COPY_HIDDEN_FILES, DEFAULT_SETTINGS_COPY_HIDDEN_FILES).toBool());
+    setCopyHiddenFiles(settings->getCopyHiddenFiles());
     // Set Show Full File Sizes
-    setShowFullSizes(settings.value(SETTINGS_KEY_SHOW_FULL_SIZES, DEFAULT_SETTINGS_SHOW_FULL_FILE_SIZES).toBool());
+    setShowFullSizes(settings->getShowFullSizes());
     // Set Use Default File Icons
-    setUseDefaultIcons(settings.value(SETTINGS_KEY_PANEL_USE_DEFAULT_ICONS, DEAFULT_SETTINGS_USE_DEFAULT_ICONS).toBool());
+    setUseDefaultIcons(settings->getUseDefaultIcons());
     // Set Follow Links
-    setFollowLinks(settings.value(SETTINGS_KEY_FOLLOW_LINKS, DEFAULT_SETTINGS_FOLLOW_SYMBOLIC_LINKS).toBool());
+    setFollowLinks(settings->getFollowLinks());
 
     // ...
 
@@ -191,79 +194,98 @@ void PreferencesDialog::loadSettings()
 //==============================================================================
 void PreferencesDialog::saveSettings()
 {
+    // Check Settings
+    if (!settings) {
+        return;
+    }
+
     qDebug() << "PreferencesDialog::saveSettings";
 
-    // Init Settings
-    QSettings settings;
+    // Begin Global Settings Update
+    settings->beginGlobalSettingsUpdate();
 
     // Set Normal Text Color
-    settings.setValue(SETTINGS_KEY_PANEL_COLOR_TEXT, textColor);
+    settings->setTextColor(textColor);
     // Set Normal Text BG Color
-    settings.setValue(SETTINGS_KEY_PANEL_COLOR_TEXT_BG, textBGColor);
+    settings->setTextBGColor(textBGColor);
     // Set Current Text Color
-    settings.setValue(SETTINGS_KEY_PANEL_COLOR_CURRENT, currentColor);
+    settings->setCurrentColor(currentColor);
     // Set Current Text BG Color
-    settings.setValue(SETTINGS_KEY_PANEL_COLOR_CURRENT_BG, currentBGColor);
+    settings->setCurrentBGColor(currentBGColor);
     // Set Selected Text Color
-    settings.setValue(SETTINGS_KEY_PANEL_COLOR_SELECTED, selectedColor);
+    settings->setSelectedColor(selectedColor);
     // Set Selected Text BG Color
-    settings.setValue(SETTINGS_KEY_PANEL_COLOR_SELECTED_BG, selectedBGColor);
+    settings->setSelectedBGColor(selectedBGColor);
     // Set Current Selected Text Color
-    settings.setValue(SETTINGS_KEY_PANEL_COLOR_CURRENT_SELECTED, currentSelectedColor);
+    settings->setCurrentSelectedColor(currentSelectedColor);
     // Set Current Selected Text BG Color
-    settings.setValue(SETTINGS_KEY_PANEL_COLOR_CURRENT_SELECTED_BG, currentSelectedBGColor);
+    settings->setCurrentSelectedBGColor(currentSelectedBGColor);
     // Set Hidden Text Color
-    settings.setValue(SETTINGS_KEY_PANEL_COLOR_HIDDEN, hiddenColor);
+    settings->setHiddenColor(hiddenColor);
     // Set Hidden Text BG Color
-    settings.setValue(SETTINGS_KEY_PANEL_COLOR_HIDDEN_BG, hiddenBGColor);
+    settings->setHiddenBGColor(hiddenBGColor);
     // Set Link Text Color
-    settings.setValue(SETTINGS_KEY_PANEL_COLOR_LINK, linkColor);
+    settings->setLinkColor(linkColor);
     // Set Link Text BG Color
-    settings.setValue(SETTINGS_KEY_PANEL_COLOR_LINK_BG, linkBGColor);
+    settings->setLinkBGColor(linkBGColor);
 
     // Set Font Name
-    settings.setValue(SETTINGS_KEY_PANEL_FONT_NAME, fontName);
+    settings->setFontName(fontName);
     // Set Font Size
-    settings.setValue(SETTINGS_KEY_PANEL_FONT_SIZE, fontSize);
+    settings->setFontSize(fontSize);
     // Set Font Bold
-    settings.setValue(SETTINGS_KEY_PANEL_FONT_BOLD, fontBold);
+    settings->setFontBold(fontBold);
     // Set Font Italic
-    settings.setValue(SETTINGS_KEY_PANEL_FONT_ITALIC, fontItalic);
+    settings->setFontItalic(fontItalic);
 
     // Set Thumb Width
-    settings.setValue(SETTINGS_KEY_THUMBS_WIDTH, thumbWidth);
-    // Set Thumb height
-    settings.setValue(SETTINGS_KEY_THUMBS_HEIGHT, thumbHeight);
+    settings->setThumbWidth(thumbWidth);
+    // Set Thumb Height
+    settings->setThumbHeight(thumbHeight);
 
     // Set Show Function Keys
-    settings.setValue(SETTINGS_KEY_SHOW_FUNCTION_KEYS, showFunctionKeys);
+    settings->setShowFunctionKeys(showFunctionKeys);
     // Set Show Directory Hot Keys
-    settings.setValue(SETTINGS_KEY_SHOW_DIR_HOT_KEYS, showDirHotKeys);
+    settings->setShowDirHotKeys(showDirHotKeys);
     // Set Show Drive Buttons
-    settings.setValue(SETTINGS_KEY_SHOW_DRIVE_BUTTONS, showDriveButtons);
+    settings->setShowDriveButtons(showDriveButtons);
     // Set Close When Finished
-    settings.setValue(SETTINGS_KEY_CLOSE_WHEN_FINISHED, closeWhenFinished);
+    settings->setCloseWhenFinished(closeWhenFinished);
 
     // Set Show Hidden Files
-    settings.setValue(SETTINGS_KEY_SHOW_HIDDEN_FILES, showHiddenFiles);
+    settings->setShowHiddenFiles(showHiddenFiles);
     // Set Select Directories
-    settings.setValue(SETTINGS_KEY_SELECT_DIRS, selectDirectories);
+    settings->setSelectDirectories(selectDirectories);
     // Set Show Directories First
-    settings.setValue(SETTINGS_KEY_DIRFIRST, showDirsFirst);
+    settings->setShowDirsFirst(showDirsFirst);
     // Set Case Sensitive Sorting
-    settings.setValue(SETTINGS_KEY_CASE_SENSITIVE, caseSensitiveSort);
+    settings->setCaseSensitiveSort(caseSensitiveSort);
 
     // Set Copy Hidden Files
-    settings.setValue(SETTINGS_KEY_PANEL_COPY_HIDDEN_FILES, copyHiddenFiles);
+    settings->setCopyHiddenFiles(copyHiddenFiles);
     // Set Show Full File Sizes
-    settings.setValue(SETTINGS_KEY_SHOW_FULL_SIZES, showFullSizes);
+    settings->setShowFullSizes(showFullSizes);
     // Set Use Default File Icons
-    settings.setValue(SETTINGS_KEY_PANEL_USE_DEFAULT_ICONS, useDefaultIcons);
+    settings->setUseDefaultIcons(useDefaultIcons);
     // Set Follow Links
-    settings.setValue(SETTINGS_KEY_FOLLOW_LINKS, followLinks);
+    settings->setFollowLinks(followLinks);
 
-    // Sync
-    settings.sync();
+    // Set Terminal Path
+    settings->setTerminalPath(terminalPath);
+    // Set Viewer Path
+    settings->setViewerPath(viewerPath);
+    // Set Editor Path
+    settings->setEditorPath(editorPath);
+    // Set Compare Path
+    settings->setComparePath(comparePath);
+    // Set Packer Path
+    settings->setPackerPath(packerPath);
+    // Set Unpacker Path
+    settings->setUnPackerPath(unPackerPath);
+
+
+    // Ginish Global Settings Update
+    settings->finishGlobalSettingsUpdate();
 
     // ...
 
@@ -276,8 +298,20 @@ void PreferencesDialog::saveSettings()
 //==============================================================================
 void PreferencesDialog::restoreDefaults()
 {
+    // Check Settings
+    if (!settings) {
+        return;
+    }
+
     qDebug() << "PreferencesDialog::restoreDefaults";
 
+    // Restore Default Settings
+    settings->restoreDefaults();
+
+    // Load Settings
+    loadSettings();
+
+/*
     // Set Normal Text Color
     setTextColor(DEFAULT_SETTINGS_TEXT_COLOR);
     // Set Normal Text BG Color
@@ -343,6 +377,10 @@ void PreferencesDialog::restoreDefaults()
     setUseDefaultIcons(DEAFULT_SETTINGS_USE_DEFAULT_ICONS);
     // Set Follow Links
     setFollowLinks(DEFAULT_SETTINGS_FOLLOW_SYMBOLIC_LINKS);
+*/
+
+    //
+
 
     // ...
 
@@ -448,6 +486,19 @@ void PreferencesDialog::restoreUI()
             ui->iconSizeComboBox->setCurrentIndex(2);
         break;
     }
+
+    // Set Terminal Path
+    ui->terminalEditor->setText(terminalPath);
+    // Set Viewer Path
+    ui->vieverEditor->setText(viewerPath);
+    // Set Editor Path
+    ui->editorEditor->setText(editorPath);
+    // Set Compare Path
+    ui->compareEditor->setText(comparePath);
+    // Set Packer Path
+    ui->packerEditor->setText(packerPath);
+    // Set Unpacker Path
+    ui->unpackerEditor->setText(unPackerPath);
 
     // ...
 }
@@ -1732,6 +1783,15 @@ PreferencesDialog::~PreferencesDialog()
     delete ui->previewWidget;
     // Delete UI
     delete ui;
+
+    // Check Settings
+    if (settings) {
+        // Release Instance
+        settings->release();
+        // Reset Settings
+        settings = NULL;
+    }
+
 
     qDebug() << "PreferencesDialog::~PreferencesDialog";
 }

@@ -96,11 +96,11 @@
 // Editor App Path
 #define DEFAULT_SETTINGS_EDITOR_PATH_MAC_OSX                "TextEdit"      // editorPath
 // Compare Path
-#define DEFAULT_SETTINGS_COMPARE_PATH_MAC_OSX               ""              // comparePath
+#define DEFAULT_SETTINGS_COMPARE_PATH                       ""              // comparePath
 // Packer Path
-#define DEFAULT_SETTINGS_PACKER_PATH_MAC_OSX                ""              // packerPath
+#define DEFAULT_SETTINGS_PACKER_PATH                        ""              // packerPath
 // Unpacker Path
-#define DEFAULT_SETTINGS_UNPACKER_PATH_MAC_OSX              ""              // unPackerPath
+#define DEFAULT_SETTINGS_UNPACKER_PATH                      ""              // unPackerPath
 
 
 // Search - Case Sensitve

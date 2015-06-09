@@ -261,6 +261,7 @@ protected:
         FileSelected,
         FileIsHidden,
         FileIsLink,
+        FileIsDir,
         FileFullName,
         FileDirSize,
 

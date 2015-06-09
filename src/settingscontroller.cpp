@@ -119,6 +119,28 @@ void SettingsController::setValue(const QString& aKey, const QVariant& aValue)
 }
 
 //==============================================================================
+// Begin Global Settings Update
+//==============================================================================
+void SettingsController::beginGlobalSettingsUpdate()
+{
+    // Emit Begin Global Settings Update
+    emit globalSettingsUpdateBegin();
+
+    // ...
+}
+
+//==============================================================================
+// Finish Global Settings Update
+//==============================================================================
+void SettingsController::finishGlobalSettingsUpdate()
+{
+    // ...
+
+    // Emit Global Settings Update Finished
+    emit globalSettingsUpdateFinished();
+}
+
+//==============================================================================
 // Get Dirty
 //==============================================================================
 bool SettingsController::getDirty()
@@ -256,6 +278,7 @@ void SettingsController::restoreDefaults()
     setShowDriveButtons(DEFAULT_SETTINGS_SHOW_DRIVE_BUTTONS);
     // Reset Close When Finished
     setCloseWhenFinished(DEFAULT_SETTINGS_CLOSE_WHEN_FINISHED);
+
     // Reset Select Directories
     setSelectDirectories(DEFAULT_SETTINGS_SELECT_DIRECTORIES);
     // Reset Show Hidden Files
@@ -264,6 +287,7 @@ void SettingsController::restoreDefaults()
     setShowDirsFirst(DEFAULT_SETTINGS_SHOW_DIRECTORIES_FIRST);
     // Reset Case Sensitive Sorting
     setCaseSensitiveSort(DEFAULT_SETTINGS_CASE_SENSITIVE_SORTING);
+
     // Reset Use Default Icons
     setUseDefaultIcons(DEAFULT_SETTINGS_USE_DEFAULT_ICONS);
     // Reset Show Full File Sizes
@@ -272,6 +296,7 @@ void SettingsController::restoreDefaults()
     setCopyHiddenFiles(DEFAULT_SETTINGS_COPY_HIDDEN_FILES);
     // Reset Follow Links
     setFollowLinks(DEFAULT_SETTINGS_FOLLOW_SYMBOLIC_LINKS);
+
     // Reset Normal Text Color
     setTextColor(DEFAULT_SETTINGS_TEXT_COLOR);
     // Reset Normal Text BG Color
@@ -296,6 +321,7 @@ void SettingsController::restoreDefaults()
     setLinkColor(DEFAULT_SETTINGS_LINK_COLOR);
     // Reset Link Text BG Color
     setLinkBGColor(DEFAULT_SETTINGS_LINK_BG_COLOR);
+
     // Reset Font Name
     setFontName(DEFAULT_SETTINGS_FONT_NAME);
     // Reset Font Size
@@ -304,10 +330,24 @@ void SettingsController::restoreDefaults()
     setFontBold(DEFAULT_SETTINGS_FONT_BOLD);
     // Reset Font Italic
     setFontItalic(DEFAULT_SETTINGS_FONT_ITALIC);
+
     // Reset Thumb Width
     setThumbWidth(DEFAULT_SETTINGS_THUMB_WIDTH);
     // Reset Thumb height
     setThumbHeight(DEFAULT_SETTINGS_THUMB_HEIGHT);
+
+    // Set Terminal Path
+    setTerminalPath(DEFAULT_SETTINGS_TERMINAL_PATH_MAC_OSX);
+    // Set Viewer Path
+    setViewerPath(DEFAULT_SETTINGS_VIEWER_PATH_MAC_OSX);
+    // Set Editor Path
+    setEditorPath(DEFAULT_SETTINGS_EDITOR_PATH_MAC_OSX);
+    // Set Compare Path
+    setComparePath(DEFAULT_SETTINGS_COMPARE_PATH);
+    // Set Packer Path
+    setPackerPath(DEFAULT_SETTINGS_PACKER_PATH);
+    // Set Unpacker PAth
+    setUnPackerPath(DEFAULT_SETTINGS_UNPACKER_PATH);
 
     // ...
 

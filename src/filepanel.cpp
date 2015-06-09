@@ -699,7 +699,6 @@ void FilePanel::setLoading(const bool& aLoading)
     // Check Loading
     if (loading != aLoading) {
         //qDebug() << "FilePanel::setLoading - aLoading: " << aLoading;
-
         // Set Loading
         loading = aLoading;
         // Emit Loading Changed Signal
@@ -1486,7 +1485,6 @@ void FilePanel::fileModelDirFetchFinished()
             setLoading(false);
         }
 
-
     } else if (lastIndex != -1) {
         qDebug() << "FilePanel::fileModelDirFetchFinished - panelName: " << panelName << " - lastIndex: " << lastIndex;
 
@@ -1878,7 +1876,7 @@ void FilePanel::globalSettingsUpdateFinished()
 //==============================================================================
 void FilePanel::showHiddenFilesChanged(const bool& aHidden)
 {
-    qDebug() << "FilePanel::showHiddenFilesChanged - aHidden: " << aHidden;
+    //qDebug() << "FilePanel::showHiddenFilesChanged - aHidden: " << aHidden;
 
     // Check File List Model
     if (fileListModel) {
@@ -1902,7 +1900,7 @@ void FilePanel::showHiddenFilesChanged(const bool& aHidden)
 //==============================================================================
 void FilePanel::showDirsFirstChanged(const bool& aDirFirst)
 {
-    qDebug() << "FilePanel::showDirsFirstChanged - aDirFirst: " << aDirFirst;
+    //qDebug() << "FilePanel::showDirsFirstChanged - aDirFirst: " << aDirFirst;
 
     // Check File List Model
     if (fileListModel) {
@@ -1926,7 +1924,7 @@ void FilePanel::showDirsFirstChanged(const bool& aDirFirst)
 //==============================================================================
 void FilePanel::caseSensitiveSortChanged(const bool& aCaseSensitive)
 {
-    qDebug() << "FilePanel::caseSensitiveSortChanged - aCaseSensitive: " << aCaseSensitive;
+    //qDebug() << "FilePanel::caseSensitiveSortChanged - aCaseSensitive: " << aCaseSensitive;
 
     // Check File List Model
     if (fileListModel) {
@@ -1950,7 +1948,9 @@ void FilePanel::caseSensitiveSortChanged(const bool& aCaseSensitive)
 //==============================================================================
 void FilePanel::useDefaultIconsChanged(const bool& aUseDefaultIcons)
 {
-    qDebug() << "FilePanel::useDefaultIconsChanged - aUseDefaultIcons: " << aUseDefaultIcons;
+    Q_UNUSED(aUseDefaultIcons);
+
+    //qDebug() << "FilePanel::useDefaultIconsChanged - aUseDefaultIcons: " << aUseDefaultIcons;
 
     // Check File List Model
     if (fileListModel) {

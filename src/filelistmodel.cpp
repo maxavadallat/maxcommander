@@ -308,7 +308,7 @@ void FileListModel::clear()
     endResetModel();
 
     // Emit Count Changed Signal
-    emit countChanged(itemList.count());
+    emit countChanged(0);
 
     // Clear File Name List
     fileNameList.clear();
@@ -847,6 +847,8 @@ QHash<int, QByteArray> FileListModel::roleNames() const
     roles[FileIsHidden]     = "fileIsHidden";
     // File Is Link
     roles[FileIsLink]       = "fileIsLink";
+    // File Is Dir
+    roles[FileIsDir ]       = "fileIsDir";
     // Full File Name
     roles[FileFullName]     = "fileFullName";
     // Dir Size
@@ -984,7 +986,7 @@ QVariant FileListModel::data(const QModelIndex& aIndex, int aRole) const
             case FileFullName:      return item->fileInfo.fileName();
             case FileIsHidden:      return (item->fileInfo.fileName() == QString("..") ? false : item->fileInfo.isHidden());
             case FileIsLink:        return item->fileInfo.isSymLink();
-
+            case FileIsDir:         return item->fileInfo.isDir();
             case FileDirSize:       return item->dirSize;
 
             default:

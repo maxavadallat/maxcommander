@@ -414,6 +414,10 @@ protected slots:
 private:
     // UI
     Ui::PreferencesDialog*  ui;
+
+    // Settings Controller
+    SettingsController*     settings;
+
     // Dirty
     bool                    dirty;
 

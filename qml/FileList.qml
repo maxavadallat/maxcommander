@@ -51,6 +51,7 @@ Rectangle {
         highlightMoveDuration: 0
         highlightResizeDuration: 0
         snapMode: ListView.SnapToItem
+
         cacheBuffer: globalSettings.thumbHeight * 8
 
         property int delegateHeight: globalSettings.thumbHeight
@@ -68,12 +69,22 @@ Rectangle {
             height: fileListView.delegateHeight
 
             fileIconSource: {
-                // Check File Name
-                if (Utility.isImage(fileFullName, mainController) && !globalSettings.useDefaultIcons) {
-                    Const.DEFAULT_FILE_PREFIX + mainController.currentDir + "/" + fileFullName
+                // Check Global Settings
+                if (globalSettings.useDefaultIcons) {
+                    // Check If Is Dir
+                    if (fileIsDir) {
+                       Const.DEFAULT_FILE_LIST_ICON_DIR
+                    } else {
+                       Const.DEFAULT_FILE_LIST_ICON_FILE
+                    }
                 } else {
-                    // Image Provider
-                    Const.DEFAULT_FILE_ICON_PREFIX + mainController.currentDir + "/" + fileFullName
+                    // Check File Name
+                    if (Utility.isImage(fileFullName, mainController)) {
+                        Const.DEFAULT_FILE_PREFIX + mainController.currentDir + "/" + fileFullName
+                    } else {
+                        // Image Provider
+                        Const.DEFAULT_FILE_ICON_PREFIX + mainController.currentDir + "/" + fileFullName
+                    }
                 }
             }
 

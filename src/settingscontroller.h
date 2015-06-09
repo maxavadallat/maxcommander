@@ -72,9 +72,13 @@ public:
 
     // Get Value
     QVariant value(const QString& aKey, const QVariant& aDefaultValue = QVariant());
-
     // Set Value
     void setValue(const QString& aKey, const QVariant& aValue);
+
+    // Begin Global Settings Update
+    void beginGlobalSettingsUpdate();
+    // Finish Global Settings Update
+    void finishGlobalSettingsUpdate();
 
     // Get Dirty
     bool getDirty();

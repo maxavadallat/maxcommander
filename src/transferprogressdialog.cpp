@@ -157,6 +157,7 @@ TransferProgressDialog::TransferProgressDialog(const QString& aOperation, QWidge
     , operation(aOperation)
     , closeWhenFinished(false)
     , queueIndex(-1)
+    , options(0)
     , transferSpeedTimerID(-1)
     , lastTransferedSize(0)
     , currTransferedSize(0)
@@ -227,7 +228,7 @@ void TransferProgressDialog::init()
 //==============================================================================
 // Launch Progress Dialog
 //==============================================================================
-void TransferProgressDialog::launch(const QString& aSourcePath, const QString& aTargetPath, const QStringList& aSelectedFiles)
+void TransferProgressDialog::launch(const QString& aSourcePath, const QString& aTargetPath, const QStringList& aSelectedFiles, const int& aOptions)
 {
     qDebug() << "TransferProgressDialog::launch - aSourcePath: " << aSourcePath << " - aTargetPath: " << aTargetPath << " - count: " << aSelectedFiles.count();
 
@@ -235,6 +236,8 @@ void TransferProgressDialog::launch(const QString& aSourcePath, const QString& a
     sourcePath = aSourcePath;
     // Set Target Path
     targetPath = aTargetPath;
+    // Set Options
+    options    = aOptions;
 
     // Restore UI
     restoreUI();
@@ -268,7 +271,7 @@ void TransferProgressDialog::launch(const QString& aSourcePath, const QString& a
 //==============================================================================
 // Launch Progress Dialog With Single Item
 //==============================================================================
-void TransferProgressDialog::launch(const QString& aSource, const QString& aTarget)
+void TransferProgressDialog::launch(const QString& aSource, const QString& aTarget, const int& aOptions)
 {
     qDebug() << "TransferProgressDialog::launch - aSource: " << aSource << " - aTarget: " << aTarget;
 
@@ -279,6 +282,8 @@ void TransferProgressDialog::launch(const QString& aSource, const QString& aTarg
     sourcePath = sourceInfo.absolutePath();
     // Set Target Path
     targetPath = QFileInfo(aTarget).absolutePath();
+    // Set Options
+    options    = aOptions;
 
     // Restore UI
     restoreUI();

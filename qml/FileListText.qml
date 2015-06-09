@@ -14,17 +14,17 @@ Text {
     visible: parent.width > Const.DEFAULT_FILE_LIST_HEADER_SEPARATOR_WIDTH
     elide: Text.ElideMiddle
 
-    color: mainController.textColor
+    color: globalSettings.textColor
 
     font.family: delegateFont.name
-    font.pixelSize: mainController.fontSize
-    font.bold: mainController.fontBold
-    font.italic: mainController.fontItalic
+    font.pixelSize: globalSettings.fontSize
+    font.bold: globalSettings.fontBold
+    font.italic: globalSettings.fontItalic
 
     // Font Loader
     FontLoader {
         id: delegateFont
-        name: mainController.fontName
+        name: globalSettings.fontName
     }
 }
 

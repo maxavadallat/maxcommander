@@ -12,7 +12,7 @@ Rectangle {
     //color: (mainController.panelHasFocus && !mainController.fileRenameActive) ? "#44444477" : "#00000000"
     color: {
         if (mainController.panelHasFocus && !mainController.fileRenameActive) {
-            return mainController.currentBGColor;
+            return globalSettings.currentBGColor;
         }
 
         return "transparent";

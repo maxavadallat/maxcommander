@@ -44,8 +44,8 @@ bool hasParentDir(const QString& aDirPath);
 // Get Parent Dir
 QString getParentDir(const QString& aDirPath);
 
-// Get Dir Name
-QString getDirName(const QString& aDirPath);
+// Get File Name
+QString getFileName(const QString& aDirPath);
 // Get Dir Path
 QString getDirPath(const QString& aDirPath);
 

@@ -49,28 +49,28 @@ Rectangle {
         if (fileListDelegateRoot.fileSelected) {
             // Check Item Index
             if (itemIndex == listIndex) {
-                return mainController.currentSelectedColor;
+                return globalSettings.currentSelectedColor;
             }
 
-            return mainController.selectedColor;
+            return globalSettings.selectedColor;
         }
 
         // Check If Hidden
         if (fileListDelegateRoot.fileHidden) {
-            return mainController.hiddenColor;
+            return globalSettings.hiddenColor;
         }
 
         // Check If Link
         if (fileListDelegateRoot.fileSymLink) {
-            return mainController.linkColor;
+            return globalSettings.linkColor;
         }
 
         // Check If Current
         if (itemIndex == listIndex) {
-            return mainController.currentColor;
+            return globalSettings.currentColor;
         }
 
-        return mainController.textColor;
+        return globalSettings.textColor;
     }
 
     width: 320

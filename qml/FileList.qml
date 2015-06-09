@@ -9,7 +9,7 @@ import "qrc:/qml/js/utility.js" as Utility
 Rectangle {
     id: fileListRoot
 
-    color: mainController.textBGColor
+    color: globalSettings.textBGColor
 
     width: 480
     height: 640
@@ -51,8 +51,9 @@ Rectangle {
         highlightMoveDuration: 0
         highlightResizeDuration: 0
         snapMode: ListView.SnapToItem
+        cacheBuffer: globalSettings.thumbHeight * 8
 
-        property int delegateHeight: mainController.thumbHeight
+        property int delegateHeight: globalSettings.thumbHeight
         property int visualItemsCount: Math.floor((fileListView.height + fileListView.spacing) / fileListView.delegateHeight);
         property int prevIndex: -1
 
@@ -68,7 +69,7 @@ Rectangle {
 
             fileIconSource: {
                 // Check File Name
-                if (Utility.isImage(fileFullName, mainController) && !mainController.useDefaultIcons) {
+                if (Utility.isImage(fileFullName, mainController) && !globalSettings.useDefaultIcons) {
                     Const.DEFAULT_FILE_PREFIX + mainController.currentDir + "/" + fileFullName
                 } else {
                     // Image Provider
@@ -76,15 +77,17 @@ Rectangle {
                 }
             }
 
-            fileNameText: fileName
-            fileExtText : fileExt
-            fileTypeText: fileType
-            fileSizeText: dirSize > 0 ? dirSize : fileSize
-            fileDateText: fileDate
-            fileHidden  : fileIsHidden
-            fileSelected: fileIsSelected
-            fileDirSize : dirSize
-            fileSymLink : fileIsLink
+            fileNameText  : fileName
+            fileExtText   : fileExt
+            fileTypeText  : fileType
+            fileSizeText  : dirSize > 0 ? dirSize : fileSize
+            fileDateText  : fileDate
+            fileOwnerText : fileOwner
+            filePermsText : filePerms
+            fileHidden    : fileIsHidden
+            fileSelected  : fileIsSelected
+            fileDirSize   : dirSize
+            fileSymLink   : fileIsLink
 
             nameWidth   : fileListHeader.nameWidth
             extWidth    : fileListHeader.extWidth

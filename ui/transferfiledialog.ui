@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>320</width>
-    <height>169</height>
+    <width>344</width>
+    <height>191</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,14 +18,14 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>320</width>
-    <height>169</height>
+    <width>344</width>
+    <height>191</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>16777215</width>
-    <height>169</height>
+    <height>191</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -44,37 +44,20 @@
    <property name="bottomMargin">
     <number>8</number>
    </property>
+   <property name="horizontalSpacing">
+    <number>0</number>
+   </property>
    <property name="verticalSpacing">
     <number>8</number>
    </property>
-   <item row="5" column="0">
-    <widget class="QFrame" name="frame">
-     <property name="frameShape">
-      <enum>QFrame::HLine</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Sunken</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="0">
-    <widget class="QLabel" name="targetTitleLabel">
+   <item row="0" column="0">
+    <widget class="QLabel" name="sourceTitleLabel">
      <property name="text">
-      <string>Target File(s):</string>
+      <string>Source File(s):</string>
      </property>
     </widget>
    </item>
-   <item row="6" column="0">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
+   <item row="1" column="0" colspan="3">
     <widget class="QLineEdit" name="sourceFileEdit">
      <property name="sizePolicy">
       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -85,12 +68,19 @@
      <property name="minimumSize">
       <size>
        <width>0</width>
-       <height>0</height>
+       <height>21</height>
       </size>
      </property>
     </widget>
    </item>
-   <item row="3" column="0">
+   <item row="2" column="0">
+    <widget class="QLabel" name="targetTitleLabel">
+     <property name="text">
+      <string>Target File(s):</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0" colspan="3">
     <widget class="QLineEdit" name="targetFileEdit">
      <property name="sizePolicy">
       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -101,30 +91,63 @@
      <property name="minimumSize">
       <size>
        <width>0</width>
-       <height>0</height>
+       <height>21</height>
       </size>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="0">
-    <widget class="QLabel" name="sourceTitleLabel">
-     <property name="text">
-      <string>Source File(s):</string>
      </property>
     </widget>
    </item>
    <item row="4" column="0">
-    <spacer name="verticalSpacer">
+    <spacer name="horizontalSpacer">
      <property name="orientation">
-      <enum>Qt::Vertical</enum>
+      <enum>Qt::Horizontal</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>20</width>
-       <height>8</height>
+       <width>94</width>
+       <height>20</height>
       </size>
      </property>
     </spacer>
+   </item>
+   <item row="4" column="1">
+    <widget class="QCheckBox" name="copyHiddenFilesCheckBox">
+     <property name="text">
+      <string>Copy Hidden File(s)</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="2">
+    <spacer name="horizontalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>93</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="5" column="0" colspan="3">
+    <widget class="QFrame" name="frame">
+     <property name="frameShape">
+      <enum>QFrame::HLine</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Sunken</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="1" colspan="2">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

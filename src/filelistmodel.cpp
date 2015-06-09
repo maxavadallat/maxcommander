@@ -1,5 +1,4 @@
 #include <QDir>
-#include <QSettings>
 #include <QDateTime>
 #include <QDebug>
 
@@ -8,6 +7,7 @@
 #include "filelistmodel.h"
 #include "remotefileutilclient.h"
 #include "utility.h"
+#include "defaultsettings.h"
 #include "constants.h"
 
 
@@ -840,7 +840,7 @@ QHash<int, QByteArray> FileListModel::roleNames() const
     // File Name
     roles[FileOwner]        = "fileOwner";
     // File Permissions
-    roles[FilePerms]        = "fileParms";
+    roles[FilePerms]        = "filePerms";
     // File Selected
     roles[FileSelected]     = "fileIsSelected";
     // File Is Hidden
@@ -947,7 +947,39 @@ QVariant FileListModel::data(const QModelIndex& aIndex, int aRole) const
 
             case FileDateTime:      return formatDateTime(item->fileInfo.lastModified());
             case FileOwner:         return item->fileInfo.owner();
-            case FilePerms:         return (int)item->fileInfo.permissions();
+            case FilePerms: {
+                // Init Perms Text
+                QString permsText = DEFAULT_PERMISSIONS_TEXT;
+
+                // Check File Info
+                if (item->fileInfo.isSymLink()) {
+                    // Adjust Perms Text
+                    permsText[0] = 'l';
+                } else if (item->fileInfo.isDir()) {
+                    // Adjust Perms Text
+                    permsText[0] = 'd';
+                }
+
+                // Get Permissions
+                QFile::Permissions perms = item->fileInfo.permissions();
+
+                // Check Perms
+                if (perms & QFile::ReadUser)    { permsText[1] = 'r'; }
+                if (perms & QFile::WriteUser)   { permsText[2] = 'w'; }
+                if (perms & QFile::ExeUser)     { permsText[3] = 'x'; }
+
+                if (perms & QFile::ReadGroup)   { permsText[4] = 'r'; }
+                if (perms & QFile::WriteGroup)  { permsText[5] = 'w'; }
+                if (perms & QFile::ExeGroup)    { permsText[6] = 'x'; }
+
+                if (perms & QFile::ReadOther)   { permsText[7] = 'r'; }
+                if (perms & QFile::WriteOther)  { permsText[8] = 'w'; }
+                if (perms & QFile::ExeOther)    { permsText[9] = 'x'; }
+
+
+                return permsText;
+                //return (int)item->fileInfo.permissions();
+            } break;
             case FileSelected:      return item->selected;
             case FileFullName:      return item->fileInfo.fileName();
             case FileIsHidden:      return (item->fileInfo.fileName() == QString("..") ? false : item->fileInfo.isHidden());
@@ -1096,13 +1128,13 @@ void FileListModel::insertDirItem(const QString& aFileName)
     // Check Reverse Order
     if (reverseOrder) {
         // Go Thru List
-        while (itemList[i]->fileInfo.isDir() && itemList[i]->fileInfo.fileName() > aFileName && i < count) {
+        while (i < count && itemList[i]->fileInfo.isDir() && itemList[i]->fileInfo.fileName() > aFileName) {
             // Inc Loop Index
             i++;
         }
     } else {
         // Go Thru List
-        while (itemList[i]->fileInfo.isDir() && itemList[i]->fileInfo.fileName() < aFileName && i < count) {
+        while (i < count && itemList[i]->fileInfo.isDir() && itemList[i]->fileInfo.fileName() < aFileName) {
             // Inc Loop Index
             i++;
         }

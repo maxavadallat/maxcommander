@@ -60,6 +60,8 @@ class SettingsController : public QObject
     Q_PROPERTY(QString packerPath READ getPackerPath WRITE setPackerPath NOTIFY packerPathChanged)
     Q_PROPERTY(QString unPackerPath READ getUnPackerPath WRITE setUnPackerPath NOTIFY unpackerPathChanged)
 
+    Q_PROPERTY(bool dirty READ getDirty NOTIFY dirtyChanged)
+
 public:
 
     // Get Instance - Static Constructor
@@ -69,14 +71,16 @@ public:
     void release();
 
     // Get Value
-    QVariant value(const QString& aKey);
+    QVariant value(const QString& aKey, const QVariant& aDefaultValue = QVariant());
 
     // Set Value
     void setValue(const QString& aKey, const QVariant& aValue);
 
+    // Get Dirty
+    bool getDirty();
+
     // Restore Defaults
     void restoreDefaults();
-
 
     // Get Show Function Keys
     bool getShowFunctionKeys();
@@ -260,6 +264,14 @@ public:
 
 signals:
 
+    // Dirty Changed
+    void dirtyChanged(const bool& aDirty);
+
+    // Begin Global Settings Update Signal
+    void globalSettingsUpdateBegin();
+    // Finish Global Settings Update Signal
+    void globalSettingsUpdateFinished();
+
     // Show Function Keys Changed Signal
     void showFunctionKeysChanged(const bool& aShow);
     // Show Directory Hot Keys Changed Signal
@@ -343,6 +355,11 @@ protected: // Constructor/Destructor
 
     // Constructor
     explicit SettingsController(QObject* aParent = NULL);
+
+    // Load Settings
+    void loadSettings();
+    // Save Settings
+    void saveSettings();
 
     // Destructor
     virtual ~SettingsController();

@@ -1,5 +1,9 @@
+
 #include "transferfiledialog.h"
 #include "ui_transferfiledialog.h"
+#include "settingscontroller.h"
+#include "defaultsettings.h"
+
 
 //==============================================================================
 // Constructor
@@ -7,8 +11,12 @@
 TransferFileDialog::TransferFileDialog(QWidget* aParent)
     : QDialog(aParent)
     , ui(new Ui::TransferFileDialog)
+    , settings(SettingsController::getInstance())
 {
+    // Setup UI
     ui->setupUi(this);
+    // Set Copy Hidden File Checkbox
+    ui->copyHiddenFilesCheckBox->setChecked(settings ? settings->getCopyHiddenFiles() : DEFAULT_SETTINGS_COPY_HIDDEN_FILES);
 }
 
 //==============================================================================
@@ -50,9 +58,54 @@ void TransferFileDialog::setTargetFileText(const QString& aTargetFile, const boo
 }
 
 //==============================================================================
+// Get Copy Hidden Files
+//==============================================================================
+bool TransferFileDialog::getCopyHidden()
+{
+    return ui->copyHiddenFilesCheckBox->isChecked();
+}
+
+//==============================================================================
+// Set Copy Hidden Files
+//==============================================================================
+void TransferFileDialog::setCopyHidden(const bool& aCopyHidden)
+{
+    // Set Checked
+    ui->copyHiddenFilesCheckBox->setChecked(aCopyHidden);
+
+    // Check Settings
+    if (settings) {
+        // Set Copy Hidden Files
+        settings->setCopyHiddenFiles(ui->copyHiddenFilesCheckBox->isChecked());
+    }
+}
+
+//==============================================================================
+// On Copy Hidden Files Checkbox Clicked Slot
+//==============================================================================
+void TransferFileDialog::on_copyHiddenFilesCheckBox_clicked()
+{
+    // Check Settings
+    if (settings) {
+        // Set Copy Hidden Files
+        settings->setCopyHiddenFiles(ui->copyHiddenFilesCheckBox->isChecked());
+    }
+}
+
+//==============================================================================
 // Destructor
 //==============================================================================
 TransferFileDialog::~TransferFileDialog()
 {
+    // Delete UUI
     delete ui;
+
+    // Check Settings
+    if (settings) {
+        // Release Instance
+        settings->release();
+        // Reset Settings
+        settings = NULL;
+    }
 }
+

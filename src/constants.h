@@ -15,13 +15,6 @@
 
 #define DEFAULT_WORKER_HOST_NAME                            "localhost"
 
-// QML Context Properties
-
-#define MAIN_VIEW_CONTROLLER                                "mainViewController"
-
-#define LIST_MODEL_LEFT_PANE                                "leftPaneModel"
-#define LIST_MODEL_RIGHT_PANE                               "rightPaneModel"
-
 
 // Settings Groups
 
@@ -112,6 +105,7 @@
 #define SETTINGS_KEY_FOLLOW_LINKS                           SETTINGS_GROUP_PANEL_COMMON"/followLinks"
 
 #define SETTINGS_KEY_PANEL_COPY_HIDDEN_FILES                SETTINGS_GROUP_PANEL_COMMON"/copyHidden"
+
 #define SETTINGS_KEY_PANEL_USE_DEFAULT_ICONS                SETTINGS_GROUP_UI"/defaultIcons"
 #define SETTINGS_KEY_SHOW_FULL_SIZES                        SETTINGS_GROUP_UI"/showFullSizes"
 
@@ -189,16 +183,7 @@
 
 // Constants
 
-#define DEFAULT_ONE_KILO                                    1024
-
-// Default Transparent Color
-#define DEFAULT_TRANSPARENT_COLOR                           "#00000000"
-
-#define DEFAULT_PANEL_FOCUSED_STYLE_SHEET                   "background-color: #11000077"
-#define DEFAULT_PANEL_TRASPARENT_STYLE_SHEET                "background-color: "DEFAULT_TRANSPARENT_COLOR
-
-#define DEFAULT_AVAILABLE_SPACE_FORMAT_STRING               "%1 files, %2 of %3 free"
-
+// QML Context Properties
 #define DEFAULT_MAIN_CONTROLLER_NAME                        "mainController"
 #define DEFAULT_FILE_LIST_MODEL_NAME                        "fileListModel"
 #define DEFAULT_IMAGE_VIEWER_CONTROLLER                     "viewerController"
@@ -208,6 +193,18 @@
 #define DEFAULT_PREVIEW_CONTROLLER                          "previewController"
 #define DEFAULT_SEARCH_RESULT_CONTROLLER                    "searchResultController"
 #define DEFAULT_SEARCH_RESULT_MODEL                         "searchResultModel"
+#define DEFAULT_GLOBAL_SETTINGS_CONTROLLER                  "globalSettings"
+
+
+#define DEFAULT_ONE_KILO                                    1024
+
+// Default Transparent Color
+#define DEFAULT_TRANSPARENT_COLOR                           "#00000000"
+
+#define DEFAULT_PANEL_FOCUSED_STYLE_SHEET                   "background-color: #11000077"
+#define DEFAULT_PANEL_TRASPARENT_STYLE_SHEET                "background-color: "DEFAULT_TRANSPARENT_COLOR
+
+#define DEFAULT_AVAILABLE_SPACE_FORMAT_STRING               "%1 files, %2 of %3 free"
 
 #define DEFAULT_FILE_ICON_PROVIDER_ID                       "fileicon"
 #define DEFAULT_AUDIO_TAG_PROVIDER_ID                       "audiotag"
@@ -308,7 +305,7 @@
 
 
 
-
+#define DEFAULT_PERMISSIONS_TEXT                            "----------"
 
 
 
@@ -358,6 +355,8 @@
 
 
 #define DEFAULT_TITLE_VIEWER                                "Viewer - "
+#define DEFAULT_TITLE_EDITOR                                "Editor - "
+#define DEFAULT_TITLE_EDITOR_NEW_FILE                       "Editor - New File"
 
 #define DEFAULT_TITLE_SAVE_NEW_FILE                         "Save New File"
 #define DEFAULT_TITLE_SAVE_FILE                             "Save File"
@@ -384,6 +383,9 @@
 
 
 #define DEFAULT_TITLE_SELECT_LINK_TARGET                    "Select Link Target"
+
+#define DEFAULT_TITLE_FILE_MODIFIED                         "File Modified"
+#define DEFAULT_CONFIRM_TEXT_SAVE_CHANGES                   "Save Changes?"
 
 
 #endif // CONSTANTS_H

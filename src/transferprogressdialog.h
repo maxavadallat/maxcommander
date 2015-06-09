@@ -80,9 +80,9 @@ public:
     void setOverallProgress(const quint64& aProgress);
 
     // Launch Progress Dialog
-    void launch(const QString& aSourcePath, const QString& aTargetPath, const QStringList& aSelectedFiles);
+    void launch(const QString& aSourcePath, const QString& aTargetPath, const QStringList& aSelectedFiles, const int& aOptions = 0);
     // Launch Progress Dialog
-    void launch(const QString& aSource, const QString& aTarget);
+    void launch(const QString& aSource, const QString& aTarget, const int& aOptions = 0);
 
     // Suspend
     void suspend();
@@ -254,7 +254,10 @@ private:
     QString                         sourcePath;
     // Target Path
     QString                         targetPath;
-    // Name Label text
+    // Options
+    int                             options;
+
+    // Name Label Text
     QString                         nameLabelText;
 
     // Speed Timer ID

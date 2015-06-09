@@ -32,6 +32,11 @@ public:
     // Get Content Source
     QString getContentSource();
 
+    // Get Is New File
+    bool isNewFile();
+    // Get Is File Modified
+    bool isFileModified();
+
     // Destructor
     virtual ~ViewerWindow();
 
@@ -41,6 +46,8 @@ public slots:
     bool newFile(const QString& aDirPath);
     // Load File
     bool loadFile(const QString& aFileName, const QString& aPanelName);
+    // Save File
+    void saveFile(const bool& aShowFileDialog = true);
     // Save File As
     void saveFileAs(const QString& aFileName);
 
@@ -75,6 +82,12 @@ protected slots:
     // Is Mime Supported As Text
     bool isSupportedTextMime(const bool& aEditMode, const QString& aMime);
 
+    // Update Window Title
+    void updateWindowTitle();
+
+    // Update Menu Bar
+    void updateMenuBar();
+
 protected slots: // For QTextEdit
 
     // Text Changed Slot
@@ -96,7 +109,17 @@ protected: // From QWidget
     // Key Release Event
     virtual void keyReleaseEvent(QKeyEvent* aEvent);
 
+protected slots: // Menu Actions
+
+    // On Action Save Triggered Slot
+    void on_actionSave_triggered();
+    // On Action Save As Triggered Slot
+    void on_actionSave_As_triggered();
+    // On Action Close Triggered Slot
+    void on_actionClose_triggered();
+
 private:
+
     // UI
     Ui::ViewerWindow*       ui;
     // File Name
@@ -107,8 +130,12 @@ private:
     bool                    editMode;
     // Dirty
     bool                    dirty;
+    // File Modified
+    bool                    fileModified;
     // Mime
     QString                 mime;
+    // New File
+    bool                    fileIsNew;
 
     // Image Browser
     ImageBrowser*           imageBrowser;

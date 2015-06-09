@@ -7,6 +7,8 @@ namespace Ui {
 class TransferFileDialog;
 }
 
+class SettingsController;
+
 //==============================================================================
 // Transfer File Dialog Class
 //==============================================================================
@@ -26,13 +28,26 @@ public:
     QString getTargetFileText();
     // Set Target Fiel Text
     void setTargetFileText(const QString& aTargetFile, const bool& aReadOnly = false);
+    // Get Copy Hidden Files
+    bool getCopyHidden();
+    // Set Copy Hidden Files
+    void setCopyHidden(const bool& aCopyHidden);
+
     // Destructor
     virtual ~TransferFileDialog();
+
+private slots:
+
+    // On Copy Hidden Files Checkbox Clicked Slot
+    void on_copyHiddenFilesCheckBox_clicked();
 
 private:
 
     // UI
     Ui::TransferFileDialog* ui;
+
+    // Settings
+    SettingsController*     settings;
 };
 
 #endif // TRANSFERFILEDIALOG_H

@@ -225,8 +225,9 @@ private:
 
     // UI
     Ui::MainWindow*                 ui;
-    // Action Group
-    QActionGroup*                   viewMenuActionGroup;
+
+    // Settings
+    SettingsController*             settings;
 
     // Left Drive Buttons - Windows
 
@@ -240,6 +241,9 @@ private:
 
     // Focused Panel
     FilePanel*                      focusedPanel;
+
+    // Action Group
+    QActionGroup*                   viewMenuActionGroup;
 
     // Modifier Keys Pressed
     int                             modifierKeys;

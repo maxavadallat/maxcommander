@@ -399,9 +399,9 @@ QString getParentDir(const QString& aDirPath)
 }
 
 //==============================================================================
-// Get Dir Name
+// Get File Name
 //==============================================================================
-QString getDirName(const QString& aDirPath)
+QString getFileName(const QString& aDirPath)
 {
     // Init File Info
     QFileInfo dirInfo(aDirPath);

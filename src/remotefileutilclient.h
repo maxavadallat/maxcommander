@@ -70,9 +70,9 @@ public:
     void scanDirTree(const QString& aDirPath);
 
     // Copy File
-    void copyFile(const QString& aSource, const QString& aTarget);
+    void copyFile(const QString& aSource, const QString& aTarget, const int& aOptions = 0);
     // Rename/Move File
-    void moveFile(const QString& aSource, const QString& aTarget);
+    void moveFile(const QString& aSource, const QString& aTarget, const int& aOptions = 0);
 
     // Set File Attributes
     void setFileAttributes(const QString& aFilePath, const int& aAttrib);

@@ -37,6 +37,14 @@
 // Follow Symbolic Links
 #define DEFAULT_SETTINGS_FOLLOW_SYMBOLIC_LINKS              true            // followLinks
 
+// File Panel Column Widths
+#define DEFAULT_FILE_PANEL_COLUMN_WIDTH_EXT                 40
+#define DEFAULT_FILE_PANEL_COLUMN_WIDTH_TYPE                120
+#define DEFAULT_FILE_PANEL_COLUMN_WIDTH_SIZE                60
+#define DEFAULT_FILE_PANEL_COLUMN_WIDTH_DATE                130
+#define DEFAULT_FILE_PANEL_COLUMN_WIDTH_OWNER               60
+#define DEFAULT_FILE_PANEL_COLUMN_WIDTH_PERMS               100
+#define DEFAULT_FILE_PANEL_COLUMN_WIDTH_ATTRS               60
 
 
 // ...

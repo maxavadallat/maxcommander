@@ -18,6 +18,8 @@ SettingsController* SettingsController::getInstance()
     if (!settingsSingleton) {
         // Create Singleton
         settingsSingleton = new SettingsController();
+        // Load Settings
+        settingsSingleton->loadSettings();
     } else {
         // Inc Ref Count
         settingsSingleton->refCount++;
@@ -99,9 +101,9 @@ void SettingsController::release()
 //==============================================================================
 // Get Value
 //==============================================================================
-QVariant SettingsController::value(const QString& aKey)
+QVariant SettingsController::value(const QString& aKey, const QVariant& aDefaultValue)
 {
-    return settings.value(aKey);
+    return settings.value(aKey, aDefaultValue);
 }
 
 //==============================================================================
@@ -109,7 +111,131 @@ QVariant SettingsController::value(const QString& aKey)
 //==============================================================================
 void SettingsController::setValue(const QString& aKey, const QVariant& aValue)
 {
+    // Set Value
     settings.setValue(aKey, aValue);
+
+    // Set Dirty
+    //setDirty(true);
+}
+
+//==============================================================================
+// Get Dirty
+//==============================================================================
+bool SettingsController::getDirty()
+{
+    return dirty;
+}
+
+//==============================================================================
+// Load Settings
+//==============================================================================
+void SettingsController::loadSettings()
+{
+    qDebug() << "SettingsController::loadSettings";
+
+    showFunctionKeys = settings.value(SETTINGS_KEY_SHOW_FUNCTION_KEYS, DEFAULT_SETTINGS_SHOW_FUNCTION_KEYS).toBool();
+    showDirHotKeys = settings.value(SETTINGS_KEY_SHOW_DIR_HOT_KEYS, DEFAULT_SETTINGS_SHOW_DIRECTORIY_HOT_KEYS).toBool();
+    showDriveButtons = settings.value(SETTINGS_KEY_SHOW_DRIVE_BUTTONS, DEFAULT_SETTINGS_SHOW_DRIVE_BUTTONS).toBool();
+    closeWhenFinished = settings.value(SETTINGS_KEY_CLOSE_WHEN_FINISHED, DEFAULT_SETTINGS_CLOSE_WHEN_FINISHED).toBool();
+
+    selectDirectories = settings.value(SETTINGS_KEY_SELECT_DIRS, DEFAULT_SETTINGS_SELECT_DIRECTORIES).toBool();
+    showHiddenFiles = settings.value(SETTINGS_KEY_SHOW_HIDDEN_FILES, DEFAULT_SETTINGS_SHOW_HIDDEN_FILES).toBool();
+    showDirsFirst = settings.value(SETTINGS_KEY_DIRFIRST, DEFAULT_SETTINGS_SHOW_DIRECTORIES_FIRST).toBool();
+    caseSensitiveSort = settings.value(SETTINGS_KEY_CASE_SENSITIVE, DEFAULT_SETTINGS_CASE_SENSITIVE_SORTING).toBool();
+
+    useDefaultIcons = settings.value(SETTINGS_KEY_PANEL_USE_DEFAULT_ICONS, DEAFULT_SETTINGS_USE_DEFAULT_ICONS).toBool();
+    showFullSizes = settings.value(SETTINGS_KEY_SHOW_FULL_SIZES, DEFAULT_SETTINGS_SHOW_FULL_FILE_SIZES).toBool();
+    copyHiddenFiles = settings.value(SETTINGS_KEY_PANEL_COPY_HIDDEN_FILES, DEFAULT_SETTINGS_COPY_HIDDEN_FILES).toBool();
+    followLinks = settings.value(SETTINGS_KEY_FOLLOW_LINKS, DEFAULT_SETTINGS_FOLLOW_SYMBOLIC_LINKS).toBool();
+
+    textColor = settings.value(SETTINGS_KEY_PANEL_COLOR_TEXT, DEFAULT_SETTINGS_TEXT_COLOR).toString();
+    textBGColor = settings.value(SETTINGS_KEY_PANEL_COLOR_TEXT_BG, DEFAULT_SETTINGS_TEXT_BG_COLOR).toString();
+    currentColor = settings.value(SETTINGS_KEY_PANEL_COLOR_CURRENT, DEFAULT_SETTINGS_CURRENT_COLOR).toString();
+    currentBGColor = settings.value(SETTINGS_KEY_PANEL_COLOR_CURRENT_BG, DEFAULT_SETTINGS_CURRENT_BG_COLOR).toString();
+    selectedColor = settings.value(SETTINGS_KEY_PANEL_COLOR_SELECTED, DEFAULT_SETTINGS_SELECTED_COLOR).toString();
+    selectedBGColor = settings.value(SETTINGS_KEY_PANEL_COLOR_SELECTED_BG, DEFAULT_SETTINGS_SELECTED_BG_COLOR).toString();
+    currentSelectedColor = settings.value(SETTINGS_KEY_PANEL_COLOR_CURRENT_SELECTED, DEFAULT_SETTINGS_CURRENT_SELECTED_COLOR).toString();
+    currentSelectedBGColor = settings.value(SETTINGS_KEY_PANEL_COLOR_CURRENT_SELECTED_BG, DEFAULT_SETTINGS_CURRENT_SELECTED_BG_COLOR).toString();
+    hiddenColor = settings.value(SETTINGS_KEY_PANEL_COLOR_HIDDEN, DEFAULT_SETTINGS_HIDDEN_COLOR).toString();
+    hiddenBGColor = settings.value(SETTINGS_KEY_PANEL_COLOR_HIDDEN_BG, DEFAULT_SETTINGS_HIDDEN_BG_COLOR).toString();
+    linkColor = settings.value(SETTINGS_KEY_PANEL_COLOR_LINK, DEFAULT_SETTINGS_LINK_COLOR).toString();
+    linkBGColor = settings.value(SETTINGS_KEY_PANEL_COLOR_LINK_BG, DEFAULT_SETTINGS_LINK_BG_COLOR).toString();
+    fontName = settings.value(SETTINGS_KEY_PANEL_FONT_NAME, DEFAULT_SETTINGS_FONT_NAME).toString();
+    fontSize = settings.value(SETTINGS_KEY_PANEL_FONT_SIZE, DEFAULT_SETTINGS_FONT_SIZE).toInt();
+    fontBold = settings.value(SETTINGS_KEY_PANEL_FONT_BOLD, DEFAULT_SETTINGS_FONT_BOLD).toBool();
+    fontItalic = settings.value(SETTINGS_KEY_PANEL_FONT_ITALIC, DEFAULT_SETTINGS_FONT_ITALIC).toBool();
+
+    thumbWidth = settings.value(SETTINGS_KEY_THUMBS_WIDTH, DEFAULT_SETTINGS_THUMB_WIDTH).toInt();
+    thumbHeight = settings.value(SETTINGS_KEY_THUMBS_HEIGHT, DEFAULT_SETTINGS_THUMB_HEIGHT).toInt();
+
+    terminalPath = settings.value(SETTINGS_KEY_APPS_TERMINAL, "").toString();
+    viewerPath = settings.value(SETTINGS_KEY_APPS_VIEWER, "").toString();
+    editorPath = settings.value(SETTINGS_KEY_APPS_EDITOR, "").toString();
+    comparePath = settings.value(SETTINGS_KEY_APPS_COMPARE, "").toString();
+    packerPath = settings.value(SETTINGS_KEY_APPS_PACKER, "").toString();
+    unPackerPath = settings.value(SETTINGS_KEY_APPS_UNPACKER, "").toString();
+
+    // ...
+}
+
+//==============================================================================
+// Save Settings
+//==============================================================================
+void SettingsController::saveSettings()
+{
+    // Check If Not Dirty
+    if (!dirty) {
+        return;
+    }
+
+    qDebug() << "SettingsController::saveSettings";
+
+    settings.setValue(SETTINGS_KEY_SHOW_FUNCTION_KEYS, showFunctionKeys);
+    settings.setValue(SETTINGS_KEY_SHOW_DIR_HOT_KEYS, showDirHotKeys);
+    settings.setValue(SETTINGS_KEY_SHOW_DRIVE_BUTTONS, showDriveButtons);
+    settings.setValue(SETTINGS_KEY_CLOSE_WHEN_FINISHED, closeWhenFinished);
+
+    settings.setValue(SETTINGS_KEY_SELECT_DIRS, selectDirectories);
+    settings.setValue(SETTINGS_KEY_SHOW_HIDDEN_FILES, showHiddenFiles);
+    settings.setValue(SETTINGS_KEY_DIRFIRST, showDirsFirst);
+    settings.setValue(SETTINGS_KEY_CASE_SENSITIVE, caseSensitiveSort);
+
+    settings.setValue(SETTINGS_KEY_PANEL_USE_DEFAULT_ICONS, useDefaultIcons);
+    settings.setValue(SETTINGS_KEY_SHOW_FULL_SIZES, showFullSizes);
+    settings.setValue(SETTINGS_KEY_PANEL_COPY_HIDDEN_FILES, copyHiddenFiles);
+    settings.setValue(SETTINGS_KEY_FOLLOW_LINKS, followLinks);
+
+    settings.setValue(SETTINGS_KEY_PANEL_COLOR_TEXT, textColor);
+    settings.setValue(SETTINGS_KEY_PANEL_COLOR_TEXT_BG, textBGColor);
+    settings.setValue(SETTINGS_KEY_PANEL_COLOR_CURRENT, currentColor);
+    settings.setValue(SETTINGS_KEY_PANEL_COLOR_CURRENT_BG, currentBGColor);
+    settings.setValue(SETTINGS_KEY_PANEL_COLOR_SELECTED, selectedColor);
+    settings.setValue(SETTINGS_KEY_PANEL_COLOR_SELECTED_BG, selectedBGColor);
+    settings.setValue(SETTINGS_KEY_PANEL_COLOR_CURRENT_SELECTED, currentSelectedColor);
+    settings.setValue(SETTINGS_KEY_PANEL_COLOR_CURRENT_SELECTED_BG, currentSelectedBGColor);
+    settings.setValue(SETTINGS_KEY_PANEL_COLOR_HIDDEN, hiddenColor);
+    settings.setValue(SETTINGS_KEY_PANEL_COLOR_HIDDEN_BG, hiddenBGColor);
+    settings.setValue(SETTINGS_KEY_PANEL_COLOR_LINK, linkColor);
+    settings.setValue(SETTINGS_KEY_PANEL_COLOR_LINK_BG, linkBGColor);
+    settings.setValue(SETTINGS_KEY_PANEL_FONT_NAME, fontName);
+    settings.setValue(SETTINGS_KEY_PANEL_FONT_SIZE, fontSize);
+    settings.setValue(SETTINGS_KEY_PANEL_FONT_BOLD, fontBold);
+    settings.setValue(SETTINGS_KEY_PANEL_FONT_ITALIC, fontItalic);
+
+    settings.setValue(SETTINGS_KEY_THUMBS_WIDTH, thumbWidth);
+    settings.setValue(SETTINGS_KEY_THUMBS_HEIGHT, thumbHeight);
+
+    settings.setValue(SETTINGS_KEY_APPS_TERMINAL, terminalPath);
+    settings.setValue(SETTINGS_KEY_APPS_VIEWER, viewerPath);
+    settings.setValue(SETTINGS_KEY_APPS_EDITOR, editorPath);
+    settings.setValue(SETTINGS_KEY_APPS_COMPARE, comparePath);
+    settings.setValue(SETTINGS_KEY_APPS_PACKER, packerPath);
+    settings.setValue(SETTINGS_KEY_APPS_UNPACKER, unPackerPath);
+
+    // ...
+
+    // Sync
+    settings.sync();
 }
 
 //==============================================================================
@@ -117,6 +243,9 @@ void SettingsController::setValue(const QString& aKey, const QVariant& aValue)
 //==============================================================================
 void SettingsController::restoreDefaults()
 {
+    // Emit Begin Global Settings Update
+    emit globalSettingsUpdateBegin();
+
     // ...
 
     // Reset Show Function Keys
@@ -182,6 +311,11 @@ void SettingsController::restoreDefaults()
 
     // ...
 
+    // Reset Dirty
+    setDirty(false);
+
+    // Emit Global Settings Update Finished
+    emit globalSettingsUpdateFinished();
 }
 
 //==============================================================================
@@ -195,6 +329,9 @@ void SettingsController::setDirty(const bool& aDirty)
         dirty = aDirty;
 
         // ...
+
+        // Emit Dirty Changed Signal
+        emit dirtyChanged(dirty);
     }
 }
 
@@ -1047,7 +1184,7 @@ QString SettingsController::getUnPackerPath()
 //==============================================================================
 // Set Unpacker Path
 //==============================================================================
-void SettingsController::SettingsController::setUnPackerPath(const QString& aUnpackerPath)
+void SettingsController::setUnPackerPath(const QString& aUnpackerPath)
 {
     // Check Un Packer Path
     if (unPackerPath != aUnpackerPath) {
@@ -1065,7 +1202,7 @@ void SettingsController::SettingsController::setUnPackerPath(const QString& aUnp
 //==============================================================================
 SettingsController::~SettingsController()
 {
-    // Sync
-    settings.sync();
+    // Save Settings
+    saveSettings();
 }
 

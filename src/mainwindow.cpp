@@ -1,4 +1,3 @@
-#include <QSettings>
 #include <QFileInfo>
 #include <QKeyEvent>
 #include <QDir>
@@ -65,10 +64,11 @@ void MainWindow::release()
 MainWindow::MainWindow(QWidget* aParent)
     : QMainWindow(aParent)
     , ui(new Ui::MainWindow)
-    , viewMenuActionGroup(new QActionGroup(NULL))
+    , settings(SettingsController::getInstance())
     , leftPanel(NULL)
     , rightPanel(NULL)
     , focusedPanel(NULL)
+    , viewMenuActionGroup(new QActionGroup(NULL))
     , modifierKeys(Qt::NoModifier)
     , aboutDialog(NULL)
     , preferencesDialog(NULL)
@@ -202,15 +202,17 @@ void MainWindow::restoreUI(const bool& aReload, const int& aFocusedPanel)
 //==============================================================================
 void MainWindow::loadSettings()
 {
+    // Check Settings
+    if (!settings) {
+        return;
+    }
+
     qDebug() << "MainWindow::loadSettings";
 
-    // Init Settings
-    QSettings settings;
-
     // Get Window Width
-    int windowWidth = settings.value(SETTINGS_KEY_MAIN_WIDTH, DEFAULT_MAIN_WINDOW_WIDTH).toInt();
+    int windowWidth = settings->value(SETTINGS_KEY_MAIN_WIDTH, DEFAULT_MAIN_WINDOW_WIDTH).toInt();
     // Get Window height
-    int windowHeight = settings.value(SETTINGS_KEY_MAIN_HEIGHT, DEFAULT_MAIN_WINDOW_HEIGHT).toInt();
+    int windowHeight = settings->value(SETTINGS_KEY_MAIN_HEIGHT, DEFAULT_MAIN_WINDOW_HEIGHT).toInt();
 
     // Get Desktop Widget
     QDesktopWidget desktop;
@@ -234,18 +236,20 @@ void MainWindow::loadSettings()
 //==============================================================================
 void MainWindow::saveSettings()
 {
-    qDebug() << "MainWindow::loadSettings";
+    // Check Settings
+    if (!settings) {
+        return;
+    }
 
-    // Init Settings
-    QSettings settings;
+    qDebug() << "MainWindow::saveSettings";
 
     // Set Value - Width
-    settings.setValue(SETTINGS_KEY_MAIN_WIDTH, geometry().width());
+    settings->setValue(SETTINGS_KEY_MAIN_WIDTH, geometry().width());
     // Set Value - Height
-    settings.setValue(SETTINGS_KEY_MAIN_HEIGHT, geometry().height());
+    settings->setValue(SETTINGS_KEY_MAIN_HEIGHT, geometry().height());
 
     // Set Active Panel
-    settings.setValue(SETTINGS_KEY_MAIN_ACTIVEPANEL, focusedPanel ? focusedPanel->getPanelName() : "");
+    settings->setValue(SETTINGS_KEY_MAIN_ACTIVEPANEL, focusedPanel ? focusedPanel->getPanelName() : "");
 
     // ...
 }
@@ -314,24 +318,22 @@ void MainWindow::launchTerminal(const QString& aDirPath)
         return;
     }
 
-    qDebug() << "MainWindow::launchTerminal - aDirPath: " << aDirPath;
-
-    // Init Settings
-    QSettings settings;
-
     // Get Terminal App
-    QString terminalApp = settings.value(SETTINGS_KEY_APPS_TERMINAL, DEFAULT_SETTINGS_TERMINAL_PATH_MAC_OSX).toString();
+    QString terminalApp = settings ? settings->value(SETTINGS_KEY_APPS_TERMINAL, DEFAULT_SETTINGS_TERMINAL_PATH_MAC_OSX).toString() : "";
 
     // Check Terminal App
     if (!terminalApp.isEmpty()) {
 
+        qDebug() << "MainWindow::launchTerminal - aDirPath: " << aDirPath;
+
+
 #if defined(Q_OS_MACX)
 
-            // Set Command Line
-            QString cmdLine = QString(DEFAULT_EXEC_APP_SYSTEM_COMMAND_WITH_PARAM_MAC_OSX).arg(terminalApp).arg(aDirPath);
+        // Set Command Line
+        QString cmdLine = QString(DEFAULT_EXEC_APP_SYSTEM_COMMAND_WITH_PARAM_MAC_OSX).arg(terminalApp).arg(aDirPath);
 
-            // Execute
-            system(cmdLine.toLocal8Bit().data());
+        // Execute
+        system(cmdLine.toLocal8Bit().data());
 
 #elif defined(Q_OS_UNIX)
 
@@ -357,11 +359,14 @@ void MainWindow::launchViewer(const bool& aEditMode, const bool& aNewFile)
         return;
     }
 
+    // Reset Modifier Keys
+    focusedPanel->resetModifierKeys();
+
     // Get File info
     QFileInfo fileInfo = focusedPanel->getCurrFileInfo();
 
     // Check File Type
-    if (fileInfo.isDir() || fileInfo.isBundle() || fileInfo.isSymLink()) {
+    if (!aNewFile && (fileInfo.isDir() || fileInfo.isBundle() || fileInfo.isSymLink())) {
         qDebug() << "MainWindow::launchViewer - aEditMode: " << aEditMode << " - NO SELECTED FILE!";
 
         // Launch Dir Quick View Maybe...
@@ -371,7 +376,7 @@ void MainWindow::launchViewer(const bool& aEditMode, const bool& aNewFile)
         return;
     }
 
-    qDebug() << "MainWindow::launchViewer - aEditMode: " << aEditMode;
+    qDebug() << "MainWindow::launchViewer - aEditMode: " << aEditMode << " - aNewFile: " << aNewFile;
 
 
     // Check Settings For Using External Viewer
@@ -562,13 +567,16 @@ void MainWindow::launchTransfer(const QString& aOperation)
         // Add To Transfer Progress Dialog List
         transferProgressDialogs << newTransferProgressDialog;
 
+        // Init Copy Options
+        int copyOptions = transferFileDialog->getCopyHidden() ? DEFAULT_COPY_OPTIONS_COPY_HIDDEN : 0;
+
         // Check Selected Files Count
         if (selectedFiles.count() == 1) {
             // Launch Progress Dialog
-            newTransferProgressDialog->launch(transferFileDialog->getSourceFileText(), transferFileDialog->getTargetFileText());
+            newTransferProgressDialog->launch(transferFileDialog->getSourceFileText(), transferFileDialog->getTargetFileText(), copyOptions);
         } else {
             // Launch Progress Dialog
-            newTransferProgressDialog->launch(transferSource, transferTarget, selectedFiles);
+            newTransferProgressDialog->launch(transferSource, transferTarget, selectedFiles, copyOptions);
         }
 
         // Clear Selected Files
@@ -622,18 +630,15 @@ void MainWindow::launchCreateDir()
 //==============================================================================
 void MainWindow::launchSearch()
 {
-    // Clear Modifier Keys
-    modifierKeys = Qt::NoModifier;
-    // Update Function Keys
-    updateFunctionKeys();
-
     // Check Focused Panel
     if (!focusedPanel) {
         return;
     }
 
+    qDebug() << "MainWindow::launchSearch";
+
     // Reset Modifier Keys
-    focusedPanel->modifierKeys = Qt::NoModifier;
+    focusedPanel->resetModifierKeys();
 
     // Check Search Dialog
     if (!searchFileDialog) {
@@ -667,6 +672,9 @@ void MainWindow::launchCreateLink()
     }
 
     qDebug() << "MainWindow::launchCreateLink";
+
+    // Reset Modifier Keys
+    focusedPanel->resetModifierKeys();
 
     // Check Create Link Dialog
     if (!createLinkDialog) {
@@ -1048,7 +1056,7 @@ void MainWindow::updateMenu()
         }
 
         // Set Show Hidden Checked
-        ui->actionShow_Hide_Hiden->setChecked(focusedPanel->getShowHidden());
+        ui->actionShow_Hide_Hiden->setChecked(settings->getShowHiddenFiles());
     }
 }
 
@@ -1057,23 +1065,15 @@ void MainWindow::updateMenu()
 //==============================================================================
 void MainWindow::toggleHiddenFile()
 {
+    // Check Settings
+    if (!settings) {
+        return;
+    }
+
     qDebug() << "MainWindow::toggleHiddenFile";
 
-    // Get Show Hidden
-    bool showHidden = focusedPanel ? focusedPanel->getShowHidden() : true;
-
-    // Check Left Panel
-    if (leftPanel) {
-        // Set Show Hidden
-        leftPanel->setShowHidden(!showHidden);
-    }
-
-    // Check Right Panel
-    if (rightPanel) {
-        // Set Show Hidden
-        rightPanel->setShowHidden(!showHidden);
-    }
-
+    // Set Show Hidden Files
+    settings->setShowHiddenFiles(!settings->getShowHiddenFiles());
 }
 
 //==============================================================================
@@ -1093,6 +1093,36 @@ void MainWindow::viewerWindowClosed(ViewerWindow* aViewer)
             ViewerWindow* window = viewerWindows[i];
             // Check Window
             if (window == aViewer) {
+
+                // Check If File Was Modified
+                if (window->isFileModified()) {
+                    // Check Focused Panel
+                    if (focusedPanel) {
+
+                        // Get File Path
+                        QString editedPath = getDirPath(window->getContentSource());
+
+                        // Chek Focused Panel Current Dir
+                        if (focusedPanel->getCurrentDir() == editedPath) {
+                            // Get File Name
+                            QString editedFileName = getFileName(window->getContentSource());
+
+                            // Check If Is New File
+                            if (window->isNewFile()) {
+                                // Set Last File Name
+                                focusedPanel->lastFileName = editedFileName;
+                                // Reload
+                                focusedPanel->reload();
+                            } else {
+                                // Find Index
+                                int editedIndex = focusedPanel->getFileIndex(editedFileName);
+                                // Set Current Index
+                                focusedPanel->setCurrentIndex(editedIndex);
+                            }
+                        }
+                    }
+                }
+
                 // Remove From Window List
                 viewerWindows.removeAt(i);
 
@@ -1104,6 +1134,11 @@ void MainWindow::viewerWindowClosed(ViewerWindow* aViewer)
         }
     }
 
+    // Check Focused Panel
+    if (focusedPanel) {
+        // Reset Modifiers
+        focusedPanel->resetModifierKeys();
+    }
 
     // Check Search Result View
     if (viewSearchResult) {
@@ -1728,6 +1763,14 @@ MainWindow::~MainWindow()
         // Delete View Menu Action Group
         delete viewMenuActionGroup;
         viewMenuActionGroup = NULL;
+    }
+
+    // Check Settings
+    if (settings) {
+        // Release Instance
+        settings->release();
+        // Reset Settings
+        settings = NULL;
     }
 
     // Delete UI

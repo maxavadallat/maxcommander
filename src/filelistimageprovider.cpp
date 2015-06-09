@@ -141,5 +141,6 @@ void SettingsReciever::useDefaultIconsChanged(const bool& aUseDefaultIcons)
 //==============================================================================
 SettingsReciever::~SettingsReciever()
 {
-
 }
+
+

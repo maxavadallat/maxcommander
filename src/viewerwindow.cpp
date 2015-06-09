@@ -21,6 +21,7 @@
 #include "confirmdialog.h"
 #include "remotefileutilclient.h"
 #include "audiotagimageprovider.h"
+#include "confirmdialog.h"
 #include "constants.h"
 
 //==============================================================================
@@ -32,7 +33,9 @@ ViewerWindow::ViewerWindow(QWidget* aParent)
     , fileName("")
     , editMode(false)
     , dirty(false)
+    , fileModified(false)
     , mime("")
+    , fileIsNew(false)
     , imageBrowser(NULL)
 {
     qDebug() << "ViewerWindow::ViewerWindow";
@@ -87,6 +90,22 @@ QString ViewerWindow::getContentSource()
 }
 
 //==============================================================================
+// Get Is New File
+//==============================================================================
+bool ViewerWindow::isNewFile()
+{
+    return fileIsNew;
+}
+
+//==============================================================================
+// Get Is File Modified
+//==============================================================================
+bool ViewerWindow::isFileModified()
+{
+    return fileModified;
+}
+
+//==============================================================================
 // New File
 //==============================================================================
 bool ViewerWindow::newFile(const QString& aDirPath)
@@ -103,6 +122,9 @@ bool ViewerWindow::newFile(const QString& aDirPath)
     // Get Current Dir
     currentDir = aDirPath;
 
+    // Set File Is New
+    fileIsNew = true;
+
     // ...
 
     return true;
@@ -118,6 +140,9 @@ bool ViewerWindow::loadFile(const QString& aFileName, const QString& aPanelName)
 
     // Get Mime Tpye
     mime = mimeDatabase.mimeTypeForFile(aFileName).name();
+
+    // Reset File Is New
+    fileIsNew = false;
 
     qDebug() << "ViewerWindow::loadFile - aFileName: " << aFileName << " - mime: " << mime;
 
@@ -161,6 +186,9 @@ bool ViewerWindow::loadFile(const QString& aFileName, const QString& aPanelName)
 
             // Close File
             file.close();
+
+            // Update Window Title
+            updateWindowTitle();
         }
 
     } else if (!editMode && mime.startsWith(DEFAULT_MIME_PREFIX_IMAGE)) {
@@ -222,6 +250,42 @@ bool ViewerWindow::loadFile(const QString& aFileName, const QString& aPanelName)
 }
 
 //==============================================================================
+// Save File
+//==============================================================================
+void ViewerWindow::saveFile(const bool& aShowFileDialog)
+{
+    // Check Edit Mode
+    if (!editMode) {
+        return;
+    }
+
+    // Check If Show File Dialog & Dirty
+    if (!aShowFileDialog && !dirty) {
+        return;
+    }
+
+    qDebug() << "ViewerWindow::saveFile";
+
+    // Init Save File Name
+    QString saveFileName = "";
+
+    // Check File Namem
+    if (!fileName.isEmpty()) {
+        // Get Saved File Name
+        saveFileName = aShowFileDialog ? QFileDialog::getSaveFileName(this, tr(DEFAULT_TITLE_SAVE_FILE), fileName, "", NULL) : fileName;
+    } else {
+        // Get Saved File Name
+        saveFileName = QFileDialog::getSaveFileName(this, tr(DEFAULT_TITLE_SAVE_NEW_FILE), currentDir);
+    }
+
+    // Check Save File Name
+    if (!saveFileName.isEmpty()) {
+        // Save File As
+        saveFileAs(saveFileName);
+    }
+}
+
+//==============================================================================
 // Save File As
 //==============================================================================
 void ViewerWindow::saveFileAs(const QString& aFileName)
@@ -242,8 +306,8 @@ void ViewerWindow::saveFileAs(const QString& aFileName)
         // Reset Dirty Flag
         dirty = false;
 
-        // Reset Dirty Flag
-
+        // Set File Name
+        fileName = aFileName;
 
         // Close File
         file.close();
@@ -347,8 +411,11 @@ void ViewerWindow::restoreUI()
         }
     }
 
-    // Set Window Title
-    setWindowTitle(tr(DEFAULT_TITLE_VIEWER) + fileName);
+    // Update Window Title
+    updateWindowTitle();
+
+    // Update Menu Bar
+    updateMenuBar();
 
     // ...
 }
@@ -432,6 +499,38 @@ bool ViewerWindow::isSupportedTextMime(const bool& aEditMode, const QString& aMi
 }
 
 //==============================================================================
+// Update Window Title
+//==============================================================================
+void ViewerWindow::updateWindowTitle()
+{
+    // Check File Name
+    if (editMode && (fileName.isEmpty() || fileName.isNull())) {
+        // Set Window Title
+        setWindowTitle(tr(DEFAULT_TITLE_EDITOR_NEW_FILE));
+    } else {
+        // Set Window Title
+        setWindowTitle(editMode ? tr(DEFAULT_TITLE_EDITOR) + fileName : tr(DEFAULT_TITLE_VIEWER) + fileName);
+    }
+}
+
+//==============================================================================
+// Update Menu Bar
+//==============================================================================
+void ViewerWindow::updateMenuBar()
+{
+    // Check Edit Mode
+    if (editMode) {
+        // Set Actions Enabled
+        ui->actionSave->setEnabled(true);
+        ui->actionSave_As->setEnabled(true);
+    } else {
+        // Set Actions Enabled
+        ui->actionSave->setEnabled(false);
+        ui->actionSave_As->setEnabled(false);
+    }
+}
+
+//==============================================================================
 // Text Changed Slot
 //==============================================================================
 void ViewerWindow::textChanged()
@@ -440,6 +539,9 @@ void ViewerWindow::textChanged()
 
     // Mark Dirty
     dirty = true;
+
+    // Set File Modified
+    fileModified = true;
 }
 
 //==============================================================================
@@ -484,23 +586,24 @@ void ViewerWindow::closeEvent(QCloseEvent* aEvent)
 
         // Check Dirty Flag
         if (dirty) {
+            // Init Confirm Dialog
+            ConfirmDialog confirmDialog;
 
-            // Init Save File Name
-            QString saveFileName = "";
+            // Set Dialog Title
+            confirmDialog.setConfirmTitle(tr(DEFAULT_TITLE_FILE_MODIFIED));
 
-            // Check File Name
-            if (!fileName.isEmpty()) {
-                // Get Saved File Name
-                saveFileName = QFileDialog::getSaveFileName(this, tr(DEFAULT_TITLE_SAVE_FILE), fileName, "", NULL, QFileDialog::DontConfirmOverwrite);
-            } else {
-                // Get Saved File Name
-                saveFileName = QFileDialog::getSaveFileName(this, tr(DEFAULT_TITLE_SAVE_NEW_FILE), currentDir);
-            }
+            // Set Error Text
+            confirmDialog.setConfirmText(tr(DEFAULT_CONFIRM_TEXT_SAVE_CHANGES));
 
-            // Check Save File Name
-            if (!saveFileName.isEmpty()) {
-                // Save File As
-                saveFileAs(saveFileName);
+            // Configure Standard Buttons
+            confirmDialog.configureButtons(QDialogButtonBox::Yes | QDialogButtonBox::No);
+
+            // ...
+
+            // Exec Confirm Dialog
+            if (confirmDialog.exec()) {
+                // Save File
+                saveFile(false);
             }
         }
 
@@ -577,17 +680,51 @@ void ViewerWindow::keyReleaseEvent(QKeyEvent* aEvent)
                 }
             break;
 
-            case Qt::Key_S:
-                // Check Modifiers
-                if (aEvent->modifiers() & Qt::ControlModifier) {
+            case Qt::Key_S: {
 
+                Qt::KeyboardModifiers modifiers = aEvent->modifiers();
+
+                // Check Modifiers
+                if (modifiers & Qt::ControlModifier) {
+                    // Save File
+                    saveFile();
                 }
-            break;
+            } break;
 
             default:
             break;
         }
     }
+}
+
+//==============================================================================
+// On Action Save Triggered Slot
+//==============================================================================
+void ViewerWindow::on_actionSave_triggered()
+{
+    // Save File
+    saveFile(false);
+}
+
+//==============================================================================
+// On Action Save As Triggered Slot
+//==============================================================================
+void ViewerWindow::on_actionSave_As_triggered()
+{
+    // Set File Is New Manually
+    fileIsNew = true;
+
+    // Save File
+    saveFile();
+}
+
+//==============================================================================
+// On Action Close Triggered Slot
+//==============================================================================
+void ViewerWindow::on_actionClose_triggered()
+{
+    // Close
+    close();
 }
 
 //==============================================================================

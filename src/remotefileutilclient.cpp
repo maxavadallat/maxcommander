@@ -276,7 +276,7 @@ void RemoteFileUtilClient::scanDirTree(const QString& aDirPath)
 //==============================================================================
 // Copy File
 //==============================================================================
-void RemoteFileUtilClient::copyFile(const QString& aSource, const QString& aTarget)
+void RemoteFileUtilClient::copyFile(const QString& aSource, const QString& aTarget, const int& aOptions)
 {
     // Init New Data
     QVariantMap newData;
@@ -286,6 +286,8 @@ void RemoteFileUtilClient::copyFile(const QString& aSource, const QString& aTarg
     newData[DEFAULT_KEY_OPERATION]      = QString(DEFAULT_OPERATION_COPY_FILE);
     newData[DEFAULT_KEY_SOURCE]         = aSource;
     newData[DEFAULT_KEY_TARGET]         = aTarget;
+    newData[DEFAULT_KEY_OPTIONS]        = aOptions;
+
 
     // ...
 
@@ -299,7 +301,7 @@ void RemoteFileUtilClient::copyFile(const QString& aSource, const QString& aTarg
 //==============================================================================
 // Rename/Move File
 //==============================================================================
-void RemoteFileUtilClient::moveFile(const QString& aSource, const QString& aTarget)
+void RemoteFileUtilClient::moveFile(const QString& aSource, const QString& aTarget, const int& aOptions)
 {
     // Init New Data
     QVariantMap newData;
@@ -309,6 +311,7 @@ void RemoteFileUtilClient::moveFile(const QString& aSource, const QString& aTarg
     newData[DEFAULT_KEY_OPERATION]      = QString(DEFAULT_OPERATION_MOVE_FILE);
     newData[DEFAULT_KEY_SOURCE]         = aSource;
     newData[DEFAULT_KEY_TARGET]         = aTarget;
+    newData[DEFAULT_KEY_OPTIONS]        = aOptions;
 
     // ...
 

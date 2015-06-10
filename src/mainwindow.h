@@ -24,6 +24,7 @@ class DeleteProgressDialog;
 class TransferProgressDialog;
 class SearchDialog;
 class SettingsController;
+class SelectFilesDialog;
 
 
 //==============================================================================
@@ -77,6 +78,11 @@ public slots:
 
     // Show Preferences Slot
     void showPreferences();
+
+    // Launch File Select Slot
+    void launchFileSelect();
+    // Launch File Deselect Slot
+    void launchFileDeselect();
 
     // Quit Application Slot
     void quitApp();
@@ -267,6 +273,8 @@ private:
     HelpWindow*                     helpWindow;
     // Search File Dialog
     SearchDialog*                   searchFileDialog;
+    // Select Files Dialog
+    SelectFilesDialog*              selectFilesDialog;
 
     // Transfer Progress Dialogs
     QList<TransferProgressDialog*>  transferProgressDialogs;

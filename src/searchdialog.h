@@ -21,7 +21,7 @@ class RemoteFileUtilClient;
 class SearchResultModel;
 class FileListImageProvider;
 class FilePanel;
-
+class SettingsController;
 
 //==============================================================================
 // Search Dialog Class
@@ -91,7 +91,7 @@ protected slots:
     void loadSettings();
     // Save Settings
     void saveSettings();
-    // restore UI
+    // Restore UI
     void restoreUI();
     // Show Results
     void showResults();

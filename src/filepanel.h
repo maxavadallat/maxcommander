@@ -336,6 +336,11 @@ signals:
     // Show Preferences Signal
     void showPreferences();
 
+    // Launch File Select Signal
+    void launchFileSelect();
+    // Launch File Deselect Signal
+    void launchFileDeselect();
+
     // Error Occured Signal
     void error(const QString& aPath, const int& aError);
 

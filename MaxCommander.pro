@@ -54,7 +54,8 @@ SOURCES                 += src/main.cpp \
                         src/searchdialog.cpp \
                         src/progressbarwidget.cpp \
                         src/settingscontroller.cpp \
-                        src/createlinkdialog.cpp
+                        src/createlinkdialog.cpp \
+                        src/selectfilesdialog.cpp
 
 # Heders
 HEADERS                 += src/constants.h \
@@ -87,7 +88,8 @@ HEADERS                 += src/constants.h \
                         src/searchdialog.h \
                         src/progressbarwidget.h \
                         src/settingscontroller.h \
-                        src/createlinkdialog.h
+                        src/createlinkdialog.h \
+                        src/selectfilesdialog.h
 
 # Include Path
 INCLUDEPATH             += \
@@ -111,7 +113,8 @@ FORMS                   += \
                         ui/infodialog.ui \
                         ui/passworddialog.ui \
                         ui/searchdialog.ui \
-                        ui/createlinkdialog.ui
+                        ui/createlinkdialog.ui \
+                        ui/selectfilesdialog.ui
 
 # Resources
 RESOURCES               += \

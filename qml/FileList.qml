@@ -73,19 +73,24 @@ Rectangle {
                 if (globalSettings.useDefaultIcons) {
                     // Check If Is Dir
                     if (fileIsDir) {
-                       Const.DEFAULT_FILE_LIST_ICON_DIR
-                    } else {
-                       Const.DEFAULT_FILE_LIST_ICON_FILE
+                       return Const.DEFAULT_FILE_LIST_ICON_DIR;
                     }
+
+                    return Const.DEFAULT_FILE_LIST_ICON_FILE;
+
                 } else {
                     // Check File Name
                     if (Utility.isImage(fileFullName, mainController)) {
-                        Const.DEFAULT_FILE_PREFIX + mainController.currentDir + "/" + fileFullName
-                    } else {
-                        // Image Provider
-                        Const.DEFAULT_FILE_ICON_PREFIX + mainController.currentDir + "/" + fileFullName
+                        return Const.DEFAULT_FILE_PREFIX + mainController.currentDir + "/" + fileFullName;
                     }
+
+                    // Image Provider
+                    return Const.DEFAULT_FILE_ICON_PREFIX + mainController.currentDir + "/" + fileFullName;
                 }
+            }
+
+            // Behavior
+            Behavior on fileIconSource {
             }
 
             fileNameText  : fileName
@@ -273,55 +278,29 @@ Rectangle {
         onWidthChanged: {
             //console.log("fileListView.onWidthChanged - width: " + fileListView.width);
 
-            // Init Remaining Width
-            var remainingWidth = fileListView.width;
+            // Update File List Header
+            updateFileListHeader();
+        }
 
-            // Check Header Visibility
-            if (fileListHeader.extVisible) {
-                // Adjust Remaining Width
-                remainingWidth -= fileListHeader.extWidth;
+        // Scroll Bar
+        FileListScrollBar {
+            id: scrollBar
+            parentVisibleSize:  fileListView.height - 4;
+            parentContentSize:  fileListView.contentHeight;
+            parentContentPos:   fileListView.contentY;
+            // On Scroll Y Changed
+            onScrollYChanged: {
+                //console.log("fileListRoot.scrollBar.onScrollYChanged - posY: " + posY);
+                // Calculate Content Position
+                var contentPos = posY * (fileListView.contentHeight - (fileListView.height - 4)) / (fileListView.height - 4 - scrollBar.height);
+
+                //console.log("fileListRoot.scrollBar.onScrollYChanged - contentPos: " + contentPos);
+
+                // ...
+
+                // Set Content Y
+                fileListView.contentY = Math.max(0, Math.min(contentPos, fileListView.contentHeight - fileListView.height));
             }
-
-            // Check Header Visibility
-            if (fileListHeader.typeVisible) {
-                // Adjust Remaining Width
-                remainingWidth -= fileListHeader.typeWidth;
-            }
-
-            // Check Header Visibility
-            if (fileListHeader.sizeVisible) {
-                // Adjust Remaining Width
-                remainingWidth -= fileListHeader.sizeWidth;
-            }
-
-            // Check Header Visibility
-            if (fileListHeader.dateVisible) {
-                // Adjust Remaining Width
-                remainingWidth -= fileListHeader.dateWidth;
-            }
-
-            // Check Header Visibility
-            if (fileListHeader.ownerVisible) {
-                // Adjust Remaining Width
-                remainingWidth -= fileListHeader.ownerWidth;
-            }
-
-            // Check Header Visibility
-            if (fileListHeader.permsVisible) {
-                // Adjust Remaining Width
-                remainingWidth -= fileListHeader.permsWidth;
-            }
-
-            // Check Header Visibility
-            if (fileListHeader.attrVisible) {
-                // Adjust Remaining Width
-                remainingWidth -= fileListHeader.attrWidth;
-            }
-
-            //console.log("fileListView.onWidthChanged - width: " + fileListView.width + " - remainingWidth: " + remainingWidth);
-
-            // Set Name Header Sizer Position
-            fileListHeader.setNameHeaderSeparatorPosition(remainingWidth - Const.DEFAULT_FILE_LIST_HEADER_SEPARATOR_WIDTH);
         }
     }
 
@@ -387,11 +366,6 @@ Rectangle {
         }
     }
 
-    // On Focus Changed
-    onFocusChanged: {
-        //console.log("fileListRoot.onFocusChanged");
-    }
-
     // On Completed
     Component.onCompleted: {
         //console.log("fileListRoot.onCompleted - visualItemsCount: " + fileListView.visualItemsCount);
@@ -410,6 +384,63 @@ Rectangle {
     Component.onDestruction: {
         //console.log("fileListRoot.onDestruction");
 
+        // ...
+
+    }
+
+    // Update File List Header
+    function updateFileListHeader() {
+        //console.log("fileListRoot.updateFileListHeader");
+
+        // Init Remaining Width
+        var remainingWidth = fileListView.width;
+
+        // Check Header Visibility
+        if (fileListHeader.extVisible) {
+            // Adjust Remaining Width
+            remainingWidth -= fileListHeader.extWidth;
+        }
+
+        // Check Header Visibility
+        if (fileListHeader.typeVisible) {
+            // Adjust Remaining Width
+            remainingWidth -= fileListHeader.typeWidth;
+        }
+
+        // Check Header Visibility
+        if (fileListHeader.sizeVisible) {
+            // Adjust Remaining Width
+            remainingWidth -= fileListHeader.sizeWidth;
+        }
+
+        // Check Header Visibility
+        if (fileListHeader.dateVisible) {
+            // Adjust Remaining Width
+            remainingWidth -= fileListHeader.dateWidth;
+        }
+
+        // Check Header Visibility
+        if (fileListHeader.ownerVisible) {
+            // Adjust Remaining Width
+            remainingWidth -= fileListHeader.ownerWidth;
+        }
+
+        // Check Header Visibility
+        if (fileListHeader.permsVisible) {
+            // Adjust Remaining Width
+            remainingWidth -= fileListHeader.permsWidth;
+        }
+
+        // Check Header Visibility
+        if (fileListHeader.attrVisible) {
+            // Adjust Remaining Width
+            remainingWidth -= fileListHeader.attrWidth;
+        }
+
+        //console.log("fileListView.onWidthChanged - width: " + fileListView.width + " - remainingWidth: " + remainingWidth);
+
+        // Set Name Header Size Position
+        fileListHeader.setNameHeaderSeparatorPosition(remainingWidth - Const.DEFAULT_FILE_LIST_HEADER_SEPARATOR_WIDTH);
     }
 
     // Connections

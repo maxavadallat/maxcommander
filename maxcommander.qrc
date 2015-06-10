@@ -20,6 +20,7 @@
         <file>qml/testMain.qml</file>
         <file>qml/previewMain.qml</file>
         <file>qml/SearchResults.qml</file>
+        <file>qml/FileListScrollBar.qml</file>
     </qresource>
 </RCC>
 

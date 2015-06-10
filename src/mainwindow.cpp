@@ -20,6 +20,7 @@
 #include "helpwindow.h"
 #include "viewerwindow.h"
 #include "searchdialog.h"
+#include "selectfilesdialog.h"
 #include "remotefileutilclient.h"
 #include "infodialog.h"
 #include "settingscontroller.h"
@@ -78,6 +79,7 @@ MainWindow::MainWindow(QWidget* aParent)
     , transferFileDialog(NULL)
     , helpWindow(NULL)
     , searchFileDialog(NULL)
+    , selectFilesDialog(NULL)
     , viewSearchResult(false)
 
 {
@@ -159,6 +161,13 @@ void MainWindow::init()
     connect(leftPanel, SIGNAL(showPreferences()), this, SLOT(showPreferences()));
     connect(rightPanel, SIGNAL(showPreferences()), this, SLOT(showPreferences()));
 
+    connect(leftPanel, SIGNAL(launchFileSelect()), this, SLOT(launchFileSelect()));
+    connect(rightPanel, SIGNAL(launchFileSelect()), this, SLOT(launchFileSelect()));
+
+    connect(leftPanel, SIGNAL(launchFileDeselect()), this, SLOT(launchFileDeselect()));
+    connect(rightPanel, SIGNAL(launchFileDeselect()), this, SLOT(launchFileDeselect()));
+
+
     // ...
 }
 
@@ -227,8 +236,21 @@ void MainWindow::loadSettings()
 
     // Set Geometry
     setGeometry(posX, posY, windowWidth, windowHeight);
+/*
+    // Get Last Focused Panel
+    QString lastFocusedPanel = settings.value(SETTINGS_KEY_MAIN_ACTIVEPANEL).toString();
 
+    // Check Last Focused Panel
+    if (lastFocusedPanel == DEFAULT_PANEL_NAME_LEFT) {
+        // Set Focused Panel
+        focusedPanel = leftPanel;
+    } else {
+        // Set Focused Panel
+        focusedPanel = rightPanel;
+    }
+*/
     // ...
+
 }
 
 //==============================================================================
@@ -803,6 +825,66 @@ void MainWindow::showPreferences()
 
     // Show Dialog
     preferencesDialog->execDialog();
+}
+
+//==============================================================================
+// Launch File Select Slot
+//==============================================================================
+void MainWindow::launchFileSelect()
+{
+    // Check Focused Panel
+    if (!focusedPanel) {
+        return;
+    }
+
+    //qDebug() << "MainWindow::launchFileSelect";
+
+    // Reset Modifier Keys
+    focusedPanel->resetModifierKeys();
+
+    // Check File Select Dialog
+    if (!selectFilesDialog) {
+        // Create Dialog
+        selectFilesDialog = new SelectFilesDialog();
+    }
+
+    // Launch Dialog
+    if (selectFilesDialog->launchDialog(EFSMSelect)) {
+        qDebug() << "MainWindow::launchFileSelect - pattern: " << selectFilesDialog->getPattern();
+
+        // ...
+
+    }
+}
+
+//==============================================================================
+// Launch File Deselect Slot
+//==============================================================================
+void MainWindow::launchFileDeselect()
+{
+    // Check Focused Panel
+    if (!focusedPanel) {
+        return;
+    }
+
+    //qDebug() << "MainWindow::launchFileDeselect";
+
+    // Reset Modifier Keys
+    focusedPanel->resetModifierKeys();
+
+    // Check File Select Dialog
+    if (!selectFilesDialog) {
+        // Create Dialog
+        selectFilesDialog = new SelectFilesDialog();
+    }
+
+    // Launch Dialog
+    if (selectFilesDialog->launchDialog(EFSMDeselect)) {
+        qDebug() << "MainWindow::launchFileDeselect - pattern: " << selectFilesDialog->getPattern();
+
+        // ...
+
+    }
 }
 
 //==============================================================================
@@ -1823,6 +1905,13 @@ MainWindow::~MainWindow()
         // Delete Search File Dialog
         delete searchFileDialog;
         searchFileDialog = NULL;
+    }
+
+    // Check Select Files Dialog
+    if (selectFilesDialog) {
+        // Delete Dialog
+        delete selectFilesDialog;
+        selectFilesDialog = NULL;
     }
 
     qDebug() << "MainWindow::~MainWindow";

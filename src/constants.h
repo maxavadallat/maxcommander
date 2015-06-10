@@ -304,9 +304,16 @@
 #define DEFAULT_FILE_ICON_DIR                               ":/resources/images/icons/default_folder_yellow.png"
 
 
-
+// Default Permissions
 #define DEFAULT_PERMISSIONS_TEXT                            "----------"
 
+// Select Files Title
+#define DEFAULT_TITLE_SELECT_FILES                          "Select Files"
+// Deselect Files Title
+#define DEFAULT_TITLE_DESELECT_FILES                        "Deselect Files"
+
+// File Select - File Name Pattern List
+#define DEFAULT_FILE_SELECT_FILE_NAME_PATTERN_LIST          ".selectfilename.list"
 
 
 

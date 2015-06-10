@@ -14,6 +14,7 @@
 #include "ui_searchdialog.h"
 #include "remotefileutilclient.h"
 #include "filelistimageprovider.h"
+#include "settingscontroller.h"
 #include "utility.h"
 #include "constants.h"
 #include "defaultsettings.h"
@@ -351,7 +352,7 @@ void SearchDialog::loadFileSearchPatterns()
         // Init Text Stream
         QTextStream fspStream(&fspFile);
 
-        // Go Thru File Pattern List File
+        // Go Thru File Pattern List
         while (!fspStream.atEnd()) {
             // Read Line
             QString line = fspStream.readLine();

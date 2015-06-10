@@ -1687,7 +1687,7 @@ void FilePanel::startDirWatcher()
     if (dirWatcherTimerID == -1) {
         //qDebug() << "FilePanel::startDirWatcher";
         // Start Timer
-        dirWatcherTimerID = startTimer(DEFAULT_ONE_SEC * 5);
+        dirWatcherTimerID = startTimer(DEFAULT_ONE_SEC * 3);
 
         // Start Dir Watcher
         dirWatcher.addPath(currentDir);
@@ -2195,31 +2195,12 @@ void FilePanel::keyPressEvent(QKeyEvent* aEvent)
         // Switch Key
         switch (aEvent->key()) {
             case Qt::Key_Escape:
-                // Check If Shift Is Pressed -> Tray
             break;
 
             case Qt::Key_Up:
-/*
-                // Check If Auto Repeat
-                if (aEvent->isAutoRepeat()) {
-                    // Accept
-                    aEvent->accept();
-                    // Go Prev
-                    goPrev();
-                }
-*/
             break;
 
             case Qt::Key_Down:
-/*
-                // Check If Auto Repeat
-                if (aEvent->isAutoRepeat()) {
-                    // Accept
-                    aEvent->accept();
-                    // Go Next
-                    goNext();
-                }
-*/
             break;
 
             case Qt::Key_Backspace:
@@ -2289,7 +2270,17 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
         // Switch Key
         switch (aEvent->key()) {
             case Qt::Key_Escape:
-                // Check If Shift Is Pressed -> Tray
+                // Check Modifier Keys
+                if (modifierKeys == Qt::ShiftModifier) {
+                    // Send To System Tray
+#if defined(Q_OS_MAC)
+
+
+#else // Q_OS_MAC
+
+
+#endif // Q_OS_MAC
+                }
             break;
 
             case Qt::Key_Return:
@@ -2381,14 +2372,16 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
             case Qt::Key_Plus:
                 // Check Modifier Keys
                 if (modifierKeys == Qt::AltModifier) {
-
+                    // Emit File Select
+                    emit launchFileSelect();
                 }
             break;
 
             case Qt::Key_Minus:
                 // Check Modifier Keys
                 if (modifierKeys == Qt::AltModifier) {
-
+                    // Emit File Deselect
+                    emit launchFileDeselect();
                 }
             break;
 

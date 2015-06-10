@@ -276,6 +276,9 @@ signals:
     // Finish Global Settings Update Signal
     void globalSettingsUpdateFinished();
 
+    // Setting Has Changed
+    void settingHasChanged(const QString& aKey);
+
     // Show Function Keys Changed Signal
     void showFunctionKeysChanged(const bool& aShow);
     // Show Directory Hot Keys Changed Signal

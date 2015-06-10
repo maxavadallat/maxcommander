@@ -91,7 +91,8 @@ Rectangle {
                 width: parent.height
                 height: parent.height
                 fillMode: Image.PreserveAspectFit
-                cache: !globalSettings.useDefaultIcons
+                //cache: !globalSettings.useDefaultIcons
+                cache: false
                 smooth: false
                 asynchronous: true
             }

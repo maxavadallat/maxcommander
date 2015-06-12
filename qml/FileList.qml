@@ -388,25 +388,22 @@ Rectangle {
                 hoverIndex = hoverItem ? hoverItem.itemIndex : -1;
                 //console.log("selectionMouseArea.onMouseYChanged - hoverIndex: " + hoverIndex);
                 // Check Last Hover Index
-                if (lastHoverIndex != hoverIndex) {
+                if (lastHoverIndex != hoverIndex && hoverIndex != -1) {
                     // Set Last Hover Index
                     lastHoverIndex = hoverIndex;
-                    // Check Hover Index
-                    if (hoverIndex != -1) {
                         //console.log("selectionMouseArea.onMouseYChanged - hoverIndex: " + hoverIndex);
 
-                        // Check If Selected
-                        if (justSelected === -1 && fileListModel.getSelected(hoverIndex)) {
+                    // Check If Selected
+                    if (justSelected === -1 && fileListModel.getSelected(hoverIndex)) {
+                        // Set Just Selected Index
+                        //justSelected = hoverIndex;
+                    } else {
+                        // Set Selected
+                        fileListModel.setSelected(hoverIndex, !fileListModel.getSelected(hoverIndex));
+                        // Check Selected
+                        if (fileListModel.getSelected(hoverIndex)) {
                             // Set Just Selected Index
                             justSelected = hoverIndex;
-                        } else {
-                            // Set Selected
-                            fileListModel.setSelected(hoverIndex, !fileListModel.getSelected(hoverIndex));
-                            // Check Selected
-                            if (fileListModel.getSelected(hoverIndex)) {
-                                // Set Just Selected Index
-                                justSelected = hoverIndex;
-                            }
                         }
                     }
                 }

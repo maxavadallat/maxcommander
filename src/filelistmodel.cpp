@@ -384,7 +384,8 @@ void FileListModel::setSelected(const int& aIndex, const bool& aSelected)
 //==============================================================================
 void FileListModel::selectAll()
 {
-    qDebug() << "FileListModel::selectAll";
+    //qDebug() << "FileListModel::selectAll";
+
     // Get Item List Count
     int ilCount = itemList.count();
     // Reset Selected Count
@@ -413,7 +414,8 @@ void FileListModel::selectAll()
 //==============================================================================
 void FileListModel::deselectAll()
 {
-    qDebug() << "FileListModel::deselectAll";
+    //qDebug() << "FileListModel::deselectAll";
+
     // Get Item List Count
     int ilCount = itemList.count();
     // Go Thru Item List
@@ -438,7 +440,8 @@ void FileListModel::deselectAll()
 //==============================================================================
 void FileListModel::toggleAllSelection()
 {
-    qDebug() << "FileListModel::toggleAllSelection";
+    //qDebug() << "FileListModel::toggleAllSelection";
+
     // Get Item List Count
     int ilCount = itemList.count();
     // Reset Selected Count
@@ -475,7 +478,7 @@ void FileListModel::selectFiles(const QString& aPattern)
         return;
     }
 
-    qDebug() << "FileListModel::selectFiles - aPattern: " << aPattern;
+    //qDebug() << "FileListModel::selectFiles - aPattern: " << aPattern;
 
     // Get Item List Count
     int ilCount = itemList.count();
@@ -517,7 +520,7 @@ void FileListModel::deselectFiles(const QString& aPattern)
         return;
     }
 
-    qDebug() << "FileListModel::deselectFiles - aPattern: " << aPattern;
+    //qDebug() << "FileListModel::deselectFiles - aPattern: " << aPattern;
 
     // Get Item List Count
     int ilCount = itemList.count();
@@ -623,13 +626,10 @@ void FileListModel::fetchDirItems()
         return;
     }
 
-    qDebug() << "FileListModel::fetchDirItems - currentDir: " << currentDir;
+    //qDebug() << "FileListModel::fetchDirItems - currentDir: " << currentDir;
 
     // Init Filters
     int filters = showHiddenFiles ? DEFAULT_FILTER_SHOW_HIDDEN : 0;
-
-    // ...
-
     // Init Sort Flags
     int sortFlags = showDirsFirst ? DEFAULT_SORT_DIRFIRST : 0;
 

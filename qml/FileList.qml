@@ -348,18 +348,45 @@ Rectangle {
         property int lastHoverIndex: -1
         property int hoverIndex: -1
 
+        property bool firstChange: false
+
         // On Pressed
         onPressed: {
             // Get Pressed Item
             pressedItem = fileListView.itemAt(mouseX, mouseY);
+
             //console.log("selectionMouseArea.onPressed - index: " + pressedItem.itemIndex);
+
+            // Set First Change
+            firstChange = true;
+
+            // Reset Just Selected
+            justSelected = -1;
+
+            // Check Pressed Item
+            if (pressedItem) {
+                // Check If Selected
+                if (!fileListModel.getSelected(pressedItem.itemIndex)) {
+                    // Set selected
+                    fileListModel.setSelected(pressedItem.itemIndex, true);
+                    // set just Selected Index
+                    justSelected = pressedItem.itemIndex;
+                }
+
+                // Set Hover Index
+                hoverIndex = justSelected;
+                // Set Last Hover Index
+                lastHoverIndex = hoverIndex;
+            }
         }
 
         // On Released
         onReleased: {
             // Get Released Item
             releasedItem = fileListView.itemAt(mouseX, mouseY);
+
             //console.log("selectionMouseArea.onReleased - index: " + releasedItem.itemIndex);
+
             // Check Pressed Item
             if (pressedItem === releasedItem && pressedItem != undefined ) {
                 // Check Just Selected
@@ -381,31 +408,29 @@ Rectangle {
         onMouseYChanged: {
             // Check Mouse X
             if (mouseX >= 0 && mouseX < fileListView.width && mouseY >= 0 && mouseY < fileListView.height) {
+                // Check First Change
+                if (firstChange) {
+                    // Reset First Change
+                    firstChange = false;
+
+                    return;
+                }
+
                 //console.log("selectionMouseArea.onMouseYChanged - mouseY: " + mouseY);
                 // Get Hover Item
                 var hoverItem = fileListView.itemAt(mouseX, mouseY);
                 // Get Hover Item Index
                 hoverIndex = hoverItem ? hoverItem.itemIndex : -1;
-                //console.log("selectionMouseArea.onMouseYChanged - hoverIndex: " + hoverIndex);
+
                 // Check Last Hover Index
                 if (lastHoverIndex != hoverIndex && hoverIndex != -1) {
+                    //console.log("selectionMouseArea.onMouseYChanged - hoverIndex: " + hoverIndex);
+
                     // Set Last Hover Index
                     lastHoverIndex = hoverIndex;
-                        //console.log("selectionMouseArea.onMouseYChanged - hoverIndex: " + hoverIndex);
 
-                    // Check If Selected
-                    if (justSelected === -1 && fileListModel.getSelected(hoverIndex)) {
-                        // Set Just Selected Index
-                        //justSelected = hoverIndex;
-                    } else {
-                        // Set Selected
-                        fileListModel.setSelected(hoverIndex, !fileListModel.getSelected(hoverIndex));
-                        // Check Selected
-                        if (fileListModel.getSelected(hoverIndex)) {
-                            // Set Just Selected Index
-                            justSelected = hoverIndex;
-                        }
-                    }
+                    // Set Selected
+                    fileListModel.setSelected(hoverIndex, !fileListModel.getSelected(hoverIndex));
                 }
             }
         }

@@ -1159,40 +1159,10 @@ void FilePanel::handleItemSelection()
     } else {
         qDebug() << "FilePanel::handleItemSelection - panelName: " << panelName << " - fileName: " << fileInfo.fileName();
 
-        // Handle Exec Files
-
-        // Check If File is Executeable
-        if (fileInfo.isExecutable()) {
-
-#if defined(Q_OS_MACX)
-
-            // Execute
-            system(QString(DEFAULT_EXEC_APP_SYSTEM_COMMAND_MAC_OSX).arg(fileInfo.absoluteFilePath()).toLocal8Bit().data());
-
-#elif defined(Q_OS_UNIX)
-
-
-#else defined(Q_OS_WIN)
-
-
-#endif // Q_OS_WIN
-
-        } else {
-
-#if defined(Q_OS_MACX)
-
-            // Open
-            system(QString(DEFAULT_OPEN_FILE_SYSTEM_COMMAND_MAC_OSX).arg(fileInfo.absoluteFilePath()).toLocal8Bit().data());
-
-#elif defined(Q_OS_UNIX)
-
-
-#else defined(Q_OS_WIN)
-
-
-#endif // Q_OS_WIN
-
-        }
+        // Init Command Line
+        QString cmdLine = QString(DEFAULT_OPEN_FILE_SYSTEM_COMMAND_MAC_OSX).arg(fileInfo.absoluteFilePath());
+        // Open
+        system(cmdLine.toLocal8Bit().data());
 
         // ...
 

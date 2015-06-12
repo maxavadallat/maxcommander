@@ -1,3 +1,4 @@
+#include <QDebug>
 
 #include "transferfiledialog.h"
 #include "ui_transferfiledialog.h"
@@ -12,11 +13,17 @@ TransferFileDialog::TransferFileDialog(QWidget* aParent)
     : QDialog(aParent)
     , ui(new Ui::TransferFileDialog)
     , settings(SettingsController::getInstance())
+    , sourceChanged(false)
+    , targetChanged(false)
 {
     // Setup UI
     ui->setupUi(this);
     // Set Copy Hidden File Checkbox
     ui->copyHiddenFilesCheckBox->setChecked(settings ? settings->getCopyHiddenFiles() : DEFAULT_SETTINGS_COPY_HIDDEN_FILES);
+
+    // Connect Signals
+    connect(ui->sourceFileEdit, SIGNAL(textChanged(QString)), this, SLOT(sourceFileTextChanged(QString)));
+    connect(ui->targetFileEdit, SIGNAL(textChanged(QString)), this, SLOT(targetFileTextChanged(QString)));
 }
 
 //==============================================================================
@@ -39,6 +46,14 @@ void TransferFileDialog::setSourceFileText(const QString& aSourceFile, const boo
 }
 
 //==============================================================================
+// Get Source Change
+//==============================================================================
+bool TransferFileDialog::getSourceChanged()
+{
+    return sourceChanged;
+}
+
+//==============================================================================
 // Get Target File Text
 //==============================================================================
 QString TransferFileDialog::getTargetFileText()
@@ -55,6 +70,14 @@ void TransferFileDialog::setTargetFileText(const QString& aTargetFile, const boo
     ui->targetFileEdit->setText(aTargetFile);
     // Set Read Only
     ui->targetFileEdit->setReadOnly(aReadOnly);
+}
+
+//==============================================================================
+// Get Target Change
+//==============================================================================
+bool TransferFileDialog::getTargetChanged()
+{
+    return targetChanged;
 }
 
 //==============================================================================
@@ -78,6 +101,42 @@ void TransferFileDialog::setCopyHidden(const bool& aCopyHidden)
         // Set Copy Hidden Files
         settings->setCopyHiddenFiles(ui->copyHiddenFilesCheckBox->isChecked());
     }
+}
+
+//==============================================================================
+// Exec
+//==============================================================================
+int TransferFileDialog::exec()
+{
+    // Reset Source Changed
+    sourceChanged = false;
+    // reset Target changed
+    targetChanged = false;
+
+    // Exec
+    int result = QDialog::exec();
+
+    return result;
+}
+
+//==============================================================================
+// Source File Text Changed
+//==============================================================================
+void TransferFileDialog::sourceFileTextChanged(const QString& aText)
+{
+    qDebug() << "TransferFileDialog::sourceFileTextChanged - aText: " << aText;
+
+    // ...
+}
+
+//==============================================================================
+// Target File Text Changed
+//==============================================================================
+void TransferFileDialog::targetFileTextChanged(const QString& aText)
+{
+    qDebug() << "TransferFileDialog::targetFileTextChanged - aText: " << aText;
+
+    // ...
 }
 
 //==============================================================================

@@ -79,7 +79,10 @@ SettingsController::SettingsController(QObject* aParent)
     , unPackerPath("")
 
 {
+    qDebug() << "SettingsController::SettingsController";
+
     // ...
+
 }
 
 //==============================================================================
@@ -1247,5 +1250,7 @@ SettingsController::~SettingsController()
 {
     // Save Settings
     saveSettings();
+
+    qDebug() << "SettingsController::~SettingsController";
 }
 

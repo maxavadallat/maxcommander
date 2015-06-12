@@ -836,42 +836,6 @@ int FilePanel::getModifierKeys()
 }
 
 //==============================================================================
-// Set Panel Has Focus
-//==============================================================================
-void FilePanel::setPanelFocus(const bool& aFocus)
-{
-    // Check Panel Has Focus
-    if (panelHasFocus != aFocus) {
-        // Set Panel Has Focus
-        panelHasFocus = aFocus;
-
-        // Check Focus
-        if (panelHasFocus) {
-            // Set Style Sheet
-            setStyleSheet(DEFAULT_PANEL_FOCUSED_STYLE_SHEET);
-            // Set Style Sheet
-            ui->currDirLabel->setStyleSheet(DEFAULT_PANEL_TRASPARENT_STYLE_SHEET);
-            // Set Style Sheet
-            ui->availableSpaceLabel->setStyleSheet(DEFAULT_PANEL_TRASPARENT_STYLE_SHEET);
-
-            // Emit Focused Panle Has Changed
-            emit focusedPanelChanged(this);
-
-        } else {
-            // Set Style Sheet
-            setStyleSheet("");
-            // Set Style Sheet
-            ui->currDirLabel->setStyleSheet("");
-            // Set Style Sheet
-            ui->availableSpaceLabel->setStyleSheet("");
-        }
-
-        // Emit Panel Focus Changed Signal
-        emit panelFocusChanged(panelHasFocus);
-    }
-}
-
-//==============================================================================
 // Set Current Index
 //==============================================================================
 void FilePanel::setCurrentIndex(const int& aCurrentIndex)
@@ -981,6 +945,32 @@ void FilePanel::toggleCurrentFileSelection()
         qDebug() << "FilePanel::toggleCurrentFileSelection - panelName: " << panelName;
         // Set Item Selection
         fileListModel->setSelected(currentIndex, !fileListModel->getSelected(currentIndex));
+    }
+}
+
+//==============================================================================
+// Select Files
+//==============================================================================
+void FilePanel::selectFiles(const QString& aPattern)
+{
+    // Check File List Model
+    if (fileListModel) {
+        qDebug() << "FilePanel::selectFiles - panelName: " << panelName << " - aPattern: " << aPattern;
+        // Select Files
+        fileListModel->selectFiles(aPattern);
+    }
+}
+
+//==============================================================================
+// Deselect Files
+//==============================================================================
+void FilePanel::deselectFiles(const QString& aPattern)
+{
+    // Check File List Model
+    if (fileListModel) {
+        qDebug() << "FilePanel::deselectFiles - panelName: " << panelName << " - aPattern: " << aPattern;
+        // Deselect Files
+        fileListModel->deselectFiles(aPattern);
     }
 }
 
@@ -1721,6 +1711,42 @@ void FilePanel::stopDirWatcher()
 }
 
 //==============================================================================
+// Set Panel Has Focus
+//==============================================================================
+void FilePanel::setPanelFocus(const bool& aFocus)
+{
+    // Check Panel Has Focus
+    if (panelHasFocus != aFocus) {
+        // Set Panel Has Focus
+        panelHasFocus = aFocus;
+
+        // Check Focus
+        if (panelHasFocus) {
+            // Set Style Sheet
+            setStyleSheet(DEFAULT_PANEL_FOCUSED_STYLE_SHEET);
+            // Set Style Sheet
+            ui->currDirLabel->setStyleSheet(DEFAULT_PANEL_TRASPARENT_STYLE_SHEET);
+            // Set Style Sheet
+            ui->availableSpaceLabel->setStyleSheet(DEFAULT_PANEL_TRASPARENT_STYLE_SHEET);
+
+            // Emit Focused Panle Has Changed
+            emit focusedPanelChanged(this);
+
+        } else {
+            // Set Style Sheet
+            setStyleSheet("");
+            // Set Style Sheet
+            ui->currDirLabel->setStyleSheet("");
+            // Set Style Sheet
+            ui->availableSpaceLabel->setStyleSheet("");
+        }
+
+        // Emit Panel Focus Changed Signal
+        emit panelFocusChanged(panelHasFocus);
+    }
+}
+
+//==============================================================================
 // Directory Changed Slot
 //==============================================================================
 void FilePanel::directoryChanged(const QString& aDirPath)
@@ -2058,7 +2084,8 @@ bool FilePanel::handleModifierKeyReleaseEvent(QKeyEvent* aEvent)
         switch (aEvent->key()) {
             case Qt::Key_Shift:
                 // Check Modifier Keys
-                if (modifierKeys & Qt::Key_Shift) {
+                //if (modifierKeys & Qt::Key_Shift)
+                {
                     //qDebug() << "FilePanel::keyReleaseEvent - key: SHIFT";
                     // Update Modifier Keys
                     modifierKeys = modifierKeys ^ Qt::ShiftModifier;

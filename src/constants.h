@@ -146,6 +146,10 @@
 #define SETTINGS_KEY_VIEWER_HEIGHT                          SETTINGS_GROUP_VIEWER"/height"
 
 #define SETTINGS_KEY_VIEWER_WORDWRAP                        SETTINGS_GROUP_VIEWER"/wordwrap"
+#define SETTINGS_KEY_VIEWER_FONTNAME                        SETTINGS_GROUP_VIEWER"/fontName"
+#define SETTINGS_KEY_VIEWER_FONTSIZE                        SETTINGS_GROUP_VIEWER"/fontSize"
+#define SETTINGS_KEY_VIEWER_FONTBOLD                        SETTINGS_GROUP_VIEWER"/fontBold"
+#define SETTINGS_KEY_VIEWER_FONTITALIC                      SETTINGS_GROUP_VIEWER"/fontItalic"
 
 
 #define DEFAULT_MIME_PREFIX_TEXT                            "text/"
@@ -393,6 +397,9 @@
 
 #define DEFAULT_TITLE_FILE_MODIFIED                         "File Modified"
 #define DEFAULT_CONFIRM_TEXT_SAVE_CHANGES                   "Save Changes?"
+
+#define DEFAULT_TITLE_SELECT_FONT                           "Select Font"
+
 
 
 #endif // CONSTANTS_H

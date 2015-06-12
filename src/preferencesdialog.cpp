@@ -1258,9 +1258,11 @@ void PreferencesDialog::updatePreview()
 void PreferencesDialog::updateFontButtonText()
 {
     // Init Updaed Font
-    QFont updatedFont(fontName, 12, -1, fontItalic);
+    QFont updatedFont(fontName, 12);
     // Set Bold
     updatedFont.setBold(fontBold);
+    // Set Italic
+    updatedFont.setItalic(fontItalic);
     // Set Font
     ui->fontButton->setFont(updatedFont);
     // Set Button Text

@@ -218,8 +218,6 @@ public slots:
     // Go To End Of The List
     void goLast();
 
-    // Set Panel Focus
-    void setPanelFocus(const bool& aFocus);
     // Set Visual Items Count
     void setVisualItemsCount(const int& aVisualCount);
 
@@ -233,14 +231,21 @@ public slots:
     void selectAllFiles();
     // Deselect All Files
     void deselectAllFiles();
+
     // Toggle Current File Selection
     void toggleCurrentFileSelection();
+
+    // Select Files
+    void selectFiles(const QString& aPattern);
+    // Deselect Files
+    void deselectFiles(const QString& aPattern);
 
     // Get Selected Files
     QStringList getSelectedFiles();
 
     // Rename File
     void renameFile(const QString& aSource, const QString& aTarget);
+
     // Scan Dir
     void scanDir(const QString& aDirPath);
 
@@ -374,6 +379,11 @@ protected slots:
 
     // Reset Modifier Keys
     void resetModifierKeys();
+
+protected slots: // From FileListWidget
+
+    // Set Panel Focus
+    void setPanelFocus(const bool& aFocus);
 
 protected slots: // From File Model
 
@@ -539,8 +549,6 @@ private:
     int                     sorting;
     // Reverse Order
     bool                    reverseOrder;
-
-
 
     // Dir File System Watcher
     QFileSystemWatcher      dirWatcher;

@@ -28,6 +28,8 @@ Rectangle {
 
     Behavior on opacity { NumberAnimation { duration: Const.DEFAULT_TRANSITION_DURATION } }
 
+    signal itemVisibilityChanged
+
     // Show
     function showPopup() {
         // Set Up File List Header Popup Checkboxes
@@ -67,6 +69,8 @@ Rectangle {
             onItemCheckedChanged: {
                 // Set Extensions Visible
                 mainController.extVisible = extMenuItem.itemChecked;
+                // Emit Item Visibility Changed Signal
+                itemVisibilityChanged();
             }
         }
 
@@ -76,6 +80,8 @@ Rectangle {
             onItemCheckedChanged: {
                 // Set Type Visible
                 mainController.typeVisible = typeMenuItem.itemChecked;
+                // Emit Item Visibility Changed Signal
+                itemVisibilityChanged();
             }
         }
 
@@ -85,6 +91,8 @@ Rectangle {
             onItemCheckedChanged: {
                 // Set Size Visible
                 mainController.sizeVisible = sizeMenuItem.itemChecked;
+                // Emit Item Visibility Changed Signal
+                itemVisibilityChanged();
             }
         }
 
@@ -94,6 +102,8 @@ Rectangle {
             onItemCheckedChanged: {
                 // Set Date Visible
                 mainController.dateVisible = dateMenuItem.itemChecked;
+                // Emit Item Visibility Changed Signal
+                itemVisibilityChanged();
             }
         }
 
@@ -103,6 +113,8 @@ Rectangle {
             onItemCheckedChanged: {
                 // Set Owner Visible
                 mainController.ownerVisible = ownerMenuItem.itemChecked;
+                // Emit Item Visibility Changed Signal
+                itemVisibilityChanged();
             }
         }
 
@@ -112,6 +124,8 @@ Rectangle {
             onItemCheckedChanged: {
                 // Set Permissions Visible
                 mainController.permsVisible = permsMenuItem.itemChecked;
+                // Emit Item Visibility Changed Signal
+                itemVisibilityChanged();
             }
         }
 
@@ -121,6 +135,8 @@ Rectangle {
             onItemCheckedChanged: {
                 // Set Attributes Visible
                 mainController.attrsVisible = attrsMenuItem.itemChecked;
+                // Emit Item Visibility Changed Signal
+                itemVisibilityChanged();
             }
         }
 

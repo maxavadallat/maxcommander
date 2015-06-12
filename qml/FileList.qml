@@ -36,6 +36,11 @@ Rectangle {
         id: fileListHeaderPopup
         opacity: 0.0
         z: 1.0
+        // On Item Visibility Changed
+        onItemVisibilityChanged: {
+            // Update Header Layout
+            updateFileListHeaderLayout();
+        }
     }
 
     // List View
@@ -130,9 +135,7 @@ Rectangle {
             MouseArea {
                 id: delegateMouseArea
                 anchors.fill: parent
-                acceptedButtons: Qt.LeftButton | Qt.RightButton
-                // Press Occured Inside Delegate
-                property bool pressedInside: false
+                acceptedButtons: Qt.LeftButton
                 // On Clicked
                 onClicked: {
                     //console.log("fileListDelegateRoot.MouseArea.onClicked - index: " + index);
@@ -144,41 +147,16 @@ Rectangle {
                         mainController.panelHasFocus = true;
                     }
                 }
+
                 // On Pressed
                 onPressed: {
                     //console.log("fileListDelegateRoot.MouseArea.onPressed - index: " + index);
-                    // Check Mouse Button
-                    if (mouse.button === Qt.RightButton) {
-                        // Set Pressed Inside
-                        delegateMouseArea.pressedInside = true;
-                        // Set Prevent Stealing
-                        delegateMouseArea.preventStealing = true;
-                    }
-
-                    // ...
                 }
                 // On Released
                 onReleased: {
                     //console.log("fileListDelegateRoot.MouseArea.onReleased - index: " + index);
-                    // Check Pressed Inside
-                    if (delegateMouseArea.pressedInside && mouse.button === Qt.RightButton) {
-                        // Reset Pressed Inside
-                        delegateMouseArea.pressedInside = false;
-
-                        // Check Mouse Position
-                        if (mouse.x >= 0 && mouse.x < fileListDelegateRoot.width && mouse.y >= 0 && mouse.y < fileListDelegateRoot.height) {
-
-                            //console.log("fileListDelegateRoot.MouseArea.onReleased - index: " + index + " - pos:[" + mouse.x + ":" + mouse.y + "]");
-
-                            // Toggle File Selected
-                            fileIsSelected = !fileIsSelected;
-                        }
-                    }
-
                     // Reset Prevent Stealing
                     delegateMouseArea.preventStealing = false;
-
-                    // ...
                 }
 
                 // Double Clicked
@@ -278,8 +256,8 @@ Rectangle {
         onWidthChanged: {
             //console.log("fileListView.onWidthChanged - width: " + fileListView.width);
 
-            // Update File List Header
-            updateFileListHeader();
+            // Update File List Header Layout
+            updateFileListHeaderLayout();
         }
 
         // Scroll Bar
@@ -354,6 +332,88 @@ Rectangle {
         Behavior on opacity { NumberAnimation { duration: 500 } }
     }
 
+    // Right Mouse Area
+    MouseArea {
+        id: selectionMouseArea
+        anchors.fill: fileListView
+        acceptedButtons: Qt.RightButton
+        hoverEnabled: false
+        preventStealing: true
+
+        property variant pressedItem: undefined
+        property variant releasedItem: undefined
+
+        property int justSelected: -1
+
+        property int lastHoverIndex: -1
+        property int hoverIndex: -1
+
+        // On Pressed
+        onPressed: {
+            // Get Pressed Item
+            pressedItem = fileListView.itemAt(mouseX, mouseY);
+            //console.log("selectionMouseArea.onPressed - index: " + pressedItem.itemIndex);
+        }
+
+        // On Released
+        onReleased: {
+            // Get Released Item
+            releasedItem = fileListView.itemAt(mouseX, mouseY);
+            //console.log("selectionMouseArea.onReleased - index: " + releasedItem.itemIndex);
+            // Check Pressed Item
+            if (pressedItem === releasedItem && pressedItem != undefined ) {
+                // Check Just Selected
+                if (justSelected !== releasedItem.itemIndex) {
+                    // Set Selected
+                    fileListModel.setSelected(releasedItem.itemIndex, false);
+                }
+            }
+
+            // Reset Just Selected
+            justSelected = -1;
+            // Reset Last Hover Index
+            lastHoverIndex = -1;
+            // Reset Hover Index
+            hoverIndex = -1;
+        }
+
+        // On Mouse Y Changed
+        onMouseYChanged: {
+            // Check Mouse X
+            if (mouseX >= 0 && mouseX < fileListView.width && mouseY >= 0 && mouseY < fileListView.height) {
+                //console.log("selectionMouseArea.onMouseYChanged - mouseY: " + mouseY);
+                // Get Hover Item
+                var hoverItem = fileListView.itemAt(mouseX, mouseY);
+                // Get Hover Item Index
+                hoverIndex = hoverItem ? hoverItem.itemIndex : -1;
+                //console.log("selectionMouseArea.onMouseYChanged - hoverIndex: " + hoverIndex);
+                // Check Last Hover Index
+                if (lastHoverIndex != hoverIndex) {
+                    // Set Last Hover Index
+                    lastHoverIndex = hoverIndex;
+                    // Check Hover Index
+                    if (hoverIndex != -1) {
+                        //console.log("selectionMouseArea.onMouseYChanged - hoverIndex: " + hoverIndex);
+
+                        // Check If Selected
+                        if (justSelected === -1 && fileListModel.getSelected(hoverIndex)) {
+                            // Set Just Selected Index
+                            justSelected = hoverIndex;
+                        } else {
+                            // Set Selected
+                            fileListModel.setSelected(hoverIndex, !fileListModel.getSelected(hoverIndex));
+                            // Check Selected
+                            if (fileListModel.getSelected(hoverIndex)) {
+                                // Set Just Selected Index
+                                justSelected = hoverIndex;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     // Helper Timer
     Timer {
         id: helperTimer
@@ -388,9 +448,9 @@ Rectangle {
 
     }
 
-    // Update File List Header
-    function updateFileListHeader() {
-        //console.log("fileListRoot.updateFileListHeader");
+    // Update File List Header Layout
+    function updateFileListHeaderLayout() {
+        //console.log("fileListRoot.updateFileListHeaderLayout");
 
         // Init Remaining Width
         var remainingWidth = fileListView.width;

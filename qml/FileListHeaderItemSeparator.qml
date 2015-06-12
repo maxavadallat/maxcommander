@@ -26,13 +26,37 @@ Rectangle {
         drag.target: separatorRoot
         drag.axis: Drag.XAxis
         drag.minimumX: 0
-        cursorShape: Qt.SplitHCursor
+        //cursorShape: Qt.SplitHCursor
+        preventStealing: true
         hoverEnabled: true
+        // On Entered
         onEntered: {
+            // Set Color
             parent.color = "red";
+            // Set Cursor Shape
+            cursorShape = Qt.SplitHCursor
         }
+        // On Exited
         onExited: {
+            // Set Color
             parent.color = Const.DEFAULT_FILE_LIST_HEADER_SEPARATOR_COLOR;
+            // Check Pressed
+            if (!pressed) {
+                // Set Cursor Shape
+                cursorShape = Qt.ArrowCursor
+            }
+        }
+
+        // On Pressed
+        onPressed: {
+            // Set Cursor Shape
+            cursorShape = Qt.SplitHCursor
+        }
+
+        // On Released
+        onReleased: {
+            // Set Cursor Shape
+            cursorShape = Qt.ArrowCursor
         }
     }
 

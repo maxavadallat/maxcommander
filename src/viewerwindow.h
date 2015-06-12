@@ -11,6 +11,7 @@ namespace Ui {
 class ViewerWindow;
 }
 
+class SettingsController;
 class ConfirmDialog;
 class RemoteFileUtilClient;
 class ImageBrowser;
@@ -117,11 +118,17 @@ protected slots: // Menu Actions
     void on_actionSave_As_triggered();
     // On Action Close Triggered Slot
     void on_actionClose_triggered();
+    // On Word Wrap Action Triggered Slot
+    void on_actionWord_Wrap_triggered();
+    // On Font Action Triggered Slot
+    void on_actionFont_triggered();
 
 private:
 
     // UI
     Ui::ViewerWindow*       ui;
+    // Settings
+    SettingsController*     settings;
     // File Name
     QString                 fileName;
     // Current Dir

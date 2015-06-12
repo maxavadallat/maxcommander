@@ -445,7 +445,6 @@ void FileListModel::toggleAllSelection()
     selectedCount = 0;
     // Go Thru Item List
     for (int i=0; i<ilCount; ++i) {
-
         // Check File Name
         if (itemList[i]->fileInfo.fileName() != QString("..") && itemList[i]->fileInfo.fileName() != QString(".")) {
             // Set Item Selected
@@ -459,6 +458,94 @@ void FileListModel::toggleAllSelection()
             QModelIndex index = createIndex(i, 0);
             // Emit Data Changed Signal
             emit dataChanged(index, index);
+        }
+    }
+}
+
+//==============================================================================
+// Select Files
+//==============================================================================
+void FileListModel::selectFiles(const QString& aPattern)
+{
+    // Check Pattern
+    if (aPattern == "*.*") {
+        // Select All
+        selectAll();
+
+        return;
+    }
+
+    qDebug() << "FileListModel::selectFiles - aPattern: " << aPattern;
+
+    // Get Item List Count
+    int ilCount = itemList.count();
+    // Reset Selected Count
+    selectedCount = 0;
+    // Init Dir
+    QDir dir(QDir::homePath());
+    // Go Thru Item List
+    for (int i=0; i<ilCount; ++i) {
+        // Get Item
+        FileListModelItem* item = itemList[i];
+        // Check File Name
+        if (item->fileInfo.fileName() != QString("..") && item->fileInfo.fileName() != QString(".")) {
+            // Check If Pattern Match
+            if (dir.match(aPattern, item->fileInfo.fileName())) {
+                // Set Item Selected
+                item->selected = true;
+                // Create Model Index
+                QModelIndex index = createIndex(i, 0);
+                // Emit Data Changed Signal
+                emit dataChanged(index, index);
+                // Inc Selected Count
+                selectedCount++;
+            }
+        }
+    }
+}
+
+//==============================================================================
+// Deselect Files
+//==============================================================================
+void FileListModel::deselectFiles(const QString& aPattern)
+{
+    // Check Pattern
+    if (aPattern == "*.*") {
+        // Deselect All
+        deselectAll();
+
+        return;
+    }
+
+    qDebug() << "FileListModel::deselectFiles - aPattern: " << aPattern;
+
+    // Get Item List Count
+    int ilCount = itemList.count();
+    // Reset Selected Count
+    selectedCount = 0;
+    // Init Dir
+    QDir dir(QDir::homePath());
+    // Go Thru Item List
+    for (int i=0; i<ilCount; ++i) {
+        // Get Item
+        FileListModelItem* item = itemList[i];
+        // Check File Name
+        if (item->fileInfo.fileName() != QString("..") && item->fileInfo.fileName() != QString(".")) {
+            // Check If Pattern Match
+            if (dir.match(aPattern, item->fileInfo.fileName())) {
+                // Set Item Selected
+                item->selected = false;
+                // Create Model Index
+                QModelIndex index = createIndex(i, 0);
+                // Emit Data Changed Signal
+                emit dataChanged(index, index);
+            }
+
+            // Check If Item Selected
+            if (item->selected) {
+                // Inc Selected Count
+                selectedCount++;
+            }
         }
     }
 }

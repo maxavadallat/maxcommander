@@ -10,8 +10,8 @@
 #include <QQmlEngine>
 #include <QFileInfo>
 #include <QDir>
-#include <QSettings>
 #include <QFileDialog>
+#include <QFontDialog>
 #include <QDebug>
 
 #include <mcwinterface.h>
@@ -22,7 +22,10 @@
 #include "remotefileutilclient.h"
 #include "audiotagimageprovider.h"
 #include "confirmdialog.h"
+#include "settingscontroller.h"
 #include "constants.h"
+#include "defaultsettings.h"
+
 
 //==============================================================================
 // Constructor
@@ -30,6 +33,7 @@
 ViewerWindow::ViewerWindow(QWidget* aParent)
     : QMainWindow(aParent)
     , ui(new Ui::ViewerWindow)
+    , settings(SettingsController::getInstance())
     , fileName("")
     , editMode(false)
     , dirty(false)
@@ -116,6 +120,11 @@ bool ViewerWindow::newFile(const QString& aDirPath)
     ui->quickWidget->setVisible(false);
     // Text Edit Set Visible
     ui->textEdit->setVisible(true);
+    // Set Wrap Mode
+    ui->textEdit->setWordWrapMode(QTextOption::NoWrap);
+    // Set Menu Item Checked
+    ui->actionWord_Wrap->setChecked(false);
+
 
     // Reset File Name
     fileName = "";
@@ -355,6 +364,12 @@ void ViewerWindow::setEditModeEnabled(const bool& aEnabled)
 
         // Set Read Only Mode
         ui->textEdit->setReadOnly(!editMode);
+
+        // Check Edit Mode
+        if (editMode) {
+            // Set Wrap Mode
+            ui->textEdit->setWordWrapMode(QTextOption::NoWrap);
+        }
     }
 }
 
@@ -363,12 +378,9 @@ void ViewerWindow::setEditModeEnabled(const bool& aEnabled)
 //==============================================================================
 void ViewerWindow::restoreUI()
 {
-    // Init Settings
-    QSettings settings;
-
     // Get Editor Width
-    int viewerWidth = settings.value(SETTINGS_KEY_VIEWER_WIDTH).toInt();
-    int viewerHeight = settings.value(SETTINGS_KEY_VIEWER_HEIGHT).toInt();
+    int viewerWidth = settings->value(SETTINGS_KEY_VIEWER_WIDTH).toInt();
+    int viewerHeight = settings->value(SETTINGS_KEY_VIEWER_HEIGHT).toInt();
     // Get Desktop Widget
     QDesktopWidget* desktop = QApplication::desktop();
 
@@ -387,9 +399,14 @@ void ViewerWindow::restoreUI()
         ui->textEdit->setWordWrapMode(QTextOption::NoWrap);
         // Show Message
         ui->statusbar->showMessage(tr(DEFAULT_TEXT_WORD_WRAP_OFF), DEFAULT_STATUS_BAR_MESSAGE_TIMEOUT);
+        // Set Menu Item Checked
+        ui->actionWord_Wrap->setChecked(false);
     } else {
         // Get Wrap Mode
-        bool wrapMode = settings.value(SETTINGS_KEY_VIEWER_WORDWRAP, false).toBool();
+        bool wrapMode = settings->value(SETTINGS_KEY_VIEWER_WORDWRAP, false).toBool();
+        // Set Menu Item Checked
+        ui->actionWord_Wrap->setChecked(wrapMode);
+
         // Check Mime - Text Files
         if (mime.startsWith(DEFAULT_MIME_PREFIX_TEXT)) {
             // Check Wrap Mode
@@ -417,6 +434,16 @@ void ViewerWindow::restoreUI()
     // Update Menu Bar
     updateMenuBar();
 
+    // Init Loaded Font
+    QFont loadedFont(settings->value(SETTINGS_KEY_VIEWER_FONTNAME).toString(), settings->value(SETTINGS_KEY_VIEWER_FONTSIZE).toInt());
+    // Set Bold
+    loadedFont.setBold(settings->value(SETTINGS_KEY_VIEWER_FONTBOLD).toBool());
+    // Set Italic
+    loadedFont.setItalic(settings->value(SETTINGS_KEY_VIEWER_FONTITALIC).toBool());
+
+    // Set Font
+    ui->textEdit->setFont(loadedFont);
+
     // ...
 }
 
@@ -427,18 +454,21 @@ void ViewerWindow::saveSettings()
 {
     qDebug() << "ViewerWindow::saveSettings";
 
-    // Init Settings
-    QSettings settings;
-
     // Set Value
-    settings.setValue(SETTINGS_KEY_VIEWER_WIDTH, rect().width());
-    settings.setValue(SETTINGS_KEY_VIEWER_HEIGHT, rect().height());
+    settings->setValue(SETTINGS_KEY_VIEWER_WIDTH, rect().width());
+    settings->setValue(SETTINGS_KEY_VIEWER_HEIGHT, rect().height());
 
     // Check Text Edit Visibility
     if (ui->textEdit->isVisible()) {
         // Set Value - Word Wrap
-        settings.setValue(SETTINGS_KEY_VIEWER_WORDWRAP, ui->textEdit->wordWrapMode() == QTextOption::WrapAtWordBoundaryOrAnywhere);
+        settings->setValue(SETTINGS_KEY_VIEWER_WORDWRAP, ui->textEdit->wordWrapMode() == QTextOption::WrapAtWordBoundaryOrAnywhere);
     }
+
+    // Save Font Family
+    settings->setValue(SETTINGS_KEY_VIEWER_FONTNAME, ui->textEdit->font().family());
+    settings->setValue(SETTINGS_KEY_VIEWER_FONTSIZE, ui->textEdit->font().pointSize());
+    settings->setValue(SETTINGS_KEY_VIEWER_FONTBOLD, ui->textEdit->font().bold());
+    settings->setValue(SETTINGS_KEY_VIEWER_FONTITALIC, ui->textEdit->font().italic());
 
     // ...
 }
@@ -454,15 +484,17 @@ void ViewerWindow::toggleWrapMode()
         // Set Wrap Mode
         ui->textEdit->setWordWrapMode(QTextOption::NoWrap);
         // Set Status Text
-        //ui->statusLabel->setText(tr("Wrap Off"));
-        ui->statusbar->showMessage(tr("Wrap Off"), DEFAULT_STATUS_BAR_MESSAGE_TIMEOUT);
+        ui->statusbar->showMessage(tr(DEFAULT_TEXT_WORD_WRAP_OFF), DEFAULT_STATUS_BAR_MESSAGE_TIMEOUT);
+        // Set Menu Item Checked
+        ui->actionWord_Wrap->setChecked(false);
     } else {
         //qDebug() << "ViewerWindow::toggleWrapMode - wrap ON";
         // Set Wrap Mode
         ui->textEdit->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
         // Set Status Text
-        //ui->statusLabel->setText(tr("Wrap On"));
-        ui->statusbar->showMessage(tr("Wrap On"), DEFAULT_STATUS_BAR_MESSAGE_TIMEOUT);
+        ui->statusbar->showMessage(tr(DEFAULT_TEXT_WORD_WRAP_ON), DEFAULT_STATUS_BAR_MESSAGE_TIMEOUT);
+        // Set Menu Item Checked
+        ui->actionWord_Wrap->setChecked(true);
     }
 }
 
@@ -523,10 +555,12 @@ void ViewerWindow::updateMenuBar()
         // Set Actions Enabled
         ui->actionSave->setEnabled(true);
         ui->actionSave_As->setEnabled(true);
+        ui->actionWord_Wrap->setEnabled(false);
     } else {
         // Set Actions Enabled
         ui->actionSave->setEnabled(false);
         ui->actionSave_As->setEnabled(false);
+        ui->actionWord_Wrap->setEnabled(true);
     }
 }
 
@@ -641,11 +675,15 @@ void ViewerWindow::keyReleaseEvent(QKeyEvent* aEvent)
             break;
 
             case Qt::Key_W:
+/*
                 // Check Editor Mode
                 if (!editMode) {
                     // Toggle Wrap Mode
                     toggleWrapMode();
                 }
+*/
+                // Handled By Hot Key
+
             break;
 
             case Qt::Key_Home:
@@ -728,6 +766,33 @@ void ViewerWindow::on_actionClose_triggered()
 }
 
 //==============================================================================
+// On Word Wrap Action Triggered Slot
+//==============================================================================
+void ViewerWindow::on_actionWord_Wrap_triggered()
+{
+    // Toggle Wrap Mode
+    toggleWrapMode();
+}
+
+//==============================================================================
+// On Font Action Triggered Slot
+//==============================================================================
+void ViewerWindow::on_actionFont_triggered()
+{
+    // Init Font Selected
+    bool fontSelected = false;
+
+    // Launch Font Dialog
+    QFont selectedFont = QFontDialog::getFont(&fontSelected, ui->textEdit->font(), NULL, tr(DEFAULT_TITLE_SELECT_FONT));
+
+    // Check If Font Selected
+    if (fontSelected) {
+        // Sert Font
+        ui->textEdit->setFont(selectedFont);
+    }
+}
+
+//==============================================================================
 // Destructor
 //==============================================================================
 ViewerWindow::~ViewerWindow()
@@ -737,6 +802,14 @@ ViewerWindow::~ViewerWindow()
 
     // Delete UI
     delete ui;
+
+    // Check Settings
+    if (settings) {
+        // Release Instance
+        settings->release();
+        // Reset Settins
+        settings = NULL;
+    }
 
     // Check Image Browser
     if (imageBrowser) {

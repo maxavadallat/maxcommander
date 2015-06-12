@@ -123,6 +123,11 @@ public slots:
     // Toggle All Selection
     void toggleAllSelection();
 
+    // Select Files
+    void selectFiles(const QString& aPattern);
+    // Deselect Files
+    void deselectFiles(const QString& aPattern);
+
     // Get All Selected Files
     QStringList getAllSelected();
 

@@ -46,11 +46,11 @@ void SelectFilesDialog::restoreUI()
         setWindowTitle(tr(DEFAULT_TITLE_DESELECT_FILES));
     }
 
-    // Set Current Text
-    ui->selectionPatternCombo->setCurrentText("*.*");
+    // Insert Item
+    ui->selectionPatternCombo->insertItem(0, "*.*");
 
-    // Set Focus
-    ui->selectionPatternCombo->setFocus();
+    // Set Current Index
+    ui->selectionPatternCombo->setCurrentIndex(0);
 }
 
 //==============================================================================
@@ -76,7 +76,12 @@ int SelectFilesDialog::launchDialog(const FileSelectionModeType& aMode)
     restoreUI();
 
     // Exec
-    return exec();
+    int result = exec();
+
+    // Clear Focus
+    ui->selectionPatternCombo->clearFocus();
+
+    return result;
 }
 
 //==============================================================================

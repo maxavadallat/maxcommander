@@ -167,7 +167,6 @@ void MainWindow::init()
     connect(leftPanel, SIGNAL(launchFileDeselect()), this, SLOT(launchFileDeselect()));
     connect(rightPanel, SIGNAL(launchFileDeselect()), this, SLOT(launchFileDeselect()));
 
-
     // ...
 }
 
@@ -850,10 +849,19 @@ void MainWindow::launchFileSelect()
 
     // Launch Dialog
     if (selectFilesDialog->launchDialog(EFSMSelect)) {
-        qDebug() << "MainWindow::launchFileSelect - pattern: " << selectFilesDialog->getPattern();
+        // Get Pattern
+        QString pattern = selectFilesDialog->getPattern();
 
-        // ...
+        // Check Pattern
+        if (pattern.indexOf("*") == -1) {
+            // Adjust Pattern
+            pattern = "*" + pattern + "*";
+        }
 
+        qDebug() << "MainWindow::launchFileSelect - pattern: " << pattern;
+
+        // Select Files
+        focusedPanel->selectFiles(pattern);
     }
 }
 
@@ -880,10 +888,19 @@ void MainWindow::launchFileDeselect()
 
     // Launch Dialog
     if (selectFilesDialog->launchDialog(EFSMDeselect)) {
-        qDebug() << "MainWindow::launchFileDeselect - pattern: " << selectFilesDialog->getPattern();
+        // Get Pattern
+        QString pattern = selectFilesDialog->getPattern();
 
-        // ...
+        // Check Pattern
+        if (pattern.indexOf("*") == -1) {
+            // Adjust Pattern
+            pattern = "*" + pattern + "*";
+        }
 
+        qDebug() << "MainWindow::launchFileDeselect - pattern: " << pattern;
+
+        // Deselect Files
+        focusedPanel->deselectFiles(pattern);
     }
 }
 

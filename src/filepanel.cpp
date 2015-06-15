@@ -1085,7 +1085,7 @@ void FilePanel::pageUp()
     //qDebug() << "FilePanel::pageUp - panelName: " << panelName;
 
     // Set Current Index
-    setCurrentIndex(currentIndex - visualItemsCount);
+    setCurrentIndex(qBound(0, currentIndex - visualItemsCount, fileListModel ? fileListModel->rowCount()-1 : 0));
 }
 
 //==============================================================================
@@ -1096,7 +1096,7 @@ void FilePanel::pageDown()
     //qDebug() << "FilePanel::pageDown - panelName: " << panelName;
 
     // Set Current Index
-    setCurrentIndex(currentIndex + visualItemsCount);
+    setCurrentIndex(qBound(0, currentIndex + visualItemsCount, fileListModel ? fileListModel->rowCount()-1 : 0));
 }
 
 //==============================================================================
@@ -1447,7 +1447,7 @@ void FilePanel::fileModelDirFetchFinished()
         qDebug() << "FilePanel::fileModelDirFetchFinished - panelName: " << panelName << " - lastIndex: " << lastIndex;
 
         // Set Current Index
-        setCurrentIndex(lastIndex);
+        setCurrentIndex(qBound(0, lastIndex, fileListModel ? fileListModel->rowCount()-1 : 0));
 
         // Check Last Index
         if (lastIndex == 0) {

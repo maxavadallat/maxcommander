@@ -511,56 +511,54 @@ void MainWindow::launchTransfer(const QString& aOperation)
     QStringList selectedFiles = focusedPanel->getSelectedFiles();
 
     // Init Transfer Source Dir
-    QString transferSource = "";
+    QString transferSourceDir = "";
     // Init Transfer Target Dir
-    QString transferTarget = "";
+    QString transferTargetDir = "";
 
     // Check Focused Panel - Left
     if (focusedPanel == leftPanel) {
 
         // Set Transfer Source
-        transferSource = leftPanel->getCurrentDir();
+        transferSourceDir = leftPanel->getCurrentDir();
         // Set Transfer Target
-        transferTarget = rightPanel->getCurrentDir();
+        transferTargetDir = rightPanel->getCurrentDir();
 
     // Check Focused Panel - Right
     } else if (focusedPanel == rightPanel) {
 
         // Set Transfer Source
-        transferSource = rightPanel->getCurrentDir();
+        transferSourceDir = rightPanel->getCurrentDir();
         // Set Transfer Target
-        transferTarget = leftPanel->getCurrentDir();
+        transferTargetDir = leftPanel->getCurrentDir();
 
     }
-
-    // Setup Delete File Dialog - Copy
 
     // Check Selected Files Count
     if (selectedFiles.count() > 1) {
 
         // Set Transfer Dialog Source File Text
-        transferFileDialog->setSourceFileText(transferSource);
+        transferFileDialog->setSourceFileText(transferSourceDir);
         // Set Transfer Dialog Target File Text
-        transferFileDialog->setTargetFileText(transferTarget);
+        transferFileDialog->setTargetFileText(transferTargetDir);
 
     } else if (selectedFiles.count() == 1) {
 
         // Check Transfer Source
-        if (!transferSource.endsWith("/")) {
+        if (!transferSourceDir.endsWith("/")) {
             // Adjust Transfer Source
-            transferSource += "/";
+            transferSourceDir += "/";
         }
 
         // Check Transfer Target
-        if (!transferTarget.endsWith("/")) {
+        if (!transferTargetDir.endsWith("/")) {
             // Adjust Transfer Target
-            transferTarget += "/";
+            transferTargetDir += "/";
         }
 
         // Set Transfer Dialog Source File Text
-        transferFileDialog->setSourceFileText(transferSource + selectedFiles[0], true);
+        transferFileDialog->setSourceFileText(transferSourceDir + selectedFiles[0], true);
         // Set Transfer Dialog Target File Text
-        transferFileDialog->setTargetFileText(transferTarget + selectedFiles[0]);
+        transferFileDialog->setTargetFileText(transferTargetDir + selectedFiles[0]);
 
     } else {
 
@@ -581,13 +579,10 @@ void MainWindow::launchTransfer(const QString& aOperation)
     if (transferFileDialog->exec()) {
         // Create Transfer Progress Dialog
         TransferProgressDialog* newTransferProgressDialog = new TransferProgressDialog(aOperation);
-
         // Connect Closed Signal
         connect(newTransferProgressDialog, SIGNAL(dialogClosed(TransferProgressDialog*)), this, SLOT(transferProgressClosed(TransferProgressDialog*)), Qt::QueuedConnection);
-
         // Add To Transfer Progress Dialog List
         transferProgressDialogs << newTransferProgressDialog;
-
         // Init Copy Options
         int copyOptions = transferFileDialog->getCopyHidden() ? DEFAULT_COPY_OPTIONS_COPY_HIDDEN : 0;
 
@@ -597,7 +592,7 @@ void MainWindow::launchTransfer(const QString& aOperation)
             newTransferProgressDialog->launch(transferFileDialog->getSourceFileText(), transferFileDialog->getTargetFileText(), copyOptions);
         } else {
             // Launch Progress Dialog
-            newTransferProgressDialog->launch(transferSource, transferTarget, selectedFiles, copyOptions);
+            newTransferProgressDialog->launch(transferSourceDir, transferTargetDir, selectedFiles, copyOptions);
         }
 
         // Clear Selected Files

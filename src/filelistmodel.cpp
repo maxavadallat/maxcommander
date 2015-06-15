@@ -353,7 +353,7 @@ void FileListModel::setSelected(const int& aIndex, const bool& aSelected)
     if (aIndex >=0 && aIndex < itemList.count()) {
 
         // Check File Name
-        if (itemList[aIndex]->fileInfo.fileName() == "." || itemList[aIndex]->fileInfo.fileName() == ".."  ) {
+        if (itemList[aIndex]->fileInfo.fileName() == "." || itemList[aIndex]->fileInfo.fileName() == "..") {
             // Skip
             return;
         }

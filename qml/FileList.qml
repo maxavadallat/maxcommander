@@ -388,7 +388,7 @@ Rectangle {
             //console.log("selectionMouseArea.onReleased - index: " + releasedItem.itemIndex);
 
             // Check Pressed Item
-            if (pressedItem === releasedItem && pressedItem != undefined ) {
+            if (pressedItem === releasedItem && pressedItem != undefined) {
                 // Check Just Selected
                 if (justSelected !== releasedItem.itemIndex) {
                     // Set Selected

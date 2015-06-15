@@ -511,7 +511,7 @@ QString getExtensionFromFullName(const QString& aFullFileName)
     }
 
     // Check Specific Ends
-    if (aFullFileName.endsWith("."DEFAULT_SUFFIX_TAR_GZ, Qt::CaseInsensitive)) {
+    if (aFullFileName.endsWith(QString(".%1").arg(DEFAULT_SUFFIX_TAR_GZ), Qt::CaseInsensitive)) {
         return DEFAULT_SUFFIX_TAR_GZ;
     }
 

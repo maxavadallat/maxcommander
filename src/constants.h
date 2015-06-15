@@ -206,7 +206,7 @@
 #define DEFAULT_TRANSPARENT_COLOR                           "#00000000"
 
 #define DEFAULT_PANEL_FOCUSED_STYLE_SHEET                   "background-color: #11000077"
-#define DEFAULT_PANEL_TRASPARENT_STYLE_SHEET                "background-color: "DEFAULT_TRANSPARENT_COLOR
+#define DEFAULT_PANEL_TRASPARENT_STYLE_SHEET                "background-color: #00000000"
 
 #define DEFAULT_AVAILABLE_SPACE_FORMAT_STRING               "%1 files, %2 of %3 free"
 

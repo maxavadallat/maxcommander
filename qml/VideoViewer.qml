@@ -113,7 +113,6 @@ Rectangle {
         }
     }
 
-
     // Play Icon
     Image {
         id: playIcon

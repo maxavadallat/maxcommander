@@ -192,8 +192,13 @@ void FilePanel::setCurrentDir(const QString& aCurrentDir, const QString& aLastFi
             return;
         }
 
+        qDebug() << "FilePanel::setCurrentDir - panelName: " << panelName << " - aCurrentDir: " << aCurrentDir;
+
         // Set Current Dir
         currentDir = aCurrentDir;
+
+        // Reset Current Index
+        setCurrentIndex(-1);
 
         // Check LAst File Name
         if (!aLastFileName.isEmpty()) {
@@ -840,18 +845,11 @@ int FilePanel::getModifierKeys()
 //==============================================================================
 void FilePanel::setCurrentIndex(const int& aCurrentIndex)
 {
-    // Get Bounded Index
-    int boundedIndex = fileListModel ? qBound(0, aCurrentIndex, fileListModel->rowCount()-1) : 0;
-
     // Check Current Index
-    if (currentIndex != boundedIndex) {
-        //qDebug() << "FilePanel::setCurrentIndex - aCurrentIndex: " << aCurrentIndex;
-
+    if (currentIndex != aCurrentIndex) {
+        //qDebug() << "FilePanel::setCurrentIndex - panelName: " << panelName << " - aCurrentIndex: " << aCurrentIndex;
         // Set Current Index
-        currentIndex = boundedIndex;
-
-        // ...
-
+        currentIndex = aCurrentIndex;
         // Emit Current Index Changed Signal
         emit currentIndexChanged(currentIndex);
     }
@@ -1219,13 +1217,13 @@ void FilePanel::clear()
 {
     //qDebug() << "FilePanel::clear - panelName: " << panelName;
 
+    // Reset Current Index
+    setCurrentIndex(-1);
+
     // Check File List Model
     if (fileListModel) {
         // Clear
         fileListModel->clear();
-
-        // Reset Current Index
-        setCurrentIndex(-1);
     }
 }
 
@@ -1484,7 +1482,7 @@ void FilePanel::fileModelDirFetchFinished()
     }
 
     // Emit Current Index Changed Signal For Sync
-    emit currentIndexChanged(currentIndex);
+    //emit currentIndexChanged(currentIndex);
 
     // ...
 }
@@ -2743,7 +2741,7 @@ void FileRenamer::abort()
     // Check File Util
     if (fileUtil) {
         // Check Status
-        if (fileUtil->getStatus() == ECSTBusy || fileUtil->getStatus() == ECSTError  ) {
+        if (fileUtil->getStatus() == ECSTBusy || fileUtil->getStatus() == ECSTError) {
             qDebug() << "FileRenamer::abort";
 
             // Abort
@@ -3181,7 +3179,7 @@ void DirScanner::scanDir(const QString& aDirPath)
 void DirScanner::abort()
 {
     // Check File Util
-    if (fileUtil && (fileUtil->getStatus() == ECSTBusy || fileUtil->getStatus() == ECSTWaiting) ) {
+    if (fileUtil && (fileUtil->getStatus() == ECSTBusy || fileUtil->getStatus() == ECSTWaiting)) {
         qDebug() << "DirScanner::abort";
 
         // Abort

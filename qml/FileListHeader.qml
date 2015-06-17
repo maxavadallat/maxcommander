@@ -56,7 +56,7 @@ Rectangle {
             id: extHeader
             itemText: "Ext"
             itemSorting: Const.DEFAULT_SORT_EXT
-            visible: mainController.extVisible
+            visible: mainController.extVisible && !mainController.searchResultsMode
             onWidthChanged: {
                 // Set Extensions Column Width
                 mainController.extWidth = extHeader.width;
@@ -68,7 +68,7 @@ Rectangle {
             id: typeHeader
             itemText: "Type"
             itemSorting: Const.DEFAULT_SORT_TYPE
-            visible: mainController.typeVisible
+            visible: mainController.typeVisible && !mainController.searchResultsMode
             onWidthChanged: {
                 // Set Type Column Width
                 mainController.typeWidth = typeHeader.width;
@@ -78,7 +78,7 @@ Rectangle {
         FileListHeaderItem {
             id: sizeHeader
             itemText: "Size"
-            visible: mainController.sizeVisible
+            visible: mainController.sizeVisible /*&& !mainController.searchResultsMode*/
             itemSorting: Const.DEFAULT_SORT_SIZE
             onWidthChanged: {
                 // Set Size Column Width
@@ -89,7 +89,7 @@ Rectangle {
         FileListHeaderItem {
             id: dateHeader
             itemText: "Date"
-            visible: mainController.dateVisible
+            visible: mainController.dateVisible && !mainController.searchResultsMode
             itemSorting: Const.DEFAULT_SORT_DATE
             onWidthChanged: {
                 // Set Date Column Width
@@ -100,7 +100,7 @@ Rectangle {
         FileListHeaderItem {
             id: ownerHeader
             itemText: "Owner"
-            visible: mainController.ownerVisible
+            visible: mainController.ownerVisible && !mainController.searchResultsMode
             itemSorting: Const.DEFAULT_SORT_OWNER
             onWidthChanged: {
                 // Set Owner Column Width
@@ -111,7 +111,7 @@ Rectangle {
         FileListHeaderItem {
             id: permsHeader
             itemText: "Perms"
-            visible: mainController.permsVisible
+            visible: mainController.permsVisible && !mainController.searchResultsMode
             itemSorting: Const.DEFAULT_SORT_PERMS
             onWidthChanged: {
                 // Set Permissions Column Width
@@ -122,7 +122,7 @@ Rectangle {
         FileListHeaderItem {
             id: attribsHeader
             itemText: "Attribs"
-            visible: mainController.attrsVisible
+            visible: mainController.attrsVisible && !mainController.searchResultsMode
             itemSorting: Const.DEFAULT_SORT_ATTRS
             onWidthChanged: {
                 // Set Attributes Column Width
@@ -215,7 +215,6 @@ Rectangle {
 
         // On Reverse Order Changed
         onReverseOrderChanged: {
-
 
         }
     }

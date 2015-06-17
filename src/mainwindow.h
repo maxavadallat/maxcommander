@@ -12,6 +12,7 @@ class MainWindow;
 class FilePanel;
 class RemoteFileUtilClient;
 class AboutDialog;
+class InfoDialog;
 class ConfirmDialog;
 class PreferencesDialog;
 class CreateDirDialog;

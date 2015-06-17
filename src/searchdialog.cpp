@@ -26,6 +26,8 @@
 SearchDialog::SearchDialog(QWidget* aParent)
     : QDialog(aParent)
     , ui(new Ui::SearchDialog)
+    , feedToListButton(NULL)
+    , startButton(NULL)
     , fileUtil(new RemoteFileUtilClient)
     , resultModel(new SearchResultModel)
     , focusedPanel(NULL)
@@ -35,7 +37,6 @@ SearchDialog::SearchDialog(QWidget* aParent)
     , searchActive(false)
     , searchFinished(false)
     , resultsVisible(true)
-    , startButton(NULL)
     , currentIndex(-1)
     , visualItemCount(0)
     , resultListKeyEvent(false)
@@ -209,7 +210,7 @@ void SearchDialog::restoreUI()
     ui->buttonBox->setStandardButtons(QDialogButtonBox::Cancel);
 
     // Add Start Button
-    startButton = ui->buttonBox->addButton(tr(DEFAULT_BUTTON_TEXT_START), QDialogButtonBox::ActionRole);
+    startButton = ui->buttonBox->addButton(tr(DEFAULT_BUTTON_TEXT_START), QDialogButtonBox::AcceptRole);
 
     // Set Current Dir Label
     ui->currentDirLabel->setText(currentDir);
@@ -505,6 +506,26 @@ void SearchDialog::buttonBoxClicked(QAbstractButton* aButton)
         startButton = NULL;
 
         return;
+
+    } else if (feedToListButton && feedToListButton == aButton) {
+
+        // Check Focused Panel & Result Model
+        if (focusedPanel && resultModel) {
+            // Feed To List
+            focusedPanel->feedSearchResults(resultModel->results());
+        }
+
+        // Remove Button
+        ui->buttonBox->removeButton(feedToListButton);
+
+        // Reset Start Button
+        delete startButton;
+        startButton = NULL;
+
+        // Accept & Close
+        accept();
+
+        return;
     }
 
     // Get Standard Button
@@ -515,10 +536,8 @@ void SearchDialog::buttonBoxClicked(QAbstractButton* aButton)
 
         case QDialogButtonBox::Cancel:
         case QDialogButtonBox::Close:
-            // Reset Dialog Shown
-            //dialogShown = false;
-            // Close
-            close();
+            // Reject/Close
+            reject();
         break;
 
         case QDialogButtonBox::Abort:
@@ -527,25 +546,18 @@ void SearchDialog::buttonBoxClicked(QAbstractButton* aButton)
                 // Abort
                 fileUtil->abort();
             }
-
-            // Reset Dialog Shown
-            //dialogShown = false;
-            // Close
-            close();
+            // reject/Close
+            reject();
         break;
 
         case QDialogButtonBox::Reset:
             // Restore UI
             restoreUI();
-
-            // ...
-
             // Check Result Model
             if (resultModel) {
                 // Clear
                 resultModel->clear();
             }
-
         break;
 
         default:
@@ -854,6 +866,8 @@ void SearchDialog::fileOpFinished(const unsigned int& aID,
         if (resultModel && resultModel->rowCount() > 0) {
             // Show Results
             showResults();
+            // Add Custom Button
+            feedToListButton = ui->buttonBox->addButton(tr("Feed to List"), QDialogButtonBox::AcceptRole);
         }
     }
 }
@@ -1199,6 +1213,14 @@ void SearchResultModel::clear()
     resultList.clear();
     // End Reset Model
     endResetModel();
+}
+
+//==============================================================================
+// Get Search Results
+//==============================================================================
+QStringList& SearchResultModel::results()
+{
+    return resultList;
 }
 
 //==============================================================================

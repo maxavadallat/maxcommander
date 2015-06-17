@@ -10,6 +10,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "aboutdialog.h"
+#include "infodialog.h"
 #include "preferencesdialog.h"
 #include "createdirdialog.h"
 #include "createlinkdialog.h"
@@ -510,55 +511,45 @@ void MainWindow::launchTransfer(const QString& aOperation)
     // Init Selected Files
     QStringList selectedFiles = focusedPanel->getSelectedFiles();
 
+    // Get Source Panel
+    FilePanel* sourcePanel = (focusedPanel == leftPanel) ? leftPanel : rightPanel;
+    // Get Target Panel
+    FilePanel* targetPanel = (focusedPanel == leftPanel) ? rightPanel : leftPanel;
+
     // Init Transfer Source Dir
-    QString transferSourceDir = "";
+    QString transferSourceDir = sourcePanel->getCurrentDir();
     // Init Transfer Target Dir
-    QString transferTargetDir = "";
+    QString transferTargetDir = targetPanel->getCurrentDir();
 
-    // Check Focused Panel - Left
-    if (focusedPanel == leftPanel) {
+    // Check Transfer Source
+    if (!transferSourceDir.endsWith("/")) {
+        // Adjust Transfer Source
+        transferSourceDir += "/";
+    }
 
-        // Set Transfer Source
-        transferSourceDir = leftPanel->getCurrentDir();
-        // Set Transfer Target
-        transferTargetDir = rightPanel->getCurrentDir();
-
-    // Check Focused Panel - Right
-    } else if (focusedPanel == rightPanel) {
-
-        // Set Transfer Source
-        transferSourceDir = rightPanel->getCurrentDir();
-        // Set Transfer Target
-        transferTargetDir = leftPanel->getCurrentDir();
-
+    // Check Transfer Target
+    if (!transferTargetDir.endsWith("/")) {
+        // Adjust Transfer Target
+        transferTargetDir += "/";
     }
 
     // Check Selected Files Count
     if (selectedFiles.count() > 1) {
 
         // Set Transfer Dialog Source File Text
-        transferFileDialog->setSourceFileText(transferSourceDir);
+        transferFileDialog->setSourceFileText(transferSourceDir + "*", focusedPanel->getSearchResultsMode());
         // Set Transfer Dialog Target File Text
-        transferFileDialog->setTargetFileText(transferTargetDir);
+        transferFileDialog->setTargetFileText(transferTargetDir + "*", focusedPanel->getSearchResultsMode());
 
     } else if (selectedFiles.count() == 1) {
 
-        // Check Transfer Source
-        if (!transferSourceDir.endsWith("/")) {
-            // Adjust Transfer Source
-            transferSourceDir += "/";
-        }
-
-        // Check Transfer Target
-        if (!transferTargetDir.endsWith("/")) {
-            // Adjust Transfer Target
-            transferTargetDir += "/";
-        }
-
         // Set Transfer Dialog Source File Text
-        transferFileDialog->setSourceFileText(transferSourceDir + selectedFiles[0], true);
+        //transferFileDialog->setSourceFileText(transferSourceDir + selectedFiles[0], focusedPanel->getSearchResultsMode());
+        transferFileDialog->setSourceFileText(selectedFiles[0], focusedPanel->getSearchResultsMode());
+
         // Set Transfer Dialog Target File Text
-        transferFileDialog->setTargetFileText(transferTargetDir + selectedFiles[0]);
+        //transferFileDialog->setTargetFileText(transferTargetDir + selectedFiles[0], focusedPanel->getSearchResultsMode());
+        transferFileDialog->setTargetFileText(transferTargetDir + QFileInfo(selectedFiles[0]).fileName(), focusedPanel->getSearchResultsMode());
 
     } else {
 
@@ -581,18 +572,89 @@ void MainWindow::launchTransfer(const QString& aOperation)
         TransferProgressDialog* newTransferProgressDialog = new TransferProgressDialog(aOperation);
         // Connect Closed Signal
         connect(newTransferProgressDialog, SIGNAL(dialogClosed(TransferProgressDialog*)), this, SLOT(transferProgressClosed(TransferProgressDialog*)), Qt::QueuedConnection);
-        // Add To Transfer Progress Dialog List
-        transferProgressDialogs << newTransferProgressDialog;
+
         // Init Copy Options
         int copyOptions = transferFileDialog->getCopyHidden() ? DEFAULT_COPY_OPTIONS_COPY_HIDDEN : 0;
 
-        // Check Selected Files Count
-        if (selectedFiles.count() == 1) {
-            // Launch Progress Dialog
-            newTransferProgressDialog->launch(transferFileDialog->getSourceFileText(), transferFileDialog->getTargetFileText(), copyOptions);
+        // Check If Source Changed
+        if (transferFileDialog->getSourceChanged() || transferFileDialog->getTargetChanged()) {
+
+            // Clear Selected Files
+            selectedFiles.clear();
+
+            // Get Transfer Source
+            QString sourceText = isPathRelative(transferFileDialog->getSourceFileText()) ? transferSourceDir + transferFileDialog->getSourceFileText() : transferFileDialog->getSourceFileText();
+            // Get Transfer Target
+            QString targetText = isPathRelative(transferFileDialog->getTargetFileText()) ? transferSourceDir + transferFileDialog->getTargetFileText() : transferFileDialog->getTargetFileText();
+
+            // Get Source Info
+            QFileInfo sourceInfo(sourceText);
+
+            // Check If Source File Exists
+            if (sourceInfo.exists()) {
+                // Launch Progress Dialog
+                newTransferProgressDialog->launch(sourceText, targetText, copyOptions);
+
+            } else {
+
+                // Get Target Info
+                //QFileInfo targetInfo(targetText);
+
+                // Split Source Elements
+                QStringList sourceElements = splitPath(sourceText);
+                // Split Target Elements
+                QStringList targetElements = splitPath(targetText);
+
+                // Update Transfer Source Dir
+                transferSourceDir = sourceElements[0];
+                // Update Transfer Target Dir
+                transferTargetDir = targetElements[0];
+
+                // Init Source Pattern
+                QString sourcePattern = sourceElements[1];
+                // Init Target Pattern
+                QString targetPattern = targetElements[1];
+
+                // Update Source Info
+                sourceInfo = QFileInfo(transferSourceDir);
+
+                // Check If Transfer Source Dir Exists
+                if (sourceInfo.isDir()) {
+
+                    // Add To Transfer Progress Dialog List
+                    transferProgressDialogs << newTransferProgressDialog;
+
+                    // Launch Progress Dialog
+                    newTransferProgressDialog->launch(transferSourceDir, transferTargetDir, sourcePattern, targetPattern, copyOptions);
+
+                } else {
+
+                    // Init Info Dialog
+                    InfoDialog infoDialog(tr(DEFAULT_WARNING_TEXT_INVALID_SOURCE), EIDTWarning);
+
+                    // Exec Info Dialog
+                    infoDialog.exec();
+
+                    // Delete New Progress Dialog
+                    delete newTransferProgressDialog;
+                    // REset Pointer
+                    newTransferProgressDialog = NULL;
+                }
+            }
+
         } else {
-            // Launch Progress Dialog
-            newTransferProgressDialog->launch(transferSourceDir, transferTargetDir, selectedFiles, copyOptions);
+
+            // Add To Transfer Progress Dialog List
+            transferProgressDialogs << newTransferProgressDialog;
+
+            // Check Selected Files Count
+            if (selectedFiles.count() == 1) {
+                // Launch Progress Dialog
+                newTransferProgressDialog->launch(transferFileDialog->getSourceFileText(), transferFileDialog->getTargetFileText(), copyOptions);
+            } else {
+                // Launch Progress Dialog
+                newTransferProgressDialog->launch(transferSourceDir, transferTargetDir, selectedFiles, copyOptions);
+            }
         }
 
         // Clear Selected Files

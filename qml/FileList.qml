@@ -19,15 +19,19 @@ Rectangle {
         id: fileListHeader
         width: parent.width
         height: Const.DEFAULT_FILE_LIST_HEADER_HEIGHT
+
         onRightClicked: {
-            console.log("fileListHeader.onRightClicked - posX: " + posX + " - posY: " + posY);
+            // Check If In Search Result Mode
+            if (!mainController.searchResultsMode) {
+                console.log("fileListHeader.onRightClicked - posX: " + posX + " - posY: " + posY);
 
-            // Set File List header Popup Pos
-            fileListHeaderPopup.x = Math.min(posX, fileListRoot.width - fileListHeaderPopup.width - 1);
-            fileListHeaderPopup.y = posY - 4;
+                // Set File List header Popup Pos
+                fileListHeaderPopup.x = Math.min(posX, fileListRoot.width - fileListHeaderPopup.width - 1);
+                fileListHeaderPopup.y = posY - 4;
 
-            // Show Header Popup
-            fileListHeaderPopup.showPopup();
+                // Show Header Popup
+                fileListHeaderPopup.showPopup();
+            }
         }
     }
 
@@ -604,6 +608,14 @@ Rectangle {
 
             // Show Renamer
             fileRenamer.showRenamer();
+        }
+
+        // On Search Result Mode Changed
+        onSearchResultsModeChanged: {
+            console.log("fileListRoot.Connections.mainController.onLaunchFileRename");
+
+            // Update File List Header Layout
+            updateFileListHeaderLayout();
         }
     }
 }

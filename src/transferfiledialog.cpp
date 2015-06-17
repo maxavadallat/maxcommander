@@ -124,9 +124,13 @@ int TransferFileDialog::exec()
 //==============================================================================
 void TransferFileDialog::sourceFileTextChanged(const QString& aText)
 {
-    qDebug() << "TransferFileDialog::sourceFileTextChanged - aText: " << aText;
+    // Check If Source Changed
+    if (!sourceChanged) {
+        qDebug() << "TransferFileDialog::sourceFileTextChanged - aText: " << aText;
 
-    // ...
+        // Set Source Changed
+        sourceChanged = true;
+    }
 }
 
 //==============================================================================
@@ -134,9 +138,13 @@ void TransferFileDialog::sourceFileTextChanged(const QString& aText)
 //==============================================================================
 void TransferFileDialog::targetFileTextChanged(const QString& aText)
 {
-    qDebug() << "TransferFileDialog::targetFileTextChanged - aText: " << aText;
+    // Check If Target Changed
+    if (!targetChanged) {
+        qDebug() << "TransferFileDialog::targetFileTextChanged - aText: " << aText;
 
-    // ...
+        // Set Target Changed
+        targetChanged = true;
+    }
 }
 
 //==============================================================================

@@ -319,6 +319,8 @@
 // File Select - File Name Pattern List
 #define DEFAULT_FILE_SELECT_FILE_NAME_PATTERN_LIST          ".selectfilename.list"
 
+#define DEFAULT_FILE_LIST_SIZE_BUNDLE                       "[BUNDLE]"
+#define DEFAULT_FILE_LIST_SIZE_DIR                          "[DIR]"
 
 
 
@@ -400,6 +402,10 @@
 
 #define DEFAULT_TITLE_SELECT_FONT                           "Select Font"
 
+#define DEFAULT_WARNING_TEXT_INVALID_SOURCE                 "Invalid Source"
+#define DEFAULT_WARNING_TEXT_INVALID_TARGET                 "Invalid Target"
+
+#define DEFAULT_FILE_PANEL_TITLE_SEARCH_RESULTS             "Search Results"
 
 
 #endif // CONSTANTS_H

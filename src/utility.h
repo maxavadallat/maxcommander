@@ -77,6 +77,15 @@ QRgb string2Rgb(const QString& aColor);
 // Formatted Size
 QString formattedSize(const qint64& aSize);
 
+// Is Path Relative
+bool isPathRelative(const QString& aPath);
+
+// Split Path & File Name
+QStringList splitPath(const QString& aPath);
+
+// Compare Files By Name
+int compareFileNames(const QFileInfo& aFileInfoA, const QFileInfo& aFileInfoB);
+
 
 #endif // UTILITY
 

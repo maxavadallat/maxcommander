@@ -199,6 +199,10 @@ private:
 
     // UI
     Ui::SearchDialog*       ui;
+    // Feed To List Button
+    QPushButton*            feedToListButton;
+    // Start Button
+    QPushButton*            startButton;
     // Remote File Util Client
     RemoteFileUtilClient*   fileUtil;
     // Search Result Model
@@ -230,9 +234,6 @@ private:
 
     // Results Visible
     bool                    resultsVisible;
-
-    // Start Button
-    QPushButton*            startButton;
 
     // Supported Image Formats
     QStringList             supportedImageFormats;
@@ -289,6 +290,9 @@ public:
     QString getItem(const int& aIndex);
     // Clear
     void clear();
+
+    // Get Search Results
+    QStringList& results();
 
     // Destructor
     virtual ~SearchResultModel();

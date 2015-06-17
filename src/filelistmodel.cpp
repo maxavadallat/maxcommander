@@ -19,6 +19,7 @@ FileListModelItem::FileListModelItem(const QString& aPath, const QString& aFileN
     : fileInfo(aPath + "/" + aFileName)
     , dirSize(0)
     , selected(false)
+    , searchResult(false)
 {
     // ...
 }
@@ -275,6 +276,77 @@ void FileListModel::sendUserResponse(const int& aConfirm, const QString& aNewPat
         // Send Confirm/Response
         fileUtil->sendUserResponse(aConfirm, aNewPath);
     }
+}
+
+//==============================================================================
+// Append Item Manually
+//==============================================================================
+void FileListModel::appendItem(const QString& aFilePath, const bool& aSearchResult)
+{
+    // Init File Info
+    QFileInfo fileInfo(aFilePath);
+
+    // Create New File List Item
+    FileListModelItem* newItem = new FileListModelItem(fileInfo.absolutePath(), fileInfo.fileName());
+    // Set Search Result
+    newItem->searchResult = aSearchResult;
+
+    // Begin Insert Row
+    beginInsertRows(QModelIndex(), rowCount(), rowCount());
+
+    // Add Item To Item List
+    itemList << newItem;
+
+    // End Insert Row
+    endInsertRows();
+
+    // Add File Name To File Name List
+    fileNameList << fileInfo.fileName();
+
+    // Emit Count Changed Signal
+    emit countChanged(itemList.count());
+
+}
+
+//==============================================================================
+// Add Item Name-Sorted Manually
+//==============================================================================
+void FileListModel::addItem(const QString& aFilePath, const bool& aSearchResult)
+{
+    // Init New File Info
+    QFileInfo newFileInfo(aFilePath);
+
+    // Create New File List Item
+    FileListModelItem* newItem = new FileListModelItem(newFileInfo.absolutePath(), newFileInfo.fileName());
+    // Set Search Result
+    newItem->searchResult = aSearchResult;
+
+    // Get Model Count
+    int ilCount = itemList.count();
+
+    // Init Insert Index
+    int insertIndex = 0;
+
+    // Find Insert Index
+    while (insertIndex < ilCount && compareFileNames(itemList[insertIndex]->fileInfo, newFileInfo) > 0 ) {
+        // Increase Insert Index
+        insertIndex++;
+    }
+
+    // Begin Insert Row
+    beginInsertRows(QModelIndex(), insertIndex, insertIndex);
+
+    // Insert New Item
+    itemList.insert(insertIndex, newItem);
+
+    // End Insert Row
+    endInsertRows();
+
+    // Add File Name To File Name List
+    fileNameList << newFileInfo.fileName();
+
+    // Emit Count Changed Signal
+    emit countChanged(itemList.count());
 }
 
 //==============================================================================
@@ -568,7 +640,8 @@ QStringList FileListModel::getAllSelected()
         // Check Selected
         if (itemList[i]->selected && itemList[i]->fileInfo.fileName() != "." && itemList[i]->fileInfo.fileName() != "..") {
             // Add File Name To Result
-            result << itemList[i]->fileInfo.fileName();
+            //result << itemList[i]->fileInfo.fileName();
+            result << itemList[i]->fileInfo.absoluteFilePath();
         }
     }
 
@@ -930,6 +1003,8 @@ QHash<int, QByteArray> FileListModel::roleNames() const
     roles[FilePerms]        = "filePerms";
     // File Selected
     roles[FileSelected]     = "fileIsSelected";
+    // File Search Result
+    roles[FileSearchResult] = "fileIsSearchResult";
     // File Is Hidden
     roles[FileIsHidden]     = "fileIsHidden";
     // File Is Link
@@ -977,6 +1052,11 @@ QVariant FileListModel::data(const QModelIndex& aIndex, int aRole) const
         // Switch Role
         switch (aRole) {
             case FileName: {
+                // Check If Search Result
+                if (item->searchResult) {
+                    return item->fileInfo.absoluteFilePath();
+                }
+
                 if (item->fileInfo.isSymLink()) {
                     return item->fileInfo.fileName() + " -> " + item->fileInfo.symLinkTarget();
                 }
@@ -1022,12 +1102,12 @@ QVariant FileListModel::data(const QModelIndex& aIndex, int aRole) const
             case FileSize: {
                 // Check File Info
                 if (item->fileInfo.isBundle()) {
-                    return QString("[BUNDLE]");
+                    return QString(DEFAULT_FILE_LIST_SIZE_BUNDLE);
                 }
 
                 // Check File Info
                 if (item->fileInfo.isDir()) {
-                    return QString("[DIR]");
+                    return QString(DEFAULT_FILE_LIST_SIZE_DIR);
                 }
 
                 //return item->fileInfo.size();
@@ -1070,6 +1150,7 @@ QVariant FileListModel::data(const QModelIndex& aIndex, int aRole) const
                 //return (int)item->fileInfo.permissions();
             } break;
             case FileSelected:      return item->selected;
+            case FileSearchResult:  return item->searchResult;
             case FileFullName:      return item->fileInfo.fileName();
             case FileIsHidden:      return (item->fileInfo.fileName() == QString("..") ? false : item->fileInfo.isHidden());
             case FileIsLink:        return item->fileInfo.isSymLink();

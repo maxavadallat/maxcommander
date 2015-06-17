@@ -74,6 +74,7 @@ FilePanel::FilePanel(QWidget* aParent)
     , fileDeleteUpdate(false)
     , dirScanner(NULL)
     , loading(false)
+    , searchResultsMode(false)
 {
     // Setup UI
     ui->setupUi(this);
@@ -197,6 +198,9 @@ void FilePanel::setCurrentDir(const QString& aCurrentDir, const QString& aLastFi
         // Set Current Dir
         currentDir = aCurrentDir;
 
+        // Set Text
+        ui->currDirLabel->setText(currentDir);
+
         // Reset Current Index
         setCurrentIndex(-1);
 
@@ -216,9 +220,6 @@ void FilePanel::setCurrentDir(const QString& aCurrentDir, const QString& aLastFi
 
         // ...
 
-        // Set Text
-        ui->currDirLabel->setText(currentDir);
-
         // Emit Current dir Changed Signal
         emit currentDirChanged(currentDir);
 
@@ -232,6 +233,9 @@ void FilePanel::setCurrentDir(const QString& aCurrentDir, const QString& aLastFi
             setCurrentIndex(lastFileIndex);
         }
     }
+
+    // Reset Search Result Mode
+    setSearchResultsMode(false);
 }
 
 //==============================================================================
@@ -838,6 +842,66 @@ void FilePanel::setFileRenameActive(const bool& aFileRenameActive)
 int FilePanel::getModifierKeys()
 {
     return modifierKeys;
+}
+
+//==============================================================================
+// Feed Search Result List
+//==============================================================================
+void FilePanel::feedSearchResults(const QStringList& aSearchResults)
+{
+    // Check File List Model
+    if (fileListModel) {
+        qDebug() << "FilePanel::feedSearchResults - aSearchResults: " << aSearchResults.count();
+
+        // Clear Model
+        fileListModel->clear();
+
+        // Set Search Resulst Mode
+        setSearchResultsMode(true);
+
+        // Get Search Results Count
+        int srCount = aSearchResults.count();
+
+        // Add Items
+        for (int i=0; i<srCount; ++i) {
+            // Add Item
+            fileListModel->addItem(aSearchResults[i], true);
+        }
+    }
+
+    // Set Current Index
+    setCurrentIndex(0);
+}
+
+//==============================================================================
+// Get Search REsults Mode
+//==============================================================================
+bool FilePanel::getSearchResultsMode()
+{
+    return searchResultsMode;
+}
+
+//==============================================================================
+// Set Search REsults Mode
+//==============================================================================
+void FilePanel::setSearchResultsMode(const bool& aSearchResultMode)
+{
+    // Cehck Search Results Mode
+    if (searchResultsMode != aSearchResultMode) {
+        // Set Search Results Mode
+        searchResultsMode = aSearchResultMode;
+        // Emit Signal
+        emit searchResultsModeChanged(searchResultsMode);
+
+        // Check Search Result Mode
+        if (searchResultsMode) {
+            // Set Current Dir Label Text
+            ui->currDirLabel->setText(tr(DEFAULT_FILE_PANEL_TITLE_SEARCH_RESULTS));
+        } else {
+            // Set Current Dir Label Text
+            ui->currDirLabel->setText(currentDir);
+        }
+    }
 }
 
 //==============================================================================
@@ -2325,8 +2389,16 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
 
             case Qt::Key_Backspace:
             case Qt::Key_Left:
-                // Go Up
-                goUp();
+                // Check If Search Results Mode On
+                if (searchResultsMode) {
+                    // Reset Search REsult Mode
+                    setSearchResultsMode(false);
+                    // Reload
+                    reload();
+                } else {
+                    // Go Up
+                    goUp();
+                }
             break;
 
             case Qt::Key_Right:
@@ -2362,6 +2434,22 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
             case Qt::Key_End:
                 // Go Last
                 goLast();
+            break;
+
+            case Qt::Key_QuoteLeft:
+                // Check Modifier Keys
+                if (modifierKeys == Qt::NoModifier) {
+                    // Goto Home
+                    gotoHome();
+                }
+            break;
+
+            case Qt::Key_Slash:
+                // Check Modifier Keys
+                if (modifierKeys == Qt::NoModifier) {
+                    // Go To Root
+                    gotoRoot();
+                }
             break;
 
             case Qt::Key_Plus:

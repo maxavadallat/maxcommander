@@ -60,6 +60,8 @@ class FilePanel : public QFrame
     Q_PROPERTY(bool fileRenameActive READ getFileRenameActive WRITE setFileRenameActive NOTIFY fileRenameActiveChanged)
     Q_PROPERTY(int modifierKeys READ getModifierKeys NOTIFY modifierKeysChanged)
 
+    Q_PROPERTY(bool searchResultsMode READ getSearchResultsMode WRITE setSearchResultsMode NOTIFY searchResultsModeChanged)
+
 public:
     // Constructor
     explicit FilePanel(QWidget* aParent = NULL);
@@ -191,6 +193,14 @@ public:
 
     // Get Modifier Keys
     int getModifierKeys();
+
+    // Feed Search Result List
+    void feedSearchResults(const QStringList& aSearchResults);
+
+    // Get Search REsults Mode
+    bool getSearchResultsMode();
+    // Set Search REsults Mode
+    void setSearchResultsMode(const bool& aSearchResultMode);
 
     // Destructor
     virtual ~FilePanel();
@@ -351,6 +361,9 @@ signals:
 
     // File Rename Active Changed Signal
     void fileRenameActiveChanged(const bool& aActive);
+
+    // Search Results Mode Changed Signal
+    void searchResultsModeChanged(const bool& aSearchResultsMode);
 
 protected slots:
 
@@ -578,6 +591,9 @@ private:
 
     // Loading State Indicator
     bool                    loading;
+
+    // Search Result Mode
+    bool                    searchResultsMode;
 };
 
 

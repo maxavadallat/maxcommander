@@ -24,6 +24,8 @@ public:
     quint64         dirSize;
     // Selected
     bool            selected;
+    // Search Result
+    bool            searchResult;
 };
 
 
@@ -99,6 +101,12 @@ public:
 
     // Send User Response
     void sendUserResponse(const int& aConfirm, const QString& aNewPath = "");
+
+    // Append Item Manually
+    void appendItem(const QString& aFilePath, const bool& aSearchResult = false);
+
+    // Add Item Name-Sorted Manually
+    void addItem(const QString& aFilePath, const bool& aSearchResult = false);
 
     // Destructor
     virtual ~FileListModel();
@@ -264,6 +272,7 @@ protected:
         FileOwner,
         FilePerms,
         FileSelected,
+        FileSearchResult,
         FileIsHidden,
         FileIsLink,
         FileIsDir,

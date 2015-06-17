@@ -82,6 +82,8 @@ public:
     // Launch Progress Dialog
     void launch(const QString& aSourcePath, const QString& aTargetPath, const QStringList& aSelectedFiles, const int& aOptions = 0);
     // Launch Progress Dialog
+    void launch(const QString& aSourcePath, const QString& aTargetPath, const QString& aSourcePattern = "*.*", const QString& aTargetPattern = "", const int& aOptions = 0);
+    // Launch Progress Dialog
     void launch(const QString& aSource, const QString& aTarget, const int& aOptions = 0);
 
     // Suspend
@@ -109,6 +111,8 @@ protected slots:
 
     // Build Queue
     bool buildQueue(const QString& aSourcePath, const QString& aTargetPath, const QStringList& aSelectedFiles);
+    // Build Queue
+    bool buildQueue(const QString& aSourcePath, const QString& aTargetPath, const QString& aSourcePattern, const QString& aTargetPattern);
     // Process Queue
     void processQueue();
     // Clear Queue
@@ -206,6 +210,11 @@ protected slots: // For RemoteFileUtilClient
                               const QString& aSource,
                               const QString& aTarget);
 
+    // Dir List Item Found Slot
+    void dirListItemFound(const unsigned int& aID,
+                          const QString& aPath,
+                          const QString& aFileName);
+
 protected slots: // For QDialogButtonBox
 
     // Button Box Accepted Slot
@@ -256,6 +265,12 @@ private:
     QString                         targetPath;
     // Options
     int                             options;
+    // Source Pattern
+    QString                         sourcePattern;
+    // Target Pattern
+    QString                         targetPattern;
+    // Need To Build Queue
+    bool                            needQueue;
 
     // Name Label Text
     QString                         nameLabelText;

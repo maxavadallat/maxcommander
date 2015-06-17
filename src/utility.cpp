@@ -592,8 +592,59 @@ QString formattedSize(const qint64& aSize)
     return result;
 }
 
+//==============================================================================
+// Is Path Relative
+//==============================================================================
+bool isPathRelative(const QString& aPath)
+{
+    if (aPath.startsWith("/")) {
+        return false;
+    }
 
+    return true;
+}
 
+//==============================================================================
+// Split Path & File Name
+//==============================================================================
+QStringList splitPath(const QString& aPath)
+{
+    // Init Result
+    QStringList result;
+    // Get Last Index Of Slash
+    int lastSlashIndex = aPath.lastIndexOf("/");
+
+    // Check Last Index Of Slash
+    if (lastSlashIndex == -1) {
+
+        result << aPath;
+
+        return result;
+    }
+
+    // Add Path
+    result << aPath.left(lastSlashIndex + 1);
+
+    // Add File/Pattern
+    result << aPath.right(aPath.length() - lastSlashIndex - 1);
+
+    return result;
+}
+
+//==============================================================================
+// Compare Files By Name
+//==============================================================================
+int compareFileNames(const QFileInfo& aFileInfoA, const QFileInfo& aFileInfoB)
+{
+    // Check File  Infos
+    if (aFileInfoA.isDir() && !aFileInfoB.isDir())
+        return 1;
+
+    if (!aFileInfoA.isDir() && aFileInfoB.isDir())
+        return -1;
+
+    return qstricmp(aFileInfoB.absoluteFilePath().toLocal8Bit().data(), aFileInfoA.absoluteFilePath().toLocal8Bit().data());
+}
 
 
 

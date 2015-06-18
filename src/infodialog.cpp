@@ -1,4 +1,5 @@
-#include "src/infodialog.h"
+
+#include "infodialog.h"
 #include "ui_infodialog.h"
 #include "constants.h"
 
@@ -38,21 +39,21 @@ void InfoDialog::setType(const EInfoDialogType& aType)
             // Set Title
             setWindowTitle(tr(DEFAULT_TITLE_INFO));
             // Set Pixmap
-            ui->iconLabel->setPixmap(QPixmap(":/resources/images/info.png"));
+            ui->iconLabel->setPixmap(QPixmap(DEFAULT_ICON_INFO));
         break;
 
         case EIDTWarning:
             // Set Title
             setWindowTitle(tr(DEFAULT_TITLE_WARNING));
             // Set Pixmap
-            ui->iconLabel->setPixmap(QPixmap(":/resources/images/warning.png"));
+            ui->iconLabel->setPixmap(QPixmap(DEFAULT_ICON_WARNING));
         break;
 
         case EIDTError:
             // Set Title
             setWindowTitle(tr(DEFAULT_TITLE_ERROR));
             // Set Pixmap
-            ui->iconLabel->setPixmap(QPixmap(":/resources/images/error.png"));
+            ui->iconLabel->setPixmap(QPixmap(DEFAULT_ICON_ERROR));
         break;
     }
 }

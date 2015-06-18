@@ -31,7 +31,7 @@ void FileListWidget::startDragTimer()
 {
     // Check Timer ID
     if (dragTimerID == -1) {
-        qDebug() << "FileListWidget::startDragTimer";
+        //qDebug() << "FileListWidget::startDragTimer";
         // Start Timer
         dragTimerID = startTimer(DEFAULT_ONE_SEC * 0.7);
     }
@@ -44,7 +44,7 @@ void FileListWidget::stopDragTimer()
 {
     // Check Timer ID
     if (dragTimerID != -1) {
-        qDebug() << "FileListWidget::stopDragTimer";
+        //qDebug() << "FileListWidget::stopDragTimer";
         // Kill Timer
         killTimer(dragTimerID);
         // Reset Timer ID

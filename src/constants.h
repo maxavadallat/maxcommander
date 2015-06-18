@@ -220,7 +220,7 @@
 #define DEFAULT_ICOM_GET_RETRY_COUNT_MAX                    5
 
 // Default Root Shell Command Template
-#define DEFAULT_ROOT_SHELL_COMMAND_TEMPLATE                 "echo \"%1\" | sudo -S %2 &"
+#define DEFAULT_ROOT_SHELL_COMMAND_TEMPLATE                 "echo \"%1\" | sudo -S \"%2\" &"
 
 // Default PS Command Line To Check If File Serverr Is Running
 #define DEFAULT_PS_COMMAND_CHECK_FILESERVER                 "ps x"
@@ -304,23 +304,37 @@
 
 // Default Icons
 #define DEFAULT_FILE_ICON_FILE                              ":/resources/images/icons/default_file.png"
-//#define DEFAULT_FILE_ICON_DIR                               ":/resources/images/icons/default_folder.png"
 #define DEFAULT_FILE_ICON_DIR                               ":/resources/images/icons/default_folder_yellow.png"
 
 
 // Default Permissions
 #define DEFAULT_PERMISSIONS_TEXT                            "----------"
 
-// Select Files Title
-#define DEFAULT_TITLE_SELECT_FILES                          "Select Files"
-// Deselect Files Title
-#define DEFAULT_TITLE_DESELECT_FILES                        "Deselect Files"
-
 // File Select - File Name Pattern List
 #define DEFAULT_FILE_SELECT_FILE_NAME_PATTERN_LIST          ".selectfilename.list"
 
 #define DEFAULT_FILE_LIST_SIZE_BUNDLE                       "[BUNDLE]"
 #define DEFAULT_FILE_LIST_SIZE_DIR                          "[DIR]"
+
+#define DEFAULT_ICON_INFO                                   ":/resources/images/info.png"
+#define DEFAULT_ICON_WARNING                                ":/resources/images/warning.png"
+#define DEFAULT_ICON_ERROR                                  ":/resources/images/error.png"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -397,6 +411,11 @@
 
 #define DEFAULT_TITLE_SELECT_LINK_TARGET                    "Select Link Target"
 
+
+#define DEFAULT_TITLE_SELECT_FILES                          "Select Files"
+#define DEFAULT_TITLE_DESELECT_FILES                        "Deselect Files"
+
+
 #define DEFAULT_TITLE_FILE_MODIFIED                         "File Modified"
 #define DEFAULT_CONFIRM_TEXT_SAVE_CHANGES                   "Save Changes?"
 
@@ -406,6 +425,16 @@
 #define DEFAULT_WARNING_TEXT_INVALID_TARGET                 "Invalid Target"
 
 #define DEFAULT_FILE_PANEL_TITLE_SEARCH_RESULTS             "Search Results"
+
+
+#define DEFAULT_HEADER_TITLE_OPERATION                      "Op"
+#define DEFAULT_HEADER_TITLE_FILENAME                       "File Name"
+#define DEFAULT_HEADER_TITLE_SOURCE                         "Source"
+#define DEFAULT_HEADER_TITLE_TARGET                         "Target"
+#define DEFAULT_HEADER_TITLE_DONE                           "Done"
+
+
+#define DEFAULT_INFO_TEXT_NO_MATCH_FOUND                    "No Matching File Found"
 
 
 #endif // CONSTANTS_H

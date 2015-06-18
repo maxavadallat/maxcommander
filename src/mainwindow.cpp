@@ -135,6 +135,9 @@ void MainWindow::init()
 
     // ...
 
+    connect(leftPanel, SIGNAL(showHelp()), this, SLOT(showHelp()));
+    connect(rightPanel, SIGNAL(showHelp()), this, SLOT(showHelp()));
+
     connect(leftPanel, SIGNAL(launchTerminal(QString)), this, SLOT(launchTerminal(QString)));
     connect(rightPanel, SIGNAL(launchTerminal(QString)), this, SLOT(launchTerminal(QString)));
 
@@ -324,7 +327,7 @@ void MainWindow::showHelp()
     }
 
     // Load Content
-    helpWindow->loadContent();
+    helpWindow->loadContent(QUrl("qrc:/resources/images/grumpy-cat.jpg"));
 
     // Show Help Window
     helpWindow->showWindow();
@@ -592,6 +595,7 @@ void MainWindow::launchTransfer(const QString& aOperation)
 
             // Check If Source File Exists
             if (sourceInfo.exists()) {
+
                 // Launch Progress Dialog
                 newTransferProgressDialog->launch(sourceText, targetText, copyOptions);
 
@@ -835,7 +839,7 @@ void MainWindow::launchDelete()
     // Check Selected File List
     if (selectedFileList.count() == 1) {
         // Setup Delete File Dialog
-        deleteFileDialog->setFileName(currDir + selectedFileList[0]);
+        deleteFileDialog->setFileName(selectedFileList[0]);
     } else {
         // Setup Delete File Dialog
         deleteFileDialog->setFileName(currDir);
@@ -848,15 +852,33 @@ void MainWindow::launchDelete()
 
         // Create Delete Progress Dialog
         DeleteProgressDialog* newDialog = new DeleteProgressDialog();
-
         // Connect Signal
         connect(newDialog, SIGNAL(dialogClosed(DeleteProgressDialog*)), this, SLOT(deleteProgressClosed(DeleteProgressDialog*)), Qt::QueuedConnection);
 
         // Add To Delete Progress Dialog List
         deleteProgressDialogs << newDialog;
 
-        // Launch
-        newDialog->launch(focusedPanel->getCurrentDir(), focusedPanel->getSelectedFiles());
+        // Check If File Name Changed
+        if (deleteFileDialog->getTextChanged()) {
+            // Get File Text
+            QString fileNameEditorText = isPathRelative(deleteFileDialog->getFileName()) ? currDir + deleteFileDialog->getFileName() : deleteFileDialog->getFileName();
+            // Init File Info
+            QFileInfo fileInfo(fileNameEditorText);
+
+            // Check If File Exists
+            if (fileInfo.exists()) {
+                // Launch
+                newDialog->launch(focusedPanel->getCurrentDir(), focusedPanel->getSelectedFiles());
+            } else {
+                // Get Path Elements
+                QStringList pathElements = splitPath(fileNameEditorText);
+                // Launch
+                newDialog->launch(pathElements[0], pathElements[1]);
+            }
+        } else {
+            // Launch
+            newDialog->launch(focusedPanel->getCurrentDir(), focusedPanel->getSelectedFiles());
+        }
 
         // Clear Selected Files
         focusedPanel->deselectAllFiles();
@@ -1382,13 +1404,13 @@ void MainWindow::transferProgressClosed(TransferProgressDialog* aTransferProgres
                 // Check Left Panel
                 if (leftPanel /*&& (leftPanel->dwDirChanged || leftPanel->dwFileChanged)*/) {
                     // Check Source Path
-                    if (dialog->targetPath == leftPanel->currentDir) {
+                    if (QDir(dialog->targetPath) == QDir(leftPanel->currentDir)) {
                         // Set Last File Name
                         leftPanel->lastFileName = QFileInfo(dialog->getLastTarget()).fileName();
                         // Try To Find Lat Item File Name & Reload
                         leftPanel->reload();
 
-                    } else if (dialog->operation == DEFAULT_OPERATION_MOVE_FILE && dialog->sourcePath == leftPanel->currentDir) {
+                    } else if (dialog->operation == DEFAULT_OPERATION_MOVE_FILE && QDir(dialog->sourcePath) == QDir(leftPanel->currentDir)) {
                         // Reload
                         leftPanel->reload(leftPanel->currentIndex);
                     }
@@ -1397,13 +1419,13 @@ void MainWindow::transferProgressClosed(TransferProgressDialog* aTransferProgres
                 // Check Right Panel
                 if (rightPanel /*&& (rightPanel->dwDirChanged || rightPanel->dwFileChanged)*/) {
                     // Check Dialog Target Path
-                    if (dialog->targetPath == rightPanel->currentDir) {
+                    if (QDir(dialog->targetPath) == QDir(rightPanel->currentDir)) {
                         // Set Last Target File Name
                         rightPanel->lastFileName = QFileInfo(dialog->getLastTarget()).fileName();
                         // Reload
                         rightPanel->reload();
 
-                    } else if (dialog->operation == DEFAULT_OPERATION_MOVE_FILE && dialog->sourcePath == rightPanel->currentDir) {
+                    } else if (dialog->operation == DEFAULT_OPERATION_MOVE_FILE && QDir(dialog->sourcePath) == QDir(rightPanel->currentDir)) {
                         // Reload
                         rightPanel->reload(rightPanel->currentIndex);
                     }

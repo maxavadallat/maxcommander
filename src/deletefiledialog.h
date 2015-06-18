@@ -21,13 +21,27 @@ public:
     QString getFileName();
     // Set File Name
     void setFileName(const QString& aFileName);
+    // Exec
+    virtual int exec();
+    // Get Editor Text Changed
+    bool getTextChanged();
     // Destructor
     virtual ~DeleteFileDialog();
+
+protected slots:
+
+    // File Name Editor Text Changed
+    void fileNameEditorTextChanged(const QString& aNewText);
 
 private:
 
     // UI
     Ui::DeleteFileDialog*   ui;
+
+    // Editor Text Changed
+    bool                    editorTextChanged;
 };
 
 #endif // DELETEFILEDIALOG_H
+
+

@@ -74,6 +74,8 @@ public:
 
     // Launch Progress Dialog
     void launch(const QString& aDirPath, const QStringList& aSelectedFiles);
+    // Launch Progress Dialog
+    void launch(const QString& aDirPath, const QString& aPattern);
     // Get Dir Path
     QString getDirPath();
 
@@ -186,6 +188,11 @@ protected slots: // for RemoteFileUtilClient
                               const QString& aSource,
                               const QString& aTarget);
 
+    // Dir List Item Found Slot
+    void dirListItemFound(const unsigned int& aID,
+                          const QString& aPath,
+                          const QString& aFileName);
+
 protected slots: // For QDialogButtonBox
 
     // Button Box Accepted Slot
@@ -227,6 +234,10 @@ private:
     int                         queueIndex;
     // Dir Path
     QString                     dirPath;
+    // Selection Pattern
+    QString                     pattern;
+    // Need Queue
+    bool                        needQueue;
 
     // Progress Refresh Timer ID
     int                         progressRefreshTimerID;

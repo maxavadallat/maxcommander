@@ -86,6 +86,8 @@ QStringList splitPath(const QString& aPath);
 // Compare Files By Name
 int compareFileNames(const QFileInfo& aFileInfoA, const QFileInfo& aFileInfoB);
 
+// Apply File name Pattern
+QString applyPattern(const QString& aSourceFileName, const QString& aPattern);
 
 #endif // UTILITY
 

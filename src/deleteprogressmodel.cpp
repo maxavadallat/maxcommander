@@ -1,6 +1,7 @@
 #include <QDebug>
 
 #include "deleteprogressmodel.h"
+#include "constants.h"
 
 
 //==============================================================================
@@ -32,7 +33,7 @@ DeleteProgressModelItem::~DeleteProgressModelItem()
 DeleteProgressModel::DeleteProgressModel(QObject* aParent)
     : QAbstractListModel(aParent)
 {
-    qDebug() << "DeleteProgressModel::DeleteProgressModel";
+    //qDebug() << "DeleteProgressModel::DeleteProgressModel";
 
     // Init
     init();
@@ -43,7 +44,7 @@ DeleteProgressModel::DeleteProgressModel(QObject* aParent)
 //==============================================================================
 void DeleteProgressModel::init()
 {
-    qDebug() << "DeleteProgressModel::init";
+    //qDebug() << "DeleteProgressModel::init";
 
     // ...
 }
@@ -290,8 +291,8 @@ QVariant DeleteProgressModel::headerData(int aSection, Qt::Orientation aOrientat
     if (aOrientation == Qt::Horizontal && aRole == Qt::DisplayRole) {
         // Switch Section
         switch (aSection) {
-            case 0: return tr("File Name");
-            case 1: return tr("Done");
+            case 0: return tr(DEFAULT_HEADER_TITLE_FILENAME);
+            case 1: return tr(DEFAULT_HEADER_TITLE_DONE);
 
             default:
             break;
@@ -318,7 +319,7 @@ Qt::ItemFlags DeleteProgressModel::flags(const QModelIndex& aIndex) const
 //==============================================================================
 void DeleteProgressModel::clear()
 {
-    qDebug() << "DeleteProgressModel::clear";
+    //qDebug() << "DeleteProgressModel::clear";
 
     // Begin Reset Model
     beginResetModel();
@@ -341,6 +342,6 @@ DeleteProgressModel::~DeleteProgressModel()
     // Clear
     clear();
 
-    qDebug() << "DeleteProgressModel::~DeleteProgressModel";
+    //qDebug() << "DeleteProgressModel::~DeleteProgressModel";
 }
 

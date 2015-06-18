@@ -249,7 +249,6 @@ void TransferProgressDialog::launch(const QString& aSourcePath, const QString& a
 
     // Build Queue
     if (buildQueue(aSourcePath, aTargetPath, aSelectedFiles)) {
-/*
         // Set Queue Index
         queueIndex = 0;
 
@@ -266,7 +265,6 @@ void TransferProgressDialog::launch(const QString& aSourcePath, const QString& a
                 QTimer::singleShot(1, this, SLOT(processQueue()));
             }
         }
-*/
     } else {
         // Reset Queue Index
         queueIndex = -1;
@@ -295,7 +293,7 @@ void TransferProgressDialog::launch(const QString& aSourcePath, const QString& a
     restoreUI();
     // Show
     show();
-/*
+
     // Check File Util Client
     if (fileUtil) {
         // Check If Connected
@@ -311,7 +309,6 @@ void TransferProgressDialog::launch(const QString& aSourcePath, const QString& a
             buildQueue(sourcePath, targetPath, sourcePattern, targetPattern);
         }
     }
-*/
 }
 
 //==============================================================================
@@ -403,7 +400,7 @@ void TransferProgressDialog::launch(const QString& aSource, const QString& aTarg
                 // Clear Options
                 fileUtil->clearFileTransferOptions();
                 // Process Queue
-                //QTimer::singleShot(1, this, SLOT(processQueue()));
+                QTimer::singleShot(1, this, SLOT(processQueue()));
             }
         }
     } else {
@@ -943,7 +940,7 @@ void TransferProgressDialog::clientConnectionChanged(const unsigned int& aID, co
             buildQueue(sourcePath, targetPath, sourcePattern, targetPattern);
         } else {
             // Process Queue
-            //QTimer::singleShot(1, this, SLOT(processQueue()));
+            QTimer::singleShot(1, this, SLOT(processQueue()));
         }
     }
 }
@@ -1434,12 +1431,38 @@ void TransferProgressDialog::dirListItemFound(const unsigned int& aID,
         // Init Dir
         QDir dir(sourcePath);
 
-        // Init File Info
-        QFileInfo fileInfo(QString("%1%2").arg(!aPath.endsWith("/") ? (aPath + "/") : aPath).arg(aFileName));
+        // Init Source File Info
+        QFileInfo sourceInfo(QString("%1%2").arg(!aPath.endsWith("/") ? (aPath + "/") : aPath).arg(aFileName));
 
         // Check If Matches Pattern
-        if (dir.match(sourcePattern, fileInfo.fileName())) {
+        if (dir.match(sourcePattern, sourceInfo.fileName())) {
+            // Get Target File Name
+            QString targetFileName = applyPattern(sourceInfo.fileName(), targetPattern);
+            // Check Target File Name
+            if (targetFileName.isEmpty()) {
+                // No Valid Target File Name
+                return;
+            }
 
+            // Init Target File Path
+            QString targetFilePath = targetPath;
+
+            // Check Target File Name
+            if (!targetFilePath.endsWith("/")) {
+                // Adjust Target File Name
+                targetFilePath += "/";
+            }
+
+            // Add Item To Queue
+            queueModel->addItem(operation, sourceInfo.absoluteFilePath(), targetFilePath + targetFileName);
+
+            // Check If Is Dir
+            if (!sourceInfo.isDir() && !sourceInfo.isBundle() && !sourceInfo.isSymLink()) {
+                // Add Size To Overall Size
+                overallSize += sourceInfo.size();
+                // Configure Overall Progress Bar
+                configureOverallProgressBar(overallSize);
+            }
 
         }
     }

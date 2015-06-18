@@ -18,6 +18,7 @@
         <file>resources/images/icons/link_overlay.png</file>
         <file>resources/images/icons/default_folder_dark.png</file>
         <file>resources/images/icons/default_folder_yellow.png</file>
+        <file>resources/images/grumpy-cat.jpg</file>
     </qresource>
 </RCC>
 

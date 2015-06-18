@@ -11,7 +11,8 @@ Rectangle {
 
     color: "black"
 
-    Image {
+    // Preview Image
+    AnimatedImage {
         id: previewImage
         anchors.fill: parent
         source: Const.DEFAULT_FILE_PREFIX + viewerContent

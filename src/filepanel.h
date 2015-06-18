@@ -634,6 +634,8 @@ signals:
 
     // Renamer Finished Signal
     void finished(const QString& aSource, const QString& aTarget);
+    // Renamer Aborted Signal
+    void aborted(const QString& aSource, const QString& aTarget);
 
 protected slots:
 

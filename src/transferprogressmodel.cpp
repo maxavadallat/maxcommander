@@ -1,7 +1,7 @@
 #include <QDebug>
 
 #include "transferprogressmodel.h"
-
+#include "constants.h"
 
 
 //==============================================================================
@@ -13,7 +13,6 @@ TransferProgressModelItem::TransferProgressModelItem(const QString& aOp, const Q
     , target(aTarget)
     , state(ETPIdle)
 {
-
 }
 
 //==============================================================================
@@ -21,7 +20,6 @@ TransferProgressModelItem::TransferProgressModelItem(const QString& aOp, const Q
 //==============================================================================
 TransferProgressModelItem::~TransferProgressModelItem()
 {
-
 }
 
 
@@ -36,7 +34,7 @@ TransferProgressModelItem::~TransferProgressModelItem()
 TransferProgressModel::TransferProgressModel(QObject* aParent)
     : QAbstractListModel(aParent)
 {
-    qDebug() << "TransferProgressModel::TransferProgressModel";
+    //qDebug() << "TransferProgressModel::TransferProgressModel";
 
     // Init
     init();
@@ -47,7 +45,7 @@ TransferProgressModel::TransferProgressModel(QObject* aParent)
 //==============================================================================
 void TransferProgressModel::init()
 {
-    qDebug() << "TransferProgressModel::init";
+    //qDebug() << "TransferProgressModel::init";
 
 }
 
@@ -109,7 +107,7 @@ void TransferProgressModel::removeItem(const int& aIndex)
 {
     // Check Index
     if (aIndex >=0 && aIndex < rowCount()) {
-        qDebug() << "TransferProgressModel::removeItem - aIndex: " << aIndex;
+        //qDebug() << "TransferProgressModel::removeItem - aIndex: " << aIndex;
         // Begin REmove Rows
         beginRemoveRows(QModelIndex(), aIndex, aIndex);
         // Delete Item
@@ -349,10 +347,10 @@ QVariant TransferProgressModel::headerData(int aSection, Qt::Orientation aOrient
     if (aOrientation == Qt::Horizontal && aRole == Qt::DisplayRole) {
         // Switch Section
         switch (aSection) {
-            case 0: return tr("Op");
-            case 1: return tr("Source");
-            case 2: return tr("Target");
-            case 3: return tr("Done");
+            case 0: return tr(DEFAULT_HEADER_TITLE_OPERATION);
+            case 1: return tr(DEFAULT_HEADER_TITLE_SOURCE);
+            case 2: return tr(DEFAULT_HEADER_TITLE_TARGET);
+            case 3: return tr(DEFAULT_HEADER_TITLE_DONE);
 
             default:
             break;
@@ -380,7 +378,7 @@ Qt::ItemFlags TransferProgressModel::flags(const QModelIndex& aIndex) const
 //==============================================================================
 void TransferProgressModel::clear()
 {
-    qDebug() << "TransferProgressModel::clear";
+    //qDebug() << "TransferProgressModel::clear";
 
     // Begin Reset Model
     beginResetModel();
@@ -404,6 +402,6 @@ TransferProgressModel::~TransferProgressModel()
     // Clear
     clear();
 
-    qDebug() << "TransferProgressModel::~TransferProgressModel";
+    //qDebug() << "TransferProgressModel::~TransferProgressModel";
 }
 

@@ -1,4 +1,5 @@
 #include <QSettings>
+#include <QKeyEvent>
 #include <QDebug>
 
 #include "helpwindow.h"
@@ -23,7 +24,7 @@ void HelpWindow::loadContent(const QUrl& aURL)
     // Check URL
     if (!aURL.isEmpty()) {
         // Set URL
-        ui->webView->setUrl(aURL);
+        ui->webView->load(aURL);
     }
 }
 
@@ -69,6 +70,38 @@ void HelpWindow::saveSettings()
     QSettings settings;
 
     // ...
+}
+
+//==============================================================================
+// Key Press Event
+//==============================================================================
+void HelpWindow::keyPressEvent(QKeyEvent* aEvent)
+{
+    QWidget::keyPressEvent(aEvent);
+
+    // ...
+}
+
+//==============================================================================
+// Key Release Event
+//==============================================================================
+void HelpWindow::keyReleaseEvent(QKeyEvent* aEvent)
+{
+    QWidget::keyReleaseEvent(aEvent);
+
+    // Check Event
+    if (aEvent) {
+        // Switch Key
+        switch (aEvent->key()) {
+            case Qt::Key_Escape:
+                // Close
+                close();
+            break;
+
+            default:
+            break;
+        }
+    }
 }
 
 //==============================================================================

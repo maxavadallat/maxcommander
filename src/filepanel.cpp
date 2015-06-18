@@ -1048,12 +1048,15 @@ QStringList FilePanel::getSelectedFiles()
 
         // Check Result
         if (result.count() <= 0) {
+            // Get Current File Info
+            QFileInfo currentInfo = fileListModel->getFileInfo(currentIndex);
             // Get Current File Name
-            QString fileName = fileListModel->getFileInfo(currentIndex).fileName();
+            QString fileName = currentInfo.fileName();
             // Check Current File Name
             if (fileName != "." && fileName != "..") {
                 // Add Current File
-                result << fileName;
+                //result << fileName;
+                result << currentInfo.absoluteFilePath();
             }
         }
 
@@ -2977,6 +2980,14 @@ void FileRenamer::fileOpAborted(const unsigned int& aID,
     Q_UNUSED(aPath);
 
     qDebug() << "FileRenamer::fileOpAborted - aID: " << aID << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget;
+
+    // Check Queue Index
+    if (queueIndex != -1) {
+        // Clear Queue
+        clearQueue();
+        // Reset Queue Index
+        queueIndex = -1;
+    }
 
     // ...
 

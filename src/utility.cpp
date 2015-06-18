@@ -646,6 +646,39 @@ int compareFileNames(const QFileInfo& aFileInfoA, const QFileInfo& aFileInfoB)
     return qstricmp(aFileInfoB.absoluteFilePath().toLocal8Bit().data(), aFileInfoA.absoluteFilePath().toLocal8Bit().data());
 }
 
+//==============================================================================
+// Apply File name Pattern
+//==============================================================================
+QString applyPattern(const QString& aSourceFileName, const QString& aPattern)
+{
+    // Check Pattern
+    if (aPattern == QString("*") || (aPattern.indexOf("*.*") >= 0) || aPattern.isEmpty() || aPattern.isNull()) {
+        return aSourceFileName;
+    }
+
+    // Check Pattern
+    if (aPattern.startsWith("*.")) {
+        return QString("%1.%2").arg(getFileNameFromFullName(aSourceFileName)).arg(getExtensionFromFullName(aPattern));
+    }
+
+    // Check Pattern
+    if (aPattern.endsWith(".*")) {
+        return QString("%1.%2").arg(getFileNameFromFullName(aPattern)).arg(getExtensionFromFullName(aSourceFileName));
+    }
+
+    // ...
+
+    return "";
+}
+
+
+
+
+
+
+
+
+
 
 
 

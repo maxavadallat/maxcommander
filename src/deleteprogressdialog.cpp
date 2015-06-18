@@ -1,12 +1,14 @@
 #include <QTimer>
 #include <QSettings>
 #include <QPainter>
+#include <QDir>
 #include <QDebug>
 
 #include <mcwinterface.h>
 
 #include "deleteprogressdialog.h"
 #include "deleteprogressmodel.h"
+#include "infodialog.h"
 #include "confirmdialog.h"
 #include "ui_deleteprogressdialog.h"
 #include "remotefileutilclient.h"
@@ -116,6 +118,7 @@ DeleteProgressDialog::DeleteProgressDialog(QWidget* aParent)
     , closeWhenFinished(false)
     , queueIndex(-1)
     , dirPath("")
+    , needQueue(false)
     , progressRefreshTimerID(-1)
 {
     qDebug() << "DeleteProgressDialog::DeleteProgressDialog";
@@ -160,6 +163,7 @@ void DeleteProgressDialog::init()
         connect(fileUtil, SIGNAL(fileOpSkipped(uint,QString,QString,QString,QString)), this, SLOT(fileOpSkipped(uint,QString,QString,QString,QString)));
         connect(fileUtil, SIGNAL(fileOpFinished(uint,QString,QString,QString,QString)), this, SLOT(fileOpFinished(uint,QString,QString,QString,QString)));
         connect(fileUtil, SIGNAL(fileOpQueueItemFound(uint,QString,QString,QString,QString)), this, SLOT(fileOpQueueItemFound(uint,QString,QString,QString,QString)));
+        connect(fileUtil, SIGNAL(dirListItemFound(uint,QString,QString)), this, SLOT(dirListItemFound(uint,QString,QString)));
     }
 
     // Connect To File Server
@@ -199,18 +203,10 @@ bool DeleteProgressDialog::buildQueue(const QString& aDirPath, const QStringList
 
     qDebug() << "DeleteProgressDialog::buildQueue - aDirPath: " << aDirPath << " - sfCount: " << sfCount;
 
-    // Init Local Path
-    QString localPath = aDirPath;
-    // Check Local Path
-    if (!localPath.endsWith("/")) {
-        // Adjust Local Path
-        localPath += "/";
-    }
-
     // Go Thru Selected Files
     for (int i=0; i<sfCount; ++i) {
         // Add To Queue Model
-        queueModel->addItem(localPath + aSelectedFiles[i]);
+        queueModel->addItem(aSelectedFiles[i]);
     }
 
     return true;
@@ -363,12 +359,16 @@ void DeleteProgressDialog::launch(const QString& aDirPath, const QStringList& aS
 
     // Set Dir Path
     dirPath = aDirPath;
+    // Reset Pattern
+    pattern = "";
 
     // Restore UI
     restoreUI();
-
     // Show
     show();
+
+    // Reset Need Queue
+    needQueue = false;
 
     // Build Queue
     if (buildQueue(aDirPath, aSelectedFiles)) {
@@ -390,6 +390,41 @@ void DeleteProgressDialog::launch(const QString& aDirPath, const QStringList& aS
     } else {
         // Reset Queue Index
         queueIndex = -1;
+    }
+}
+
+//==============================================================================
+// Launch Progress Dialog
+//==============================================================================
+void DeleteProgressDialog::launch(const QString& aDirPath, const QString& aPattern)
+{
+    qDebug() << "DeleteProgressDialog::launch - aDirPath: " << aDirPath << " - aPattern: " << aPattern;
+
+    // Set Dir Path
+    dirPath = aDirPath;
+    // Set Pattern
+    pattern = aPattern;
+
+    // Restore UI
+    restoreUI();
+    // Show
+    show();
+
+    // Set Queue Index
+    queueIndex = 0;
+    // Set Need Queue
+    needQueue = true;
+
+    // Chekc File Util
+    if (fileUtil) {
+        // Check If Connected
+        if (!fileUtil->isConnected()) {
+            // Connect
+            fileUtil->connectToFileServer();
+        } else {
+            // Get Dir List
+            fileUtil->getDirList(dirPath);
+        }
     }
 }
 
@@ -478,14 +513,19 @@ void DeleteProgressDialog::clientConnectionChanged(const unsigned int& aID, cons
     qDebug() << "DeleteProgressDialog::clientStatusChanged - aID: " << aID << " - aConnected: " << aConnected;
 
     // Check If Connected
-    if (aConnected) {
-        // Check File Util
-        if (fileUtil) {
+    if (aConnected && fileUtil) {
+        // Check Need Queue
+        if (needQueue) {
+            // Reset Need Queue
+            needQueue = false;
+            // Get Dir List
+            fileUtil->getDirList(dirPath);
+        } else {
             // Clear Options
             fileUtil->clearFileTransferOptions();
+            // Process Queue
+            QTimer::singleShot(1, this, SLOT(processQueue()));
         }
-        // Process Queue
-        QTimer::singleShot(1, this, SLOT(processQueue()));
     }
 }
 
@@ -524,9 +564,6 @@ void DeleteProgressDialog::fileOpStarted(const unsigned int& aID,
 
     // Start Progress Refresh Timer
     startProgressRefreshTimer();
-
-    // Configure Buttons
-    //configureButtons(QDialogButtonBox::Abort);
 
     // ...
 }
@@ -621,10 +658,40 @@ void DeleteProgressDialog::fileOpFinished(const unsigned int& aID,
 
         // ...
 
+    } else if (aOp == DEFAULT_OPERATION_LIST_DIR) {
+
+        // Check Queue Model
+        if (!queueModel) {
+            return;
+        }
+
+        // Check Row Count
+        if (queueModel->rowCount() <= 0) {
+            // Init Info Dialog
+            InfoDialog infoDialog(tr(DEFAULT_INFO_TEXT_NO_MATCH_FOUND));
+            // Show Info Dialog
+            infoDialog.exec();
+
+            // Check Close When Finished
+            if (closeWhenFinished) {
+                // Check Close When Finished
+                reject();
+            }
+
+            return;
+        }
+
+        // Just Move On
+
+        // ...
     }
 
     // Process Queue
-    processQueue();
+    //processQueue();
+
+    // Process Queue
+    QTimer::singleShot(1, this, SLOT(processQueue()));
+
 }
 
 //==============================================================================
@@ -818,6 +885,37 @@ void DeleteProgressDialog::fileOpQueueItemFound(const unsigned int& aID,
 
         // Set Maximum
         ui->currentProgress->setMaximum(queueModel->rowCount());
+    }
+}
+
+//==============================================================================
+// Dir List Item Found Slot
+//==============================================================================
+void DeleteProgressDialog::dirListItemFound(const unsigned int& aID,
+                                            const QString& aPath,
+                                            const QString& aFileName)
+{
+    // Check Queue & Path
+    if (queueModel && QDir(aPath) == QDir(dirPath)) {
+        qDebug() << "DeleteProgressDialog::fileOpQueueItemFound - aID: " << aID << " - aPath: " << aPath << " - aFileName: " << aFileName;
+
+        // Init Dir
+        QDir dir(QDir::homePath());
+
+        // Check If File Name Matches
+        if (dir.match(pattern, aFileName)) {
+            // Init Delete File Path
+            QString deleteFilePath = aPath;
+
+            // Check Delete File Name
+            if (!deleteFilePath.endsWith("/")) {
+                // Adjust Delete File Name
+                deleteFilePath += "/";
+            }
+
+            // Append Item
+            queueModel->addItem(deleteFilePath + aFileName);
+        }
     }
 }
 

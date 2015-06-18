@@ -27,7 +27,7 @@ RemoteFileUtilClient::RemoteFileUtilClient(QObject* aParent)
     , reconnectAsRoot(false)
     , needReconnect(false)
 {
-    qDebug() << "RemoteFileUtilClient::RemoteFileUtilClient";
+    //qDebug() << "RemoteFileUtilClient::RemoteFileUtilClient";
 
     // Init
     init();
@@ -1326,6 +1326,6 @@ RemoteFileUtilClient::~RemoteFileUtilClient()
         client = NULL;
     }
 
-    qDebug() << "RemoteFileUtilClient::~RemoteFileUtilClient - cID: " << cID;
+    //qDebug() << "RemoteFileUtilClient::~RemoteFileUtilClient - cID: " << cID;
 }
 

@@ -38,6 +38,13 @@ protected:
     // Save Settings
     void saveSettings();
 
+protected: // From QWidget
+
+    // Key Press Event
+    virtual void keyPressEvent(QKeyEvent* aEvent);
+    // Key Release Event
+    virtual void keyReleaseEvent(QKeyEvent* aEvent);
+
 private:
     // UI
     Ui::HelpWindow*     ui;

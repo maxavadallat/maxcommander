@@ -1895,7 +1895,8 @@ void MainWindow::on_actionDelete_File_triggered()
 //==============================================================================
 void MainWindow::on_actionCreate_Link_triggered()
 {
-
+    // Launch Create Link
+    launchCreateLink();
 }
 
 //==============================================================================
@@ -1916,6 +1917,18 @@ void MainWindow::on_actionReload_triggered()
     if (focusedPanel) {
         // Reload Focused Panel
         focusedPanel->reload(focusedPanel->currentIndex);
+    }
+}
+
+//==============================================================================
+// On Action Directory History Triggered Slot
+//==============================================================================
+void MainWindow::on_actionDir_Hotlist_triggered()
+{
+    // Check Forcused Panel
+    if (focusedPanel) {
+        // Launch Directory History List Popup
+        focusedPanel->launchDirHistoryPopup();
     }
 }
 

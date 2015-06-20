@@ -20,6 +20,8 @@
 #include "confirmdialog.h"
 #include "transferprogressmodel.h"
 #include "settingscontroller.h"
+#include "dirhistorylistmodel.h"
+#include "dirhistorylistpopup.h"
 #include "utility.h"
 #include "constants.h"
 #include "defaultsettings.h"
@@ -75,6 +77,8 @@ FilePanel::FilePanel(QWidget* aParent)
     , dirScanner(NULL)
     , loading(false)
     , searchResultsMode(false)
+    , dirHistoryModel(NULL)
+    , dirHistoryListPopup(NULL)
 {
     // Setup UI
     ui->setupUi(this);
@@ -147,6 +151,8 @@ void FilePanel::init()
     connect(settings, SIGNAL(caseSensitiveSortChanged(bool)), this, SLOT(caseSensitiveSortChanged(bool)));
     connect(settings, SIGNAL(useDefaultIconsChanged(bool)), this, SLOT(useDefaultIconsChanged(bool)));
 
+    connect(ui->currDirLabel, SIGNAL(rightMouseClicked(QPoint)), this, SLOT(currDirLabelRightClicked(QPoint)));
+
     // ...
 
 }
@@ -218,6 +224,12 @@ void FilePanel::setCurrentDir(const QString& aCurrentDir, const QString& aLastFi
             fileListModel->setCurrentDir(currentDir);
         }
 
+        // Check Directory History List Model
+        if (dirHistoryModel) {
+            // Add Item
+            dirHistoryModel->addNewHistoryItem(currentDir);
+        }
+
         // ...
 
         // Emit Current dir Changed Signal
@@ -257,6 +269,12 @@ void FilePanel::setPanelName(const QString& aPanelName)
         panelName = aPanelName;
 
         // ...
+
+        // Check Dir History Model
+        if (!dirHistoryModel) {
+            // Create Dir History Model
+            dirHistoryModel = new DirHistoryListModel(panelName);
+        }
     }
 }
 
@@ -812,6 +830,29 @@ void FilePanel::scanDir(const QString& aDirPath)
 }
 
 //==============================================================================
+// Launch Dir History Popup
+//==============================================================================
+void FilePanel::launchDirHistoryPopup()
+{
+    qDebug() << "FilePanel::launchDirHistoryPopup - panelName: " << panelName;
+
+    // Check Dir history Popup
+    if (!dirHistoryListPopup) {
+        // Create Dir history Popup
+        dirHistoryListPopup = new DirHistoryListPopup(dirHistoryModel);
+
+        // Connect Signals
+        connect(dirHistoryListPopup, SIGNAL(dirHistoryItemSelected(QString)), this, SLOT(setCurrentDir(QString)));
+    }
+
+    // Launch Dir History List Popup
+    dirHistoryListPopup->launchPopup(mapToGlobal(ui->currDirLabel->pos()), ui->currDirLabel->width());
+
+    // Reset Modifier Keys
+    resetModifierKeys();
+}
+
+//==============================================================================
 // File Rename Active
 //==============================================================================
 bool FilePanel::getFileRenameActive()
@@ -1272,9 +1313,10 @@ void FilePanel::resetModifierKeys()
     if (modifierKeys != Qt::NoModifier) {
         // Reset Modifier Keys
         modifierKeys = Qt::NoModifier;
-        // Emit ModifierKeys Changed Signal
-        emit modifierKeysChanged(modifierKeys);
     }
+
+    // Emit ModifierKeys Changed Signal
+    emit modifierKeysChanged(modifierKeys);
 }
 
 //==============================================================================
@@ -2190,6 +2232,17 @@ void FilePanel::on_rootButton_clicked()
 }
 
 //==============================================================================
+// Current Dir Label Right clicked
+//==============================================================================
+void FilePanel::currDirLabelRightClicked(const QPoint& aPos)
+{
+    qDebug() << "FilePanel::currDirLabelRightClicked - aPos: " << aPos;
+
+    // Launch Dir History List Popup
+    launchDirHistoryPopup();
+}
+
+//==============================================================================
 // Focus In Event
 //==============================================================================
 void FilePanel::focusInEvent(QFocusEvent* aEvent)
@@ -2665,6 +2718,20 @@ FilePanel::~FilePanel()
         // Delete Dir Scanner
         delete dirScanner;
         dirScanner = NULL;
+    }
+
+    // Check Dir History List Popup
+    if (dirHistoryListPopup) {
+        // Delete Dir History List Popup
+        delete dirHistoryListPopup;
+        dirHistoryListPopup = NULL;
+    }
+
+    // Check Dir History Model
+    if (dirHistoryModel) {
+        // Delete Dir History Model
+        delete dirHistoryModel;
+        dirHistoryModel = NULL;
     }
 }
 

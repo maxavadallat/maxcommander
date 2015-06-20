@@ -13,8 +13,7 @@ Rectangle {
     width: 160
     height: 62
 
-    //color: Const.DEFAULT_POPUP_BACKGROUND_COLOR
-    color: "#77444444"
+    color: Const.DEFAULT_FILE_LIST_ITEM_RENAMER_BACKROUNG_COLOR
 
     border.width: Const.DEFAULT_POPUP_BORDER_WIDTH
     border.color: Const.DEFAULT_POPUP_BORDER_COLOR

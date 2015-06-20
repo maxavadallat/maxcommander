@@ -21,6 +21,8 @@ class TransferProgressModelItem;
 class FileRenamer;
 class DirScanner;
 class SettingsController;
+class DirHistoryListModel;
+class DirHistoryListPopup;
 
 
 //==============================================================================
@@ -68,8 +70,6 @@ public:
 
     // Get Current Dir
     QString getCurrentDir();
-    // Set Current Dir
-    void setCurrentDir(const QString& aCurrentDir, const QString& aLastFileName = "");
 
     // Get Panel Name
     QString getPanelName();
@@ -207,6 +207,9 @@ public:
 
 public slots:
 
+    // Set Current Dir
+    void setCurrentDir(const QString& aCurrentDir, const QString& aLastFileName = "");
+
     // Go To Home Directory
     void gotoHome();
     // Go To Root
@@ -258,6 +261,9 @@ public slots:
 
     // Scan Dir
     void scanDir(const QString& aDirPath);
+
+    // Launch Dir History Popup
+    void launchDirHistoryPopup();
 
 signals:
 
@@ -461,12 +467,17 @@ protected slots:
     // Handle Modifier Key Release Event
     bool handleModifierKeyReleaseEvent(QKeyEvent* aEvent);
 
-protected slots:
+protected slots: // Buttons
 
     // Home Button Clicked Slot
     void on_homeButton_clicked();
     // Root Button Clicked Slot
     void on_rootButton_clicked();
+
+protected slots: // Current Dir Label & Dir History List
+
+    // Current Dir Label Right Clicked Slot
+    void currDirLabelRightClicked(const QPoint& aPos);
 
 protected: // From QWidget
 
@@ -594,6 +605,12 @@ private:
 
     // Search Result Mode
     bool                    searchResultsMode;
+
+    // Dir History Model
+    DirHistoryListModel*    dirHistoryModel;
+
+    // Dir History List Popup
+    DirHistoryListPopup*    dirHistoryListPopup;
 };
 
 

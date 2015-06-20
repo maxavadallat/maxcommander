@@ -198,6 +198,9 @@
 #define DEFAULT_SEARCH_RESULT_CONTROLLER                    "searchResultController"
 #define DEFAULT_SEARCH_RESULT_MODEL                         "searchResultModel"
 #define DEFAULT_GLOBAL_SETTINGS_CONTROLLER                  "globalSettings"
+#define DEFAULT_DIR_HISTORY_LIST_CONTROLLER                 "dirHistoryListController"
+#define DEFAULT_DIR_HISTORY_LIST_MODEL                      "dirHistoryListModel"
+
 
 
 #define DEFAULT_ONE_KILO                                    1024
@@ -320,10 +323,13 @@
 #define DEFAULT_ICON_WARNING                                ":/resources/images/warning.png"
 #define DEFAULT_ICON_ERROR                                  ":/resources/images/error.png"
 
+#define DEFAULT_DIR_HISTORY_LIST_ITEMS_MAX                  16
 
+#define DEFAULT_FILE_LIST_DIR_HSITORY_FILENAME              ".dirHistory%1.list"
 
-
-
+#define DEFAULT_FILE_LIST_DIR_HISTORY_ITEM_HEIGHT           24
+#define DEFAULT_FILE_LIST_DIR_HISTORY_RADIUS                8
+#define DEFAULT_FILE_LIST_DIR_HISTORY_EMPTY_HEIGHT          46
 
 
 

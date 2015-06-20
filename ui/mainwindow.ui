@@ -375,6 +375,8 @@
     <addaction name="actionOptions"/>
     <addaction name="separator"/>
     <addaction name="actionTerminal"/>
+    <addaction name="separator"/>
+    <addaction name="actionDir_Hotlist"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -572,9 +574,12 @@
     <string>Ctrl+R</string>
    </property>
   </action>
-  <action name="actionView_File">
+  <action name="actionDir_Hotlist">
    <property name="text">
-    <string>View File</string>
+    <string>Dir Hotlist</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
    </property>
   </action>
  </widget>

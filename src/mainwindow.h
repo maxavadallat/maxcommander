@@ -224,6 +224,8 @@ protected slots: // Actions & Button
     void on_actionCopy_triggered();
     // Action Move File Triggered Slot
     void on_actionMove_triggered();
+    // On Action Directory History Triggered Slot
+    void on_actionDir_Hotlist_triggered();
 
     // Action Exit Triggered Slot
     void on_actionExit_triggered();

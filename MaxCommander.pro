@@ -55,7 +55,10 @@ SOURCES                 += src/main.cpp \
                         src/progressbarwidget.cpp \
                         src/settingscontroller.cpp \
                         src/createlinkdialog.cpp \
-                        src/selectfilesdialog.cpp
+                        src/selectfilesdialog.cpp \
+                        src/customdirlabel.cpp \
+                        src/dirhistorylistpopup.cpp \
+                        src/dirhistorylistmodel.cpp
 
 # Heders
 HEADERS                 += src/constants.h \
@@ -89,7 +92,10 @@ HEADERS                 += src/constants.h \
                         src/progressbarwidget.h \
                         src/settingscontroller.h \
                         src/createlinkdialog.h \
-                        src/selectfilesdialog.h
+                        src/selectfilesdialog.h \
+                        src/customdirlabel.h \
+                        src/dirhistorylistpopup.h \
+                        src/dirhistorylistmodel.h
 
 # Include Path
 INCLUDEPATH             += \
@@ -114,7 +120,8 @@ FORMS                   += \
                         ui/passworddialog.ui \
                         ui/searchdialog.ui \
                         ui/createlinkdialog.ui \
-                        ui/selectfilesdialog.ui
+                        ui/selectfilesdialog.ui \
+                        ui/dirhistorylistpopup.ui
 
 # Resources
 RESOURCES               += \

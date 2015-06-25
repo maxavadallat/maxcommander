@@ -25,6 +25,7 @@ signals:
 
     // Drag Started Signal
     void dragStarted(const int& aPosX, const int aPosY);
+
     // Drag Dropped
     void dragDropped();
 
@@ -41,15 +42,6 @@ protected: // From QWidget
     virtual void focusInEvent(QFocusEvent* aEvent);
     // Focus Out Event
     virtual void focusOutEvent(QFocusEvent* aEvent);
-
-    // Drag Enter Event
-    virtual void dragEnterEvent(QDragEnterEvent* aEvent);
-    // Drag Move Event
-    virtual void dragMoveEvent(QDragMoveEvent* aEvent);
-    // Drag Leave Event
-    virtual void dragLeaveEvent(QDragLeaveEvent* aEvent);
-    // Drop Event
-    virtual void dropEvent(QDropEvent* aEvent);
 
     // Mouse Press Event
     virtual void mousePressEvent(QMouseEvent* aEvent);

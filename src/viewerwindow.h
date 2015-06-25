@@ -15,6 +15,7 @@ class SettingsController;
 class ConfirmDialog;
 class RemoteFileUtilClient;
 class ImageBrowser;
+class FindTextDialog;
 
 
 //==============================================================================
@@ -37,6 +38,9 @@ public:
     bool isNewFile();
     // Get Is File Modified
     bool isFileModified();
+
+    // Set Search Term
+    void setSearchTerm(const QString& aTerm);
 
     // Destructor
     virtual ~ViewerWindow();
@@ -64,7 +68,6 @@ signals:
 
     // Viewer Closed Signal
     void viewerClosed(ViewerWindow* aViewer);
-
     // Content Source changed Signal
     void contentSourceChanged(const QString& aContentSource);
 
@@ -101,6 +104,15 @@ protected slots: // For Image Browser
     // Current File Changed Slot
     void imageBrowserCurrentFileChanged(const QString& aCurrentFile);
 
+protected slots: // For Find Dialog
+
+    // Search Text
+    void searchText(const QString& aSearchTerm);
+    // Find Next Search Term Occurence
+    void findNext();
+    // find Dialog Escape Pressed Slot
+    void findDialogEscapePressed();
+
 protected: // From QWidget
 
     // Close Event
@@ -122,6 +134,10 @@ protected slots: // Menu Actions
     void on_actionWord_Wrap_triggered();
     // On Font Action Triggered Slot
     void on_actionFont_triggered();
+    // On Action Find Triggered Slot
+    void on_actionFind_triggered();
+    // On Action Find Next Triggered Slot
+    void on_actionFind_Next_triggered();
 
 private:
 
@@ -146,6 +162,17 @@ private:
 
     // Image Browser
     ImageBrowser*           imageBrowser;
+
+    // Find Text Dialog
+    FindTextDialog*         findDialog;
+    // Search Term
+    QString                 searchTerm;
+    // Search Position
+    int                     searchPos;
+    // Own Key Press
+    bool                    ownKeyPress;
+    // Find Dialog Key Press
+    bool                    findDialogKeyPress;
 };
 
 

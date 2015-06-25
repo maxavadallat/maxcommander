@@ -75,7 +75,15 @@
     <addaction name="separator"/>
     <addaction name="actionFont"/>
    </widget>
+   <widget class="QMenu" name="menuSearch">
+    <property name="title">
+     <string>Search</string>
+    </property>
+    <addaction name="actionFind"/>
+    <addaction name="actionFind_Next"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuSearch"/>
    <addaction name="menuView"/>
   </widget>
   <action name="actionSave">
@@ -118,7 +126,23 @@
     <string>Font</string>
    </property>
    <property name="shortcut">
+    <string>Ctrl+Shift+F</string>
+   </property>
+  </action>
+  <action name="actionFind">
+   <property name="text">
+    <string>Find</string>
+   </property>
+   <property name="shortcut">
     <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="actionFind_Next">
+   <property name="text">
+    <string>Find Next</string>
+   </property>
+   <property name="shortcut">
+    <string>F3</string>
    </property>
   </action>
  </widget>

@@ -331,6 +331,7 @@
 #define DEFAULT_FILE_LIST_DIR_HISTORY_RADIUS                8
 #define DEFAULT_FILE_LIST_DIR_HISTORY_EMPTY_HEIGHT          46
 
+#define DEFAULT_URL_PREFIX_FILE                             "file://"
 
 
 
@@ -441,6 +442,9 @@
 
 
 #define DEFAULT_INFO_TEXT_NO_MATCH_FOUND                    "No Matching File Found"
+
+#define DEFAULT_BUTTON_TEXT_FIND                            "Find"
+#define DEFAULT_BUTTON_TEXT_FIND_NEXT                       "Find Next"
 
 
 #endif // CONSTANTS_H

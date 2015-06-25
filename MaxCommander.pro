@@ -58,7 +58,8 @@ SOURCES                 += src/main.cpp \
                         src/selectfilesdialog.cpp \
                         src/customdirlabel.cpp \
                         src/dirhistorylistpopup.cpp \
-                        src/dirhistorylistmodel.cpp
+                        src/dirhistorylistmodel.cpp \
+                        src/findtextdialog.cpp
 
 # Heders
 HEADERS                 += src/constants.h \
@@ -95,7 +96,8 @@ HEADERS                 += src/constants.h \
                         src/selectfilesdialog.h \
                         src/customdirlabel.h \
                         src/dirhistorylistpopup.h \
-                        src/dirhistorylistmodel.h
+                        src/dirhistorylistmodel.h \
+                        src/findtextdialog.h
 
 # Include Path
 INCLUDEPATH             += \
@@ -121,7 +123,8 @@ FORMS                   += \
                         ui/searchdialog.ui \
                         ui/createlinkdialog.ui \
                         ui/selectfilesdialog.ui \
-                        ui/dirhistorylistpopup.ui
+                        ui/dirhistorylistpopup.ui \
+                        ui/findtextdialog.ui
 
 # Resources
 RESOURCES               += \

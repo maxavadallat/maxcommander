@@ -2,7 +2,6 @@
 #include <QTimer>
 #include <QQmlContext>
 #include <QImageReader>
-#include <QSettings>
 #include <QFile>
 #include <QTextStream>
 #include <QDebug>
@@ -26,6 +25,7 @@
 SearchDialog::SearchDialog(QWidget* aParent)
     : QDialog(aParent)
     , ui(new Ui::SearchDialog)
+    , settings(SettingsController::getInstance())
     , feedToListButton(NULL)
     , startButton(NULL)
     , fileUtil(new RemoteFileUtilClient)
@@ -146,7 +146,7 @@ void SearchDialog::itemView(const bool& aEdit)
     // Check Current File Path
     if (!currentFilePath.isEmpty()) {
         // Emit Search Result Item View Signal
-        emit searchResultView(currentFilePath, aEdit);
+        emit searchResultView(currentFilePath, aEdit, contentPattern);
     }
 }
 
@@ -155,16 +155,18 @@ void SearchDialog::itemView(const bool& aEdit)
 //==============================================================================
 void SearchDialog::loadSettings()
 {
+    // Check Settings
+    if (!settings) {
+        return;
+    }
+
     qDebug() << "SearchDialog::loadSettings";
 
-    // Init Settings
-    QSettings settings;
-
     // Case Senstive Search
-    caseSensitiveSearch = settings.value(SETTINGS_KEY_SEARCH_CASE_SENSITIVE, DEFAULT_SETTINGS_SEARCH_CASE_SENSITIVE).toBool();
+    caseSensitiveSearch = settings->value(SETTINGS_KEY_SEARCH_CASE_SENSITIVE, DEFAULT_SETTINGS_SEARCH_CASE_SENSITIVE).toBool();
 
     // Whole Word Search
-    wholeWordSearch = settings.value(SETTINGS_KEY_SEARCH_WHOLE_WORD, DEFAULT_SETTINGS_SEARCH_WHOLE_WORD).toBool();
+    wholeWordSearch = settings->value(SETTINGS_KEY_SEARCH_WHOLE_WORD, DEFAULT_SETTINGS_SEARCH_WHOLE_WORD).toBool();
 
     // ...
 
@@ -175,16 +177,18 @@ void SearchDialog::loadSettings()
 //==============================================================================
 void SearchDialog::saveSettings()
 {
+    // Check Settings
+    if (!settings) {
+        return;
+    }
+
     qDebug() << "SearchDialog::saveSettings";
 
-    // Init Settings
-    QSettings settings;
-
     // Save Case Sensitive Setting
-    settings.setValue(SETTINGS_KEY_SEARCH_CASE_SENSITIVE, caseSensitiveSearch);
+    settings->setValue(SETTINGS_KEY_SEARCH_CASE_SENSITIVE, caseSensitiveSearch);
 
     // Save Whole Word Search
-    settings.setValue(SETTINGS_KEY_SEARCH_WHOLE_WORD, wholeWordSearch);
+    settings->setValue(SETTINGS_KEY_SEARCH_WHOLE_WORD, wholeWordSearch);
 
     // ...
 
@@ -205,6 +209,12 @@ void SearchDialog::restoreUI()
 
     // Hide Results
     hideresults();
+
+    // Clear Button Box
+    ui->buttonBox->clear();
+
+    // Reset Feed To List Button
+    feedToListButton = NULL;
 
     // Set Up Button Box
     ui->buttonBox->setStandardButtons(QDialogButtonBox::Cancel);
@@ -512,15 +522,15 @@ void SearchDialog::buttonBoxClicked(QAbstractButton* aButton)
         // Check Focused Panel & Result Model
         if (focusedPanel && resultModel) {
             // Feed To List
-            focusedPanel->feedSearchResults(resultModel->results());
+            focusedPanel->feedSearchResults(resultModel->results(), contentPattern);
         }
 
         // Remove Button
         ui->buttonBox->removeButton(feedToListButton);
 
-        // Reset Start Button
-        delete startButton;
-        startButton = NULL;
+        // Reset Feed To List Button
+        delete feedToListButton;
+        feedToListButton = NULL;
 
         // Accept & Close
         accept();
@@ -1126,6 +1136,14 @@ SearchDialog::~SearchDialog()
         // Delete Search Result Model
         delete resultModel;
         resultModel = NULL;
+    }
+
+    // Check Settings
+    if (settings) {
+        // RElease Instance
+        settings->release();
+        // Reset Pointer
+        settings = NULL;
     }
 }
 

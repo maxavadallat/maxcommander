@@ -34,6 +34,7 @@ class FilePanel : public QFrame
 
     Q_PROPERTY(QString currentDir READ getCurrentDir NOTIFY currentDirChanged)
     Q_PROPERTY(int currentIndex READ getCurrentIndex WRITE setCurrentIndex NOTIFY currentIndexChanged)
+    Q_PROPERTY(int pressedIndex READ getPressedIndex WRITE setPressedIndex NOTIFY pressedIndexChanged)
     Q_PROPERTY(QString panelName READ getPanelName)
     Q_PROPERTY(bool panelHasFocus READ getPanelFocus WRITE setPanelFocus NOTIFY panelFocusChanged)
     Q_PROPERTY(int visualItemsCount READ getvisualItemsCount WRITE setVisualItemsCount NOTIFY visualItemsCountChanged)
@@ -83,6 +84,11 @@ public:
     int getCurrentIndex();
     // Set Current Index
     void setCurrentIndex(const int& aCurrentIndex);
+
+    // Get Pressed Index
+    int getPressedIndex();
+    // Set Pressed Index
+    void setPressedIndex(const int& aPressedIndex);
 
     // Get Visual Items Count
     int getvisualItemsCount();
@@ -195,7 +201,7 @@ public:
     int getModifierKeys();
 
     // Feed Search Result List
-    void feedSearchResults(const QStringList& aSearchResults);
+    void feedSearchResults(const QStringList& aSearchResults, const QString& aSearchTerm);
 
     // Get Search REsults Mode
     bool getSearchResultsMode();
@@ -265,6 +271,12 @@ public slots:
     // Launch Dir History Popup
     void launchDirHistoryPopup();
 
+    // Drag Dropped
+    void dragDropped(const QString& aDroppedItems, const int& aModifiers);
+
+    // Drag Started Slot
+    void fileListWidgetDragStarted(const int& aPosX, const int aPosY);
+
 signals:
 
     // Focused Panel Changed Signal
@@ -283,6 +295,8 @@ signals:
 
     // Current Index Changed Signal
     void currentIndexChanged(const int& aIndex);
+    // Pressed Index Changed Signal
+    void pressedIndexChanged(const int& aIndex);
     // Visual Items Count Changed
     void visualItemsCountChanged(const int& aVisualCount);
 
@@ -370,6 +384,9 @@ signals:
 
     // Search Results Mode Changed Signal
     void searchResultsModeChanged(const bool& aSearchResultsMode);
+
+    // Set List View Interactive
+    void setListViewInteractive(const bool& aInteractive);
 
 protected slots:
 
@@ -525,6 +542,8 @@ private:
 
     // Current Index
     int                     currentIndex;
+    // Pressed Index
+    int                     pressedIndex;
 
     // Visual Items Count
     int                     visualItemsCount;
@@ -605,6 +624,8 @@ private:
 
     // Search Result Mode
     bool                    searchResultsMode;
+    // Search Term
+    QString                 searchTerm;
 
     // Dir History Model
     DirHistoryListModel*    dirHistoryModel;

@@ -23,7 +23,7 @@ Rectangle {
         onRightClicked: {
             // Check If In Search Result Mode
             if (!mainController.searchResultsMode) {
-                console.log("fileListHeader.onRightClicked - posX: " + posX + " - posY: " + posY);
+                //console.log("fileListHeader.onRightClicked - posX: " + posX + " - posY: " + posY);
 
                 // Set File List header Popup Pos
                 fileListHeaderPopup.x = Math.min(posX, fileListRoot.width - fileListHeaderPopup.width - 1);
@@ -155,6 +155,8 @@ Rectangle {
                 // On Pressed
                 onPressed: {
                     //console.log("fileListDelegateRoot.MouseArea.onPressed - index: " + index);
+                    // Set Pressed Index
+                    mainController.pressedIndex = index;
                 }
                 // On Released
                 onReleased: {
@@ -241,7 +243,6 @@ Rectangle {
                         // Set Selected
                         fileListModel.setSelected(fileListView.currentIndex, !fileListModel.getSelected(fileListView.currentIndex));
                     }
-
                 }
             }
 
@@ -306,7 +307,7 @@ Rectangle {
         onAccepted: {
             // Check File Name
             if (fileName.length > 0) {
-                console.log("fileRenamer.onAccepted - originalFileName: " + fileRenamer.originalFileName + " - fileName: " + fileRenamer.fileName);
+                //console.log("fileRenamer.onAccepted - originalFileName: " + fileRenamer.originalFileName + " - fileName: " + fileRenamer.fileName);
                 // Rename File
                 mainController.renameFile(fileRenamer.originalFileName, fileRenamer.fileName);
             }
@@ -336,6 +337,45 @@ Rectangle {
         Behavior on opacity { NumberAnimation { duration: 500 } }
     }
 
+    // Drop Area
+    DropArea {
+        id: dragArea
+        anchors.fill: fileListView
+        // On Entered
+        onEntered: {
+            //console.log("dragArea.onEntered");
+            // Accept Event
+            //drag.accept();
+
+            // ...
+        }
+
+        // On Position Changed
+        onPositionChanged: {
+            //console.log("dragArea.onPositionChanged - pos:[ " + drag.x + ":" + drag.y + "]");
+
+            // ...
+        }
+
+        // On Dropped
+        onDropped: {
+            // Accept
+            drop.accept();
+            //console.log("dragArea.onDropped - drop.source: " + drop.text);
+            // Drag Dropped
+            mainController.dragDropped(drop.text, drop.keys);
+
+            // ...
+        }
+
+        // On Exited
+        onExited: {
+            //console.log("dragArea.onExited");
+
+            // ...
+        }
+    }
+
     // Right Mouse Area
     MouseArea {
         id: selectionMouseArea
@@ -363,7 +403,6 @@ Rectangle {
 
             // Set First Change
             firstChange = true;
-
             // Reset Just Selected
             justSelected = -1;
 
@@ -429,10 +468,8 @@ Rectangle {
                 // Check Last Hover Index
                 if (lastHoverIndex != hoverIndex && hoverIndex != -1) {
                     //console.log("selectionMouseArea.onMouseYChanged - hoverIndex: " + hoverIndex);
-
                     // Set Last Hover Index
                     lastHoverIndex = hoverIndex;
-
                     // Set Selected
                     fileListModel.setSelected(hoverIndex, !fileListModel.getSelected(hoverIndex));
                 }
@@ -455,15 +492,12 @@ Rectangle {
     // On Completed
     Component.onCompleted: {
         //console.log("fileListRoot.onCompleted - visualItemsCount: " + fileListView.visualItemsCount);
-
         // Set Visual Items Count
         mainController.visualItemsCount = fileListView.visualItemsCount;
-
         // Set Prev Index
         fileListView.prevIndex = fileListView.currentIndex;
 
         // ...
-
     }
 
     // On Destruction
@@ -471,7 +505,6 @@ Rectangle {
         //console.log("fileListRoot.onDestruction");
 
         // ...
-
     }
 
     // Update File List Header Layout
@@ -560,36 +593,6 @@ Rectangle {
             // ...
         }
 
-        // On Modifier Keys Pressed
-        onModifierKeysChanged: {
-            // Check Modifier Keys
-            if (aModifierKeys === 0) {
-                //console.log("fileListRoot.Connections.mainController.onModifierKeysChanged - NO MODIFIER");
-            }
-
-            // Check Modifier Keys
-            if (aModifierKeys & Qt.ShiftModifier) {
-                //console.log("fileListRoot.Connections.mainController.onModifierKeysChanged - SHIFT");
-            }
-
-            // Check Modifier Keys
-            if (aModifierKeys & Qt.AltModifier) {
-                //console.log("fileListRoot.Connections.mainController.onModifierKeysChanged - ALT");
-            }
-
-            // Check Modifier Keys
-            if (aModifierKeys & Qt.ControlModifier) {
-                //console.log("fileListRoot.Connections.mainController.onModifierKeysChanged - CONTROL");
-            }
-
-            // Check Modifier Keys
-            if (aModifierKeys & Qt.MetaModifier) {
-                //console.log("fileListRoot.Connections.mainController.onModifierKeysChanged - META");
-            }
-
-            // ...
-        }
-
         // On Launch File Rename
         onLaunchFileRename: {
             console.log("fileListRoot.Connections.mainController.onLaunchFileRename");
@@ -616,6 +619,14 @@ Rectangle {
 
             // Update File List Header Layout
             updateFileListHeaderLayout();
+        }
+
+        // On Set List View Interactive
+        onSetListViewInteractive: {
+            //console.log("fileListRoot.Connections.mainController.onSetListViewInteractive - aInteractive: " + aInteractive);
+
+            // Set Interactive
+            fileListView.interactive = aInteractive;
         }
     }
 }

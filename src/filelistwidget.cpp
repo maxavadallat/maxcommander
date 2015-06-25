@@ -16,10 +16,7 @@ FileListWidget::FileListWidget(QWidget* aParent)
     , dragPosX(0)
     , dragPosY(0)
 {
-    qDebug() << "FileListWidget::FileListWidget";
-
-    // Set Accept Drops
-    setAcceptDrops(true);
+    //qDebug() << "FileListWidget::FileListWidget";
 
     // ...
 }
@@ -83,60 +80,6 @@ void FileListWidget::focusOutEvent(QFocusEvent* aEvent)
         focused = false;
         // Emit focus Changed Signal
         emit focusChanged(focused);
-    }
-}
-
-//==============================================================================
-// Drag Enter Event
-//==============================================================================
-void FileListWidget::dragEnterEvent(QDragEnterEvent* aEvent)
-{
-    // Check Event
-    if (aEvent) {
-        qDebug() << "FileListWidget::dragEnterEvent";
-        // Accept Drag Event
-        aEvent->accept();
-
-        // ...
-    }
-}
-
-//==============================================================================
-// Drag Move Event
-//==============================================================================
-void FileListWidget::dragMoveEvent(QDragMoveEvent* aEvent)
-{
-    // Check Event
-    if (aEvent) {
-        qDebug() << "FileListWidget::dragMoveEvent";
-
-        // ...
-    }
-}
-
-//==============================================================================
-// Drag Leave Event
-//==============================================================================
-void FileListWidget::dragLeaveEvent(QDragLeaveEvent* aEvent)
-{
-    // Check Event
-    if (aEvent) {
-        qDebug() << "FileListWidget::dragLeaveEvent";
-
-        // ...
-    }
-}
-
-//==============================================================================
-// Drop Event
-//==============================================================================
-void FileListWidget::dropEvent(QDropEvent* aEvent)
-{
-    // Check Event
-    if (aEvent) {
-        qDebug() << "FileListWidget::dropEvent";
-
-        // ...
     }
 }
 
@@ -213,7 +156,7 @@ void FileListWidget::mouseReleaseEvent(QMouseEvent* aEvent)
                 //qDebug() << "FileListWidget::mouseReleaseEvent - dragOn: " << dragOn;
 
                 // Emit Drag Dropped Signal
-                emit dragDropped();
+                //emit dragDropped();
             }
 
         } else {
@@ -256,6 +199,6 @@ FileListWidget::~FileListWidget()
 {
     // ...
 
-    qDebug() << "FileListWidget::~FileListWidget";
+    //qDebug() << "FileListWidget::~FileListWidget";
 }
 

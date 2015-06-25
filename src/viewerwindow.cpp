@@ -12,6 +12,7 @@
 #include <QDir>
 #include <QFileDialog>
 #include <QFontDialog>
+#include <QTextCursor>
 #include <QDebug>
 
 #include <mcwinterface.h>
@@ -22,6 +23,7 @@
 #include "remotefileutilclient.h"
 #include "audiotagimageprovider.h"
 #include "confirmdialog.h"
+#include "findtextdialog.h"
 #include "settingscontroller.h"
 #include "constants.h"
 #include "defaultsettings.h"
@@ -41,6 +43,11 @@ ViewerWindow::ViewerWindow(QWidget* aParent)
     , mime("")
     , fileIsNew(false)
     , imageBrowser(NULL)
+    , findDialog(NULL)
+    , searchTerm("")
+    , searchPos(-1)
+    , ownKeyPress(false)
+    , findDialogKeyPress(false)
 {
     qDebug() << "ViewerWindow::ViewerWindow";
 
@@ -107,6 +114,22 @@ bool ViewerWindow::isNewFile()
 bool ViewerWindow::isFileModified()
 {
     return fileModified;
+}
+
+//==============================================================================
+// Set Search Term
+//==============================================================================
+void ViewerWindow::setSearchTerm(const QString& aTerm)
+{
+    // Check Search Term
+    if (searchTerm != aTerm) {
+        //qDebug() << "ViewerWindow::setSearchTerm - aTerm: " << aTerm;
+
+        // Set Search Term
+        searchTerm = aTerm;
+
+        // ...
+    }
 }
 
 //==============================================================================
@@ -335,6 +358,12 @@ void ViewerWindow::showWindow()
 
     // Show
     show();
+
+    // Check Search Term
+    if (!searchTerm.isEmpty()) {
+        // Enable Find Next
+        ui->actionFind_Next->setEnabled(true);
+    }
 }
 
 //==============================================================================
@@ -443,6 +472,9 @@ void ViewerWindow::restoreUI()
 
     // Set Font
     ui->textEdit->setFont(loadedFont);
+
+    // Set Find Next Enabled
+    ui->actionFind_Next->setEnabled(false);
 
     // ...
 }
@@ -606,7 +638,100 @@ void ViewerWindow::imageBrowserCurrentFileChanged(const QString& aCurrentFile)
     ctx->setContextProperty(DEFAULT_IMAGE_VIEWER_CONTENT, fileName);
 
     // Set Window Title
-    setWindowTitle(tr("Viewer - ") + fileName);
+    setWindowTitle(tr(DEFAULT_TITLE_VIEWER) + fileName);
+}
+
+//==============================================================================
+// Search Text
+//==============================================================================
+void ViewerWindow::searchText(const QString& aSearchTerm)
+{
+    // Check Text Edit
+    if (ui->textEdit->isVisible()) {
+        //qDebug() << "ViewerWindow::searchText - aSearchTerm: " << aSearchTerm;
+
+        // Set Search Term
+        setSearchTerm(aSearchTerm);
+
+        // Find Next
+        findNext();
+    }
+}
+
+//==============================================================================
+// Find Next Search Term Occurence
+//==============================================================================
+void ViewerWindow::findNext()
+{
+    //qDebug() << "ViewerWindow::findNext";
+
+    // Init Find Flags
+    QTextDocument::FindFlags findFlags = 0;
+
+    // Check Find Dialog
+    if (findDialog) {
+        // Check Case Sensitive Search
+        if (findDialog->getCaseSensitiveSearch()) {
+            // Adjust Options
+            findFlags |= QTextDocument::FindCaseSensitively;
+        }
+
+        // Check Whole Word
+        if (findDialog->getWholeWordSearch()) {
+            // Adjust Options
+            findFlags |= QTextDocument::FindWholeWords;
+        }
+
+        // Check Backward Search
+        if (findDialog->getBackwardSearch()) {
+            // Adjust Options
+            findFlags |= QTextDocument::FindBackward;
+        }
+    }
+
+    // Find Occurence
+    if (ui->textEdit->find(searchTerm, findFlags)) {
+        // Check Find Dialog
+        if (findDialog) {
+            // Enable Find Next Button
+            findDialog->enableFindNextButton(true);
+        }
+
+        // Set Find Next Action Enabled
+        ui->actionFind_Next->setEnabled(true);
+
+    } else {
+        // Check Find Dialog
+        if (findDialog) {
+            // Check Wrap Around
+            if (findDialog->getWrapAroundWhenFinished()) {
+
+                // Get Text Cursor
+                QTextCursor textCursor = ui->textEdit->textCursor();
+                // Move Position
+                textCursor.movePosition(QTextCursor::Start);
+                // Set Updated Text Cursor
+                ui->textEdit->setTextCursor(textCursor);
+            }
+
+            // Enable Find Next Button
+            findDialog->enableFindNextButton(false);
+        }
+
+        // Set Find Next Action Enabled
+        ui->actionFind_Next->setEnabled(false);
+    }
+}
+
+//==============================================================================
+// find Dialog Escape Pressed Slot
+//==============================================================================
+void ViewerWindow::findDialogEscapePressed()
+{
+    //qDebug() << "ViewerWindow::findDialogEscapePressed";
+
+    // Set Find Dialog Key Press
+    findDialogKeyPress = true;
 }
 
 //==============================================================================
@@ -657,6 +782,9 @@ void ViewerWindow::keyPressEvent(QKeyEvent* aEvent)
     // Check Event
     if (aEvent) {
 
+        // Set Own Key Pressed
+        ownKeyPress = true;
+
     }
 }
 
@@ -665,6 +793,22 @@ void ViewerWindow::keyPressEvent(QKeyEvent* aEvent)
 //==============================================================================
 void ViewerWindow::keyReleaseEvent(QKeyEvent* aEvent)
 {
+    // Check If Key Pressed
+    if (!ownKeyPress) {
+        return;
+    }
+
+    // Reset Own Key Press
+    ownKeyPress = false;
+
+    // Check Find Dialog Key Press
+    if (findDialogKeyPress) {
+        // Reset Find Dialog Key Press
+        findDialogKeyPress = false;
+
+        return;
+    }
+
     // Check Event
     if (aEvent) {
         // Switch Event Key
@@ -793,6 +937,38 @@ void ViewerWindow::on_actionFont_triggered()
 }
 
 //==============================================================================
+// On Action Find Triggered Slot
+//==============================================================================
+void ViewerWindow::on_actionFind_triggered()
+{
+    // Check Text Editor Visibility
+    if (ui->textEdit->isVisible()) {
+        // Check Find Dialog
+        if (!findDialog) {
+            // Create Find Dialog
+            findDialog = new FindTextDialog();
+
+            // Connect Signals
+            connect(findDialog, SIGNAL(findText(QString)), this, SLOT(searchText(QString)));
+            connect(findDialog, SIGNAL(findNext()), this, SLOT(findNext()));
+            connect(findDialog, SIGNAL(escapePresed()), this, SLOT(findDialogEscapePressed()));
+        }
+
+        // Launch Find Text Dialog
+        findDialog->exec();
+    }
+}
+
+//==============================================================================
+// On Action Find Next Triggered Slot
+//==============================================================================
+void ViewerWindow::on_actionFind_Next_triggered()
+{
+    // Fnd Next
+    findNext();
+}
+
+//==============================================================================
 // Destructor
 //==============================================================================
 ViewerWindow::~ViewerWindow()
@@ -816,6 +992,13 @@ ViewerWindow::~ViewerWindow()
         // Delete Image Browser
         delete imageBrowser;
         imageBrowser = NULL;
+    }
+
+    // Check Find Dialog
+    if (findDialog) {
+        // Delete Dialog
+        delete findDialog;
+        findDialog = NULL;
     }
 
     qDebug() << "ViewerWindow::~ViewerWindow";

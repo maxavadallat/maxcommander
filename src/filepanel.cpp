@@ -6,6 +6,8 @@
 #include <QQmlEngine>
 #include <QImageReader>
 #include <QTimer>
+#include <QDrag>
+#include <QMimeData>
 #include <QDebug>
 
 #include <mcwinterface.h>
@@ -42,6 +44,7 @@ FilePanel::FilePanel(QWidget* aParent)
     , fileListModel(NULL)
     , modifierKeys(Qt::NoModifier)
     , currentIndex(-1)
+    , pressedIndex(-1)
     , visualItemsCount(-1)
     , lastDirName("")
     , lastFileName("")
@@ -77,6 +80,7 @@ FilePanel::FilePanel(QWidget* aParent)
     , dirScanner(NULL)
     , loading(false)
     , searchResultsMode(false)
+    , searchTerm("")
     , dirHistoryModel(NULL)
     , dirHistoryListPopup(NULL)
 {
@@ -137,6 +141,7 @@ void FilePanel::init()
 
     // Connect Signals
     connect(ui->fileListWidget, SIGNAL(focusChanged(bool)), this, SLOT(setPanelFocus(bool)));
+    connect(ui->fileListWidget, SIGNAL(dragStarted(int,int)), this, SLOT(fileListWidgetDragStarted(int,int)));
 
     // Connect Signals - Dir Watcher
     connect(&dirWatcher, SIGNAL(directoryChanged(QString)), this, SLOT(directoryChanged(QString)));
@@ -853,6 +858,122 @@ void FilePanel::launchDirHistoryPopup()
 }
 
 //==============================================================================
+// Drag Dropped
+//==============================================================================
+void FilePanel::dragDropped(const QString& aDroppedItems, const int& aModifiers)
+{
+    qDebug() << "FilePanel::dragDropped - aDroppedItems: " << aDroppedItems;
+
+    // Check Modifiers
+    if (aModifiers & Qt::AltModifier) {
+
+    } else {
+
+    }
+
+    // ...
+}
+
+//==============================================================================
+// Drag Started Slot
+//==============================================================================
+void FilePanel::fileListWidgetDragStarted(const int& aPosX, const int aPosY)
+{
+    Q_UNUSED(aPosX);
+    Q_UNUSED(aPosY);
+
+    //qDebug() << "FilePanel::fileListWidgetDragStarted - pos[" << aPosX << ":" << aPosY << "]";
+
+    // Check File List Model
+    if (fileListModel) {
+        // Emit Set File List View Interactive
+        emit setListViewInteractive(false);
+
+        // Get All Selected Items
+        QStringList selectedItems = fileListModel->getAllSelected();
+
+        // Get Selectd Items Count
+        int siCount = selectedItems.count();
+
+        // Init URL List
+        QList<QUrl> uriList;
+
+        // Go Thru Selected Items
+        for (int i=0; i<siCount; ++i) {
+            // Adjust Selected Items
+            selectedItems.replace(i, QString("%1%2").arg(DEFAULT_URL_PREFIX_FILE).arg(selectedItems[i]));
+
+            // Add To URI List
+            uriList << QUrl(selectedItems[i]);
+        }
+
+        // Check URL List
+        if (uriList.count() <= 0) {
+            // Add Pressed Item
+
+            uriList << QUrl(QString("%1%2").arg(DEFAULT_URL_PREFIX_FILE).arg(fileListModel->getFileInfo(pressedIndex).absoluteFilePath()));
+        }
+
+        //qDebug() << "FilePanel::fileListWidgetDragStarted - uriList: " << uriList;
+
+        // Create Drag
+        QDrag* drag = new QDrag(this);
+        // Create Mime Data
+        QMimeData* mimeData = new QMimeData;
+
+        // Set URLS
+        mimeData->setUrls(uriList);
+
+        //qDebug() << "FilePanel::fileListWidgetDragStarted - mimeData: " << mimeData->formats();
+
+
+        // Set Mime Data
+        drag->setMimeData(mimeData);
+        // Set Hot Spot
+        //drag->setHotSpot(QPoint(0, 0));
+        // Set Pixmap
+        //drag->setPixmap(QPixmap("qrc:/resources/images/icons/default_file.png"));
+
+        // ...
+
+        // Exec Drag
+        Qt::DropAction dropAction = drag->exec(Qt::CopyAction | Qt::MoveAction | Qt::LinkAction);
+
+        // Switch Drop Action
+        switch (dropAction) {
+            case Qt::CopyAction:
+                qDebug() << "FilePanel::fileListWidgetDragStarted - dropAction: COPY";
+
+            break;
+
+            case Qt::MoveAction:
+                qDebug() << "FilePanel::fileListWidgetDragStarted - dropAction: MOVE";
+
+            break;
+
+            case Qt::LinkAction:
+                qDebug() << "FilePanel::fileListWidgetDragStarted - dropAction: LINK";
+
+            break;
+
+            case Qt::IgnoreAction:
+                qDebug() << "FilePanel::fileListWidgetDragStarted - dropAction: IGNORE";
+
+            break;
+
+            default:
+                qDebug() << "FilePanel::fileListWidgetDragStarted - dropAction: " << dropAction;
+            break;
+        }
+
+        // ...
+
+        // Emit Set File List View Interactive
+        emit setListViewInteractive(true);
+    }
+}
+
+//==============================================================================
 // File Rename Active
 //==============================================================================
 bool FilePanel::getFileRenameActive()
@@ -888,7 +1009,7 @@ int FilePanel::getModifierKeys()
 //==============================================================================
 // Feed Search Result List
 //==============================================================================
-void FilePanel::feedSearchResults(const QStringList& aSearchResults)
+void FilePanel::feedSearchResults(const QStringList& aSearchResults, const QString& aSearchTerm)
 {
     // Check File List Model
     if (fileListModel) {
@@ -908,6 +1029,9 @@ void FilePanel::feedSearchResults(const QStringList& aSearchResults)
             // Add Item
             fileListModel->addItem(aSearchResults[i], true);
         }
+
+        // Set Search Term
+        searchTerm = aSearchTerm;
     }
 
     // Set Current Index
@@ -941,6 +1065,8 @@ void FilePanel::setSearchResultsMode(const bool& aSearchResultMode)
         } else {
             // Set Current Dir Label Text
             ui->currDirLabel->setText(currentDir);
+            // Clear Search Term
+            searchTerm = "";
         }
     }
 }
@@ -957,6 +1083,29 @@ void FilePanel::setCurrentIndex(const int& aCurrentIndex)
         currentIndex = aCurrentIndex;
         // Emit Current Index Changed Signal
         emit currentIndexChanged(currentIndex);
+    }
+}
+
+//==============================================================================
+// Get Pressed Index
+//==============================================================================
+int FilePanel::getPressedIndex()
+{
+    return pressedIndex;
+}
+
+//==============================================================================
+// Set Pressed Index
+//==============================================================================
+void FilePanel::setPressedIndex(const int& aPressedIndex)
+{
+    // Check Pressed Index
+    if (pressedIndex != aPressedIndex) {
+        //qDebug() << "FilePanel::setPressedIndex - aPressedIndex: " << aPressedIndex;
+        // Set Pressed Index
+        pressedIndex = aPressedIndex;
+        // Emit Signal
+        emit pressedIndexChanged(pressedIndex);
     }
 }
 

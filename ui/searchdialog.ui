@@ -159,6 +159,9 @@
      <property name="editable">
       <bool>true</bool>
      </property>
+     <property name="insertPolicy">
+      <enum>QComboBox::InsertAtTop</enum>
+     </property>
     </widget>
    </item>
    <item row="8" column="0" colspan="3">
@@ -220,6 +223,9 @@
      </property>
      <property name="editable">
       <bool>true</bool>
+     </property>
+     <property name="insertPolicy">
+      <enum>QComboBox::InsertAtTop</enum>
      </property>
     </widget>
    </item>

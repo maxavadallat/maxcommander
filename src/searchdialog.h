@@ -71,7 +71,7 @@ signals:
     // Search Result Item Selected Signal
     void searchResultSelected(const QString& aFilePath);
     // Search Result Item View Signal
-    void searchResultView(const QString& aFilePath, const bool& aEdit);
+    void searchResultView(const QString& aFilePath, const bool& aEdit, const QString& aSearchTerm);
 
 public slots:
 
@@ -199,6 +199,9 @@ private:
 
     // UI
     Ui::SearchDialog*       ui;
+    // Settings Controller
+    SettingsController*     settings;
+
     // Feed To List Button
     QPushButton*            feedToListButton;
     // Start Button

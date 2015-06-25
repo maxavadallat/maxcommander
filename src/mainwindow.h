@@ -59,7 +59,7 @@ public slots:
     // Launch Viewer
     void launchViewer(const bool& aEditMode = false, const bool& aNewFile = false);
     // Launch Viewer
-    void launchViewer(const QString& aFileName, FilePanel* aFilePanel, const bool& aEditMode, const bool& aNewFile);
+    void launchViewer(const QString& aFileName, FilePanel* aFilePanel, const bool& aEditMode, const bool& aNewFile, const QString& aSearchTerm = "");
 
     // Launch File Copy Slot
     void launchFileCopy();
@@ -142,7 +142,7 @@ protected slots:
     // Search Result Item Selected Slot
     void searchResultSelected(const QString& aFilePath);
     // Search Result Item View Slot
-    void searchResultView(const QString& aFilePath, const bool& aEdit);
+    void searchResultView(const QString& aFilePath, const bool& aEdit, const QString& aSearchTerm);
 
 protected slots: // Actions & Button
 

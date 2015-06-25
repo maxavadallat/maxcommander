@@ -406,17 +406,17 @@ void MainWindow::launchViewer(const bool& aEditMode, const bool& aNewFile)
 
     // Check Settings For Using External Viewer
 
-    // Reset Search Result View
-    viewSearchResult = false;
+    // Set Search Result View
+    viewSearchResult = focusedPanel->searchResultsMode;
 
     // Launch Viewer
-    launchViewer(focusedPanel->getCurrFileInfo().absoluteFilePath(), focusedPanel, aEditMode, aNewFile);
+    launchViewer(focusedPanel->getCurrFileInfo().absoluteFilePath(), focusedPanel, aEditMode, aNewFile, focusedPanel->searchTerm);
 }
 
 //==============================================================================
 // Launch Viewer
 //==============================================================================
-void MainWindow::launchViewer(const QString& aFileName, FilePanel* aFilePanel, const bool& aEditMode, const bool& aNewFile)
+void MainWindow::launchViewer(const QString& aFileName, FilePanel* aFilePanel, const bool& aEditMode, const bool& aNewFile, const QString& aSearchTerm)
 {
     // Create New Viewer Window
     ViewerWindow* newViewer = new ViewerWindow();
@@ -456,6 +456,12 @@ void MainWindow::launchViewer(const QString& aFileName, FilePanel* aFilePanel, c
 
     // Connect Signal
     connect(newViewer, SIGNAL(viewerClosed(ViewerWindow*)), this, SLOT(viewerWindowClosed(ViewerWindow*)), Qt::QueuedConnection);
+
+    // Check View Search Result
+    if (viewSearchResult) {
+        // Set Search Term
+        newViewer->setSearchTerm(aSearchTerm);
+    }
 
     // Add To Viewer List
     viewerWindows << newViewer;
@@ -720,7 +726,8 @@ void MainWindow::launchSearch()
     qDebug() << "MainWindow::launchSearch";
 
     // Reset Modifier Keys
-    focusedPanel->resetModifierKeys();
+    leftPanel->resetModifierKeys();
+    rightPanel->resetModifierKeys();
 
     // Check Search Dialog
     if (!searchFileDialog) {
@@ -729,7 +736,7 @@ void MainWindow::launchSearch()
 
         // Connect Signals
         connect(searchFileDialog, SIGNAL(searchResultSelected(QString)), this, SLOT(searchResultSelected(QString)));
-        connect(searchFileDialog, SIGNAL(searchResultView(QString,bool)), this, SLOT(searchResultView(QString,bool)));
+        connect(searchFileDialog, SIGNAL(searchResultView(QString,bool,QString)), this, SLOT(searchResultView(QString,bool,QString)));
     }
 
     // Check If Dialog Shown
@@ -1040,17 +1047,17 @@ void MainWindow::searchResultSelected(const QString& aFilePath)
 //==============================================================================
 // Search Result Item View Slot
 //==============================================================================
-void MainWindow::searchResultView(const QString& aFilePath, const bool& aEdit)
+void MainWindow::searchResultView(const QString& aFilePath, const bool& aEdit, const QString& aSearchTerm)
 {
     // Check Search File Dialog
     if (searchFileDialog) {
-        qDebug() << "MainWindow::searchResultView - aFilePath: " << aFilePath << " - aEdit: " << aEdit;
+        qDebug() << "MainWindow::searchResultView - aFilePath: " << aFilePath << " - aEdit: " << aEdit << " - aSearchTerm: " << aSearchTerm;
 
         // Set Search Result View
         viewSearchResult = true;
 
         // Launch Viewer
-        launchViewer(aFilePath, searchFileDialog->getFocusedPanel(), aEdit, false);
+        launchViewer(aFilePath, searchFileDialog->getFocusedPanel(), aEdit, false, aSearchTerm);
     }
 }
 

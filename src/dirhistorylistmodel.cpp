@@ -135,16 +135,18 @@ void DirHistoryListModel::addNewHistoryItem(const QString& aDirPath)
 
     // Check Item Index
     if (itemIndex >= 0) {
+        // Begin Item REmoval
+        beginRemoveRows(QModelIndex(), itemIndex, itemIndex);
         // Remove Previous Occurence
         items.removeAt(itemIndex);
+        // End Remove Rows
+        endRemoveRows();
     }
 
     // Begin Insert Rows
     beginInsertRows(QModelIndex(), 0, 0);
-
     // Insert New Item
     items.insert(0, localDirPath);
-
     // End Insert Rows
     endInsertRows();
 

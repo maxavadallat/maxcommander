@@ -38,11 +38,14 @@ int launchRemoteFileServer(const bool& asRoot = false, const QString& aRootPass 
 // Format Data Time
 QString formatDateTime(const QDateTime& aDateTime);
 
-// Has Parent Dir
+// Has Parent Dir Of An Existing File/Dir
 bool hasParentDir(const QString& aDirPath);
 
-// Get Parent Dir
+// Get Parent Dir Of An Existing File/Dir
 QString getParentDir(const QString& aDirPath);
+
+// Get Parent Dir From Path
+QString getParentDirFromPath(const QString& aDirPath);
 
 // Get File Name
 QString getFileName(const QString& aDirPath);

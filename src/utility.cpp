@@ -395,7 +395,37 @@ QString getParentDir(const QString& aDirPath)
         return dirInfo.absolutePath();
     }
 
-    return QString("");
+    return QString(DEFAULT_ROOT_DIR);
+}
+
+//==============================================================================
+// Get Parent Dir From Path
+//==============================================================================
+QString getParentDirFromPath(const QString& aDirPath)
+{
+    // Check Local Path
+    if (aDirPath == QString(DEFAULT_ROOT_DIR)) {
+        return QString(DEFAULT_ROOT_DIR);
+    }
+
+    // Get Local Path
+    QString localPath = aDirPath;
+
+    // Check Local Path
+    if (localPath.endsWith("/")) {
+        // Adjust Local Path
+        localPath = localPath.left(localPath.length()-1);
+    }
+
+    // Get Last Index Of /
+    int liSlash = localPath.lastIndexOf("/");
+
+    // Check Last Index Of Slash
+    if (liSlash > 0) {
+        return localPath.left(liSlash);
+    }
+
+    return QString(DEFAULT_ROOT_DIR);
 }
 
 //==============================================================================

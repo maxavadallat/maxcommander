@@ -1438,7 +1438,7 @@ void FilePanel::handleItemSelect()
     // Get Current File Info
     QFileInfo fileInfo = fileListModel->getFileInfo(currentIndex);
 
-    qDebug() << "FilePanel::handleItemSelect - panelName: " << panelName << " - fileName: " << fileInfo.fileName();
+    //qDebug() << "FilePanel::handleItemSelect - panelName: " << panelName << " - fileName: " << fileInfo.fileName();
 
     // Check If Dir
     if (fileInfo.isDir() || fileInfo.isBundle()) {
@@ -1903,7 +1903,7 @@ void FilePanel::startDirWatcher()
     if (dirWatcherTimerID == -1) {
         //qDebug() << "FilePanel::startDirWatcher";
         // Start Timer
-        dirWatcherTimerID = startTimer(DEFAULT_ONE_SEC * 3);
+        dirWatcherTimerID = startTimer(DEFAULT_ONE_SEC * 2);
 
         // Start Dir Watcher
         dirWatcher.addPath(currentDir);
@@ -1979,6 +1979,7 @@ void FilePanel::directoryChanged(const QString& aDirPath)
 {
     // Check Dir Path
     if (currentDir == aDirPath) {
+
         // Check File Renamer Update
         if (fileRenamerUpdate) {
             // Reset file Renamer Update
@@ -1991,8 +1992,6 @@ void FilePanel::directoryChanged(const QString& aDirPath)
 
         // Set Dir Changed
         dwDirChanged = true;
-
-        // ...
     }
 }
 
@@ -2469,13 +2468,6 @@ void FilePanel::keyPressEvent(QKeyEvent* aEvent)
 
             case Qt::Key_Backspace:
             case Qt::Key_Left:
-                // Check If Auto Repeat
-                if (aEvent->isAutoRepeat()) {
-                    // Accept
-                    aEvent->accept();
-                    // Go Up
-                    goUp();
-                }
             break;
 
             case Qt::Key_PageUp:
@@ -2801,16 +2793,25 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
 //==============================================================================
 void FilePanel::timerEvent(QTimerEvent* aEvent)
 {
-    // Cehck EVent
+    // Check Event
     if (aEvent) {
         // Check Tiemr ID
         if (aEvent->timerId() == dirWatcherTimerID) {
             // Check File List Model
-            if (fileListModel) {
-                // Check If Busy
-                if (fileListModel->getBusy()) {
+            if (fileListModel && !fileListModel->getBusy()) {
+                //qDebug() << "FilePanel::timerEvent - panelName: " << panelName;
+                // Check if Dir Exists
+                if (!QFileInfo(currentDir).exists()) {
+                    // Init Last Existing Dir
+                    QString lastExistingDir = currentDir;
+                    // Find Existing Dir
+                    while (!QFileInfo(lastExistingDir).exists() && lastExistingDir != DEFAULT_ROOT_DIR) {
+                        // Get Parent Dir
+                        lastExistingDir = getParentDirFromPath(lastExistingDir);
+                    }
 
-                    //qDebug() << "FilePanel::timerEvent - dirWatcherTimerID - BUSY!";
+                    // Set Current Dir
+                    setCurrentDir(lastExistingDir);
 
                 } else if (dwDirChanged || dwFileChanged){
 

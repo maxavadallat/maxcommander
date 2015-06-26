@@ -333,8 +333,7 @@
 
 #define DEFAULT_URL_PREFIX_FILE                             "file://"
 
-
-
+#define DEFAULT_ROOT_DIR                                    "/"
 
 
 

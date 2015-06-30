@@ -130,6 +130,9 @@ protected slots:
     // Show Results Button Clicked Slot
     void on_showResultsButton_clicked();
 
+    // On Content Search Checkbox Clicked Slot
+    void on_contentSearchCheckBox_clicked();
+
 protected: // From QDialog
 
     // Exec

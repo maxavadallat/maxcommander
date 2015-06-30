@@ -1155,7 +1155,7 @@ QVariant FileListModel::data(const QModelIndex& aIndex, int aRole) const
             case FileIsHidden:      return (item->fileInfo.fileName() == QString("..") ? false : item->fileInfo.isHidden());
             case FileIsLink:        return item->fileInfo.isSymLink();
             case FileIsDir:         return item->fileInfo.isDir();
-            case FileDirSize:       return item->dirSize;
+            case FileDirSize:       return formattedSize(item->dirSize);
 
             default:
             break;

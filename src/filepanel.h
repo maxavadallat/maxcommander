@@ -445,9 +445,6 @@ protected slots: // From QFileSystemWatcher
     // File Changed Slot
     void fileChanged(const QString& aFilePath);
 
-    // Refresh File List Model
-    void refreshFileListModel(const QString& aFilePath);
-
 protected slots: // From File Renamer
 
     // Rename Finished Slot

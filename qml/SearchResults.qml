@@ -105,7 +105,7 @@ Rectangle {
 
         // On Visual Item Coun Changed
         onVisualItemCountChanged: {
-            console.log("searchResultList.onVisualItemCountChanged - visualItemCount: " + searchResultList.visualItemCount);
+            //console.log("searchResultList.onVisualItemCountChanged - visualItemCount: " + searchResultList.visualItemCount);
 
             // Set Visual Item Count
             searchResultController.visualItemCount = searchResultList.visualItemCount;
@@ -124,13 +124,13 @@ Rectangle {
 
     // On Completed
     Component.onCompleted: {
-        console.log("searchResultsRoot.onCompleted");
+        //console.log("searchResultsRoot.onCompleted");
 
     }
 
     // On Destruction
     Component.onDestruction: {
-        console.log("searchResultsRoot.onDestruction");
+        //console.log("searchResultsRoot.onDestruction");
 
     }
 

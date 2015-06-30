@@ -57,8 +57,9 @@ Rectangle {
         clip: true
         focus: true
         highlightFollowsCurrentItem: true
-        highlightMoveDuration: 0
-        highlightResizeDuration: 0
+        //highlightMoveDuration: 0
+        //highlightResizeDuration: 0
+
         snapMode: ListView.SnapToItem
 
         cacheBuffer: globalSettings.thumbHeight * 8
@@ -105,13 +106,12 @@ Rectangle {
             fileNameText  : fileName
             fileExtText   : fileExt
             fileTypeText  : fileType
-            fileSizeText  : dirSize > 0 ? dirSize : fileSize
+            fileSizeText  : dirSize != "0 B" ? dirSize : fileSize
             fileDateText  : fileDate
             fileOwnerText : fileOwner
             filePermsText : filePerms
             fileHidden    : fileIsHidden
             fileSelected  : fileIsSelected
-            fileDirSize   : dirSize
             fileSymLink   : fileIsLink
 
             nameWidth   : fileListHeader.nameWidth
@@ -573,7 +573,9 @@ Rectangle {
                 // Set File List View Current Index
                 fileListView.currentIndex = aIndex;
                 // Position View
-                //fileListView.positionViewAtIndex(aIndex + 1, ListView.Center);
+                //fileListView.positionViewAtIndex(aIndex, ListView.SnapPosition);
+                // Force Layout
+                //fileListView.forceLayout();
             }
         }
 

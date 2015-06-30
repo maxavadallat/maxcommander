@@ -4,6 +4,7 @@
 #include <QImageReader>
 #include <QFile>
 #include <QTextStream>
+#include <QLineEdit>
 #include <QDebug>
 
 #include <mcwinterface.h>
@@ -53,7 +54,7 @@ SearchDialog::SearchDialog(QWidget* aParent)
 //==============================================================================
 void SearchDialog::init()
 {
-    qDebug() << "SearchDialog::init";
+    //qDebug() << "SearchDialog::init";
 
     // Connect Signals
     connect(ui->buttonBox, SIGNAL(clicked(QAbstractButton*)), this, SLOT(buttonBoxClicked(QAbstractButton*)));
@@ -160,7 +161,7 @@ void SearchDialog::loadSettings()
         return;
     }
 
-    qDebug() << "SearchDialog::loadSettings";
+    //qDebug() << "SearchDialog::loadSettings";
 
     // Case Senstive Search
     caseSensitiveSearch = settings->value(SETTINGS_KEY_SEARCH_CASE_SENSITIVE, DEFAULT_SETTINGS_SEARCH_CASE_SENSITIVE).toBool();
@@ -182,7 +183,7 @@ void SearchDialog::saveSettings()
         return;
     }
 
-    qDebug() << "SearchDialog::saveSettings";
+    //qDebug() << "SearchDialog::saveSettings";
 
     // Save Case Sensitive Setting
     settings->setValue(SETTINGS_KEY_SEARCH_CASE_SENSITIVE, caseSensitiveSearch);
@@ -205,7 +206,7 @@ void SearchDialog::saveSettings()
 //==============================================================================
 void SearchDialog::restoreUI()
 {
-    qDebug() << "SearchDialog::restoreUI";
+    //qDebug() << "SearchDialog::restoreUI";
 
     // Hide Results
     hideresults();
@@ -235,6 +236,18 @@ void SearchDialog::restoreUI()
     ui->caseSensitiveCheckBox->setChecked(caseSensitiveSearch);
     // Whole Word Search
     ui->wholeWordCheckBox->setChecked(wholeWordSearch);
+
+    // Reset Content Search Check Box
+    ui->contentSearchCheckBox->setChecked(false);
+
+    // Set Case Sensitive Check Box Enabled
+    ui->caseSensitiveCheckBox->setEnabled(false);
+    // Set Whole Word Check Box Enabled
+    ui->wholeWordCheckBox->setEnabled(false);
+    // Set Content Pattern Combo Enabled
+    ui->contentPatternComboBox->setEnabled(false);
+    // Enable Results Button
+    ui->showResultsButton->setEnabled(false);
 
     // Check Results Model
     if (resultModel) {
@@ -350,7 +363,7 @@ void SearchDialog::shutDown()
 //==============================================================================
 void SearchDialog::loadFileSearchPatterns()
 {
-    qDebug() << "SearchDialog::loadFileSearchPatterns";
+    //qDebug() << "SearchDialog::loadFileSearchPatterns";
 
     // Clear File Patterns
     ui->filePatternComboBox->clear();
@@ -381,7 +394,7 @@ void SearchDialog::loadFileSearchPatterns()
 //==============================================================================
 void SearchDialog::loadContentSearchPatterns()
 {
-    qDebug() << "SearchDialog::loadContentSearchPatterns";
+    //qDebug() << "SearchDialog::loadContentSearchPatterns";
 
     // Clear Content Patterns
     ui->contentPatternComboBox->clear();
@@ -412,7 +425,7 @@ void SearchDialog::loadContentSearchPatterns()
 //==============================================================================
 void SearchDialog::saveFileSearchPatterns()
 {
-    qDebug() << "SearchDialog::saveFileSearchPatterns";
+    //qDebug() << "SearchDialog::saveFileSearchPatterns";
 
     // Init File Search Pattern List File
     QFile fspFile(QDir::homePath() + "/" + DEFAULT_FILE_SEARCH_FILE_NAME_PATTERN_LIST);
@@ -445,7 +458,7 @@ void SearchDialog::saveFileSearchPatterns()
 //==============================================================================
 void SearchDialog::saveContentSearchPatterns()
 {
-    qDebug() << "SearchDialog::saveContentSearchPatterns";
+    //qDebug() << "SearchDialog::saveContentSearchPatterns";
 
     // Init Content Search Pattern List File
     QFile cspFile(QDir::homePath() + "/" + DEFAULT_FILE_SEARCH_CONTENT_PATTERN_LIST);
@@ -580,7 +593,7 @@ void SearchDialog::buttonBoxClicked(QAbstractButton* aButton)
 //==============================================================================
 void SearchDialog::showDialog(const QString& aDirPath, FilePanel* aFocusedPanel)
 {
-    qDebug() << "SearchDialog::showDialog";
+    //qDebug() << "SearchDialog::showDialog";
 
     // Set Current Dir
     currentDir = aDirPath;
@@ -622,7 +635,7 @@ void SearchDialog::showDialog(const QString& aDirPath, FilePanel* aFocusedPanel)
 //==============================================================================
 void SearchDialog::hideDialog()
 {
-    qDebug() << "SearchDialog::hideDialog";
+    //qDebug() << "SearchDialog::hideDialog";
 
     // Close
     close();
@@ -745,7 +758,7 @@ void SearchDialog::startSearch()
         // Get File Name Pattern
         fileNamePattern = ui->filePatternComboBox->currentText();
         // Get Content Pattern
-        contentPattern = ui->contentPatternComboBox->currentText();
+        contentPattern = ui->contentSearchCheckBox->isChecked() ? ui->contentPatternComboBox->currentText() : "";
 
         // Init Options
         int searchOptions = 0;
@@ -840,10 +853,13 @@ void SearchDialog::fileOpSkipped(const unsigned int& aID,
                                  const QString& aSource,
                                  const QString& aTarget)
 {
+    Q_UNUSED(aID);
+    Q_UNUSED(aOp);
+    Q_UNUSED(aPath);
     Q_UNUSED(aSource);
     Q_UNUSED(aTarget);
 
-    qDebug() << "SearchDialog::fileOpSkipped - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath;
+    //qDebug() << "SearchDialog::fileOpSkipped - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath;
 
 }
 
@@ -871,6 +887,9 @@ void SearchDialog::fileOpFinished(const unsigned int& aID,
 
         // Set Button Box
         ui->buttonBox->setStandardButtons(QDialogButtonBox::Reset | QDialogButtonBox::Close);
+
+        // Enable Results Button
+        ui->showResultsButton->setEnabled(true);
 
         // Check Results
         if (resultModel && resultModel->rowCount() > 0) {
@@ -926,7 +945,7 @@ void SearchDialog::fileOpError(const unsigned int& aID,
 
     // Check Operation
     if (aOp == DEFAULT_OPERATION_SEARCH_FILE) {
-        qDebug() << "SearchDialog::fileOpFinished - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath << " - aError: " << aError;
+        qDebug() << "SearchDialog::fileOpError - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath << " - aError: " << aError;
 
         // ...
 
@@ -1072,7 +1091,7 @@ void SearchDialog::closeEvent(QCloseEvent* aEvent)
 {
     Q_UNUSED(aEvent);
 
-    qDebug() << "SearchDialog::closeEvent";
+    //qDebug() << "SearchDialog::closeEvent";
 
     // ...
 
@@ -1085,7 +1104,7 @@ void SearchDialog::hideEvent(QHideEvent* aEvent)
 {
     Q_UNUSED(aEvent);
 
-    qDebug() << "SearchDialog::hideEvent";
+    //qDebug() << "SearchDialog::hideEvent";
 
     // Reset Dialog Shown
     dialogShown = false;
@@ -1107,6 +1126,58 @@ void SearchDialog::hideEvent(QHideEvent* aEvent)
     }
 
     // ...
+}
+
+//==============================================================================
+// Show Results Button Clicked Slot
+//==============================================================================
+void SearchDialog::on_showResultsButton_clicked()
+{
+    // Check If Results Shown/Visible
+    if (resultsVisible) {
+        // Hide Results
+        hideresults();
+    } else {
+
+        // ...
+
+        // Show Results
+        showResults();
+    }
+}
+
+//==============================================================================
+// On Content Search Checkbox Clicked Slot
+//==============================================================================
+void SearchDialog::on_contentSearchCheckBox_clicked()
+{
+    // Check Check Box
+    if (ui->contentSearchCheckBox->isChecked()) {
+
+        // Set Case Sensitive Check Box Enabled
+        ui->caseSensitiveCheckBox->setEnabled(true);
+        // Set Whole Word Check Box Enabled
+        ui->wholeWordCheckBox->setEnabled(true);
+        // Set Content Pattern Combo Enabled
+        ui->contentPatternComboBox->setEnabled(true);
+
+        // Set Focus
+        ui->contentPatternComboBox->setFocus();
+        // Set Current Index
+        ui->contentPatternComboBox->setCurrentIndex(0);
+        // Select all
+        ui->contentPatternComboBox->lineEdit()->selectAll();
+
+    } else {
+
+        // Set Case Sensitive Check Box Enabled
+        ui->caseSensitiveCheckBox->setEnabled(false);
+        // Set Whole Word Check Box Enabled
+        ui->wholeWordCheckBox->setEnabled(false);
+        // Set Content Pattern Combo Enabled
+        ui->contentPatternComboBox->setEnabled(false);
+
+    }
 }
 
 //==============================================================================
@@ -1336,24 +1407,6 @@ Qt::ItemFlags SearchResultModel::flags(const QModelIndex& aIndex) const
 }
 
 //==============================================================================
-// Show Results Button Clicked Slot
-//==============================================================================
-void SearchDialog::on_showResultsButton_clicked()
-{
-    // Check If Results Shown/Visible
-    if (resultsVisible) {
-        // Hide Results
-        hideresults();
-    } else {
-
-        // ...
-
-        // Show Results
-        showResults();
-    }
-}
-
-//==============================================================================
 // Destructor
 //==============================================================================
 SearchResultModel::~SearchResultModel()
@@ -1363,6 +1416,7 @@ SearchResultModel::~SearchResultModel()
 
     // ...
 }
+
 
 
 

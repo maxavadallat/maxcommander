@@ -209,6 +209,11 @@ void FilePanel::setCurrentDir(const QString& aCurrentDir, const QString& aLastFi
         // Set Current Dir
         currentDir = aCurrentDir;
 
+        // Check Search Result Mode
+        if (searchResultsMode) {
+            return;
+        }
+
         // Set Text
         ui->currDirLabel->setText(currentDir);
 
@@ -1680,8 +1685,16 @@ void FilePanel::fileModelDirFetchFinished()
         int lastDirIndex = fileListModel ? fileListModel->findIndex(lastDirName) : 0;
         // Reset Last Dir Name
         lastDirName = "";
+
+        // Check Last Index - FOR A FUCKING QML LISTVIEW BUG!
+        if (fileListModel && lastDirIndex == fileListModel->rowCount() - 1) {
+            // Set Current Index
+            setCurrentIndex(lastDirIndex - 1);
+        }
+
         // Set Current Index
         setCurrentIndex(lastDirIndex);
+
         // Set Loading
         setLoading(false);
 
@@ -2012,17 +2025,6 @@ void FilePanel::fileChanged(const QString& aFilePath)
 
         // ...
     }
-}
-
-//==============================================================================
-// Refresh File List Model
-//==============================================================================
-void FilePanel::refreshFileListModel(const QString& aFilePath)
-{
-    qDebug() << "FilePanel::refreshFileListModel - aFilePath: " << aFilePath;
-
-    // ...
-
 }
 
 //==============================================================================
@@ -2814,6 +2816,11 @@ void FilePanel::timerEvent(QTimerEvent* aEvent)
                     setCurrentDir(lastExistingDir);
 
                 } else if (dwDirChanged || dwFileChanged){
+
+                    // Check Search Results Mode
+                    if (searchResultsMode) {
+                        return;
+                    }
 
                     //qDebug() << "FilePanel::timerEvent - dirWatcherTimerID";
 

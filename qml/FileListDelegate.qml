@@ -39,7 +39,6 @@ Rectangle {
     property bool fileSymLink: false
 
     property bool mouseHovered: false
-    property int fileDirSize: 0
 
     property int itemIndex: 0
     property int listIndex: -1

@@ -456,6 +456,7 @@ void MainWindow::launchViewer(const QString& aFileName, FilePanel* aFilePanel, c
 
     // Connect Signal
     connect(newViewer, SIGNAL(viewerClosed(ViewerWindow*)), this, SLOT(viewerWindowClosed(ViewerWindow*)), Qt::QueuedConnection);
+    connect(newViewer, SIGNAL(imageSelected(QString, QString)), this, SLOT(viewerImageSelected(QString, QString)));
 
     // Check View Search Result
     if (viewSearchResult) {
@@ -1058,6 +1059,32 @@ void MainWindow::searchResultView(const QString& aFilePath, const bool& aEdit, c
 
         // Launch Viewer
         launchViewer(aFilePath, searchFileDialog->getFocusedPanel(), aEdit, false, aSearchTerm);
+    }
+}
+
+//==============================================================================
+// Viewer Image Selected Slot
+//==============================================================================
+void MainWindow::viewerImageSelected(const QString& aFilePath, const QString& aPanelName)
+{
+    qDebug() << "MainWindow::viewerImageSelected - aFilePath: " << aFilePath << " - aPanelName: " << aPanelName;
+
+    // Init File Info
+    QFileInfo fileInfo(aFilePath);
+
+    // Init Current Panel
+    FilePanel* currPanel = aPanelName == DEFAULT_PANEL_NAME_LEFT ? leftPanel : rightPanel;
+
+    // Check Curr Panel Path
+    if (currPanel && QDir(currPanel->getCurrentDir()) == QDir(fileInfo.absolutePath())) {
+        // Find Index
+        int imageIndex = currPanel->getFileIndex(fileInfo.fileName());
+
+        // Check Index
+        if (imageIndex >= 0 && imageIndex < currPanel->getCount()) {
+            // Set Current Index
+            currPanel->setCurrentIndex(imageIndex);
+        }
     }
 }
 

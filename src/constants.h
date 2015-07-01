@@ -367,6 +367,10 @@
 #define DEFAULT_CONFIRM_BUTTON_TEXT_ASADMIN                 "As Admin"
 
 
+#define DEFAULT_TITLE_ERROR_CREATING_DIRECTORY              "Error Creating Directory"
+#define DEFAULT_TITLE_ERROR_DELETING_DIRECTORY              "Error Deleting Directory"
+#define DEFAULT_TITLE_ERROR_DELETING_FILE                   "Error Deleting File"
+
 #define DEFAULT_CONFIRM_TEXT_DIRECTORY_EXISTS               "Directory Exists:"
 #define DEFAULT_CONFIRM_TEXT_DIRECTORY_NOT_EMPTY            "Directory: %1 Is Not Empty. Delete All?"
 #define DEFAULT_CONFIRM_TEXT_DIRECTORY_EXISTS_MERGE         "Target Directory Exists, Merge?"

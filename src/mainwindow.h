@@ -144,6 +144,9 @@ protected slots:
     // Search Result Item View Slot
     void searchResultView(const QString& aFilePath, const bool& aEdit, const QString& aSearchTerm);
 
+    // Viewer Image Selected Slot
+    void viewerImageSelected(const QString& aFilePath, const QString& aPanelName);
+
 protected slots: // Actions & Button
 
     // Help Button Clicked Slot

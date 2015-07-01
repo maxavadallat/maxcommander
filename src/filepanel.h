@@ -72,6 +72,9 @@ public:
     // Get Current Dir
     QString getCurrentDir();
 
+    // Get Files/Items Count
+    int getCount();
+
     // Get Panel Name
     QString getPanelName();
     // Set Panel Name

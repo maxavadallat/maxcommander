@@ -173,6 +173,19 @@ QString FilePanel::getCurrentDir()
 }
 
 //==============================================================================
+// Get Files/Items Count
+//==============================================================================
+int FilePanel::getCount()
+{
+    // Check File List Model
+    if (fileListModel) {
+        return fileListModel->rowCount();
+    }
+
+    return 0;
+}
+
+//==============================================================================
 // Set Current Dir
 //==============================================================================
 void FilePanel::setCurrentDir(const QString& aCurrentDir, const QString& aLastFileName)
@@ -1839,18 +1852,19 @@ void FilePanel::fileModelError(const QString& aPath, const QString& aSource, con
         if (fileListModel->lastOperation() == DEFAULT_OPERATION_LIST_DIR) {
 
 
+
         // Check Last Operation - Make Dir
         } else if (fileListModel->lastOperation() == DEFAULT_OPERATION_MAKE_DIR) {
             // Directory Exists
             ConfirmDialog confirmDialog;
-            // Clear Buttons
-            //confirmDialog.clearButtons();
+            // Set Title
+            confirmDialog.setConfirmTitle(tr(DEFAULT_TITLE_ERROR_CREATING_DIRECTORY));
             // Configure Buttons
             confirmDialog.configureButtons(QDialogButtonBox::Abort);
 
             // Switch Error
             switch (aError) {
-                case DEFAULT_ERROR_EXISTS: {
+                case DEFAULT_ERROR_EXISTS:
                     // Set Text
                     confirmDialog.setConfirmText(tr(DEFAULT_CONFIRM_TEXT_DIRECTORY_EXISTS));
                     // Add Button
@@ -1865,22 +1879,32 @@ void FilePanel::fileModelError(const QString& aPath, const QString& aSource, con
                         // Send User Response/Confirm
                         fileListModel->sendUserResponse(DEFAULT_CONFIRM_ABORT, confirmDialog.getPath());
                     }
-
-                } break;
+                break;
 
                 case DEFAULT_ERROR_ACCESS:
                     // No Access
 
                 break;
 
-                case DEFAULT_ERROR_GENERAL:
-                    // General
-
-                break;
-
                 default:
+                case DEFAULT_ERROR_GENERAL:
+                    // Set Text
+                    confirmDialog.setConfirmText(tr(DEFAULT_ERROR_TEXT_CANT_CREATE_DIRECTORY));
+                    // Add Button
+                    confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_RETRY), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_RETRY);
+                    // Set Path
+                    confirmDialog.setPath(aPath);
+                    // Exec Dialog
+                    if (confirmDialog.exec()) {
+                        // Send User Response/Confirm
+                        fileListModel->sendUserResponse(confirmDialog.getActionIndex(), confirmDialog.getPath());
+                    } else {
+                        // Send User Response/Confirm
+                        fileListModel->sendUserResponse(DEFAULT_CONFIRM_ABORT, confirmDialog.getPath());
+                    }
                 break;
             }
+
         } else if (fileListModel->lastOperation() == DEFAULT_OPERATION_MAKE_LINK) {
 
             // Switch Error

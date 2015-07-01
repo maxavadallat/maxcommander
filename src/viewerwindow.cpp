@@ -244,6 +244,7 @@ bool ViewerWindow::loadFile(const QString& aFileName, const QString& aPanelName)
             // Connect Signals
             connect(imageBrowser, SIGNAL(currentIndexChanged(int)), this, SLOT(imageBrowserCurrentIndexChanged(int)));
             connect(imageBrowser, SIGNAL(currentFileChanged(QString)), this, SLOT(imageBrowserCurrentFileChanged(QString)));
+            connect(imageBrowser, SIGNAL(currentFileChanged(QString)), this, SIGNAL(currentImageFileChanged(QString)));
         }
 
         // Set Context Property
@@ -824,18 +825,6 @@ void ViewerWindow::keyReleaseEvent(QKeyEvent* aEvent)
                 closeWindow();
             break;
 
-            case Qt::Key_W:
-/*
-                // Check Editor Mode
-                if (!editMode) {
-                    // Toggle Wrap Mode
-                    toggleWrapMode();
-                }
-*/
-                // Handled By Hot Key
-
-            break;
-
             case Qt::Key_Home:
                 // Check Image Browser
                 if (imageBrowser) {
@@ -866,6 +855,17 @@ void ViewerWindow::keyReleaseEvent(QKeyEvent* aEvent)
                     // Go To Last
                     imageBrowser->gotoLast();
                 }
+            break;
+
+            case Qt::Key_Return:
+            case Qt::Key_Enter:
+                // Check Image Browser
+                if (imageBrowser) {
+                    // Emit Image Selected
+                    emit imageSelected(imageBrowser->getCurrentDir() + imageBrowser->getCurrentFile(), imageBrowser->getPanelName());
+                }
+                // Close Window
+                closeWindow();
             break;
 
             case Qt::Key_S: {
@@ -1149,6 +1149,22 @@ QString ImageBrowser::getCurrentFile()
 int ImageBrowser::getCurrentIndex()
 {
     return currentIndex;
+}
+
+//==============================================================================
+// Get Panel Name
+//==============================================================================
+QString ImageBrowser::getPanelName()
+{
+    return panelName;
+}
+
+//==============================================================================
+// Get Current Dir
+//==============================================================================
+QString ImageBrowser::getCurrentDir()
+{
+    return currentDir;
 }
 
 //==============================================================================

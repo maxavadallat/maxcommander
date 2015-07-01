@@ -70,6 +70,10 @@ signals:
     void viewerClosed(ViewerWindow* aViewer);
     // Content Source changed Signal
     void contentSourceChanged(const QString& aContentSource);
+    // Current Image File Changed Signal
+    void currentImageFileChanged(const QString& aFilePath);
+    // Image Selected Signal
+    void imageSelected(const QString& aFilePath, const QString& aPanelName);
 
 protected slots:
 
@@ -210,6 +214,11 @@ public:
     QString getCurrentFile();
     // Get Current Index
     int getCurrentIndex();
+
+    // Get Panel Name
+    QString getPanelName();
+    // Get Current Dir
+    QString getCurrentDir();
 
     // Go To First
     void gotoFirst();

@@ -89,6 +89,9 @@ void ViewerWindow::init()
     // Set Resize Mode
     ui->quickWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
 
+    // Set Focus Policy
+    setFocusPolicy(Qt::StrongFocus);
+
     // ...
 }
 
@@ -364,6 +367,9 @@ void ViewerWindow::showWindow()
         // Enable Find Next
         ui->actionFind_Next->setEnabled(true);
     }
+
+    // Set Focus
+    setFocus();
 }
 
 //==============================================================================

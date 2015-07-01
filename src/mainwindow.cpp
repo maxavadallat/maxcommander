@@ -1453,7 +1453,7 @@ void MainWindow::transferProgressClosed(TransferProgressDialog* aTransferProgres
 //==============================================================================
 void MainWindow::focusedPanelChanged(FilePanel* aFocusedPanel)
 {
-    //qDebug() << "MainWindow::focusedPanelChanged";
+    qDebug() << "MainWindow::focusedPanelChanged - panelName: " << aFocusedPanel->getPanelName();
 
     // Set Focused Panel
     focusedPanel = aFocusedPanel;

@@ -160,6 +160,8 @@ void FilePanel::init()
 
     // ...
 
+    // Set Focus Policy
+    setFocusPolicy(Qt::StrongFocus);
 }
 
 //==============================================================================
@@ -1325,7 +1327,7 @@ void FilePanel::goNext()
     //qDebug() << "FilePanel::goNext - panelName: " << panelName;
 
     // Set Current Index
-    setCurrentIndex(currentIndex + 1);
+    setCurrentIndex(qBound(0, currentIndex + 1, fileListModel ? fileListModel->rowCount()-1 : 0));
 }
 
 //==============================================================================
@@ -1336,7 +1338,7 @@ void FilePanel::goPrev()
     //qDebug() << "FilePanel::goPrev - panelName: " << panelName;
 
     // Set Current Index
-    setCurrentIndex(currentIndex - 1);
+    setCurrentIndex(qBound(0, currentIndex - 1, fileListModel ? fileListModel->rowCount()-1 : 0));
 }
 
 //==============================================================================
@@ -1956,17 +1958,22 @@ void FilePanel::setPanelFocus(const bool& aFocus)
 {
     // Check Panel Has Focus
     if (panelHasFocus != aFocus) {
+        //qDebug() << "FilePanel::setPanelFocus - panelName: " << panelName << " - aFocus: " << aFocus;
+
         // Set Panel Has Focus
         panelHasFocus = aFocus;
 
         // Check Focus
         if (panelHasFocus) {
-            // Set Style Sheet
-            setStyleSheet(DEFAULT_PANEL_FOCUSED_STYLE_SHEET);
-            // Set Style Sheet
-            ui->currDirLabel->setStyleSheet(DEFAULT_PANEL_TRASPARENT_STYLE_SHEET);
-            // Set Style Sheet
-            ui->availableSpaceLabel->setStyleSheet(DEFAULT_PANEL_TRASPARENT_STYLE_SHEET);
+            // Check Parent
+            if (parent()) {
+                // Set Style Sheet
+                setStyleSheet(DEFAULT_PANEL_FOCUSED_STYLE_SHEET);
+                // Set Style Sheet
+                ui->currDirLabel->setStyleSheet(DEFAULT_PANEL_TRASPARENT_STYLE_SHEET);
+                // Set Style Sheet
+                ui->availableSpaceLabel->setStyleSheet(DEFAULT_PANEL_TRASPARENT_STYLE_SHEET);
+            }
 
             // Emit Focused Panle Has Changed
             emit focusedPanelChanged(this);
@@ -2386,7 +2393,9 @@ void FilePanel::on_rootButton_clicked()
 //==============================================================================
 void FilePanel::currDirLabelRightClicked(const QPoint& aPos)
 {
-    qDebug() << "FilePanel::currDirLabelRightClicked - aPos: " << aPos;
+    Q_UNUSED(aPos);
+
+    //qDebug() << "FilePanel::currDirLabelRightClicked - aPos: " << aPos;
 
     // Launch Dir History List Popup
     launchDirHistoryPopup();
@@ -2399,23 +2408,10 @@ void FilePanel::focusInEvent(QFocusEvent* aEvent)
 {
     // Check Event
     if (aEvent) {
-        qDebug() << "FilePanel::focusInEvent - panel: " << panelName;
+        //qDebug() << "FilePanel::focusInEvent - panel: " << panelName;
 
-        // Set Style Sheet
-        setStyleSheet(DEFAULT_PANEL_FOCUSED_STYLE_SHEET);
-        // Set Style Sheet
-        ui->currDirLabel->setStyleSheet(DEFAULT_PANEL_TRASPARENT_STYLE_SHEET);
-        // Set Style Sheet
-        ui->availableSpaceLabel->setStyleSheet(DEFAULT_PANEL_TRASPARENT_STYLE_SHEET);
-
-        // Check Focus
-        if (!ui->fileListWidget->hasFocus()) {
-            // Set Focus
-            ui->fileListWidget->setFocus();
-        }
-
-        // Emit Focused Panel Changed Signal
-        emit focusedPanelChanged(this);
+        // Set Panel Focus
+        setPanelFocus(true);
     }
 }
 
@@ -2426,14 +2422,10 @@ void FilePanel::focusOutEvent(QFocusEvent* aEvent)
 {
     // Check Event
     if (aEvent) {
-        qDebug() << "FilePanel::focusOutEvent - panel: " << panelName;
+        //qDebug() << "FilePanel::focusOutEvent - panel: " << panelName;
 
-        // Reset Style Sheet
-        setStyleSheet("");
-        // Set Style Sheet
-        ui->currDirLabel->setStyleSheet("");
-        // Set Style Sheet
-        ui->availableSpaceLabel->setStyleSheet("");
+        // Set Panel Focus
+        setPanelFocus(false);
     }
 }
 
@@ -2463,9 +2455,23 @@ void FilePanel::keyPressEvent(QKeyEvent* aEvent)
             break;
 
             case Qt::Key_Up:
+                // Check If Auto Repeat
+                if (aEvent->isAutoRepeat()) {
+                    // Accept
+                    aEvent->accept();
+                    // Go Prev
+                    goPrev();
+                }
             break;
 
             case Qt::Key_Down:
+                // Check If Auto Repeat
+                if (aEvent->isAutoRepeat()) {
+                    // Accept
+                    aEvent->accept();
+                    // Go Next
+                    goNext();
+                }
             break;
 
             case Qt::Key_Backspace:
@@ -2566,10 +2572,11 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
                         // Set Selected
                         fileListModel->setSelected(currentIndex, !fileListModel->getSelected(currentIndex));
                     }
-                } else if (modifierKeys == Qt::NoModifier) {
-                    // Go Prev
-                    //goPrev();
                 }
+
+                // Go Prev
+                goPrev();
+
             break;
 
             case Qt::Key_Down:
@@ -2580,10 +2587,11 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
                         // Set Selected
                         fileListModel->setSelected(currentIndex, !fileListModel->getSelected(currentIndex));
                     }
-                } else if (modifierKeys == Qt::NoModifier) {
-                    // Go Next
-                    //goNext();
                 }
+
+                // Go Next
+                goNext();
+
             break;
 
             case Qt::Key_Backspace:
@@ -2784,7 +2792,7 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
             break;
 
             default:
-                qDebug() << "FilePanel::keyReleaseEvent - key: " << aEvent->key();
+                //qDebug() << "FilePanel::keyReleaseEvent - key: " << aEvent->key();
             break;
         }
     }
@@ -2853,6 +2861,8 @@ FilePanel::~FilePanel()
         settings = NULL;
     }
 
+    // Delete Quick Widget
+    delete ui->fileListWidget;
     // Delete UI
     delete ui;
 

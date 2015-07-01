@@ -16,6 +16,9 @@
     <height>480</height>
    </size>
   </property>
+  <property name="focusPolicy">
+   <enum>Qt::NoFocus</enum>
+  </property>
   <property name="windowTitle">
    <string>Max Commander</string>
   </property>

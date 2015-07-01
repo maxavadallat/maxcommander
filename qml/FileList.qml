@@ -597,7 +597,7 @@ Rectangle {
 
         // On Launch File Rename
         onLaunchFileRename: {
-            console.log("fileListRoot.Connections.mainController.onLaunchFileRename");
+            //console.log("fileListRoot.Connections.mainController.onLaunchFileRename");
 
             // Set File Renamer Pos & Size
             fileRenamer.width = fileListView.width - 4;
@@ -617,7 +617,7 @@ Rectangle {
 
         // On Search Result Mode Changed
         onSearchResultsModeChanged: {
-            console.log("fileListRoot.Connections.mainController.onLaunchFileRename");
+            //console.log("fileListRoot.Connections.mainController.onLaunchFileRename");
 
             // Update File List Header Layout
             updateFileListHeaderLayout();

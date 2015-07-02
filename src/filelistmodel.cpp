@@ -665,6 +665,22 @@ QString FileListModel::getFileName(const int& aIndex)
 }
 
 //==============================================================================
+// Get Full File Path
+//==============================================================================
+QString FileListModel::getFullPath(const int& aIndex)
+{
+    // Get Item List Count
+    int ilCount = itemList.count();
+
+    // Check Index
+    if (aIndex >= 0 && aIndex < ilCount) {
+        return itemList[aIndex]->fileInfo.absoluteFilePath();
+    }
+
+    return "";
+}
+
+//==============================================================================
 // Get Dir Size
 //==============================================================================
 quint64 FileListModel::getDirSize(const int& aIndex)

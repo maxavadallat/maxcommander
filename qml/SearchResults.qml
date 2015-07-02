@@ -14,6 +14,8 @@ Rectangle {
 
     focus: true
 
+    property bool ownKeyPress: false
+
     // Goto Prev Item
     function gotoPrev() {
         // Set Current Index
@@ -51,6 +53,10 @@ Rectangle {
     }
 
     Keys.onPressed: {
+
+        // Set Own Key Press
+        searchResultsRoot.ownKeyPress = true;
+
         // Switch Key
         switch (event.key) {
             case Qt.Key_Up:
@@ -87,6 +93,14 @@ Rectangle {
     }
 
     Keys.onReleased: {
+
+        // Check Own Key Press
+        if (!searchResultsRoot.ownKeyPress)
+            return;
+
+        // reset Own Key Press
+        searchResultsRoot.ownKeyPress = false;
+
         // Switch Key
         switch (event.key) {
             case Qt.Key_Up:
@@ -181,13 +195,26 @@ Rectangle {
                     width: parent.height
                     height: parent.height
                     fillMode: Image.PreserveAspectFit
+                    cache: false
+                    smooth: false
                     source: {
-                        // Check File Name
-                        if (Utility.isImage(filePath, searchResultController)) {
-                            Const.DEFAULT_FILE_PREFIX + filePath
+                        // Check Settings
+                        if (globalSettings.useDefaultIcons) {
+                            // Check If Is Dir
+                            if (fileIsDir) {
+                               return Const.DEFAULT_FILE_LIST_ICON_DIR;
+                            }
+
+                            return Const.DEFAULT_FILE_LIST_ICON_FILE;
+
                         } else {
+                            // Check File Name
+                            if (Utility.isImage(filePath, searchResultController)) {
+                                return Const.DEFAULT_FILE_PREFIX + filePath;
+                            }
+
                             // Image Provider
-                            Const.DEFAULT_FILE_ICON_PREFIX + filePath
+                            return Const.DEFAULT_FILE_ICON_PREFIX + filePath;
                         }
                     }
                 }
@@ -232,7 +259,7 @@ Rectangle {
         highlight: Rectangle {
             width: searchResultList.width
             height: Const.DEFAULT_SEARCH_RESULTS_DELEGATE_HEIGHT
-            color: "#44444477"
+            color: Const.DEFAULT_SEARCH_RESULTS_HIGLIGHT_COLOR
         }
 
         // On Visual Item Coun Changed

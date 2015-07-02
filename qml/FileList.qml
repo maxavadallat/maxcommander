@@ -62,7 +62,7 @@ Rectangle {
 
         snapMode: ListView.SnapToItem
 
-        cacheBuffer: globalSettings.thumbHeight * 8
+        //cacheBuffer: globalSettings.thumbHeight * 8
 
         property int delegateHeight: globalSettings.thumbHeight
         property int visualItemsCount: Math.floor((fileListView.height + fileListView.spacing) / fileListView.delegateHeight);
@@ -89,13 +89,27 @@ Rectangle {
                     return Const.DEFAULT_FILE_LIST_ICON_FILE;
 
                 } else {
-                    // Check File Name
-                    if (Utility.isImage(fileFullName, mainController)) {
-                        return Const.DEFAULT_FILE_PREFIX + mainController.currentDir + "/" + fileFullName;
-                    }
 
-                    // Image Provider
-                    return Const.DEFAULT_FILE_ICON_PREFIX + mainController.currentDir + "/" + fileFullName;
+                    // Check Main Controller Search Result Mode
+                    if (mainController.searchResultsMode) {
+
+                        // Check File Name
+                        if (Utility.isImage(fileFullName, mainController)) {
+                            return Const.DEFAULT_FILE_PREFIX + fileListModel.getFullPath(index);
+                        }
+
+                        // Image Provider
+                        return Const.DEFAULT_FILE_ICON_PREFIX + fileListModel.getFullPath(index);
+
+                    } else {
+                        // Check File Name
+                        if (Utility.isImage(fileFullName, mainController)) {
+                            return Const.DEFAULT_FILE_PREFIX + mainController.currentDir + "/" + fileFullName;
+                        }
+
+                        // Image Provider
+                        return Const.DEFAULT_FILE_ICON_PREFIX + mainController.currentDir + "/" + fileFullName;
+                    }
                 }
             }
 

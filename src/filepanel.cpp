@@ -224,11 +224,6 @@ void FilePanel::setCurrentDir(const QString& aCurrentDir, const QString& aLastFi
         // Set Current Dir
         currentDir = aCurrentDir;
 
-        // Check Search Result Mode
-        if (searchResultsMode) {
-            return;
-        }
-
         // Set Text
         ui->currDirLabel->setText(currentDir);
 

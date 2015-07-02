@@ -148,6 +148,9 @@ public slots:
     // Get File Name
     QString getFileName(const int& aIndex);
 
+    // Get Full File Path
+    QString getFullPath(const int& aIndex);
+
     // Get Dir Size
     quint64 getDirSize(const int& aIndex);
 

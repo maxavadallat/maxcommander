@@ -435,7 +435,8 @@
 #define DEFAULT_WARNING_TEXT_INVALID_TARGET                 "Invalid Target"
 
 #define DEFAULT_FILE_PANEL_TITLE_SEARCH_RESULTS             "Search Results"
-
+#define DEFAULT_BUTTON_TEXT_FEED_TO_LIST                    "Feed to List"
+#define DEFAULT_BUTTON_TEXT_RESET                           "Reset"
 
 #define DEFAULT_HEADER_TITLE_OPERATION                      "Op"
 #define DEFAULT_HEADER_TITLE_FILENAME                       "File Name"

@@ -209,6 +209,9 @@ private:
     QPushButton*            feedToListButton;
     // Start Button
     QPushButton*            startButton;
+    // Reset Button
+    QPushButton*            resetButton;
+
     // Remote File Util Client
     RemoteFileUtilClient*   fileUtil;
     // Search Result Model
@@ -324,7 +327,8 @@ protected:
 
     // Role ID's
     enum RolesIDs {
-        ERIDFilePath    = Qt::UserRole + 1
+        ERIDFilePath    = Qt::UserRole + 1,
+        ERIDIsDir
     };
 
     // Result List

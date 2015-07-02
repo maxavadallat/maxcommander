@@ -101,7 +101,7 @@ Rectangle {
                 anchors.fill: fileIconImage
                 visible: fileListDelegateRoot.fileSymLink
                 fillMode: Image.PreserveAspectFit
-                cache: true
+                cache: false
                 smooth: false
                 asynchronous: true
                 source: Const.DEFAULT_FILE_LIST_ICON_LINK_OVERLAY

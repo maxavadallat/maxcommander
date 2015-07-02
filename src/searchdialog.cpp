@@ -29,6 +29,7 @@ SearchDialog::SearchDialog(QWidget* aParent)
     , settings(SettingsController::getInstance())
     , feedToListButton(NULL)
     , startButton(NULL)
+    , resetButton(NULL)
     , fileUtil(new RemoteFileUtilClient)
     , resultModel(new SearchResultModel)
     , focusedPanel(NULL)
@@ -90,6 +91,8 @@ void SearchDialog::init()
     ctx->setContextProperty(DEFAULT_SEARCH_RESULT_CONTROLLER, this);
     // Set Context Properties - Search Result Model
     ctx->setContextProperty(DEFAULT_SEARCH_RESULT_MODEL, resultModel);
+    // Set Global Settings Controller
+    ctx->setContextProperty(DEFAULT_GLOBAL_SETTINGS_CONTROLLER, settings);
 
     // Get Engine
     QQmlEngine* engine = ui->searchResultView->engine();
@@ -216,6 +219,8 @@ void SearchDialog::restoreUI()
 
     // Reset Feed To List Button
     feedToListButton = NULL;
+    // Reset Reset Button
+    resetButton = NULL;
 
     // Set Up Button Box
     ui->buttonBox->setStandardButtons(QDialogButtonBox::Cancel);
@@ -246,7 +251,7 @@ void SearchDialog::restoreUI()
     ui->wholeWordCheckBox->setEnabled(false);
     // Set Content Pattern Combo Enabled
     ui->contentPatternComboBox->setEnabled(false);
-    // Enable Results Button
+    // Set Show Results Button Enabled
     ui->showResultsButton->setEnabled(false);
 
     // Check Results Model
@@ -549,6 +554,47 @@ void SearchDialog::buttonBoxClicked(QAbstractButton* aButton)
         accept();
 
         return;
+    } else if (resetButton && resetButton == aButton) {
+
+        // Check If Results Shown/Visible
+        if (resultsVisible) {
+            // Hide Results
+            hideresults();
+        }
+
+        // Check Feed To List Button
+        if (feedToListButton) {
+            // Remove Button
+            ui->buttonBox->removeButton(feedToListButton);
+
+            // Reset Feed To List Button
+            delete feedToListButton;
+            feedToListButton = NULL;
+        }
+
+        // Check Reset Button
+        if (resetButton) {
+            // REmove Button
+            ui->buttonBox->removeButton(resetButton);
+
+            // Reset Reset Button
+            delete resetButton;
+            resetButton = NULL;
+        }
+
+        // Check Results Model
+        if (resultModel) {
+            // Clear
+            resultModel->clear();
+        }
+
+        // Add Start Button
+        startButton = ui->buttonBox->addButton(tr(DEFAULT_BUTTON_TEXT_START), QDialogButtonBox::AcceptRole);
+
+        // Set Show Results Button Enabled
+        ui->showResultsButton->setEnabled(false);
+
+        return;
     }
 
     // Get Standard Button
@@ -571,11 +617,6 @@ void SearchDialog::buttonBoxClicked(QAbstractButton* aButton)
             }
             // reject/Close
             reject();
-        break;
-
-        case QDialogButtonBox::Reset:
-            // Restore UI
-            restoreUI();
         break;
 
         default:
@@ -881,7 +922,7 @@ void SearchDialog::fileOpFinished(const unsigned int& aID,
         searchFinished = true;
 
         // Set Button Box
-        ui->buttonBox->setStandardButtons(QDialogButtonBox::Reset | QDialogButtonBox::Close);
+        ui->buttonBox->setStandardButtons(/*QDialogButtonBox::Reset |*/ QDialogButtonBox::Close);
 
         // Enable Results Button
         ui->showResultsButton->setEnabled(true);
@@ -891,7 +932,9 @@ void SearchDialog::fileOpFinished(const unsigned int& aID,
             // Show Results
             showResults();
             // Add Custom Button
-            feedToListButton = ui->buttonBox->addButton(tr("Feed to List"), QDialogButtonBox::AcceptRole);
+            feedToListButton = ui->buttonBox->addButton(tr(DEFAULT_BUTTON_TEXT_FEED_TO_LIST), QDialogButtonBox::AcceptRole);
+            // Add Reset Button
+            resetButton = ui->buttonBox->addButton(tr(DEFAULT_BUTTON_TEXT_RESET), QDialogButtonBox::ActionRole);
         }
     }
 }
@@ -1055,7 +1098,7 @@ void SearchDialog::hideEvent(QHideEvent* aEvent)
 
     // Save Settings
     saveSettings();
-
+/*
     // Check Start Button
     if (startButton) {
         // Remove Button
@@ -1066,6 +1109,20 @@ void SearchDialog::hideEvent(QHideEvent* aEvent)
         startButton = NULL;
     }
 
+    // Chek Reset Button
+    if (resetButton) {
+        // Remove Button
+        ui->buttonBox->removeButton(resetButton);
+
+        // Delete Button
+        delete resetButton;
+        resetButton = NULL;
+    }
+*/
+
+    // Clear Buttons
+    ui->buttonBox->clear();
+    
     // ...
 }
 
@@ -1264,6 +1321,9 @@ QHash<int, QByteArray> SearchResultModel::roleNames() const
     // File PAth
     roles[ERIDFilePath] = "filePath";
 
+    // Is Dir
+    roles[ERIDIsDir]    = "fileIsDir";
+
     return roles;
 }
 
@@ -1308,6 +1368,7 @@ QVariant SearchResultModel::data(const QModelIndex& aIndex, int aRole) const
             break;
 
             case ERIDFilePath:  return filePath;
+            case ERIDIsDir:     return QFileInfo(filePath).isDir();
 
             default:
             break;

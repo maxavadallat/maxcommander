@@ -156,6 +156,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="focusPolicy">
+         <enum>Qt::TabFocus</enum>
+        </property>
         <property name="resizeMode">
          <enum>QQuickWidget::SizeRootObjectToView</enum>
         </property>

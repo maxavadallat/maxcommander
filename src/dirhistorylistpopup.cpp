@@ -62,7 +62,6 @@ void DirHistoryListPopup::launchPopup(const QPoint& aPos, const int& aWidth)
 
     // Set Focus
     ui->dirlistWidget->setFocus();
-    //setFocus();
 }
 
 //==============================================================================
@@ -109,7 +108,7 @@ void DirHistoryListPopup::dirHistoryListItemSelected(const int& aIndex)
 //==============================================================================
 void DirHistoryListPopup::dirHistoryClearClicked()
 {
-    qDebug() << "DirHistoryListPopup::dirHistoryClearClicked";
+    //qDebug() << "DirHistoryListPopup::dirHistoryClearClicked";
 
     // Check Index
     if (historyModel) {

@@ -64,6 +64,8 @@ var DEFAULT_POPUP_BACKGROUND_COLOR                      = "#CC000000";
 
 var DEFAULT_TRANSITION_DURATION                         = 200;
 
+var DEFAULT_LIST_HIGHLIGHT_MOVE_DURATION                = 100;
+
 
 // Sorting Methods - MUST BE IN SYNC WITH MCWINTERFACE.H
 var DEFAULT_SORT_NAME                                   = 0;

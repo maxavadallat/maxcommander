@@ -742,8 +742,6 @@ void MainWindow::launchSearch()
 
     // Check If Dialog Shown
     if (!searchFileDialog->isDialogShown()) {
-        qDebug() << "MainWindow::launchSearch";
-
         // Init Dir Path
         QString dirPath = focusedPanel->getCurrentDir();
         // Show Dialog
@@ -1484,6 +1482,18 @@ void MainWindow::focusedPanelChanged(FilePanel* aFocusedPanel)
 
     // Set Focused Panel
     focusedPanel = aFocusedPanel;
+
+    // Check Left Panel
+    if (leftPanel) {
+        // Reset Modifier Keys
+        leftPanel->resetModifierKeys();
+    }
+
+    // Check Right Panel
+    if (rightPanel) {
+        // Reset Modifier Keys
+        rightPanel->resetModifierKeys();
+    }
 
     // Update Menu
     updateMenu();

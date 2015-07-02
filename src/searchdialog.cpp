@@ -576,11 +576,6 @@ void SearchDialog::buttonBoxClicked(QAbstractButton* aButton)
         case QDialogButtonBox::Reset:
             // Restore UI
             restoreUI();
-            // Check Result Model
-            if (resultModel) {
-                // Clear
-                resultModel->clear();
-            }
         break;
 
         default:
@@ -967,7 +962,9 @@ void SearchDialog::fileSearchResultItemFound(const unsigned int& aID,
                                              const QString& aPath,
                                              const QString& aFilePath)
 {
-    qDebug() << "SearchDialog::fileSearchResultItemFound - aID: " << aID << " - aPath: " << aPath << " - aFilePath: " << aFilePath;
+    Q_UNUSED(aID);
+
+    //qDebug() << "SearchDialog::fileSearchResultItemFound - aID: " << aID << " - aPath: " << aPath << " - aFilePath: " << aFilePath;
 
     // Check Result Model
     if (resultModel) {
@@ -1013,62 +1010,6 @@ void SearchDialog::keyReleaseEvent(QKeyEvent* aEvent)
     if (aEvent) {
         // Switch Key
         switch (aEvent->key()) {
-            case Qt::Key_Home:
-                // Check Focus
-                if (resultListKeyEvent && ui->searchResultView->hasFocus()) {
-                    // Set Current Index
-                    setCurrentIndex(0);
-                }
-            break;
-
-            case Qt::Key_End:
-                // Check Focus
-                if (resultListKeyEvent && ui->searchResultView->hasFocus()) {
-                    // Set Current index
-                    setCurrentIndex(resultModel ? resultModel->rowCount() - 1 : 0);
-                }
-            break;
-
-            case Qt::Key_PageUp:
-                // Check Focus
-                if (resultListKeyEvent && ui->searchResultView->hasFocus()) {
-                    // Set Current Index
-                    setCurrentIndex(currentIndex - (visualItemCount - 1));
-                }
-            break;
-
-            case Qt::Key_PageDown:
-                // Check Focus
-                if (resultListKeyEvent && ui->searchResultView->hasFocus()) {
-                    // Set Current Index
-                    setCurrentIndex(currentIndex + (visualItemCount - 1));
-                }
-            break;
-
-            case Qt::Key_Enter:
-            case Qt::Key_Return:
-                // Check Focus
-                if (resultListKeyEvent && ui->searchResultView->hasFocus()) {
-                    // ItemSelected
-                    itemSelected();
-                }
-            break;
-
-            case Qt::Key_F3:
-                // Check Focus
-                if (resultListKeyEvent && ui->searchResultView->hasFocus()) {
-                    // Item View
-                    itemView(false);
-                }
-            break;
-
-            case Qt::Key_F4:
-                // Check Focus
-                if (resultListKeyEvent && ui->searchResultView->hasFocus()) {
-                    // Item View
-                    itemView(true);
-                }
-            break;
 
             default:
 

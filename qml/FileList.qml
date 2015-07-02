@@ -57,8 +57,8 @@ Rectangle {
         clip: true
         focus: true
         highlightFollowsCurrentItem: true
-        //highlightMoveDuration: 0
-        //highlightResizeDuration: 0
+        highlightMoveDuration: Const.DEFAULT_LIST_HIGHLIGHT_MOVE_DURATION
+        highlightResizeDuration: 0
 
         snapMode: ListView.SnapToItem
 

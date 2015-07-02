@@ -12,6 +12,139 @@ Rectangle {
 
     color: "transparent"
 
+    focus: true
+
+    // Goto Prev Item
+    function gotoPrev() {
+        // Set Current Index
+        searchResultList.currentIndex = Math.max(0, searchResultList.currentIndex - 1);
+    }
+
+    // Next Item
+    function gotoNext() {
+        // Set Current Index
+        searchResultList.currentIndex = Math.min(searchResultList.count - 1, searchResultList.currentIndex + 1);
+    }
+
+    // Goto Home
+    function gotoHome() {
+        // Set Current Index
+        searchResultList.currentIndex = 0;
+    }
+
+    // Goto End
+    function gotoEnd() {
+        // Set Current Index
+        searchResultList.currentIndex = searchResultList.count - 1;
+    }
+
+    // Goto Page Up
+    function gotoPageUp() {
+        // Set Current Index
+        searchResultList.currentIndex = Math.max(0, searchResultList.currentIndex - searchResultList.visualCount);
+    }
+
+    // Goto Page Down
+    function gotoPageDown() {
+        // Set Current Index
+        searchResultList.currentIndex = Math.min(searchResultList.count - 1, searchResultList.currentIndex + searchResultList.visualCount);
+    }
+
+    Keys.onPressed: {
+        // Switch Key
+        switch (event.key) {
+            case Qt.Key_Up:
+                if (event.isAutoRepeat) {
+                    // Goto Prev
+                    gotoPrev();
+                }
+            break;
+
+            case Qt.Key_Down:
+                if (event.isAutoRepeat) {
+                    // Goto Next
+                    gotoNext();
+                }
+            break;
+
+            case Qt.Key_PageUp:
+                if (event.isAutoRepeat) {
+                    // Goto Page Up
+                    gotoPageUp();
+                }
+            break;
+
+            case Qt.Key_PageDown:
+                if (event.isAutoRepeat) {
+                    // Goto Page Down
+                    gotoPageDown();
+                }
+            break;
+
+            default:
+            break;
+        }
+    }
+
+    Keys.onReleased: {
+        // Switch Key
+        switch (event.key) {
+            case Qt.Key_Up:
+                // Goto Prev
+                gotoPrev();
+            break;
+
+            case Qt.Key_Down:
+                // Goto Next
+                gotoNext();
+            break;
+
+            case Qt.Key_Home:
+                // Goto Home
+                gotoHome();
+            break;
+
+            case Qt.Key_End:
+                // Goto End
+                gotoEnd();
+            break;
+
+            case Qt.Key_PageUp:
+                // Goto Page Up
+                gotoPageUp();
+            break;
+
+            case Qt.Key_PageDown:
+                // Goto Page Down
+                gotoPageDown();
+            break;
+
+            case Qt.Key_Return:
+            case Qt.Key_Enter:
+                // Item Selected
+                searchResultController.itemSelected();
+            break;
+
+            case Qt.Key_F3:
+                // Item View
+                searchResultController.itemView(false);
+            break;
+
+            case Qt.Key_F4:
+                // Item Edit
+                searchResultController.itemView(true);
+            break;
+
+            case Qt.Key_Escape:
+                // reject Dialog
+                searchResultController.reject();
+            break;
+
+            default:
+            break;
+        }
+    }
+
     // Search Result List
     ListView {
         id: searchResultList
@@ -20,13 +153,12 @@ Rectangle {
         anchors.margins: 1
         spacing: 1
         clip: true
-        focus: true
         highlightFollowsCurrentItem: true
-        highlightMoveDuration: 0
+        highlightMoveDuration: Const.DEFAULT_LIST_HIGHLIGHT_MOVE_DURATION
         highlightResizeDuration: 0
         snapMode: ListView.SnapToItem
 
-        property int visualItemCount: Math.min(count, Math.ceil(searchResultList.height / Const.DEFAULT_SEARCH_RESULTS_DELEGATE_HEIGHT))
+        property int visualCount: Math.min(count, Math.ceil(searchResultList.height / Const.DEFAULT_SEARCH_RESULTS_DELEGATE_HEIGHT))
 
         // Model
         model: searchResultModel
@@ -104,11 +236,11 @@ Rectangle {
         }
 
         // On Visual Item Coun Changed
-        onVisualItemCountChanged: {
-            //console.log("searchResultList.onVisualItemCountChanged - visualItemCount: " + searchResultList.visualItemCount);
+        onVisualCountChanged: {
+            //console.log("searchResultList.onVisualItemCountChanged - visualCount: " + searchResultList.visualCount);
 
             // Set Visual Item Count
-            searchResultController.visualItemCount = searchResultList.visualItemCount;
+            searchResultController.visualItemCount = searchResultList.visualCount;
         }
 
         // On Current Index Changed

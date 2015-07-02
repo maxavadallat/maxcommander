@@ -1,4 +1,5 @@
 import QtQuick 2.0
+
 import "qrc:/qml/js/constants.js" as Const
 
 Rectangle {
@@ -11,20 +12,142 @@ Rectangle {
     border.color: Const.DEFAULT_POPUP_BORDER_COLOR
     border.width: Const.DEFAULT_POPUP_BORDER_WIDTH
 
+    focus: true
+
+    // Goto Prev Item
+    function gotoPrev() {
+        // Set Current Index
+        dirHistoryList.currentIndex = Math.max(0, dirHistoryList.currentIndex - 1);
+    }
+
+    // Next Item
+    function gotoNext() {
+        // Set Current Index
+        dirHistoryList.currentIndex = Math.min(dirHistoryList.count - 1, dirHistoryList.currentIndex + 1);
+    }
+
+    // Goto Home
+    function gotoHome() {
+        // Set Current Index
+        dirHistoryList.currentIndex = 0;
+    }
+
+    // Goto End
+    function gotoEnd() {
+        // Set Current Index
+        dirHistoryList.currentIndex = dirHistoryList.count - 1;
+    }
+
+    // Goto Page Up
+    function gotoPageUp() {
+        // Set Current Index
+        dirHistoryList.currentIndex = Math.max(0, dirHistoryList.currentIndex - dirHistoryList.visualCount);
+    }
+
+    // Goto Page Down
+    function gotoPageDown() {
+        // Set Current Index
+        dirHistoryList.currentIndex = Math.min(dirHistoryList.count - 1, dirHistoryList.currentIndex + dirHistoryList.visualCount);
+    }
+
+    Keys.onPressed: {
+        // Switch Key
+        switch (event.key) {
+            case Qt.Key_Up:
+                if (event.isAutoRepeat) {
+                    // Goto Prev
+                    gotoPrev();
+                }
+            break;
+
+            case Qt.Key_Down:
+                if (event.isAutoRepeat) {
+                    // Goto Next
+                    gotoNext();
+                }
+            break;
+
+            case Qt.Key_PageUp:
+                if (event.isAutoRepeat) {
+                    // Goto Page Up
+                    gotoPageUp();
+                }
+            break;
+
+            case Qt.Key_PageDown:
+                if (event.isAutoRepeat) {
+                    // Goto Page Down
+                    gotoPageDown();
+                }
+            break;
+        }
+    }
+
+    Keys.onReleased: {
+        // Switch Key
+        switch (event.key) {
+            case Qt.Key_Up:
+                // Goto Prev
+                gotoPrev();
+            break;
+
+            case Qt.Key_Down:
+                // Goto Next
+                gotoNext();
+            break;
+
+            case Qt.Key_Home:
+                // Goto Home
+                gotoHome();
+            break;
+
+            case Qt.Key_End:
+                // Goto End
+                gotoEnd();
+            break;
+
+            case Qt.Key_PageUp:
+                // Goto Page Up
+                gotoPageUp();
+            break;
+
+            case Qt.Key_PageDown:
+                // Goto Page Down
+                gotoPageDown();
+            break;
+
+            case Qt.Key_Return:
+            case Qt.Key_Enter:
+                // Check Count
+                if (dirHistoryList.count > 0) {
+                    // Select Item
+                    dirHistoryListController.dirHistoryListItemSelected(dirHistoryList.currentIndex);
+                }
+            break;
+
+            case Qt.Key_Escape:
+                // Select Item
+                dirHistoryListController.dirHistoryListItemSelected(-1);
+            break;
+        }
+    }
+
     // Dir History List View
     ListView {
         id: dirHistoryList
-        cacheBuffer: 0
+
         anchors.fill: parent
         anchors.leftMargin: parent.border.width
         anchors.topMargin: parent.radius
         anchors.rightMargin: parent.border.width
         anchors.bottomMargin: parent.radius + clearButton.height
         interactive: true
-        focus: true
         highlightFollowsCurrentItem: true
+        highlightMoveDuration: Const.DEFAULT_LIST_HIGHLIGHT_MOVE_DURATION
         snapMode: ListView.SnapToItem
         clip: true
+
+        property int visualCount: Math.min(dirHistoryList.count, Math.floor(dirHistoryList.height / Const.DEFAULT_DIR_HISTORY_LIST_POPUP_ITEM_HEIGHT))
 
         model: dirHistoryListModel
 
@@ -32,7 +155,7 @@ Rectangle {
         delegate: Rectangle {
             id: delegateRoot
 
-            color: mousePressed ?  Const.DEFAULT_POPUP_ITEM_SELECT_COLOR : "transparent"
+            color: mousePressed ?  Const.DEFAULT_POPUP_ITEM_SELECT_COLOR : mouseHovered ? "#11FFFFFF" : "transparent"
 
             width: dirHistoryList.width
             height: Const.DEFAULT_DIR_HISTORY_LIST_POPUP_ITEM_HEIGHT
@@ -56,7 +179,7 @@ Rectangle {
             MouseArea {
                 anchors.fill: parent
                 preventStealing: true
-                //hoverEnabled: true
+                hoverEnabled: true
 
                 // On Pressed
                 onPressed: {
@@ -180,9 +303,6 @@ Rectangle {
                     // Reset Current Index
                     dirHistoryList.currentIndex = 0;
                 }
-            }
-            onClicked: {
-
             }
         }
     }

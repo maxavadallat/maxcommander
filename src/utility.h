@@ -17,6 +17,8 @@ enum FileSortType {
     EFSPerms
 };
 
+// Get Current User Name
+QString getCurrentUserName();
 
 // Get Total Space In Directory
 qint64 getTotalSpace(const QString& aDirPath);

@@ -38,6 +38,13 @@
 #include "utility.h"
 #include "constants.h"
 
+//==============================================================================
+// Get Current User Name
+//==============================================================================
+QString getCurrentUserName()
+{
+    return QFileInfo(QDir::homePath()).owner();
+}
 
 //==============================================================================
 // Get Total Space In Directory

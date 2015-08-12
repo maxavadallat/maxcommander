@@ -147,7 +147,7 @@ void DirHistoryListPopup::focusOutEvent(QFocusEvent* aEvent)
     Q_UNUSED(aEvent);
 
     // Close
-    // close();
+    //close();
 
     // ...
 }
@@ -191,3 +191,4 @@ DirHistoryListPopup::~DirHistoryListPopup()
 
     // ...
 }
+

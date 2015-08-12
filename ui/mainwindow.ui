@@ -380,6 +380,7 @@
     <addaction name="actionTerminal"/>
     <addaction name="separator"/>
     <addaction name="actionDir_Hotlist"/>
+    <addaction name="actionVolumes"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -583,6 +584,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+D</string>
+   </property>
+  </action>
+  <action name="actionVolumes">
+   <property name="text">
+    <string>Volumes</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+V</string>
    </property>
   </action>
  </widget>

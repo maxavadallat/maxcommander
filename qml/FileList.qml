@@ -59,7 +59,6 @@ Rectangle {
         highlightFollowsCurrentItem: true
         highlightMoveDuration: Const.DEFAULT_LIST_HIGHLIGHT_MOVE_DURATION
         highlightResizeDuration: 0
-
         snapMode: ListView.SnapToItem
 
         //cacheBuffer: globalSettings.thumbHeight * 8
@@ -329,6 +328,7 @@ Rectangle {
             // Set Focus
             fileListView.focus = true;
         }
+
         // On Rejected
         onRejected: {
             // Set Focus

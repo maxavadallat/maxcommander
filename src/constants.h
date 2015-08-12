@@ -335,6 +335,8 @@
 
 #define DEFAULT_ROOT_DIR                                    "/"
 
+#define DEFAULT_VOLUMES_PATH_MAC                            "/Volumes"
+#define DEFAULT_MEDIA_PATH_LINUX                            "/media"
 
 
 

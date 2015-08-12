@@ -63,6 +63,9 @@ void FileListWidget::focusInEvent(QFocusEvent* aEvent)
         focused = true;
         // Emit focus Changed Signal
         emit focusChanged(focused);
+
+        // Grab Keyboard - Not Sure WHY THE FUCK Do I have to do this for some time now X (
+        grabKeyboard();
     }
 }
 
@@ -80,6 +83,9 @@ void FileListWidget::focusOutEvent(QFocusEvent* aEvent)
         focused = false;
         // Emit focus Changed Signal
         emit focusChanged(focused);
+
+        // Release Keyboard
+        releaseKeyboard();
     }
 }
 

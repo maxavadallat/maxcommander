@@ -49,6 +49,7 @@ Rectangle {
 
     // Show Renamer
     function showRenamer() {
+        //console.log("fileListItemRenamerRoot.showRenamer");
         // Set Cursor Position
         renamerEditor.cursorPosition = renamerEditor.text.length;
         // Select All
@@ -64,6 +65,7 @@ Rectangle {
 
     // Hide Renamer
     function hideRenamer() {
+        //console.log("fileListItemRenamerRoot.hideRenamer");
         // Set Opacity
         fileListItemRenamerRoot.opacity = 0.0;
         // Set Focus

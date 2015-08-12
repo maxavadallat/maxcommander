@@ -1977,6 +1977,18 @@ void MainWindow::on_actionDir_Hotlist_triggered()
 }
 
 //==============================================================================
+// Action Volumes Triggered Slot
+//==============================================================================
+void MainWindow::on_actionVolumes_triggered()
+{
+    // Check Forcused Panel
+    if (focusedPanel) {
+        // Goto Volumes
+        focusedPanel->gotoVolumes();
+    }
+}
+
+//==============================================================================
 // Action Exit Triggered Slot
 //==============================================================================
 void MainWindow::on_actionExit_triggered()

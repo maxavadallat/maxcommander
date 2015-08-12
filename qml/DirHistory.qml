@@ -50,7 +50,10 @@ Rectangle {
         dirHistoryList.currentIndex = Math.min(dirHistoryList.count - 1, dirHistoryList.currentIndex + dirHistoryList.visualCount);
     }
 
+    // On Key Pressed
     Keys.onPressed: {
+        //console.log("dirHistoryRoot.Keys.onPressed - key: " + event.key);
+
         // Switch Key
         switch (event.key) {
             case Qt.Key_Up:
@@ -84,6 +87,8 @@ Rectangle {
     }
 
     Keys.onReleased: {
+        //console.log("dirHistoryRoot.Keys.onReleased - key: " + event.key);
+
         // Switch Key
         switch (event.key) {
             case Qt.Key_Up:

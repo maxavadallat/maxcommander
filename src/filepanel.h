@@ -223,6 +223,8 @@ public slots:
     void gotoHome();
     // Go To Root
     void gotoRoot();
+    // Go To Volumes
+    void gotoVolumes();
     // Go To Drive
     void gotoDrive(const int& aDriveIndex);
     // Go Up To Parent Dir
@@ -490,6 +492,8 @@ protected slots: // Buttons
     void on_homeButton_clicked();
     // Root Button Clicked Slot
     void on_rootButton_clicked();
+    // On Drives Button Clicked Slot
+    void on_drivesButton_clicked();
 
 protected slots: // Current Dir Label & Dir History List
 

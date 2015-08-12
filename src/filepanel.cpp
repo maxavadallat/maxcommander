@@ -161,7 +161,10 @@ void FilePanel::init()
     // ...
 
     // Set Focus Policy
-    setFocusPolicy(Qt::StrongFocus);
+    //setFocusPolicy(Qt::StrongFocus);
+
+    // Set Focuse Policy
+    ui->fileListWidget->setFocusPolicy(Qt::StrongFocus);
 }
 
 //==============================================================================
@@ -1298,6 +1301,29 @@ void FilePanel::gotoRoot()
 }
 
 //==============================================================================
+// Go To Volumes
+//==============================================================================
+void FilePanel::gotoVolumes()
+{
+#if defined(Q_OS_MAC)
+
+    // Set Current Dir
+    setCurrentDir(DEFAULT_VOLUMES_PATH_MAC);
+
+#elif defined(Q_OS_LINUX)
+
+    // Set Current Dir
+    setCurrentDir(DEFAULT_MEDIA_PATH_LINUX);
+
+#else // Q_OS_LINUX
+
+#endif // Q_OS_LINUX
+
+    // Set Current Index
+    setCurrentIndex(0);
+}
+
+//==============================================================================
 // Go To Drive
 //==============================================================================
 void FilePanel::gotoDrive(const int& aDriveIndex)
@@ -1702,6 +1728,9 @@ void FilePanel::fileModelDirFetchFinished()
             setCurrentIndex(lastDirIndex - 1);
         }
 
+        // Adjust Last Dir Index
+        lastDirIndex = qBound(0, lastDirIndex, (fileListModel ? fileListModel->rowCount()-1 : -1));
+
         // Set Current Index
         setCurrentIndex(lastDirIndex);
 
@@ -1715,6 +1744,10 @@ void FilePanel::fileModelDirFetchFinished()
         int lastFileIndex = fileListModel ? fileListModel->findIndex(lastFileName) : 0;
         // Reset Last File Name
         lastFileName = "";
+
+        // Adjust Last File Index
+        lastFileIndex = qBound(0, lastFileIndex, (fileListModel ? fileListModel->rowCount()-1 : -1));
+
         // Set Current Index
         setCurrentIndex(lastFileIndex);
 
@@ -1728,7 +1761,7 @@ void FilePanel::fileModelDirFetchFinished()
         qDebug() << "FilePanel::fileModelDirFetchFinished - panelName: " << panelName << " - lastIndex: " << lastIndex;
 
         // Set Current Index
-        setCurrentIndex(qBound(0, lastIndex, fileListModel ? fileListModel->rowCount()-1 : 0));
+        setCurrentIndex(qBound(0, lastIndex, fileListModel ? fileListModel->rowCount()-1 : -1));
 
         // Check Last Index
         if (lastIndex == 0) {
@@ -2390,7 +2423,7 @@ bool FilePanel::handleModifierKeyReleaseEvent(QKeyEvent* aEvent)
 }
 
 //==============================================================================
-// Home Button Clicked Slot
+// On Home Button Clicked Slot
 //==============================================================================
 void FilePanel::on_homeButton_clicked()
 {
@@ -2399,12 +2432,21 @@ void FilePanel::on_homeButton_clicked()
 }
 
 //==============================================================================
-// Root Button Clicked Slot
+// On Root Button Clicked Slot
 //==============================================================================
 void FilePanel::on_rootButton_clicked()
 {
     // Go To Root
     gotoRoot();
+}
+
+//==============================================================================
+// On Drives Button Clicked Slot
+//==============================================================================
+void FilePanel::on_drivesButton_clicked()
+{
+    // Go To Volumes
+    gotoVolumes();
 }
 
 //==============================================================================
@@ -2812,6 +2854,7 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
 
             default:
                 //qDebug() << "FilePanel::keyReleaseEvent - key: " << aEvent->key();
+                //QFrame::keyReleaseEvent(aEvent);
             break;
         }
     }
@@ -3850,3 +3893,4 @@ DirScanner::~DirScanner()
 
     qDebug() << "DirScanner::~DirScanner";
 }
+

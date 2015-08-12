@@ -1487,12 +1487,16 @@ void MainWindow::focusedPanelChanged(FilePanel* aFocusedPanel)
     if (leftPanel) {
         // Reset Modifier Keys
         leftPanel->resetModifierKeys();
+        // Hide Dir History List Popup
+        leftPanel->hideDirHistoryPopup();
     }
 
     // Check Right Panel
     if (rightPanel) {
         // Reset Modifier Keys
         rightPanel->resetModifierKeys();
+        // Hide Dir History List Popup
+        rightPanel->hideDirHistoryPopup();
     }
 
     // Update Menu

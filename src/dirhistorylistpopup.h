@@ -26,6 +26,8 @@ public:
 
     // Launch Popup
     void launchPopup(const QPoint& aPos, const int& aWidth);
+    // Hide Popup
+    void hidePopup();
 
     // Get Current Index
     int getCurrentIndex();

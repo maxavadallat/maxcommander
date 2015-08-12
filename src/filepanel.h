@@ -275,6 +275,8 @@ public slots:
 
     // Launch Dir History Popup
     void launchDirHistoryPopup();
+    // Hide Dir History Popup
+    void hideDirHistoryPopup();
 
     // Drag Dropped
     void dragDropped(const QString& aDroppedItems, const int& aModifiers);

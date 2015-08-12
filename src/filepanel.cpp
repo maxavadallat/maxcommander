@@ -160,9 +160,6 @@ void FilePanel::init()
 
     // ...
 
-    // Set Focus Policy
-    //setFocusPolicy(Qt::StrongFocus);
-
     // Set Focuse Policy
     ui->fileListWidget->setFocusPolicy(Qt::StrongFocus);
 }
@@ -873,6 +870,20 @@ void FilePanel::launchDirHistoryPopup()
 
     // Reset Modifier Keys
     resetModifierKeys();
+}
+
+//==============================================================================
+// Hide Dir History Popup
+//==============================================================================
+void FilePanel::hideDirHistoryPopup()
+{
+    qDebug() << "FilePanel::hideDirHistoryPopup - panelName: " << panelName;
+
+    // Check Popup
+    if (dirHistoryListPopup) {
+        // Hide Popup
+        dirHistoryListPopup->hidePopup();
+    }
 }
 
 //==============================================================================
@@ -2797,7 +2808,7 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
                 } else if (modifierKeys == Qt::ShiftModifier) {
 
                     // Check If File Renamer Active
-                    if (!fileRenameActive) {
+                    if (!fileRenameActive && fileListModel && fileListModel->getFileName(currentIndex) != "..") {
                         // Emit Launch File Rename
                         emit launchFileRename();
                     }

@@ -65,6 +65,15 @@ void DirHistoryListPopup::launchPopup(const QPoint& aPos, const int& aWidth)
 }
 
 //==============================================================================
+// Hide Popup
+//==============================================================================
+void DirHistoryListPopup::hidePopup()
+{
+    // Close
+    close();
+}
+
+//==============================================================================
 // Get Current Index
 //==============================================================================
 int DirHistoryListPopup::getCurrentIndex()

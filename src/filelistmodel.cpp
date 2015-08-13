@@ -745,6 +745,29 @@ bool FileListModel::isVolume(const QString& aFilePath)
 }
 
 //==============================================================================
+// Eject Volume
+//==============================================================================
+void FileListModel::ejectVolume(const QString& aFilePath)
+{
+    // Init File Info
+    QFileInfo fileInfo(aFilePath);
+
+    // Check File Path
+    if (fileInfo.isSymLink()) {
+        // Check Target
+        if (fileInfo.symLinkTarget() == "/") {
+            return;
+        }
+    }
+
+    // Init Command Line
+    QString cmdLine = QString(DEFAULT_EXTERNAL_DRIVE_EJECT_COMMAND_MAC).arg(aFilePath);
+
+    // Execute System Command
+    system(cmdLine.toLocal8Bit().data());
+}
+
+//==============================================================================
 // Fetch Dir
 //==============================================================================
 void FileListModel::fetchDirItems()

@@ -338,8 +338,8 @@
 #define DEFAULT_MEDIA_PATH_LINUX                            "/media/"
 
 // Eject External Drive Command
-#define DEFAULT_EXTERNAL_DRIVE_EJECT_COMMAND_MAC            "diskutil eject %1"
-
+#define DEFAULT_EXTERNAL_DRIVE_EJECT_COMMAND_MAC            "diskutil eject \"%1\" &"
+#define DEFAULT_EXTERNAL_DRIVE_EJECT_COMMAND_LINUX          "eject \"%1\" &"
 
 
 

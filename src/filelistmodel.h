@@ -163,6 +163,9 @@ public slots:
     // Check If Path Is External Drive/Volume
     bool isVolume(const QString& aFilePath);
 
+    // Eject Volume
+    void ejectVolume(const QString& aFilePath);
+
 signals:
 
     // Current Dir Changed Signal

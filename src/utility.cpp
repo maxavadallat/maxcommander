@@ -4,10 +4,10 @@
 #include <QImage>
 #include <QPainter>
 #include <QColor>
-#include <QProcess>
 #include <QApplication>
 #include <QThread>
 #include <QSettings>
+#include <QProcess>
 #include <QStorageInfo>
 #include <QColor>
 #include <QDebug>

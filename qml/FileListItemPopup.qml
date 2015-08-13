@@ -116,7 +116,9 @@ FileListPopup {
                 // Hide
                 hidePopup();
                 // Emit Launch Unmount Drive
-                mainController.launchUnmountDrive();
+                //mainController.launchUnmountDrive();
+                // Eject Volume
+                fileListModel.ejectVolume(currentItemPath);
             }
         }
 

@@ -94,5 +94,8 @@ int compareFileNames(const QFileInfo& aFileInfoA, const QFileInfo& aFileInfoB);
 // Apply File name Pattern
 QString applyPattern(const QString& aSourceFileName, const QString& aPattern);
 
+// Is Volume Path
+bool isVolumePath(const QString& aFilePath);
+
 #endif // UTILITY
 

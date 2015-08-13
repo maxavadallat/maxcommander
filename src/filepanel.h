@@ -383,6 +383,12 @@ signals:
     // Launch File Deselect Signal
     void launchFileDeselect();
 
+    // Launch Unmount Drive Signal
+    void launchUnmountDrive();
+
+    // Hide Popups
+    void hidePopups();
+
     // Error Occured Signal
     void error(const QString& aPath, const int& aError);
 

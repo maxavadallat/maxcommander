@@ -6,6 +6,7 @@ FileListPopupItem {
     id: fileListHeaderPopupItemRoot
 
     property alias itemChecked: fileListHeaderPopupItemCheckBox.checked
+    property alias checkBoxHovered: fileListHeaderPopupItemCheckBox.hovered
 
     titleLeftMargin: fileListHeaderPopupItemCheckBox.width + Const.DEFAULT_MARGIN_WIDTH * 2
 
@@ -15,6 +16,10 @@ FileListPopupItem {
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.left
         anchors.leftMargin: Const.DEFAULT_MARGIN_WIDTH
+        onHoveredChanged: {
+            // Set Mouse Hovered
+            mouseHovered = hovered;
+        }
     }
 }
 

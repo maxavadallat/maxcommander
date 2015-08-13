@@ -244,6 +244,28 @@ void FileListModel::deleteFile(const QString& aFilePath)
 }
 
 //==============================================================================
+// Set Selected Files Count
+//==============================================================================
+void FileListModel::setSelectedCount(const int& aSelectedCount)
+{
+    // Check Selected Count
+    if (selectedCount != aSelectedCount) {
+        // Set Selected Count
+        selectedCount = aSelectedCount;
+        // Emit Signal
+        emit selectedCountChanged(selectedCount);
+    }
+}
+
+//==============================================================================
+// Get Selected Files Count
+//==============================================================================
+int FileListModel::getSelectedCount()
+{
+    return selectedCount;
+}
+
+//==============================================================================
 // Has Selection
 //==============================================================================
 bool FileListModel::hasSelection()
@@ -386,7 +408,7 @@ void FileListModel::clear()
     fileNameList.clear();
 
     // Reset Selected Count
-    selectedCount = 0;
+    setSelectedCount(0);
 }
 
 //==============================================================================
@@ -448,6 +470,9 @@ void FileListModel::setSelected(const int& aIndex, const bool& aSelected)
                 selectedCount--;
             }
         }
+
+        // Emit Selected Count Changed Signal
+        emit selectedCountChanged(selectedCount);
     }
 }
 
@@ -479,6 +504,9 @@ void FileListModel::selectAll()
             }
         }
     }
+
+    // Emit Selected Count Changed Signal
+    emit selectedCountChanged(selectedCount);
 }
 
 //==============================================================================
@@ -504,7 +532,7 @@ void FileListModel::deselectAll()
     }
 
     // Reset Selected Count
-    selectedCount = 0;
+    setSelectedCount(0);
 }
 
 //==============================================================================
@@ -535,6 +563,9 @@ void FileListModel::toggleAllSelection()
             emit dataChanged(index, index);
         }
     }
+
+    // Emit Selected Count Changed Signal
+    emit selectedCountChanged(selectedCount);
 }
 
 //==============================================================================
@@ -577,6 +608,9 @@ void FileListModel::selectFiles(const QString& aPattern)
             }
         }
     }
+
+    // Emit Selected Count Changed Signal
+    emit selectedCountChanged(selectedCount);
 }
 
 //==============================================================================
@@ -623,6 +657,9 @@ void FileListModel::deselectFiles(const QString& aPattern)
             }
         }
     }
+
+    // Emit Selected Count Changed Signal
+    emit selectedCountChanged(selectedCount);
 }
 
 //==============================================================================
@@ -674,7 +711,10 @@ QString FileListModel::getFullPath(const int& aIndex)
 
     // Check Index
     if (aIndex >= 0 && aIndex < ilCount) {
-        return itemList[aIndex]->fileInfo.absoluteFilePath();
+        // Get Full Path
+        QString fullPath = itemList[aIndex]->fileInfo.absoluteFilePath();
+
+        return fullPath;
     }
 
     return "";
@@ -694,6 +734,14 @@ quint64 FileListModel::getDirSize(const int& aIndex)
     }
 
     return 0;
+}
+
+//==============================================================================
+// Check If Path Is External Drive/Volume
+//==============================================================================
+bool FileListModel::isVolume(const QString& aFilePath)
+{
+    return isVolumePath(aFilePath);
 }
 
 //==============================================================================

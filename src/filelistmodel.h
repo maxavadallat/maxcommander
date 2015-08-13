@@ -41,6 +41,7 @@ class FileListModel : public QAbstractListModel
     Q_PROPERTY(QString currentDir READ getCurrentDir WRITE setCurrentDir NOTIFY currentDirChanged)
     Q_PROPERTY(bool busy READ getBusy NOTIFY busyChanged)
     Q_PROPERTY(int count READ rowCount NOTIFY countChanged)
+    Q_PROPERTY(int selectedCount READ getSelectedCount NOTIFY selectedCountChanged)
 
 public:
 
@@ -93,9 +94,6 @@ public:
     // Create Link
     void createLink(const QString& aLinkPath, const QString& aLinkTarget);
 
-    // Has Selection
-    bool hasSelection();
-
     // Get Last Operation
     QString lastOperation();
 
@@ -107,6 +105,11 @@ public:
 
     // Add Item Name-Sorted Manually
     void addItem(const QString& aFilePath, const bool& aSearchResult = false);
+
+    // Set Selected Files Count
+    void setSelectedCount(const int& aSelectedCount);
+    // Get Selected Files Count
+    int getSelectedCount();
 
     // Destructor
     virtual ~FileListModel();
@@ -122,6 +125,9 @@ public slots:
     bool getSelected(const int& aIndex);
     // Set Selected
     void setSelected(const int& aIndex, const bool& aSelected);
+
+    // Has Selection
+    bool hasSelection();
 
     // Select All
     void selectAll();
@@ -154,6 +160,9 @@ public slots:
     // Get Dir Size
     quint64 getDirSize(const int& aIndex);
 
+    // Check If Path Is External Drive/Volume
+    bool isVolume(const QString& aFilePath);
+
 signals:
 
     // Current Dir Changed Signal
@@ -182,6 +191,9 @@ signals:
 
     // Need Confirm Signal
     void needConfirm(const int& aCode, const QString& aPath, const QString& aSource, const QString& aTarget);
+
+    // Selected Count Changed Signal
+    void selectedCountChanged(const int& aSelectedCount);
 
 public: // From QAbstractListModel
 

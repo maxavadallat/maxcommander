@@ -22,6 +22,7 @@
         <file>qml/SearchResults.qml</file>
         <file>qml/FileListScrollBar.qml</file>
         <file>qml/DirHistory.qml</file>
+        <file>qml/FileListItemPopup.qml</file>
     </qresource>
 </RCC>
 

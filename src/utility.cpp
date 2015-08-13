@@ -708,6 +708,56 @@ QString applyPattern(const QString& aSourceFileName, const QString& aPattern)
     return "";
 }
 
+//==============================================================================
+// Is Volume Path
+//==============================================================================
+bool isVolumePath(const QString& aFilePath)
+{
+    // Check Path
+    if (!QFile::exists(aFilePath)) {
+        return false;
+    }
+
+#if defined(Q_OS_MAC)
+
+    //qDebug() << "utility::isVolumePath - aFilePath: " << aFilePath;
+
+    // Check Path
+    if (!aFilePath.startsWith(DEFAULT_VOLUMES_PATH_MAC))
+        return false;
+/*
+    // Check Path if Link
+    if (QFileInfo(aFilePath).isSymLink()) {
+        return false;
+    }
+*/
+    // Get Volume Name
+    QString volumeName = aFilePath.right(aFilePath.length() - QString(DEFAULT_VOLUMES_PATH_MAC).length());
+
+    // Check Volume Name
+    while (volumeName.endsWith("/")) {
+        // Adjust Volume Name
+        volumeName.chop(1);
+    }
+
+    // Check Volume Name
+    if (volumeName.indexOf("/") < 0) {
+        return true;
+    }
+
+#elif defined(Q_OS_LINUX)
+
+    // Check Path
+    if (!aFilePath.startsWith(DEFAULT_MEDIA_PATH_LINUX))
+        return false;
+
+#elif // Q_OS_WIN
+
+
+#endif // Q_OS_WIN
+
+    return false;
+}
 
 
 

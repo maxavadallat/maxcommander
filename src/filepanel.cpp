@@ -877,10 +877,10 @@ void FilePanel::launchDirHistoryPopup()
 //==============================================================================
 void FilePanel::hideDirHistoryPopup()
 {
-    qDebug() << "FilePanel::hideDirHistoryPopup - panelName: " << panelName;
-
     // Check Popup
     if (dirHistoryListPopup) {
+        //qDebug() << "FilePanel::hideDirHistoryPopup - panelName: " << panelName;
+
         // Hide Popup
         dirHistoryListPopup->hidePopup();
     }

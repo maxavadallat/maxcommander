@@ -1,10 +1,9 @@
 import QtQuick 2.0
 import "qrc:/qml/js/constants.js" as Const
 
-Rectangle {
+FileListPopup {
     id: fileListHeaderPopupRoot
 
-    width: Const.DEFAULT_POPUP_WIDTH
     height: popupItemsContainer.height + radius * 2
 
     property alias extChecked: extMenuItem.itemChecked
@@ -14,19 +13,6 @@ Rectangle {
     property alias ownerChecked: ownerMenuItem.itemChecked
     property alias permsChecked: permsMenuItem.itemChecked
     property alias attrsChecked: attrsMenuItem.itemChecked
-
-    radius: Const.DEFAULT_POPUP_RADIUS
-
-    color: Const.DEFAULT_POPUP_BACKGROUND_COLOR
-
-    border.color: Const.DEFAULT_POPUP_BORDER_COLOR
-    border.width: Const.DEFAULT_POPUP_BORDER_WIDTH
-
-    opacity: 0.0
-
-    visible: opacity > 0.0
-
-    Behavior on opacity { NumberAnimation { duration: Const.DEFAULT_TRANSITION_DURATION } }
 
     signal itemVisibilityChanged
 
@@ -43,12 +29,6 @@ Rectangle {
 
         // Set Opacity
         opacity = 1.0;
-    }
-
-    // Hide
-    function hidePopup() {
-        // Set Opacity
-        opacity = 0.0;
     }
 
     // Popup Items Container

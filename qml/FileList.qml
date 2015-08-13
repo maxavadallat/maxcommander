@@ -38,8 +38,6 @@ Rectangle {
     // File List Header Popup
     FileListHeaderPopup {
         id: fileListHeaderPopup
-        opacity: 0.0
-        z: 1.0
         // On Item Visibility Changed
         onItemVisibilityChanged: {
             // Update Header Layout
@@ -66,6 +64,28 @@ Rectangle {
         property int delegateHeight: globalSettings.thumbHeight
         property int visualItemsCount: Math.floor((fileListView.height + fileListView.spacing) / fileListView.delegateHeight);
         property int prevIndex: -1
+
+        Keys.onPressed: {
+            //console.log("fileListView.Keys.onPressed - key: " + event.key);
+
+        }
+
+        Keys.onReleased: {
+            // Switch Key
+            switch (event.key) {
+                case Qt.Key_Escape:
+                    // Hide File List Header Popup
+                    fileListHeaderPopup.hidePopup();
+                    // Hide File List Item Popup
+                    fileListItemPopup.hidePopup();
+                break;
+
+                default:
+                    //console.log("fileListView.Keys.onReleased - key: " + event.key);
+
+                break;
+            }
+        }
 
         // Model
         model: fileListModel
@@ -170,6 +190,11 @@ Rectangle {
                     //console.log("fileListDelegateRoot.MouseArea.onPressed - index: " + index);
                     // Set Pressed Index
                     mainController.pressedIndex = index;
+
+                    // Hide File List Header Popup
+                    fileListHeaderPopup.hidePopup();
+                    // Hide File List Item Popup
+                    fileListItemPopup.hidePopup();
                 }
                 // On Released
                 onReleased: {
@@ -401,6 +426,8 @@ Rectangle {
         property variant pressedItem: undefined
         property variant releasedItem: undefined
 
+        property bool popupShown: false
+
         property int justSelected: -1
 
         property int lastHoverIndex: -1
@@ -435,6 +462,9 @@ Rectangle {
                 // Set Last Hover Index
                 lastHoverIndex = hoverIndex;
             }
+
+            // Hide File List Item Popup
+            fileListItemPopup.hidePopup();
         }
 
         // On Released
@@ -447,7 +477,7 @@ Rectangle {
             // Check Pressed Item
             if (pressedItem === releasedItem && pressedItem != undefined) {
                 // Check Just Selected
-                if (justSelected !== releasedItem.itemIndex) {
+                if (justSelected !== releasedItem.itemIndex && !fileListItemPopup.visible) {
                     // Set Selected
                     fileListModel.setSelected(releasedItem.itemIndex, false);
                 }
@@ -463,6 +493,11 @@ Rectangle {
 
         // On Mouse Y Changed
         onMouseYChanged: {
+            // Chekc If File List Popup Visible
+            if (fileListItemPopup.visible) {
+                return;
+            }
+
             // Check Mouse X
             if (mouseX >= 0 && mouseX < fileListView.width && mouseY >= 0 && mouseY < fileListView.height) {
                 // Check First Change
@@ -489,6 +524,43 @@ Rectangle {
                 }
             }
         }
+
+        // On Press And Hold
+        onPressAndHold: {
+            // Check Pressed Item
+            if (pressedItem != undefined && mouse.button === Qt.RightButton) {
+                //console.log("selectionMouseArea.onPressAndHold - index: " + pressedItem.itemIndex + " - path: " + fileListModel.getFullPath(pressedItem.itemIndex));
+
+                // Set File List Item Popup Pos
+                fileListItemPopup.x = Math.min(mouseX, fileListRoot.width - fileListItemPopup.width - 1);
+                fileListItemPopup.y = Math.min(mouseY, fileListRoot.height - fileListItemPopup.height - 1);
+
+                // Set Current Path
+                fileListItemPopup.currentItemPath = fileListModel.getFullPath(pressedItem.itemIndex);
+
+                // Show Item Popup
+                fileListItemPopup.showPopup();
+
+                // Set Selected
+                //fileListModel.setSelected(pressedItem.itemIndex, false);
+
+                // ...
+
+
+            }
+        }
+    }
+
+    // Item Popup Mouse Eater
+    MouseArea {
+        id: popupMouseEater
+        anchors.fill: fileListView
+        visible: false
+    }
+
+    // File List Item Popup
+    FileListItemPopup {
+        id: fileListItemPopup
     }
 
     // Helper Timer
@@ -643,6 +715,16 @@ Rectangle {
 
             // Set Interactive
             fileListView.interactive = aInteractive;
+        }
+
+        // On Hide Popups
+        onHidePopups: {
+            //console.log("fileListRoot.Connections.mainController.onHidePopups");
+
+            // Hide File List Header Popup
+            fileListHeaderPopup.hidePopup();
+            // Hide File List Item Popup
+            fileListItemPopup.hidePopup();
         }
     }
 }

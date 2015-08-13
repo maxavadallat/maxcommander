@@ -277,10 +277,8 @@
 
 // Exec Command
 #define DEFAULT_EXEC_APP_SYSTEM_COMMAND_MAC_OSX             "open -a \"%1\" &"
-
 // Exec App with Parameter
 #define DEFAULT_EXEC_APP_SYSTEM_COMMAND_WITH_PARAM_MAC_OSX  "open -a %1 \"%2\" &"
-
 // Open Files
 #define DEFAULT_OPEN_FILE_SYSTEM_COMMAND_MAC_OSX            "open \"%1\" &"
 
@@ -333,12 +331,14 @@
 
 #define DEFAULT_URL_PREFIX_FILE                             "file://"
 
+// Root Dir
 #define DEFAULT_ROOT_DIR                                    "/"
+// External Drives Path
+#define DEFAULT_VOLUMES_PATH_MAC                            "/Volumes/"
+#define DEFAULT_MEDIA_PATH_LINUX                            "/media/"
 
-#define DEFAULT_VOLUMES_PATH_MAC                            "/Volumes"
-#define DEFAULT_MEDIA_PATH_LINUX                            "/media"
-
-
+// Eject External Drive Command
+#define DEFAULT_EXTERNAL_DRIVE_EJECT_COMMAND_MAC            "diskutil eject %1"
 
 
 

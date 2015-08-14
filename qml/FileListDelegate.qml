@@ -72,8 +72,8 @@ Rectangle {
         return globalSettings.textColor;
     }
 
-    width: 320
-    height: 32
+    width: Const.DEFAULT_FILE_LIST_DELEGATE_WIDTH
+    height: Const.DEFAULT_FILE_LIST_DELEGATE_HEIGHT
 
     color: "transparent"
 
@@ -101,7 +101,7 @@ Rectangle {
                 anchors.fill: fileIconImage
                 visible: fileListDelegateRoot.fileSymLink
                 fillMode: Image.PreserveAspectFit
-                cache: false
+                cache: true
                 smooth: false
                 asynchronous: true
                 source: Const.DEFAULT_FILE_LIST_ICON_LINK_OVERLAY

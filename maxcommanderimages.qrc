@@ -19,6 +19,8 @@
         <file>resources/images/icons/default_folder_dark.png</file>
         <file>resources/images/icons/default_folder_yellow.png</file>
         <file>resources/images/grumpy-cat.jpg</file>
+        <file>resources/images/icons/default_file_16x16.png</file>
+        <file>resources/images/icons/default_folder_yellow_16x16.png</file>
     </qresource>
 </RCC>
 

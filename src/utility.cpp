@@ -127,19 +127,19 @@ OSStatus convertMacIcon(const IconRef& aMacIconref, QImage& aIconImage)
     return status;
 }
 
-#elif defined(Q_OS_WIN)
+#elif defined(Q_OS_UNIX)
 
 
 // ...
 
 
-#else // Q_OS_UNIX
+#else // Q_OS_WIN
 
 
 // ...
 
 
-#endif // Q_OS_UNIX
+#endif // Q_OS_WIN
 
 //==============================================================================
 // Get File Icon Pixmap
@@ -242,25 +242,25 @@ QImage getFileIconImage(const QString& aFilePath, const int& aWidth, const int& 
         painter.drawImage(newImage.rect(), QImage(QString(":/resources/images/icons/default_file.png")));
     }
 
-#elif defined(Q_OS_WIN)
+#elif defined(Q_OS_UNIX)
 
     // Init Painter
     QPainter painter(&newImage);
-
+    // Fill Image
     newImage.fill(QColor(0, 0, 0, 0));
+    // Draw Default Icon
+    painter.drawImage(newImage.rect(), QImage(QString(":/resources/images/icons/default_file.png")));
 
-    //painter.drawImage(newImage.rect(), QImage(QString(":defaultIcon32x32")));
-
-#else // Q_OS_UNIX
+#else // Q_OS_WIN
 
     // Init Painter
     QPainter painter(&newImage);
-
+    // Fill Image
     newImage.fill(QColor(0, 0, 0, 0));
+    // Draw Default Icon
+    painter.drawImage(newImage.rect(), QImage(QString(":/resources/images/icons/default_file.png")));
 
-    //painter.drawImage(newImage.rect(), QImage(QString(":defaultIcon32x32")));
-
-#endif // Q_OS_UNIX
+#endif // Q_OS_WIN
 
     return newImage;
 }

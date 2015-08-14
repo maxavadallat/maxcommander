@@ -246,7 +246,7 @@
 
 
 #define DEFAULT_ONE_SEC                                     1000
-#define DEFAULT_ANIM_FRAME_RATE                             30
+#define DEFAULT_ANIM_FRAME_RATE                             20
 #define DEFAULT_ANIM_PIECES_MAX                             3
 
 

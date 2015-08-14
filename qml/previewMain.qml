@@ -23,6 +23,7 @@ Rectangle {
             fileHidden: false
             fileCurrent: false
             fileLink: false
+            fileDir: true
         }
 
         ListElement {
@@ -32,6 +33,7 @@ Rectangle {
             fileHidden: false
             fileCurrent: false
             fileLink: true
+            fileDir: true
         }
 
         ListElement {
@@ -41,6 +43,7 @@ Rectangle {
             fileHidden: false
             fileCurrent: true
             fileLink: false
+            fileDir: false
         }
 
         ListElement {
@@ -50,6 +53,7 @@ Rectangle {
             fileHidden: false
             fileCurrent: false
             fileLink: false
+            fileDir: false
         }
 
         ListElement {
@@ -59,6 +63,7 @@ Rectangle {
             fileHidden: false
             fileCurrent: true
             fileLink: false
+            fileDir: false
         }
 
         ListElement {
@@ -68,6 +73,7 @@ Rectangle {
             fileHidden: true
             fileCurrent: false
             fileLink: false
+            fileDir: false
         }
 
     }
@@ -115,7 +121,31 @@ Rectangle {
                     width: previewController.thumbWidth
                     height: previewController.thumbHeight
                     fillMode: Image.PreserveAspectFit
-                    source: Const.DEFAULT_FILE_ICON_PREFIX + fileIcon
+                    //source: Const.DEFAULT_FILE_ICON_PREFIX + fileIcon
+                    smooth: false
+                    source: {
+                        // Check Use Default Icons
+                        if (previewController.useDefaultIcons) {
+                            // Check If Dir
+                            if (fileDir) {
+                                // Check Size
+                                if (previewController.thumbHeight < Const.DEFAULT_FILE_LIST_DELEGATE_HEIGHT) {
+                                    return Const.DEFAULT_FILE_LIST_ICON_DIR_SMALL;
+                                }
+
+                                return Const.DEFAULT_FILE_LIST_ICON_DIR;
+                            }
+
+                            // Check Size
+                            if (previewController.thumbHeight < Const.DEFAULT_FILE_LIST_DELEGATE_HEIGHT) {
+                                return Const.DEFAULT_FILE_LIST_ICON_FILE_SMALL;
+                            }
+
+                            return Const.DEFAULT_FILE_LIST_ICON_FILE;
+                        }
+
+                        return Const.DEFAULT_FILE_ICON_PREFIX + fileIcon;
+                    }
                 }
 
                 Rectangle {

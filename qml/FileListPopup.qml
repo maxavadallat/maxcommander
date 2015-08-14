@@ -22,10 +22,13 @@ Rectangle {
     Behavior on opacity { NumberAnimation { duration: Const.DEFAULT_TRANSITION_DURATION } }
 
     // Show
-    function showPopup() {
+    function showPopup(aFocus) {
 
         // Set Opacity
         opacity = 1.0;
+        // Set Focus
+        focus = aFocus;
+
     }
 
     // Hide
@@ -33,6 +36,7 @@ Rectangle {
         // Set Opacity
         opacity = 0.0;
     }
+
 
 }
 

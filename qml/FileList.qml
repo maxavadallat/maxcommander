@@ -80,6 +80,21 @@ Rectangle {
                     fileListItemPopup.hidePopup();
                 break;
 
+                case 16:
+                    //console.log("fileListView.Keys.onReleased - key: POPUP - currentItem: " + fileListView.currentItem.y);
+
+                    // Set File List Item Popup Pos
+                    fileListItemPopup.x = Const.DEFAULT_FILE_LIST_ITEM_POPUP_POSX;
+                    fileListItemPopup.y = Math.min(fileListView.currentItem.y, fileListRoot.height - fileListItemPopup.height - 1);
+
+                    // Set Current Path
+                    fileListItemPopup.currentItemPath = fileListModel.getFullPath(fileListView.currentIndex);
+
+                    // Show Item Popup
+                    fileListItemPopup.showPopup(true);
+
+                break;
+
                 default:
                     //console.log("fileListView.Keys.onReleased - key: " + event.key);
 
@@ -102,7 +117,17 @@ Rectangle {
                 if (globalSettings.useDefaultIcons) {
                     // Check If Is Dir
                     if (fileIsDir) {
+                       // Check Size
+                       if (fileListView.delegateHeight < Const.DEFAULT_FILE_LIST_DELEGATE_HEIGHT) {
+                           return Const.DEFAULT_FILE_LIST_ICON_DIR_SMALL;
+                       }
+
                        return Const.DEFAULT_FILE_LIST_ICON_DIR;
+                    }
+
+                    // Check Size
+                    if (fileListView.delegateHeight < Const.DEFAULT_FILE_LIST_DELEGATE_HEIGHT) {
+                        return Const.DEFAULT_FILE_LIST_ICON_FILE_SMALL;
                     }
 
                     return Const.DEFAULT_FILE_LIST_ICON_FILE;

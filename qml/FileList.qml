@@ -564,7 +564,7 @@ Rectangle {
                 fileListItemPopup.currentItemPath = fileListModel.getFullPath(pressedItem.itemIndex);
 
                 // Show Item Popup
-                fileListItemPopup.showPopup();
+                fileListItemPopup.showPopup(false);
 
                 // Set Selected
                 //fileListModel.setSelected(pressedItem.itemIndex, false);

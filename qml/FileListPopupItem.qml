@@ -8,9 +8,13 @@ Rectangle {
 
     property int command: 0
 
+    property int index: -1
+
     property bool mousePressed: false
 
     property bool mouseHovered: false
+
+    property bool active: false
 
     property int titleLeftMargin: Const.DEFAULT_MARGIN_WIDTH
 
@@ -22,7 +26,7 @@ Rectangle {
 
     anchors.horizontalCenter: parent.horizontalCenter
 
-    color: mouseHovered ? Const.DEFAULT_POPUP_ITEM_HIGHLIGHT_COLOR : "transparent"
+    color: mouseHovered || active ? Const.DEFAULT_POPUP_ITEM_HIGHLIGHT_COLOR : "transparent"
 
     signal itemClicked(var aCommand);
 

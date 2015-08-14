@@ -83,6 +83,7 @@ FilePanel::FilePanel(QWidget* aParent)
     , searchTerm("")
     , dirHistoryModel(NULL)
     , dirHistoryListPopup(NULL)
+    , fileListItemPopupActive(false)
 {
     // Setup UI
     ui->setupUi(this);
@@ -1097,6 +1098,28 @@ void FilePanel::setSearchResultsMode(const bool& aSearchResultMode)
             // Clear Search Term
             searchTerm = "";
         }
+    }
+}
+
+//==============================================================================
+// Get File List Item Popup Active
+//==============================================================================
+bool FilePanel::getFileListItemPopupActive()
+{
+    return fileListItemPopupActive;
+}
+
+//==============================================================================
+// Set File List Item Popup Active
+//==============================================================================
+void FilePanel::setFileListItemPopupActive(const bool& aPopupActive)
+{
+    // Check File List Item Popup Active
+    if (fileListItemPopupActive != aPopupActive) {
+        // Set File List Item Popup Active
+        fileListItemPopupActive = aPopupActive;
+        // Emit Signal
+        emit fileListItemPopupActiveChanged(fileListItemPopupActive);
     }
 }
 
@@ -2508,6 +2531,9 @@ void FilePanel::keyPressEvent(QKeyEvent* aEvent)
 {
     // Handle Modifier Key Press Event
     if (handleModifierKeyPressEvent(aEvent)) {
+        // Emit Hide Popups
+        emit hidePopups();
+
         return;
     }
 
@@ -2515,6 +2541,11 @@ void FilePanel::keyPressEvent(QKeyEvent* aEvent)
     if (aEvent) {
         // Check If File Renamer Active
         if (fileRenameActive) {
+            return;
+        }
+
+        // Check If File List Item Popup Active
+        if (fileListItemPopupActive) {
             return;
         }
 
@@ -2584,6 +2615,9 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
 {
     // Handle Modifier Key Release Event
     if (handleModifierKeyReleaseEvent(aEvent)) {
+        // Emit Hide Popups
+        emit hidePopups();
+
         return;
     }
 
@@ -2598,6 +2632,11 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
 
     // Check If File Renamer Active
     if (fileRenameActive) {
+        return;
+    }
+
+    // Check If File List Item Popup Active
+    if (fileListItemPopupActive) {
         return;
     }
 

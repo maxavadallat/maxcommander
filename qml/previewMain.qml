@@ -121,7 +121,6 @@ Rectangle {
                     width: previewController.thumbWidth
                     height: previewController.thumbHeight
                     fillMode: Image.PreserveAspectFit
-                    //source: Const.DEFAULT_FILE_ICON_PREFIX + fileIcon
                     smooth: false
                     source: {
                         // Check Use Default Icons

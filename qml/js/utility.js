@@ -1,6 +1,35 @@
 
 .pragma library
 
+// File List Popup Items
+var fileListPopupItems          = [];
+
+//==============================================================================
+// Clear File List Popup Items
+//==============================================================================
+function clearFileListPopupItems()
+{
+    // Clear Items
+    fileListPopupItems.splice(0, fileListPopupItems.length);
+}
+
+//==============================================================================
+// Append File List Popup Item
+//==============================================================================
+function appendFileListPopupItem(item)
+{
+    // Push Item
+    fileListPopupItems.push(item);
+}
+
+//==============================================================================
+// Remove File List Popup Item
+//==============================================================================
+function removeFileListPopupItem(index)
+{
+    // Remove Item
+    fileListPopupItems.splice(intex, 1);
+}
 
 //==============================================================================
 // Check If File Is Image

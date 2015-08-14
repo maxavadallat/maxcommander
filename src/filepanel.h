@@ -65,6 +65,8 @@ class FilePanel : public QFrame
 
     Q_PROPERTY(bool searchResultsMode READ getSearchResultsMode WRITE setSearchResultsMode NOTIFY searchResultsModeChanged)
 
+    Q_PROPERTY(bool fileListItemPopupActive READ getFileListItemPopupActive WRITE setFileListItemPopupActive NOTIFY fileListItemPopupActiveChanged)
+
 public:
     // Constructor
     explicit FilePanel(QWidget* aParent = NULL);
@@ -210,6 +212,11 @@ public:
     bool getSearchResultsMode();
     // Set Search REsults Mode
     void setSearchResultsMode(const bool& aSearchResultMode);
+
+    // Get File List Item Popup Active
+    bool getFileListItemPopupActive();
+    // Set File List Item Popup Active
+    void setFileListItemPopupActive(const bool& aPopupActive);
 
     // Destructor
     virtual ~FilePanel();
@@ -400,6 +407,9 @@ signals:
 
     // Set List View Interactive
     void setListViewInteractive(const bool& aInteractive);
+
+    // File List Item Popup Active Changed Signal
+    void fileListItemPopupActiveChanged(const bool& aPopupActive);
 
 protected slots:
 
@@ -644,6 +654,9 @@ private:
 
     // Dir History List Popup
     DirHistoryListPopup*    dirHistoryListPopup;
+
+    // File List Item Popup Active
+    bool                    fileListItemPopupActive;
 };
 
 

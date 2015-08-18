@@ -53,6 +53,9 @@ class SettingsController : public QObject
     Q_PROPERTY(int thumbWidth READ getThumbWidth WRITE setThumbWidth NOTIFY thumbWidthChanged)
     Q_PROPERTY(int thumbHeight READ getThumbHeight WRITE setThumbHeight NOTIFY thumbHeightChanged)
 
+    Q_PROPERTY(int gridThumbWidth READ getGridThumbWidth WRITE setGridThumbWidth NOTIFY gridThumbWidthChanged)
+    Q_PROPERTY(int gridThumbHeight READ getGridThumbHeight WRITE setGridThumbHeight NOTIFY gridThumbHeightChanged)
+
     Q_PROPERTY(QString terminalPath READ getTerminalPath WRITE setTerminalPath NOTIFY terminalPathChanged)
     Q_PROPERTY(QString viewerPath READ getViewerPath WRITE setViewerPath NOTIFY viewerPathChanged)
     Q_PROPERTY(QString editorPath READ getEditorPath WRITE setEditorPath NOTIFY editorPathChanged)
@@ -236,6 +239,16 @@ public:
     // Set Thumb height
     void setThumbHeight(const int& aheight);
 
+    // Get Grid Thumb Width
+    int getGridThumbWidth();
+    // Set Grid Thumb Width
+    void setGridThumbWidth(const int& aWidth);
+
+    // Get Grid Thumb Height
+    int getGridThumbHeight();
+    // Set Grid Thumb Height
+    void setGridThumbHeight(const int& aHeight);
+
     // Get Terminal Path
     QString getTerminalPath();
     // Set Terminal Path
@@ -345,6 +358,11 @@ signals:
     // Thumb Height Changed Signal
     void thumbHeightChanged(const int& aHeight);
 
+    // Grid Thumb Width Changed Signal
+    void gridThumbWidthChanged(const int& aWidth);
+    // Grid Thumb Height Changed Signal
+    void gridThumbHeightChanged(const int& aHeight);
+
     // Terminal Path Changed Signal
     void terminalPathChanged(const QString& aTerminalPath);
     // Viewer Path Changed Signal
@@ -452,6 +470,10 @@ protected:
     // Thumb Height
     int                     thumbHeight;
 
+    // Grid Thumb Width
+    int                     gridThumbWidth;
+    // Grid Thumb Height
+    int                     gridThumbHeight;
 
     // Terminal App Path
     QString                 terminalPath;

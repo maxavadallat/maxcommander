@@ -60,6 +60,9 @@ PreferencesDialog::PreferencesDialog(QWidget* aParent)
     , thumbWidth(DEFAULT_SETTINGS_THUMB_WIDTH)
     , thumbHeight(DEFAULT_SETTINGS_THUMB_HEIGHT)
 
+    , gridThumbWidth(DEFAULT_SETTINGS_GRID_THUMB_WIDTH)
+    , gridThumbHeight(DEFAULT_SETTINGS_GRID_THUMB_HEIGHT)
+
     , terminalPath(DEFAULT_SETTINGS_TERMINAL_PATH_MAC_OSX)
     , viewerPath(DEFAULT_SETTINGS_VIEWER_PATH_MAC_OSX)
     , editorPath(DEFAULT_SETTINGS_EDITOR_PATH_MAC_OSX)
@@ -156,6 +159,11 @@ void PreferencesDialog::loadSettings()
     // Set Thumb height
     setThumbHeight(settings->getThumbHeight());
 
+    // Set Grid Thumb Width
+    setGridThumbWidth(settings->getGridThumbWidth());
+    // Set Grid Thumb Height
+    setGridThumbHeight(settings->getGridThumbHeight());
+
     // Set Show Function Keys
     setShowFunctionKeys(settings->getShowFunctionKeys());
     // Set Show Directory Hot Keys
@@ -243,6 +251,11 @@ void PreferencesDialog::saveSettings()
     // Set Thumb Height
     settings->setThumbHeight(thumbHeight);
 
+    // Set Grid Thumb Width
+    settings->setGridThumbWidth(gridThumbWidth);
+    // Set Grid Thumb Height
+    settings->setGridThumbHeight(gridThumbHeight);
+
     // Set Show Function Keys
     settings->setShowFunctionKeys(showFunctionKeys);
     // Set Show Directory Hot Keys
@@ -310,79 +323,6 @@ void PreferencesDialog::restoreDefaults()
 
     // Load Settings
     loadSettings();
-
-/*
-    // Set Normal Text Color
-    setTextColor(DEFAULT_SETTINGS_TEXT_COLOR);
-    // Set Normal Text BG Color
-    setTextBGColor(DEFAULT_SETTINGS_TEXT_BG_COLOR);
-    // Set Current Text Color
-    setCurrentColor(DEFAULT_SETTINGS_CURRENT_COLOR);
-    // Set Current Text BG Color
-    setCurrentBGColor(DEFAULT_SETTINGS_CURRENT_BG_COLOR);
-    // Set Selected Text Color
-    setSelectedColor(DEFAULT_SETTINGS_SELECTED_COLOR);
-    // Set Selected Text BG Color
-    setSelectedBGColor(DEFAULT_SETTINGS_SELECTED_BG_COLOR);
-    // Set Current Selected Text Color
-    setCurrentSelectedColor(DEFAULT_SETTINGS_CURRENT_SELECTED_COLOR);
-    // Set Current Selected Text BG Color
-    setCurrentSelectedBGColor(DEFAULT_SETTINGS_CURRENT_SELECTED_BG_COLOR);
-    // Set Hidden Text Color
-    setHiddenColor(DEFAULT_SETTINGS_HIDDEN_COLOR);
-    // Set Hidden Text BG Color
-    setHiddenBGColor(DEFAULT_SETTINGS_HIDDEN_BG_COLOR);
-    // Set Link Text Color
-    setLinkColor(DEFAULT_SETTINGS_LINK_COLOR);
-    // Set Link Text BG Color
-    setLinkBGColor(DEFAULT_SETTINGS_LINK_BG_COLOR);
-
-    // Set Font Name
-    setFontName(DEFAULT_SETTINGS_FONT_NAME);
-    // Set Font Size
-    setFontSize(DEFAULT_SETTINGS_FONT_SIZE);
-    // Set Font Bold
-    setFontBold(DEFAULT_SETTINGS_FONT_BOLD);
-    // Set Font Italic
-    setFontItalic(DEFAULT_SETTINGS_FONT_ITALIC);
-
-    // Set Thumb Width
-    setThumbWidth(DEFAULT_SETTINGS_THUMB_WIDTH);
-    // Set Thumb height
-    setThumbHeight(DEFAULT_SETTINGS_THUMB_HEIGHT);
-
-    // Set Show Function Keys
-    setShowFunctionKeys(DEFAULT_SETTINGS_SHOW_FUNCTION_KEYS);
-    // Set Show Directory Hot Keys
-    setShowDirHotKeys(DEFAULT_SETTINGS_SHOW_DIRECTORIY_HOT_KEYS);
-    // Set Show Drive Buttons
-    setShowDriveButtons(DEFAULT_SETTINGS_SHOW_DRIVE_BUTTONS);
-    // Set Close When Finished
-    setCloseWhenFinished(DEFAULT_SETTINGS_CLOSE_WHEN_FINISHED);
-
-    // Set Show Hidden Files
-    setShowHiddenFiles(DEFAULT_SETTINGS_SHOW_HIDDEN_FILES);
-    // Set Select Directories
-    setSelectDirectories(DEFAULT_SETTINGS_SELECT_DIRECTORIES);
-    // Set Show Directories First
-    setShowDirsFirst(DEFAULT_SETTINGS_SHOW_DIRECTORIES_FIRST);
-    // Set Case Sensitive Sorting
-    setCaseSensitiveSort(DEFAULT_SETTINGS_CASE_SENSITIVE_SORTING);
-
-    // Set Copy Hidden Files
-    setCopyHiddenFiles(DEFAULT_SETTINGS_COPY_HIDDEN_FILES);
-    // Set Show Full File Sizes
-    setShowFullSizes(DEFAULT_SETTINGS_SHOW_FULL_FILE_SIZES);
-    // Set Use Default File Icons
-    setUseDefaultIcons(DEAFULT_SETTINGS_USE_DEFAULT_ICONS);
-    // Set Follow Links
-    setFollowLinks(DEFAULT_SETTINGS_FOLLOW_SYMBOLIC_LINKS);
-*/
-
-    //
-
-
-    // ...
 
     // Restore UI
     restoreUI();
@@ -1243,6 +1183,51 @@ void PreferencesDialog::setThumbHeight(const int& aHeight)
         emit thumbHeightChanged(thumbHeight);
     }
 }
+
+//==============================================================================
+// Get Grid Thumb Width
+//==============================================================================
+int PreferencesDialog::getGridThumbWidth()
+{
+    return gridThumbWidth;
+}
+
+//==============================================================================
+// Set Grid Thumb Width
+//==============================================================================
+void PreferencesDialog::setGridThumbWidth(const int& aWidth)
+{
+    // Chek Grid Thumb Width
+    if (gridThumbWidth != aWidth) {
+        // Set Grid Thumb Width
+        gridThumbWidth = aWidth;
+        // Emit Signal
+        emit gridThumbWidthChanged(gridThumbWidth);
+    }
+}
+
+//==============================================================================
+// Get Grid Thumb Height
+//==============================================================================
+int PreferencesDialog::getGridThumbHeight()
+{
+    return gridThumbHeight;
+}
+
+//==============================================================================
+// Set Grid Thumb Height
+//==============================================================================
+void PreferencesDialog::setGridThumbHeight(const int& aHeight)
+{
+    // Check Grid Thumb Height
+    if (gridThumbHeight != aHeight) {
+        // Set Grid Thumb Height
+        gridThumbHeight = aHeight;
+        // Emit Signal
+        emit gridThumbHeightChanged(gridThumbHeight);
+    }
+}
+
 
 //==============================================================================
 // Update Preview

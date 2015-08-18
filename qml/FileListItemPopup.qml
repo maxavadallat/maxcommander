@@ -59,17 +59,15 @@ FileListPopup {
 
         // Set Opacity
         opacity = 1.0;
-
         // Set Focus
         //focus = aFocus;
         focus = true;
 
         // Get Number Of Children
         var numChildren = popupItemsContainer.children.length;
-
-        console.log("#### fileListItemPopupRoot.showPopup - numChildren: " + numChildren);
-
         var indexing = 0;
+
+        //console.log("#### fileListItemPopupRoot.showPopup - numChildren: " + numChildren);
 
         // Go Thru Children
         for (var i=0; i<numChildren; i++) {
@@ -79,13 +77,14 @@ FileListPopup {
 
             // Check Command
             if (popupItem.command !== 0 /*&& popupItem.visible*/) {
-                console.log("fileListItemPopupRoot.showPopup - command: " + popupItem.command + " - index: " + indexing);
+                //console.log("fileListItemPopupRoot.showPopup - command: " + popupItem.command + " - index: " + indexing);
 
                 // Set Index
                 popupItem.index = indexing;
                 // Append Popup Item
                 Utility.appendFileListPopupItem(popupItem);
 
+                // Inc Indexing
                 indexing++;
             }
         }
@@ -117,14 +116,14 @@ FileListPopup {
     function hidePopup() {
         // Set Opacity
         opacity = 0.0;
+        // Reset Focus
+        focus = false;
         // Clear File List Popup Items
         Utility.clearFileListPopupItems();
         // Reset Current Index
         currentIndex = -1;
         // Reset Current Item
         currentItem = undefined;
-        // Reset Focus
-        focus = false;
 
         // Set File List Item Popup Active
         mainController.fileListItemPopupActive = false;
@@ -291,6 +290,26 @@ FileListPopup {
 
         FileListPopupItem {
             title: "-"
+            visible: !isVolume
+        }
+
+        FileListPopupItem {
+            id: propertiesItem
+            title: "Properties"
+            command: isVolume ? 0 : 8
+            visible: !isVolume
+            active: index == currentIndex
+            onItemClicked: {
+                // Hide
+                hidePopup();
+                // Emit Launch Properties Signal
+                mainController.launchProperties();
+            }
+        }
+
+/*
+        FileListPopupItem {
+            title: "-"
         }
 
         FileListPopupItem {
@@ -303,6 +322,7 @@ FileListPopup {
                 hidePopup();
             }
         }
+*/
     }
 }
 

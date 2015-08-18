@@ -171,6 +171,13 @@ void MainWindow::init()
     connect(leftPanel, SIGNAL(launchFileDeselect()), this, SLOT(launchFileDeselect()));
     connect(rightPanel, SIGNAL(launchFileDeselect()), this, SLOT(launchFileDeselect()));
 
+    connect(leftPanel, SIGNAL(launchProperties()), this, SLOT(launchProperties()));
+    connect(rightPanel, SIGNAL(launchProperties()), this, SLOT(launchProperties()));
+
+    // ...
+
+    connect(ui->mainSplitter, SIGNAL(splitterMoved(int,int)), this, SLOT(mainSlitterMoved(int,int)));
+
     // ...
 }
 
@@ -990,6 +997,28 @@ void MainWindow::launchFileDeselect()
 }
 
 //==============================================================================
+// Launch Properties Slot
+//==============================================================================
+void MainWindow::launchProperties()
+{
+    // Check Focused Panel
+    if (!focusedPanel) {
+        return;
+    }
+
+    // Reset Modifier Keys
+    focusedPanel->resetModifierKeys();
+
+    // Get File Info
+    QFileInfo fileInfo = focusedPanel->getCurrFileInfo();
+
+    qDebug() << "MainWindow::launchProperties - fileInfo: " << fileInfo.absoluteFilePath();
+
+
+    // ...
+}
+
+//==============================================================================
 // Settings Has Changed Slot
 //==============================================================================
 void MainWindow::settingsHasChanged()
@@ -1084,6 +1113,73 @@ void MainWindow::viewerImageSelected(const QString& aFilePath, const QString& aP
             currPanel->setCurrentIndex(imageIndex);
         }
     }
+}
+
+//==============================================================================
+// Main Splitter Moved
+//==============================================================================
+void MainWindow::mainSlitterMoved(const int& aPos, const int& aIndex)
+{
+    Q_UNUSED(aPos);
+    Q_UNUSED(aIndex);
+
+    //qDebug() << "MainWindow::mainSlitterMoved - aPos: " << aPos << " - aIndex: " << aIndex;
+
+    // Get Sizes
+    QList<int> sizes = ui->mainSplitter->sizes();
+
+    // Check Sizes
+    if (sizes.count() > 1) {
+
+        // Check Sizes
+        if (sizes[0] <= 0 && rightPanel && !rightPanel->getGridMode()) {
+
+            qDebug() << "MainWindow::mainSlitterMoved - Switching ON Grid Mode in RIGHT PANEL";
+
+            // Set Panel Focused
+            rightPanel->setFocus();
+            // Set Grid Mode
+            rightPanel->setGridMode(true);
+            // Reload
+            rightPanel->reload(/*rightPanel->getCurrentIndex()*/);
+
+            // ...
+
+        } else if (sizes[1] <= 0 && leftPanel && !leftPanel->getGridMode()) {
+
+            qDebug() << "MainWindow::mainSlitterMoved - Switching ON Grid Mode in LEFT PANEL";
+
+            // Set Panel Focused
+            leftPanel->setFocus();
+            // Set Grid Mode
+            leftPanel->setGridMode(true);
+            // Reload
+            leftPanel->reload(/*leftPanel->getCurrentIndex()*/);
+
+            // ...
+
+        } else if (sizes[0] > 0 && rightPanel && rightPanel->getGridMode()){
+
+            qDebug() << "MainWindow::mainSlitterMoved - Switching OFF Grid Mode in RIGHT PANEL";
+
+            // Set Grid Mode
+            rightPanel->setGridMode(false);
+
+            // ...
+
+        } else if (sizes[1] > 0 && leftPanel && leftPanel->getGridMode()) {
+
+            qDebug() << "MainWindow::mainSlitterMoved - Switching OFF Grid Mode in LEFT PANEL";
+
+            // Set Grid Mode
+            leftPanel->setGridMode(false);
+
+            // ...
+
+        }
+    }
+
+    // ...
 }
 
 //==============================================================================
@@ -1478,39 +1574,42 @@ void MainWindow::transferProgressClosed(TransferProgressDialog* aTransferProgres
 //==============================================================================
 void MainWindow::focusedPanelChanged(FilePanel* aFocusedPanel)
 {
-    qDebug() << "MainWindow::focusedPanelChanged - panelName: " << aFocusedPanel->getPanelName();
+    // Check Focused Panel
+    if (focusedPanel != aFocusedPanel) {
+        qDebug() << "MainWindow::focusedPanelChanged - panelName: " << aFocusedPanel->getPanelName();
 
-    // Set Focused Panel
-    focusedPanel = aFocusedPanel;
+        // Set Focused Panel
+        focusedPanel = aFocusedPanel;
 
-    // Check Left Panel
-    if (leftPanel) {
-        // Reset Modifier Keys
-        leftPanel->resetModifierKeys();
-        // Hide Dir History List Popup
-        leftPanel->hideDirHistoryPopup();
-        // Check Focused Panel
-        if (focusedPanel != leftPanel) {
-            // Emit Hide Popups Signal
-            emit leftPanel->hidePopups();
+        // Check Left Panel
+        if (leftPanel) {
+            // Reset Modifier Keys
+            leftPanel->resetModifierKeys();
+            // Hide Dir History List Popup
+            leftPanel->hideDirHistoryPopup();
+            // Check Focused Panel
+            if (focusedPanel != leftPanel) {
+                // Emit Hide Popups Signal
+                emit leftPanel->hidePopups();
+            }
         }
-    }
 
-    // Check Right Panel
-    if (rightPanel) {
-        // Reset Modifier Keys
-        rightPanel->resetModifierKeys();
-        // Hide Dir History List Popup
-        rightPanel->hideDirHistoryPopup();
-        // Check Focused Panel
-        if (focusedPanel != rightPanel) {
-            // Emit Hide Popups Signal
-            emit rightPanel->hidePopups();
+        // Check Right Panel
+        if (rightPanel) {
+            // Reset Modifier Keys
+            rightPanel->resetModifierKeys();
+            // Hide Dir History List Popup
+            rightPanel->hideDirHistoryPopup();
+            // Check Focused Panel
+            if (focusedPanel != rightPanel) {
+                // Emit Hide Popups Signal
+                emit rightPanel->hidePopups();
+            }
         }
-    }
 
-    // Update Menu
-    updateMenu();
+        // Update Menu
+        updateMenu();
+    }
 }
 
 //==============================================================================

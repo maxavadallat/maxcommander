@@ -71,6 +71,9 @@ SettingsController::SettingsController(QObject* aParent)
     , thumbWidth(DEFAULT_SETTINGS_THUMB_WIDTH)
     , thumbHeight(DEFAULT_SETTINGS_THUMB_HEIGHT)
 
+    , gridThumbWidth(DEFAULT_SETTINGS_GRID_THUMB_WIDTH)
+    , gridThumbHeight(DEFAULT_SETTINGS_GRID_THUMB_HEIGHT)
+
     , terminalPath("")
     , viewerPath("")
     , editorPath("")
@@ -196,6 +199,9 @@ void SettingsController::loadSettings()
     thumbWidth = settings.value(SETTINGS_KEY_THUMBS_WIDTH, DEFAULT_SETTINGS_THUMB_WIDTH).toInt();
     thumbHeight = settings.value(SETTINGS_KEY_THUMBS_HEIGHT, DEFAULT_SETTINGS_THUMB_HEIGHT).toInt();
 
+    gridThumbWidth = settings.value(SETTINGS_KEY_GRID_THUMBS_WIDTH, DEFAULT_SETTINGS_GRID_THUMB_WIDTH).toInt();
+    gridThumbHeight = settings.value(SETTINGS_KEY_GRID_THUMBS_HEIGHT, DEFAULT_SETTINGS_GRID_THUMB_HEIGHT).toInt();
+
     terminalPath = settings.value(SETTINGS_KEY_APPS_TERMINAL, "").toString();
     viewerPath = settings.value(SETTINGS_KEY_APPS_VIEWER, "").toString();
     editorPath = settings.value(SETTINGS_KEY_APPS_EDITOR, "").toString();
@@ -252,6 +258,9 @@ void SettingsController::saveSettings()
 
     settings.setValue(SETTINGS_KEY_THUMBS_WIDTH, thumbWidth);
     settings.setValue(SETTINGS_KEY_THUMBS_HEIGHT, thumbHeight);
+
+    settings.setValue(SETTINGS_KEY_GRID_THUMBS_WIDTH, gridThumbWidth);
+    settings.setValue(SETTINGS_KEY_GRID_THUMBS_HEIGHT, gridThumbHeight);
 
     settings.setValue(SETTINGS_KEY_APPS_TERMINAL, terminalPath);
     settings.setValue(SETTINGS_KEY_APPS_VIEWER, viewerPath);
@@ -341,6 +350,11 @@ void SettingsController::restoreDefaults()
     setThumbWidth(DEFAULT_SETTINGS_THUMB_WIDTH);
     // Reset Thumb height
     setThumbHeight(DEFAULT_SETTINGS_THUMB_HEIGHT);
+
+    // Reset Grid Thumb Width
+    setGridThumbWidth(DEFAULT_SETTINGS_GRID_THUMB_WIDTH);
+    // REset Grid Thumb Height
+    setGridThumbHeight(DEFAULT_SETTINGS_GRID_THUMB_HEIGHT);
 
     // Set Terminal Path
     setTerminalPath(DEFAULT_SETTINGS_TERMINAL_PATH_MAC_OSX);
@@ -1096,6 +1110,50 @@ void SettingsController::setThumbHeight(const int& aHeight)
         setDirty(true);
         // Emit Thumb Height Changed Signal
         emit thumbHeightChanged(thumbHeight);
+    }
+}
+
+//==============================================================================
+// Get Grid Thumb Width
+//==============================================================================
+int SettingsController::getGridThumbWidth()
+{
+    return gridThumbWidth;
+}
+
+//==============================================================================
+// Set Grid Thumb Width
+//==============================================================================
+void SettingsController::setGridThumbWidth(const int& aWidth)
+{
+    // Chek Grid Thumb Width
+    if (gridThumbWidth != aWidth) {
+        // Set Grid Thumb Width
+        gridThumbWidth = aWidth;
+        // Emit Signal
+        emit gridThumbWidthChanged(gridThumbWidth);
+    }
+}
+
+//==============================================================================
+// Get Grid Thumb Height
+//==============================================================================
+int SettingsController::getGridThumbHeight()
+{
+    return gridThumbHeight;
+}
+
+//==============================================================================
+// Set Grid Thumb Height
+//==============================================================================
+void SettingsController::setGridThumbHeight(const int& aHeight)
+{
+    // Check Grid Thumb Height
+    if (gridThumbHeight != aHeight) {
+        // Set Grid Thumb Height
+        gridThumbHeight = aHeight;
+        // Emit Signal
+        emit gridThumbHeightChanged(gridThumbHeight);
     }
 }
 

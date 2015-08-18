@@ -34,6 +34,7 @@ Rectangle {
     property alias permsWidth: filePermsContainer.width
     property alias attrWidth : fileAttrContainer.width
 
+    property bool fileDirectory: false
     property bool fileHidden: false
     property bool fileSelected: false
     property bool fileSymLink: false
@@ -94,6 +95,35 @@ Rectangle {
                 cache: false
                 smooth: false
                 asynchronous: true
+                opacity: status == Image.Ready ? 1.0 : 0.0
+                Behavior on opacity { NumberAnimation { duration: Const.DEFAULT_TRANSITION_DURATION } }
+                visible: opacity > 0.0
+            }
+
+            // Icon Place Holder
+            Image {
+                id: fileIconPlaceHolder
+                anchors.fill: fileIconImage
+                //source: fileDirectory ? Const.DEFAULT_FILE_LIST_ICON_DIR : Const.DEFAULT_FILE_LIST_ICON_FILE
+                source: {
+                    // Check If Directory
+                    if (fileDirectory) {
+                        return "";
+                    }
+
+                    // Check Size
+                    if (fileListDelegateRoot.height < Const.DEFAULT_FILE_LIST_DELEGATE_HEIGHT) {
+                        return Const.DEFAULT_FILE_LIST_ICON_FILE_PLACEHOLDER_SMALL;
+                    }
+
+                    return Const.DEFAULT_FILE_LIST_ICON_FILE_PLACEHOLDER;
+                }
+                cache: true
+                asynchronous: false
+                smooth: false
+                opacity: fileIconImage.status != Image.Ready ? 1.0 : 0.0
+                Behavior on opacity { NumberAnimation { duration: Const.DEFAULT_TRANSITION_DURATION } }
+                visible: opacity > 0.0
             }
 
             Image {

@@ -87,6 +87,11 @@
 // Thumb Height
 #define DEFAULT_SETTINGS_THUMB_HEIGHT                       32              //  thumbHeight
 
+// Grid Thumb Width
+#define DEFAULT_SETTINGS_GRID_THUMB_WIDTH                   200             //  gridThumbWidth
+// Grid Thumb Height
+#define DEFAULT_SETTINGS_GRID_THUMB_HEIGHT                  136             //  gridThumbHeight
+
 // ...
 
 // Terminal App Path

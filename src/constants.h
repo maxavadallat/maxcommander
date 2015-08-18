@@ -56,6 +56,9 @@
 #define SETTINGS_KEY_THUMBS_WIDTH                           SETTINGS_GROUP_UI"/thumbsWidth"
 #define SETTINGS_KEY_THUMBS_HEIGHT                          SETTINGS_GROUP_UI"/thumbsHeiight"
 
+#define SETTINGS_KEY_GRID_THUMBS_WIDTH                      SETTINGS_GROUP_UI"/gridThumbsWidth"
+#define SETTINGS_KEY_GRID_THUMBS_HEIGHT                     SETTINGS_GROUP_UI"/gridThumbsHeiight"
+
 #define SETTINGS_KEY_FOCUSED_PANEL                          SETTINGS_GROUP_UI"/focusedPanel"
 
 #define SETTINGS_KEY_CLOSE_WHEN_FINISHED                    SETTINGS_GROUP_UI"/closeWhenFinished"
@@ -214,6 +217,7 @@
 #define DEFAULT_AVAILABLE_SPACE_FORMAT_STRING               "%1 files, %2 of %3 free"
 
 #define DEFAULT_FILE_ICON_PROVIDER_ID                       "fileicon"
+#define DEFAULT_GRID_ICON_PROVIDER_ID                       "gridicon"
 #define DEFAULT_AUDIO_TAG_PROVIDER_ID                       "audiotag"
 
 // Bits Per Color Components
@@ -244,6 +248,8 @@
 #define DEFAULT_ICON_WIDTH_64                               64
 #define DEFAULT_ICON_HEIGHT_64                              64
 
+#define DEFAULT_THUMB_WIDTH_300                             300
+#define DEFAULT_THUMB_HEIGHT_200                            200
 
 #define DEFAULT_ONE_SEC                                     1000
 #define DEFAULT_ANIM_FRAME_RATE                             20

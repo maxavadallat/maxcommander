@@ -17,6 +17,9 @@ FileListImageProvider::FileListImageProvider()
     : QQuickImageProvider(QQmlImageProviderBase::Image, QQmlImageProviderBase::ForceAsynchronousImageLoading)
     , iconWidth(DEFAULT_ICON_WIDTH_32)
     , iconHeight(DEFAULT_ICON_HEIGHT_32)
+    , thumbWidth(DEFAULT_THUMB_WIDTH_300)
+    , thumbHeight(DEFAULT_THUMB_HEIGHT_200)
+    , gridMode(false)
     , settings(SettingsController::getInstance())
     , useDefaultIcons(DEAFULT_SETTINGS_USE_DEFAULT_ICONS)
     , settingsReciever(new SettingsReciever(this))
@@ -29,8 +32,22 @@ FileListImageProvider::FileListImageProvider()
 
     // Connect Signals
     QObject::connect(settings, SIGNAL(useDefaultIconsChanged(bool)), settingsReciever, SLOT(useDefaultIconsChanged(bool)));
+    QObject::connect(settings, SIGNAL(thumbWidthChanged(int)), settingsReciever, SLOT(thumbWidthChanged(int)));
+    QObject::connect(settings, SIGNAL(thumbHeightChanged(int)), settingsReciever, SLOT(thumbHeightChanged(int)));
+    QObject::connect(settings, SIGNAL(gridThumbWidthChanged(int)), settingsReciever, SLOT(gridThumbWidthChanged(int)));
+    QObject::connect(settings, SIGNAL(gridThumbHeightChanged(int)), settingsReciever, SLOT(gridThumbHeightChanged(int)));
+
+
 
     // ...
+}
+
+//==============================================================================
+// Get Settings Reciever
+//==============================================================================
+SettingsReciever* FileListImageProvider::reciever()
+{
+    return settingsReciever;
 }
 
 //==============================================================================
@@ -77,7 +94,7 @@ QImage FileListImageProvider::requestImage(const QString& aID, QSize* aSize, con
     }
 
     // Get File Icon Image
-    QImage image = getFileIconImage(fileName, iconWidth, iconHeight);
+    QImage image = getFileIconImage(fileName, gridMode ? thumbHeight : iconWidth, gridMode ? thumbHeight : iconHeight);
 
     // Check Image
     if (!image.isNull()) {
@@ -126,7 +143,6 @@ SettingsReciever::SettingsReciever(FileListImageProvider* aParent)
     : QObject(NULL)
     , ipParent(aParent)
 {
-
 }
 
 //==============================================================================
@@ -140,6 +156,48 @@ void SettingsReciever::useDefaultIconsChanged(const bool& aUseDefaultIcons)
     ipParent->useDefaultIcons = aUseDefaultIcons;
 }
 
+//==============================================================================
+// Thumb Width Changed Slot
+//==============================================================================
+void SettingsReciever::thumbWidthChanged(const int& aWidth)
+{
+    // Set Icon Width
+    ipParent->iconWidth = aWidth;
+}
+
+//==============================================================================
+// Thumb Height Changed Slot
+//==============================================================================
+void SettingsReciever::thumbHeightChanged(const int& aHeight)
+{
+    // Set Icon Height
+    ipParent->iconHeight = aHeight;
+}
+
+//==============================================================================
+// Grid Thumb Width Changed Slot
+//==============================================================================
+void SettingsReciever::gridThumbWidthChanged(const int& aWidth)
+{
+    // Set Thumb Width
+    ipParent->thumbWidth = aWidth;
+}
+
+//==============================================================================
+// Grid Thumb Height Changed Slot
+//==============================================================================
+void SettingsReciever::gridThumbHeightChanged(const int& aHeight)
+{
+    // Set Thumb Height
+    ipParent->thumbWidth = aHeight;
+}
+
+// Grid Mode Changed Slot
+void SettingsReciever::gridModeChanged(const bool& aGridMode)
+{
+    // Set Grid Mode
+    ipParent->gridMode = aGridMode;
+}
 
 //==============================================================================
 // Destructor

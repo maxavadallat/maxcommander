@@ -23,6 +23,7 @@
         <file>qml/FileListScrollBar.qml</file>
         <file>qml/DirHistory.qml</file>
         <file>qml/FileListItemPopup.qml</file>
+        <file>qml/FileGridDelegate.qml</file>
     </qresource>
 </RCC>
 

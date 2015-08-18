@@ -58,6 +58,9 @@ class PreferencesDialog : public QDialog
     Q_PROPERTY(int thumbWidth READ getThumbWidth WRITE setThumbWidth NOTIFY thumbWidthChanged)
     Q_PROPERTY(int thumbHeight READ getThumbHeight WRITE setThumbHeight NOTIFY thumbHeightChanged)
 
+    Q_PROPERTY(int gridThumbWidth READ getGridThumbWidth WRITE setGridThumbWidth NOTIFY gridThumbWidthChanged)
+    Q_PROPERTY(int gridThumbHeight READ getGridThumbHeight WRITE setGridThumbHeight NOTIFY gridThumbHeightChanged)
+
     // ...
 
 public:
@@ -214,6 +217,16 @@ public:
     // Set Thumb height
     void setThumbHeight(const int& aheight);
 
+    // Get Grid Thumb Width
+    int getGridThumbWidth();
+    // Set Grid Thumb Width
+    void setGridThumbWidth(const int& aWidth);
+
+    // Get Grid Thumb Height
+    int getGridThumbHeight();
+    // Set Grid Thumb Height
+    void setGridThumbHeight(const int& aHeight);
+
     // Destructor
     virtual ~PreferencesDialog();
 
@@ -291,6 +304,11 @@ signals:
     void thumbWidthChanged(const int& aWidth);
     // Thumb Height Changed Signal
     void thumbHeightChanged(const int& aHeight);
+
+    // Grid Thumb Width Changed Signal
+    void gridThumbWidthChanged(const int& aWidth);
+    // Grid Thumb Height Changed Signal
+    void gridThumbHeightChanged(const int& aHeight);
 
 protected slots:
 
@@ -488,6 +506,11 @@ private:
     int                     thumbWidth;
     // Thumb Height
     int                     thumbHeight;
+
+    // Grid Thumb Width
+    int                     gridThumbWidth;
+    // Grid Thumb Height
+    int                     gridThumbHeight;
 
     // ...
 

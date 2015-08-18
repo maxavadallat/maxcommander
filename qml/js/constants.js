@@ -9,6 +9,7 @@ var DEFAULT_FILE_LIST_HEADER_HEIGHT                     = 16;
 var DEFAULT_FILE_PREFIX                                 = "file://";
 
 var DEFAULT_FILE_ICON_PREFIX                            = "image://fileicon/";
+var DEFAULT_GRID_ICON_PREFIX                            = "image://gridicon/";
 
 var DEFAULT_AUDIO_TAG_PREFIX                            = "image://audiotag/";
 
@@ -23,6 +24,10 @@ var DEFAULT_FILE_LIST_ICON_DIR_SMALL                    = "qrc:/resources/images
 var DEFAULT_FILE_LIST_ICON_FILE                         = "qrc:/resources/images/icons/default_file.png";
 var DEFAULT_FILE_LIST_ICON_FILE_SMALL                   = "qrc:/resources/images/icons/default_file_16x16.png";
 var DEFAULT_FILE_LIST_ICON_LINK_OVERLAY                 = "qrc:/resources/images/icons/link_overlay.png";
+
+var DEFAULT_FILE_LIST_ICON_DIR_PLACEHOLDER              = "qrc:/resources/images/icons/default_folder.png";
+var DEFAULT_FILE_LIST_ICON_FILE_PLACEHOLDER             = "qrc:/resources/images/icons/default_file.png";
+var DEFAULT_FILE_LIST_ICON_FILE_PLACEHOLDER_SMALL       = "qrc:/resources/images/icons/default_file_16x16.png";
 
 var DEFAULT_BACKGROUND_COLOR                            = "#FFEFEFEF";
 
@@ -83,6 +88,10 @@ var DEFAULT_SORT_PERMS                                  = 6;
 var DEFAULT_SORT_ATTRS                                  = 7;
 
 
+var DEFAULT_FILE_GRID_DELEGATE_WIDTH                    = 300;
+var DEFAULT_FILE_GRID_DELEGATE_HEIGHT                   = 200;
+
+var DEFAULT_FILE_GRID_DELEGATE_TEXT_SIZE                = 16;
 
 var DEFAULT_BUSY_INDICATOR_WIDTH                        = 64;
 var DEFAULT_BUSY_INDICATOR_HEIGHT                       = 64;

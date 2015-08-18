@@ -41,6 +41,7 @@ FilePanel::FilePanel(QWidget* aParent)
     , currentDir("")
     , panelName("")
     , panelHasFocus(false)
+    , gridMode(false)
     , fileListModel(NULL)
     , modifierKeys(Qt::NoModifier)
     , currentIndex(-1)
@@ -128,8 +129,15 @@ void FilePanel::init()
 
     // Get Engine
     QQmlEngine* engine = ui->fileListWidget->engine();
+
+    // Create New Image Provides
+    FileListImageProvider* newImageProvider = new FileListImageProvider();
+
+    // Connect Signal
+    connect(this, SIGNAL(gridModeChanged(bool)), newImageProvider->reciever(), SLOT(gridModeChanged(bool)));
+
     // Add Image Provider
-    engine->addImageProvider(QLatin1String(DEFAULT_FILE_ICON_PROVIDER_ID), new FileListImageProvider());
+    engine->addImageProvider(QLatin1String(DEFAULT_FILE_ICON_PROVIDER_ID), newImageProvider);
 
     // Register Busy Indicator
     qmlRegisterType<BusyIndicator>("MyCustomComponents", 1, 0, "BusyIndicator");
@@ -191,10 +199,19 @@ int FilePanel::getCount()
 //==============================================================================
 void FilePanel::setCurrentDir(const QString& aCurrentDir, const QString& aLastFileName)
 {
+    // Get Local Dir
+    QString localDir = aCurrentDir;
+
     // Check Current Dir
-    if (currentDir != aCurrentDir) {
+    if (localDir.length() > 1 && localDir.endsWith("/")) {
+        // Chop Last Char
+        localDir.chop(1);
+    }
+
+    // Check Current Dir
+    if (currentDir != localDir) {
         // Init New Dir Info
-        QFileInfo newDirInfo(aCurrentDir);
+        QFileInfo newDirInfo(localDir);
 
         // Check If Exists
         if (!newDirInfo.exists()) {
@@ -206,9 +223,6 @@ void FilePanel::setCurrentDir(const QString& aCurrentDir, const QString& aLastFi
 
         // Check If Is Dir
         if (!(newDirInfo.isDir() || newDirInfo.isBundle())) {
-
-            // ...
-
             return;
         }
 
@@ -220,10 +234,10 @@ void FilePanel::setCurrentDir(const QString& aCurrentDir, const QString& aLastFi
             return;
         }
 
-        qDebug() << "FilePanel::setCurrentDir - panelName: " << panelName << " - aCurrentDir: " << aCurrentDir;
-
         // Set Current Dir
         currentDir = aCurrentDir;
+
+        qDebug() << "FilePanel::setCurrentDir - panelName: " << panelName << " - currentDir: " << currentDir;
 
         // Set Text
         ui->currDirLabel->setText(currentDir);
@@ -305,6 +319,28 @@ void FilePanel::setPanelName(const QString& aPanelName)
 bool FilePanel::getPanelFocus()
 {
     return panelHasFocus;
+}
+
+//==============================================================================
+// Get Grid Mode
+//==============================================================================
+bool FilePanel::getGridMode()
+{
+    return gridMode;
+}
+
+//==============================================================================
+// Set Grid Mode
+//==============================================================================
+void FilePanel::setGridMode(const bool& aGridMode)
+{
+    // Check Grid Mode
+    if (gridMode != aGridMode) {
+        // Set Grid Mode
+        gridMode = aGridMode;
+        // Emit Grid Mode Changed Signal
+        emit gridModeChanged(gridMode);
+    }
 }
 
 //==============================================================================
@@ -1416,8 +1452,14 @@ void FilePanel::pageUp()
 {
     //qDebug() << "FilePanel::pageUp - panelName: " << panelName;
 
-    // Set Current Index
-    setCurrentIndex(qBound(0, currentIndex - visualItemsCount, fileListModel ? fileListModel->rowCount()-1 : 0));
+    // Check Grid Mode
+    if (gridMode) {
+        // Set Current Index
+        //setCurrentIndex(qBound(0, currentIndex - visualItemsCount, fileListModel ? fileListModel->rowCount()-1 : 0));
+    } else {
+        // Set Current Index
+        setCurrentIndex(qBound(0, currentIndex - visualItemsCount, fileListModel ? fileListModel->rowCount()-1 : 0));
+    }
 }
 
 //==============================================================================
@@ -1427,8 +1469,14 @@ void FilePanel::pageDown()
 {
     //qDebug() << "FilePanel::pageDown - panelName: " << panelName;
 
-    // Set Current Index
-    setCurrentIndex(qBound(0, currentIndex + visualItemsCount, fileListModel ? fileListModel->rowCount()-1 : 0));
+    // Check Grid Mode
+    if (gridMode) {
+        // Set Current Index
+        //setCurrentIndex(qBound(0, currentIndex + visualItemsCount, fileListModel ? fileListModel->rowCount()-1 : 0));
+    } else {
+        // Set Current Index
+        setCurrentIndex(qBound(0, currentIndex + visualItemsCount, fileListModel ? fileListModel->rowCount()-1 : 0));
+    }
 }
 
 //==============================================================================
@@ -2676,6 +2724,7 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
             break;
 
             case Qt::Key_Up:
+
                 // Check Modifier - SHIFT
                 if (modifierKeys == Qt::ShiftModifier && fileListModel) {
                     // Check Current Index
@@ -2706,6 +2755,10 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
             break;
 
             case Qt::Key_Backspace:
+                // Go Up
+                goUp();
+            break;
+
             case Qt::Key_Left:
                 // Check If Search Results Mode On
                 if (searchResultsMode) {
@@ -2713,7 +2766,7 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
                     setSearchResultsMode(false);
                     // Reload
                     reload();
-                } else {
+                } else if (!gridMode) {
                     // Go Up
                     goUp();
                 }
@@ -2725,7 +2778,7 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
                     // Get File Info
                     QFileInfo fileInfo = fileListModel->getFileInfo(currentIndex);
                     // Check File Info
-                    if ((fileInfo.isDir() || fileInfo.isBundle()) && fileInfo.fileName() != QString("..")) {
+                    if ((fileInfo.isDir() || fileInfo.isBundle()) && fileInfo.fileName() != QString("..") && !gridMode) {
                         // Set Current Dir
                         setCurrentDir(fileInfo.absoluteFilePath());
                         // Set Current Index
@@ -2831,7 +2884,7 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
 
             case Qt::Key_F5:
                 // Check Modifier Keys
-                if (modifierKeys == Qt::NoModifier) {
+                if (modifierKeys == Qt::NoModifier && !gridMode) {
                     // Emit Launch File Copy
                     emit launchFileCopy();
                 }
@@ -2839,7 +2892,7 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
 
             case Qt::Key_F6:
                 // Check Modifier Keys
-                if (modifierKeys == Qt::NoModifier) {
+                if (modifierKeys == Qt::NoModifier && !gridMode) {
 
                     // Emit Launch File Move/Rename
                     emit launchFileMove();

@@ -38,6 +38,9 @@ Rectangle {
 
     color: Const.DEFAULT_FILE_LIST_HEADER_BACKGROUND_COLOR
 
+    visible: opacity > 0.0
+    Behavior on opacity { NumberAnimation { duration: Const.DEFAULT_TRANSITION_DURATION } }
+
     // Header Row
     Row {
         id: itemsContainer

@@ -19,7 +19,7 @@ Rectangle {
         id: fileListHeader
         width: parent.width
         height: Const.DEFAULT_FILE_LIST_HEADER_HEIGHT
-
+        opacity: mainController.gridMode ? 0.0 : 1.0
         onRightClicked: {
             // Check If In Search Result Mode
             if (!mainController.searchResultsMode) {
@@ -53,21 +53,21 @@ Rectangle {
         anchors.bottomMargin: 1 // I don't no why the fuck fileListRoot is not properly sized.... X (
         spacing: 1
         clip: true
-        focus: true
+        focus: !mainController.gridMode
         highlightFollowsCurrentItem: true
         highlightMoveDuration: Const.DEFAULT_LIST_HIGHLIGHT_MOVE_DURATION
         highlightResizeDuration: 0
         snapMode: ListView.SnapToItem
-
+        visible: opacity > 0.0
+        Behavior on opacity { NumberAnimation { duration: Const.DEFAULT_TRANSITION_DURATION * 2 } }
+        opacity: mainController.gridMode ? 0.0 : 1.0
         //cacheBuffer: globalSettings.thumbHeight * 8
-
         property int delegateHeight: globalSettings.thumbHeight
         property int visualItemsCount: Math.floor((fileListView.height + fileListView.spacing) / fileListView.delegateHeight);
         property int prevIndex: -1
 
         Keys.onPressed: {
             //console.log("fileListView.Keys.onPressed - key: " + event.key);
-
         }
 
         Keys.onReleased: {
@@ -113,6 +113,11 @@ Rectangle {
             height: fileListView.delegateHeight
 
             fileIconSource: {
+                // Check Grid Mode
+                if (mainController.gridMode) {
+                    return "";
+                }
+
                 // Check Global Settings
                 if (globalSettings.useDefaultIcons) {
                     // Check If Is Dir
@@ -157,10 +162,6 @@ Rectangle {
                 }
             }
 
-            // Behavior
-            Behavior on fileIconSource {
-            }
-
             fileNameText  : fileName
             fileExtText   : fileExt
             fileTypeText  : fileType
@@ -171,6 +172,7 @@ Rectangle {
             fileHidden    : fileIsHidden
             fileSelected  : fileIsSelected
             fileSymLink   : fileIsLink
+            fileDirectory : fileIsDir
 
             nameWidth   : fileListHeader.nameWidth
             extWidth    : fileListHeader.extWidth
@@ -195,7 +197,7 @@ Rectangle {
 
             // Mouse Area
             MouseArea {
-                id: delegateMouseArea
+                id: listDelegateMouseArea
                 anchors.fill: parent
                 acceptedButtons: Qt.LeftButton
                 // On Clicked
@@ -225,14 +227,14 @@ Rectangle {
                 onReleased: {
                     //console.log("fileListDelegateRoot.MouseArea.onReleased - index: " + index);
                     // Reset Prevent Stealing
-                    delegateMouseArea.preventStealing = false;
+                    listDelegateMouseArea.preventStealing = false;
                 }
 
                 // Double Clicked
                 onDoubleClicked: {
                     //console.log("fileListDelegateRoot.MouseArea.onDoubleClicked - index: " + index);
                     // Check Pressed Buttons
-                    if (delegateMouseArea.pressedButtons === Qt.LeftButton) {
+                    if (listDelegateMouseArea.pressedButtons === Qt.LeftButton) {
                         //console.log("fileListDelegateRoot.MouseArea.onDoubleClicked - index: " + index + " - pressedButtons: " + delegateMouseArea.pressedButtons);
                         // Handle Item Selection
                         mainController.handleItemSelection();
@@ -243,7 +245,6 @@ Rectangle {
 
         // Highlight
         highlight: FileListHightLight {
-            id: itemHighlight
             width: fileListView.delegate.width
             height: fileListView.delegate.height
         }
@@ -346,6 +347,246 @@ Rectangle {
 
                 // Set Content Y
                 fileListView.contentY = Math.max(0, Math.min(contentPos, fileListView.contentHeight - fileListView.height));
+            }
+        }
+    }
+
+    // Grid View
+    GridView {
+        id: fileGridView
+        anchors.fill: parent
+        clip: true
+        focus: mainController.gridMode
+        highlightFollowsCurrentItem: true
+        highlightMoveDuration: Const.DEFAULT_LIST_HIGHLIGHT_MOVE_DURATION
+        snapMode: GridView.SnapToRow
+        visible: opacity > 0.0
+        Behavior on opacity { NumberAnimation { duration: Const.DEFAULT_TRANSITION_DURATION * 2 } }
+        opacity: mainController.gridMode ? 1.0 : 0.0
+
+        property int delegateWidth: globalSettings.gridThumbWidth
+        property int delegateHeight: globalSettings.gridThumbHeight
+
+        property int visibleRowCount: Math.floor(fileGridView.height / fileGridView.delegateHeight)
+        property int visibleColCount: Math.floor(fileGridView.width / fileGridView.delegateWidth)
+
+        cellWidth: delegateWidth
+        cellHeight: delegateHeight
+
+        // Grid Model
+        model: fileListModel
+
+        // Grid Delegate
+        delegate: FileGridDelegate {
+            id: fileGridDelegateRoot
+
+            width: fileGridView.delegateWidth
+            height: fileGridView.delegateHeight
+
+            // File Name Text
+            fileNameText: {
+                // Check If Dir
+                if (fileIsDir) {
+                    return fileFullName;
+                }
+
+                return fileFullName + " - " + fileSize;
+
+            }
+
+            // File Icon Source
+            fileIconSource: {
+                // Check Grid Mode
+                if (!mainController.gridMode) {
+                    return "";
+                }
+
+                // Check Global Settings
+                if (globalSettings.useDefaultIcons) {
+                    // Check If Is Dir
+                    if (fileIsDir) {
+                       // Check Size
+                       if (fileListView.delegateHeight < Const.DEFAULT_FILE_LIST_DELEGATE_HEIGHT) {
+                           return Const.DEFAULT_FILE_LIST_ICON_DIR_SMALL;
+                       }
+
+                       return Const.DEFAULT_FILE_LIST_ICON_DIR;
+                    }
+
+                    // Check Size
+                    if (fileListView.delegateHeight < Const.DEFAULT_FILE_LIST_DELEGATE_HEIGHT) {
+                        return Const.DEFAULT_FILE_LIST_ICON_FILE_SMALL;
+                    }
+
+                    return Const.DEFAULT_FILE_LIST_ICON_FILE;
+
+                } else {
+
+                    // Check Main Controller Search Result Mode
+                    if (mainController.searchResultsMode) {
+
+                        // Check File Name
+                        if (Utility.isImage(fileFullName, mainController)) {
+                            return Const.DEFAULT_FILE_PREFIX + fileListModel.getFullPath(index);
+                        }
+
+                        // Image Provider
+                        return Const.DEFAULT_FILE_ICON_PREFIX + fileListModel.getFullPath(index);
+
+                    } else {
+                        // Check File Name
+                        if (Utility.isImage(fileFullName, mainController)) {
+                            return Const.DEFAULT_FILE_PREFIX + mainController.currentDir + "/" + fileFullName;
+                        }
+
+                        // Image Provider
+                        return Const.DEFAULT_FILE_ICON_PREFIX + mainController.currentDir + "/" + fileFullName;
+                    }
+                }
+            }
+
+            // Delegate Mouse Area
+            MouseArea {
+                id: gridDelegateMouseArea
+                anchors.fill: parent
+                acceptedButtons: Qt.LeftButton
+                // On Clicked
+                onClicked: {
+                    //console.log("fileGridDelegateRoot.MouseArea.onClicked - index: " + index);
+                    // Check Button
+                    if (mouse.button === Qt.LeftButton) {
+                        // Set Current Index
+                        mainController.currentIndex = index;
+                        // Set Panel Has Focus
+                        mainController.panelHasFocus = true;
+                    }
+                }
+
+                // On Pressed
+                onPressed: {
+                    //console.log("fileGridDelegateRoot.MouseArea.onPressed - index: " + index);
+                    // Set Pressed Index
+                    mainController.pressedIndex = index;
+
+                    // Hide File List Header Popup
+                    fileListHeaderPopup.hidePopup();
+                    // Hide File List Item Popup
+                    fileListItemPopup.hidePopup();
+                }
+                // On Released
+                onReleased: {
+                    //console.log("fileGridDelegateRoot.MouseArea.onReleased - index: " + index);
+                    // Reset Prevent Stealing
+                    gridDelegateMouseArea.preventStealing = false;
+                }
+
+                // Double Clicked
+                onDoubleClicked: {
+                    //console.log("fileGridDelegateRoot.MouseArea.onDoubleClicked - index: " + index);
+                    // Check Pressed Buttons
+                    if (gridDelegateMouseArea.pressedButtons === Qt.LeftButton) {
+                        //console.log("fileGridDelegateRoot.MouseArea.onDoubleClicked - index: " + index + " - pressedButtons: " + delegateMouseArea.pressedButtons);
+                        // Handle Item Selection
+                        mainController.handleItemSelection();
+                    }
+                }
+            }
+        }
+
+        // Highlight
+        highlight: FileListHightLight {
+            width: fileGridView.delegate.width
+            height: fileGridView.delegate.height
+        }
+
+        // Keys Pressed
+        Keys.onPressed: {
+            // Check Auto Repeat
+            if (event.isAutoRepeat) {
+                // Switch Key
+                switch (event.key) {
+                    default:
+                    break;
+
+                    case Qt.Key_PageUp: {
+                        console.log("fileGridView.Key.onPressed - PAGEUP");
+                        // Loop
+                        for (var i=0; i<fileGridView.visibleRowCount; i++) {
+                            // Move Index Up
+                            fileGridView.moveCurrentIndexUp();
+                        }
+
+                        // Position View
+                        fileGridView.positionViewAtIndex(fileGridView.currentIndex, GridView.Beginning);
+
+                    } break;
+
+                    case Qt.Key_PageDown: {
+                        console.log("fileGridView.Key.onPressed - PAGEDOWN");
+                        // Loop
+                        for (var i=0; i<fileGridView.visibleRowCount; i++) {
+                            // Move Index Down
+                            fileGridView.moveCurrentIndexDown();
+                        }
+
+                        // Position View
+                        fileGridView.positionViewAtIndex(fileGridView.currentIndex, GridView.End);
+
+                    } break;
+                }
+            }
+        }
+
+        // Keys Released
+        Keys.onReleased: {
+            // Switch Key
+            switch (event.key) {
+                default:
+                break;
+
+                case Qt.Key_PageUp: {
+                    console.log("fileGridView.Key.onReleased - PAGEUP");
+                    // Loop
+                    for (var i=0; i<fileGridView.visibleRowCount; i++) {
+                        // Move Index Up
+                        fileGridView.moveCurrentIndexUp();
+                    }
+
+                    // Position View
+                    fileGridView.positionViewAtIndex(fileGridView.currentIndex, GridView.Beginning);
+
+                } break;
+
+                case Qt.Key_PageDown: {
+                    console.log("fileGridView.Key.onReleased - PAGEDOWN");
+                    // Loop
+                    for (var i=0; i<fileGridView.visibleRowCount; i++) {
+                        // Move Index Down
+                        fileGridView.moveCurrentIndexDown();
+                    }
+
+                    // Position View
+                    fileGridView.positionViewAtIndex(fileGridView.currentIndex, GridView.End);
+
+                } break;
+            }
+        }
+
+        // On Current Index Changed
+        onCurrentIndexChanged: {
+            // Check Loading
+            if (mainController.loading) {
+                // Reset Loading
+                mainController.loading = false;
+
+            } else {
+                //console.log("fileGridView.onCurrentIndexChanged - currentIndex: " + fileGridView.currentIndex);
+
+                // Check If Current Index Matches
+                if (mainController.currentIndex != fileGridView.currentIndex) {
+                    // Set Main Controller Current Index
+                    mainController.currentIndex = fileGridView.currentIndex;
+                }
             }
         }
     }
@@ -459,6 +700,8 @@ Rectangle {
         property int hoverIndex: -1
 
         property bool firstChange: false
+
+        enabled: !mainController.gridMode
 
         // On Pressed
         onPressed: {
@@ -575,14 +818,15 @@ Rectangle {
             }
         }
     }
-
+/*
     // Item Popup Mouse Eater
     MouseArea {
         id: popupMouseEater
         anchors.fill: fileListView
+        enabled: false
         visible: false
     }
-
+*/
     // File List Item Popup
     FileListItemPopup {
         id: fileListItemPopup
@@ -678,15 +922,17 @@ Rectangle {
         target: mainController
         // On Current Index Changed
         onCurrentIndexChanged: {
+            //console.log("fileListRoot.Connections.mainController.onCurrentIndexChanged - aIndex: " + aIndex);
             // Check List View Current Index
             if (fileListView.currentIndex != aIndex) {
-                //console.log("fileListRoot.Connections.mainController.onCurrentIndexChanged - aIndex: " + aIndex);
                 // Set File List View Current Index
                 fileListView.currentIndex = aIndex;
-                // Position View
-                //fileListView.positionViewAtIndex(aIndex, ListView.SnapPosition);
-                // Force Layout
-                //fileListView.forceLayout();
+            }
+
+            // Check Grid View
+            if (fileGridView.currentIndex != aIndex) {
+                // Set Current Index
+                fileGridView.currentIndex = aIndex;
             }
         }
 

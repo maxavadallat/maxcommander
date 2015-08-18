@@ -85,6 +85,9 @@ public slots:
     // Launch File Deselect Slot
     void launchFileDeselect();
 
+    // Launch Properties Slot
+    void launchProperties();
+
     // Quit Application Slot
     void quitApp();
 
@@ -146,6 +149,9 @@ protected slots:
 
     // Viewer Image Selected Slot
     void viewerImageSelected(const QString& aFilePath, const QString& aPanelName);
+
+    // Main Splitter Moved
+    void mainSlitterMoved(const int& aPos, const int& aIndex);
 
 protected slots: // Actions & Button
 

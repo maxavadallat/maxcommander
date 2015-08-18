@@ -37,6 +37,7 @@ class FilePanel : public QFrame
     Q_PROPERTY(int pressedIndex READ getPressedIndex WRITE setPressedIndex NOTIFY pressedIndexChanged)
     Q_PROPERTY(QString panelName READ getPanelName)
     Q_PROPERTY(bool panelHasFocus READ getPanelFocus WRITE setPanelFocus NOTIFY panelFocusChanged)
+    Q_PROPERTY(bool gridMode READ getGridMode WRITE setGridMode NOTIFY gridModeChanged)
     Q_PROPERTY(int visualItemsCount READ getvisualItemsCount WRITE setVisualItemsCount NOTIFY visualItemsCountChanged)
 
     Q_PROPERTY(bool extVisible READ getExtVisible WRITE setExtVisible NOTIFY extVisibleChanged)
@@ -84,6 +85,11 @@ public:
 
     // Get Panel Focus
     bool getPanelFocus();
+
+    // Get Grid Mode
+    bool getGridMode();
+    // Set Grid Mode
+    void setGridMode(const bool& aGridMode);
 
     // Get Current Index
     int getCurrentIndex();
@@ -301,6 +307,9 @@ signals:
     // Panel Focus Changed Signal
     void panelFocusChanged(const bool& aPanelFocus);
 
+    // Grid Mode Changed Signal
+    void gridModeChanged(const bool& aGridMode);
+
     // Modifier Keys Pressed Signal
     void modifierKeysChanged(const int& aModifierKeys);
 
@@ -392,6 +401,9 @@ signals:
 
     // Launch Unmount Drive Signal
     void launchUnmountDrive();
+
+    // Launch Properties Signal
+    void launchProperties();
 
     // Hide Popups
     void hidePopups();
@@ -555,6 +567,9 @@ private:
 
     // Panel Focus
     bool                    panelHasFocus;
+
+    // Grid Mode
+    bool                    gridMode;
 
     // File List Model
     FileListModel*          fileListModel;

@@ -1137,11 +1137,19 @@ void MainWindow::mainSlitterMoved(const int& aPos, const int& aIndex)
             qDebug() << "MainWindow::mainSlitterMoved - Switching ON Grid Mode in RIGHT PANEL";
 
             // Set Panel Focused
-            rightPanel->setFocus();
+            //rightPanel->setFocus();
+            // Set Panel's QML Widget Focused
+            rightPanel->setQMLWidgetFocus();
             // Set Grid Mode
             rightPanel->setGridMode(true);
             // Reload
-            rightPanel->reload(/*rightPanel->getCurrentIndex()*/);
+            rightPanel->reload(rightPanel->getCurrentIndex());
+
+            // Check Left Panel
+            if (leftPanel) {
+                // Set QML Widget Focus Policy
+                leftPanel->setQMLWidgetFocusPolicy(Qt::NoFocus);
+            }
 
             // ...
 
@@ -1150,11 +1158,19 @@ void MainWindow::mainSlitterMoved(const int& aPos, const int& aIndex)
             qDebug() << "MainWindow::mainSlitterMoved - Switching ON Grid Mode in LEFT PANEL";
 
             // Set Panel Focused
-            leftPanel->setFocus();
+            //leftPanel->setFocus();
+            // Set Panel's QML Widget Focused
+            leftPanel->setQMLWidgetFocus();
             // Set Grid Mode
             leftPanel->setGridMode(true);
             // Reload
-            leftPanel->reload(/*leftPanel->getCurrentIndex()*/);
+            leftPanel->reload(leftPanel->getCurrentIndex());
+
+            // Check Right Panel
+            if (rightPanel) {
+                // Set QML Widget Focus Policy
+                rightPanel->setQMLWidgetFocusPolicy(Qt::NoFocus);
+            }
 
             // ...
 
@@ -1165,6 +1181,12 @@ void MainWindow::mainSlitterMoved(const int& aPos, const int& aIndex)
             // Set Grid Mode
             rightPanel->setGridMode(false);
 
+            // Check Left Panel
+            if (leftPanel) {
+                // Set QML Widget Focus Policy
+                leftPanel->setQMLWidgetFocusPolicy(Qt::StrongFocus);
+            }
+
             // ...
 
         } else if (sizes[1] > 0 && leftPanel && leftPanel->getGridMode()) {
@@ -1173,6 +1195,12 @@ void MainWindow::mainSlitterMoved(const int& aPos, const int& aIndex)
 
             // Set Grid Mode
             leftPanel->setGridMode(false);
+
+            // Check Right Panel
+            if (rightPanel) {
+                // Set QML Widget Focus Policy
+                rightPanel->setQMLWidgetFocusPolicy(Qt::StrongFocus);
+            }
 
             // ...
 

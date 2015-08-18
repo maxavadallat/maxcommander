@@ -1160,17 +1160,51 @@ void FilePanel::setFileListItemPopupActive(const bool& aPopupActive)
 }
 
 //==============================================================================
+// Set QML Widget Focus
+//==============================================================================
+void FilePanel::setQMLWidgetFocus()
+{
+    // Set Focus
+    ui->fileListWidget->setFocus();
+}
+
+//==============================================================================
+// Set QML Widget Focus Policy
+//==============================================================================
+void FilePanel::setQMLWidgetFocusPolicy(Qt::FocusPolicy aPolicy)
+{
+    // Set Focus Policy
+    ui->fileListWidget->setFocusPolicy(aPolicy);
+}
+
+//==============================================================================
 // Set Current Index
 //==============================================================================
 void FilePanel::setCurrentIndex(const int& aCurrentIndex)
 {
     // Check Current Index
     if (currentIndex != aCurrentIndex) {
+        // Check File List Model
+        if (!fileListModel) {
+            return;
+        }
+
         //qDebug() << "FilePanel::setCurrentIndex - panelName: " << panelName << " - aCurrentIndex: " << aCurrentIndex;
-        // Set Current Index
-        currentIndex = aCurrentIndex;
-        // Emit Current Index Changed Signal
-        emit currentIndexChanged(currentIndex);
+
+        // Check New Index
+        if (aCurrentIndex >= 0 && aCurrentIndex < fileListModel->rowCount()) {
+            // Set Current Index
+            currentIndex = aCurrentIndex;
+            // Emit Current Index Changed Signal
+            emit currentIndexChanged(currentIndex);
+
+        } else {
+
+            qDebug() << "FilePanel::setCurrentIndex - panelName: " << panelName << " - aCurrentIndex: " << aCurrentIndex << " - INVALID INDEX!!";
+
+            // Emit Current Index Changed Signal
+            emit currentIndexChanged(currentIndex);
+        }
     }
 }
 

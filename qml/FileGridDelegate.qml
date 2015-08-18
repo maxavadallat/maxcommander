@@ -61,7 +61,7 @@ Rectangle {
         anchors.rightMargin: Const.DEFAULT_MARGIN_WIDTH
         anchors.bottomMargin: Const.DEFAULT_MARGIN_WIDTH + fileNameLabel.height + Const.DEFAULT_MARGIN_WIDTH
         fillMode: Image.PreserveAspectFit
-        cache: true
+        cache: false
         smooth: false
         asynchronous: true
         opacity: fileIconImage.status == Image.Ready ? 1.0 : 0.0

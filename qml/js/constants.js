@@ -54,6 +54,8 @@ var DEFAULT_FILE_LIST_ICON_LINK_OVERLAY_HEIGHT          = 8;
 
 var DEFAULT_MARGIN_WIDTH                                = 4;
 
+var DEFAULT_RADIUS                                      = 8;
+
 var DEFAULT_POPUP_ITEM_SELECT_COLOR                     = "orange";
 
 var DEFAULT_POPUP_ITEM_HIGHLIGHT_COLOR                  = "#77FFFFFF";
@@ -65,7 +67,7 @@ var DEFAULT_POPUP_WIDTH                                 = 120;
 
 var DEFAULT_POPUP_ITEM_HEIGHT                           = 24;
 
-var DEFAULT_POPUP_RADIUS                                = 8;
+var DEFAULT_POPUP_RADIUS                                = DEFAULT_RADIUS;
 
 var DEFAULT_POPUP_BORDER_COLOR                          = "white";
 var DEFAULT_POPUP_BORDER_WIDTH                          = 2;

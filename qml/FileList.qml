@@ -497,6 +497,7 @@ Rectangle {
         highlight: FileListHightLight {
             width: fileGridView.delegate.width
             height: fileGridView.delegate.height
+            radius: Const.DEFAULT_RADIUS
         }
 
         // Keys Pressed
@@ -996,6 +997,26 @@ Rectangle {
             fileListHeaderPopup.hidePopup();
             // Hide File List Item Popup
             fileListItemPopup.hidePopup();
+        }
+
+        // On Grid Mode Changed
+        onGridModeChanged: {
+            //console.log("fileListRoot.Connections.mainController.onGridModeChanged - gridMode: " + mainController.gridMode);
+
+            // Check Grid Mode
+            if (mainController.gridMode) {
+                // Set Focus
+                fileGridView.focus = true;
+                // Set Focus
+                fileListView.focus = false;
+            } else {
+                // Set Focus
+                fileGridView.focus = false;
+                // Set Focus
+                fileListView.focus = true;
+            }
+
+            // ...
         }
     }
 }

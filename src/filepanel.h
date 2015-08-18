@@ -224,6 +224,11 @@ public:
     // Set File List Item Popup Active
     void setFileListItemPopupActive(const bool& aPopupActive);
 
+    // Set QML Widget Focus
+    void setQMLWidgetFocus();
+    // Set QML Widget Focus Policy
+    void setQMLWidgetFocusPolicy(Qt::FocusPolicy aPolicy);
+
     // Destructor
     virtual ~FilePanel();
 

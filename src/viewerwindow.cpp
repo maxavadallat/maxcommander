@@ -237,7 +237,7 @@ bool ViewerWindow::loadFile(const QString& aFileName, const QString& aPanelName)
         ui->quickWidget->setVisible(true);
 
         // Set Active Widget
-        activeWidget = ui->textEdit;
+        activeWidget = ui->quickWidget;
 
         // Set Source
         ui->quickWidget->setSource(QUrl("qrc:/qml/ImageViewer.qml"));
@@ -394,10 +394,12 @@ void ViewerWindow::showWindow()
 
     // Check Active Widget
     if (activeWidget) {
+
         // Set Active Widget Focus
         activeWidget->setFocus();
         // Grab Keyboard
         activeWidget->grabKeyboard();
+
     } else {
         // ...
     }

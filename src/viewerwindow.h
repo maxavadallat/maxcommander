@@ -152,6 +152,8 @@ private:
     Ui::ViewerWindow*       ui;
     // Settings
     SettingsController*     settings;
+    // Active Widget
+    QWidget*                activeWidget;
     // File Name
     QString                 fileName;
     // Current Dir

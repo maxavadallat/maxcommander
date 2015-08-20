@@ -36,6 +36,7 @@ ViewerWindow::ViewerWindow(QWidget* aParent)
     : QMainWindow(aParent)
     , ui(new Ui::ViewerWindow)
     , settings(SettingsController::getInstance())
+    , activeWidget(NULL)
     , fileName("")
     , editMode(false)
     , dirty(false)
@@ -198,6 +199,9 @@ bool ViewerWindow::loadFile(const QString& aFileName, const QString& aPanelName)
         // Text Edit Set Visible
         ui->textEdit->setVisible(true);
 
+        // Set Active Widget
+        activeWidget = ui->textEdit;
+
         // Init File
         QFile file(aFileName);
 
@@ -221,7 +225,6 @@ bool ViewerWindow::loadFile(const QString& aFileName, const QString& aPanelName)
 
             // Close File
             file.close();
-
             // Update Window Title
             updateWindowTitle();
         }
@@ -232,6 +235,9 @@ bool ViewerWindow::loadFile(const QString& aFileName, const QString& aPanelName)
         ui->textEdit->setVisible(false);
         // Quick Widget Set Visible
         ui->quickWidget->setVisible(true);
+
+        // Set Active Widget
+        activeWidget = ui->textEdit;
 
         // Set Source
         ui->quickWidget->setSource(QUrl("qrc:/qml/ImageViewer.qml"));
@@ -263,6 +269,9 @@ bool ViewerWindow::loadFile(const QString& aFileName, const QString& aPanelName)
         // Quick Widget Set Visible
         ui->quickWidget->setVisible(true);
 
+        // Set Active Widget
+        activeWidget = ui->quickWidget;
+
         // Set Source
         ui->quickWidget->setSource(QUrl("qrc:/qml/VideoViewer.qml"));
 
@@ -272,6 +281,9 @@ bool ViewerWindow::loadFile(const QString& aFileName, const QString& aPanelName)
         ui->textEdit->setVisible(false);
         // Quick Widget Set Visible
         ui->quickWidget->setVisible(true);
+
+        // Set Active Widget
+        activeWidget = ui->quickWidget;
 
         // Set Source
         ui->quickWidget->setSource(QUrl("qrc:/qml/VideoViewer.qml"));
@@ -377,6 +389,20 @@ void ViewerWindow::showWindow()
 
     // Set Focus
     setFocus();
+    // Grab Keyboard
+    grabKeyboard();
+
+    // Check Active Widget
+    if (activeWidget) {
+        // Set Active Widget Focus
+        activeWidget->setFocus();
+        // Grab Keyboard
+        activeWidget->grabKeyboard();
+    } else {
+        // ...
+    }
+
+
 }
 
 //==============================================================================
@@ -391,6 +417,9 @@ void ViewerWindow::closeWindow()
 
     // Close
     close();
+
+    // reset Active Widget
+    activeWidget = NULL;
 }
 
 //==============================================================================

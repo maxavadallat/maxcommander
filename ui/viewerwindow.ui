@@ -38,16 +38,17 @@
     </property>
     <item row="0" column="0">
      <widget class="QQuickWidget" name="quickWidget">
-      <property name="focusPolicy">
-       <enum>Qt::NoFocus</enum>
-      </property>
       <property name="resizeMode">
        <enum>QQuickWidget::SizeRootObjectToView</enum>
       </property>
      </widget>
     </item>
     <item row="1" column="0">
-     <widget class="QTextEdit" name="textEdit"/>
+     <widget class="QTextEdit" name="textEdit">
+      <property name="focusPolicy">
+       <enum>Qt::StrongFocus</enum>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>

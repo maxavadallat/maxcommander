@@ -20,8 +20,8 @@
 #elif defined(Q_OS_MAC)
 
 #include <CoreServices/CoreServices.h>
-#include <ApplicationServices/ApplicationServices.h>
 #include <CoreFoundation/CoreFoundation.h>
+#include <ApplicationServices/ApplicationServices.h>
 
 #include <sys/stat.h>
 #include <sys/statvfs.h>
@@ -760,6 +760,48 @@ bool isVolumePath(const QString& aFilePath)
 }
 
 
+//==============================================================================
+// Set Desktop Wallpaper
+//==============================================================================
+void setDesktopWallpaper(const QString& aFilePath, const int& aDesktop)
+{
+    Q_UNUSED(aFilePath);
+    Q_UNUSED(aDesktop);
+
+#if defined(Q_OS_MAC)
+
+/*
+    NSString* newImgPath = @"/Users/cody/Desktop/stuff/imgs/Black_mac.png";
+
+    NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+
+    NSMutableDictionary* desktopDict = [NSMutableDictionary dictionaryWithDictionary:[defaults persistentDomainForName:@"com.apple.desktop"]];
+    NSMutableDictionary* bgDict = [desktopDict objectForKey:@"Background"];
+    NSMutableDictionary* spaces = [bgDict objectForKey:@"spaces"];
+    [spaces enumerateKeysAndObjectsUsingBlock:^(NSString* key, NSMutableDictionary* obj, BOOL *stop) {
+        [obj enumerateKeysAndObjectsUsingBlock:^(id key, NSMutableDictionary* prefs, BOOL *stop) {
+            [prefs setObject:newImgPath forKey:@"ImageFilePath"];
+            [prefs setObject:newImgPath forKey:@"NewImageFilePath"];
+            [prefs setObject:@"Never" forKey:@"Change"];
+        }];
+    }];
+
+    //NSLog(@"%@", desktopDict);
+
+    [defaults setPersistentDomain:desktopDict forName:@"com.apple.desktop"];
+    if ([defaults synchronize] == NO)
+        NSLog(@"synchronize failed");
+
+    // Restart dock
+    system ("/usr/bin/killall Dock");
+*/
+
+#else // Q_OS_MACX
+
+
+#endif // Q_OS_MACX
+
+}
 
 
 

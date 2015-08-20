@@ -12,6 +12,7 @@ FileListPopup {
     property bool isDir: false
     property bool isLink: false
     property bool isVolume: fileListModel.isVolume(fileListItemPopupRoot.currentItemPath)
+    property bool isImage: mainController.isImage(fileListItemPopupRoot.currentItemPath)
 
     property variant currentItem: undefined
     property int currentIndex: -1
@@ -88,21 +89,7 @@ FileListPopup {
                 indexing++;
             }
         }
-/*
-        // Check Focus
-        if (focus) {
-            // Reset Current Index
-            currentIndex = 0;
-            // Set Current Item
-            currentItem = Utility.fileListPopupItems[currentIndex];
 
-        } else {
-            // Reset Current Index
-            currentIndex = -1;
-            // Reset Current Item
-            currentItem = undefined;
-        }
-*/
         // Reset Current Index
         currentIndex = -1;
         // Reset Current Item
@@ -290,13 +277,32 @@ FileListPopup {
 
         FileListPopupItem {
             title: "-"
+            visible: !isVolume && isImage
+        }
+
+        FileListPopupItem {
+            id: setDesktopImage
+            title: "Set as Wallpaper"
+            command: isVolume ? 0 : 8
+            visible: !isVolume && isImage
+            active: index == currentIndex
+            onItemClicked: {
+                // Hide
+                hidePopup();
+                // Set Desktop Image
+                mainController.setAsWallPaper(currentItemPath);
+            }
+        }
+
+        FileListPopupItem {
+            title: "-"
             visible: !isVolume
         }
 
         FileListPopupItem {
             id: propertiesItem
             title: "Properties"
-            command: isVolume ? 0 : 8
+            command: isVolume ? 0 : 9
             visible: !isVolume
             active: index == currentIndex
             onItemClicked: {

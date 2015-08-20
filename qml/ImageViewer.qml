@@ -20,11 +20,41 @@ Rectangle {
         fillMode: Image.PreserveAspectFit
     }
 
+    // Mouse Area
+    MouseArea {
+        id: viewerMouseArea
+        anchors.fill: previewImage
+        // On Wheel Event
+        onWheel: {
+            //console.log("imageViewerRoot.viewerMouseArea.onWheel - wheel: " + wheel.angleDelta.y);
+            // Check Angle Delta
+            if (wheel.angleDelta.y < 0) {
+                // Next Image
+                imageBrowser.gotoNext();
+            } else {
+                // Prev Image
+                imageBrowser.gotoPrev();
+            }
+        }
+        // On Double Clicked
+        onDoubleClicked: {
+            // Emit Select Current
+            imageBrowser.selectCurrent();
+        }
+    }
+
     // On Completed
     Component.onCompleted: {
         //console.log("imageViewerRoot.onCompleted - contentSource: " + viewerContent);
 
         // ...
+    }
+
+    // Focus Changed
+    onFocusChanged: {
+        console.log("imageViewerRoot.onFocusChanged - focus: " + imageViewerRoot.focus);
+
+
     }
 }
 

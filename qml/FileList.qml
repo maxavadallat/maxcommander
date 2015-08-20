@@ -510,7 +510,7 @@ Rectangle {
                     break;
 
                     case Qt.Key_PageUp: {
-                        console.log("fileGridView.Key.onPressed - PAGEUP");
+                        //console.log("fileGridView.Key.onPressed - PAGEUP");
                         // Loop
                         for (var i=0; i<fileGridView.visibleRowCount; i++) {
                             // Move Index Up
@@ -523,7 +523,7 @@ Rectangle {
                     } break;
 
                     case Qt.Key_PageDown: {
-                        console.log("fileGridView.Key.onPressed - PAGEDOWN");
+                        //console.log("fileGridView.Key.onPressed - PAGEDOWN");
                         // Loop
                         for (var i=0; i<fileGridView.visibleRowCount; i++) {
                             // Move Index Down
@@ -546,7 +546,7 @@ Rectangle {
                 break;
 
                 case Qt.Key_PageUp: {
-                    console.log("fileGridView.Key.onReleased - PAGEUP");
+                    //console.log("fileGridView.Key.onReleased - PAGEUP");
                     // Loop
                     for (var i=0; i<fileGridView.visibleRowCount; i++) {
                         // Move Index Up
@@ -559,7 +559,7 @@ Rectangle {
                 } break;
 
                 case Qt.Key_PageDown: {
-                    console.log("fileGridView.Key.onReleased - PAGEDOWN");
+                    //console.log("fileGridView.Key.onReleased - PAGEDOWN");
                     // Loop
                     for (var i=0; i<fileGridView.visibleRowCount; i++) {
                         // Move Index Down
@@ -617,14 +617,26 @@ Rectangle {
                 mainController.renameFile(fileRenamer.originalFileName, fileRenamer.fileName);
             }
 
-            // Set Focus
-            fileListView.focus = true;
+            // Check Grid Mode
+            if (mainController.gridMode) {
+                // Set Focus
+                fileGridView.focus = true;
+            } else {
+                // Set Focus
+                fileListView.focus = true;
+            }
         }
 
         // On Rejected
         onRejected: {
-            // Set Focus
-            fileListView.focus = true;
+            // Check Grid Mode
+            if (mainController.gridMode) {
+                // Set Focus
+                fileGridView.focus = true;
+            } else {
+                // Set Focus
+                fileListView.focus = true;
+            }
         }
     }
 
@@ -707,7 +719,7 @@ Rectangle {
         // On Pressed
         onPressed: {
             // Get Pressed Item
-            pressedItem = fileListView.itemAt(mouseX, mouseY);
+            pressedItem = fileListView.itemAt(mouseX, mouseY + fileListView.contentY);
 
             //console.log("selectionMouseArea.onPressed - index: " + pressedItem.itemIndex);
 
@@ -739,7 +751,7 @@ Rectangle {
         // On Released
         onReleased: {
             // Get Released Item
-            releasedItem = fileListView.itemAt(mouseX, mouseY);
+            releasedItem = fileListView.itemAt(mouseX, mouseY + fileListView.contentY);
 
             //console.log("selectionMouseArea.onReleased - index: " + releasedItem.itemIndex);
 
@@ -779,7 +791,7 @@ Rectangle {
 
                 //console.log("selectionMouseArea.onMouseYChanged - mouseY: " + mouseY);
                 // Get Hover Item
-                var hoverItem = fileListView.itemAt(mouseX, mouseY);
+                var hoverItem = fileListView.itemAt(mouseX, mouseY + fileListView.contentY);
                 // Get Hover Item Index
                 hoverIndex = hoverItem ? hoverItem.itemIndex : -1;
 
@@ -957,12 +969,25 @@ Rectangle {
         onLaunchFileRename: {
             //console.log("fileListRoot.Connections.mainController.onLaunchFileRename");
 
-            // Set File Renamer Pos & Size
-            fileRenamer.width = fileListView.width - 4;
-            fileRenamer.height = Math.max(fileListView.currentItem.height, Const.DEFAULT_FILE_LIST_ITEM_RENAMER_MINIMUM_HEIGHT);
+            // Check Grid Mode
+            if (mainController.gridMode) {
+                // Set File Renamer Pos & Size
+                fileRenamer.width = fileGridView.cellWidth;
+                fileRenamer.height = Const.DEFAULT_FILE_LIST_ITEM_RENAMER_MINIMUM_HEIGHT;
 
-            fileRenamer.x = fileListView.currentItem.mapToItem(fileListRoot).x;
-            fileRenamer.y = Math.min(fileListView.currentItem.mapToItem(fileListRoot).y - (fileRenamer.height - fileListView.currentItem.height) / 2, fileListRoot.height - fileRenamer.height);
+                // Get Current Grid Item
+                var currentGridItem = fileGridView.currentItem;
+
+                fileRenamer.x = currentGridItem.mapToItem(fileListRoot).x + currentGridItem.width / 2 - fileRenamer.width / 2;
+                fileRenamer.y = Math.min(currentGridItem.mapToItem(fileListRoot).y + currentGridItem.height - fileRenamer.height, fileListRoot.height - fileRenamer.height);
+            } else {
+                // Set File Renamer Pos & Size
+                fileRenamer.width = fileListView.width - 4;
+                fileRenamer.height = Math.max(fileListView.currentItem.height, Const.DEFAULT_FILE_LIST_ITEM_RENAMER_MINIMUM_HEIGHT);
+
+                fileRenamer.x = fileListView.currentItem.mapToItem(fileListRoot).x;
+                fileRenamer.y = Math.min(fileListView.currentItem.mapToItem(fileListRoot).y - (fileRenamer.height - fileListView.currentItem.height) / 2, fileListRoot.height - fileRenamer.height);
+            }
 
             // Set Original File Name
             fileRenamer.originalFileName = fileListModel.getFileName(fileListView.currentIndex);

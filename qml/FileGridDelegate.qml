@@ -65,7 +65,7 @@ Rectangle {
         smooth: false
         asynchronous: true
         opacity: fileIconImage.status == Image.Ready ? 1.0 : 0.0
-        Behavior on opacity { NumberAnimation { duration: Const.DEFAULT_TRANSITION_DURATION } }
+        Behavior on opacity { NumberAnimation { duration: Const.DEFAULT_TRANSITION_DURATION / 2 } }
         visible: opacity > 0.0
     }
 
@@ -82,7 +82,7 @@ Rectangle {
         text: "loading..."
         color: Const.DEFAULT_POPUP_BACKGROUND_COLOR
         opacity: fileIconImage.status != Image.Ready ? 1.0 : 0.0
-        Behavior on opacity { NumberAnimation { duration: Const.DEFAULT_TRANSITION_DURATION } }
+        Behavior on opacity { NumberAnimation { duration: Const.DEFAULT_TRANSITION_DURATION / 2} }
         visible: opacity > 0.0
     }
 

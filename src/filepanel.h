@@ -302,6 +302,12 @@ public slots:
     // Drag Started Slot
     void fileListWidgetDragStarted(const int& aPosX, const int aPosY);
 
+    // Check If Is Image
+    bool isImage(const QString& aFilePath);
+
+    // Set As Wallpaper
+    void setAsWallPaper(const QString& aFilePath);
+
 signals:
 
     // Focused Panel Changed Signal

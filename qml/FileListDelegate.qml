@@ -96,7 +96,7 @@ Rectangle {
                 smooth: false
                 asynchronous: true
                 opacity: status == Image.Ready ? 1.0 : 0.0
-                Behavior on opacity { NumberAnimation { duration: Const.DEFAULT_TRANSITION_DURATION } }
+                Behavior on opacity { NumberAnimation { duration: Const.DEFAULT_TRANSITION_DURATION / 2 } }
                 visible: opacity > 0.0
             }
 

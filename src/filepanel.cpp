@@ -1040,6 +1040,25 @@ void FilePanel::fileListWidgetDragStarted(const int& aPosX, const int aPosY)
 }
 
 //==============================================================================
+// Check If Is Image
+//==============================================================================
+bool FilePanel::isImage(const QString& aFilePath)
+{
+    return supportedImageFormats.indexOf(QFileInfo(aFilePath).suffix()) >= 0;
+}
+
+//==============================================================================
+// Set As Wallpaper
+//==============================================================================
+void FilePanel::setAsWallPaper(const QString& aFilePath)
+{
+    // Set Desktop Wallpaper
+    setDesktopWallpaper(aFilePath);
+
+    // ...
+}
+
+//==============================================================================
 // File Rename Active
 //==============================================================================
 bool FilePanel::getFileRenameActive()
@@ -2698,7 +2717,7 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
     // Handle Modifier Key Release Event
     if (handleModifierKeyReleaseEvent(aEvent)) {
         // Emit Hide Popups
-        emit hidePopups();
+        //emit hidePopups();
 
         return;
     }

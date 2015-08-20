@@ -96,6 +96,9 @@ protected slots:
     // Update Menu Bar
     void updateMenuBar();
 
+    // Handle Image Browser Selection
+    void handleImageBrowserSelection();
+
 protected slots: // For QTextEdit
 
     // Text Changed Slot
@@ -220,15 +223,6 @@ public:
     // Get Current Dir
     QString getCurrentDir();
 
-    // Go To First
-    void gotoFirst();
-    // Go To Prev
-    void gotoPrev();
-    // Go To Next
-    void gotoNext();
-    // Go To Last
-    void gotoLast();
-
     // Destructor
     virtual ~ImageBrowser();
 
@@ -238,6 +232,19 @@ signals:
     void currentIndexChanged(const int& aCurrentIndex);
     // Current File Changed Signal
     void currentFileChanged(const QString& aCurrentFile);
+    // Select Current
+    void selectCurrent();
+
+public slots:
+
+    // Go To First
+    void gotoFirst();
+    // Go To Prev
+    void gotoPrev();
+    // Go To Next
+    void gotoNext();
+    // Go To Last
+    void gotoLast();
 
 protected slots:
 

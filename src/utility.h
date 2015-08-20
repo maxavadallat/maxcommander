@@ -97,5 +97,8 @@ QString applyPattern(const QString& aSourceFileName, const QString& aPattern);
 // Is Volume Path
 bool isVolumePath(const QString& aFilePath);
 
+// Set Desktop Wallpaper
+void setDesktopWallpaper(const QString& aFilePath, const int& aDesktop = 0);
+
 #endif // UTILITY
 

@@ -20,6 +20,8 @@ Rectangle {
 
     radius: Const.DEFAULT_POPUP_RADIUS
 
+    clip: true
+
     signal accepted
     signal rejected
 
@@ -106,6 +108,7 @@ Rectangle {
             cursorVisible: true
             text: "Testing Testing Testing..."
             color: "white"
+            //clip: true
             selectionColor: Const.DEFAULT_FILE_LIST_ITEM_RENAMER_SELECTION_COLOR
 
             Keys.onReleased: {

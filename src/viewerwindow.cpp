@@ -78,7 +78,7 @@ void ViewerWindow::init()
 
     // Set Context Properties
     QQmlContext* ctx = ui->quickWidget->rootContext();
-    // Set Context Properties - Dummy Model
+    // Set Context Properties - Viewer Content
     ctx->setContextProperty(DEFAULT_IMAGE_VIEWER_CONTENT, fileName);
 
     // Get Engine
@@ -188,7 +188,7 @@ bool ViewerWindow::loadFile(const QString& aFileName, const QString& aPanelName)
 
     // Set Context Properties
     QQmlContext* ctx = ui->quickWidget->rootContext();
-    // Set Context Properties - Dummy Model
+    // Set Context Properties - Viewer Content
     ctx->setContextProperty(DEFAULT_IMAGE_VIEWER_CONTENT, fileName);
 
     // Edit Mode & Check Mime Type - Load All Files As Text in Edit Mode
@@ -245,6 +245,12 @@ bool ViewerWindow::loadFile(const QString& aFileName, const QString& aPanelName)
             connect(imageBrowser, SIGNAL(currentIndexChanged(int)), this, SLOT(imageBrowserCurrentIndexChanged(int)));
             connect(imageBrowser, SIGNAL(currentFileChanged(QString)), this, SLOT(imageBrowserCurrentFileChanged(QString)));
             connect(imageBrowser, SIGNAL(currentFileChanged(QString)), this, SIGNAL(currentImageFileChanged(QString)));
+            connect(imageBrowser, SIGNAL(selectCurrent()), this, SLOT(handleImageBrowserSelection()));
+
+            // Set Context Properties
+            QQmlContext* ctx = ui->quickWidget->rootContext();
+            // Set Context Properties - Image Browser
+            ctx->setContextProperty(DEFAULT_IMAGE_BROWSER, imageBrowser);
         }
 
         // Set Context Property
@@ -604,6 +610,21 @@ void ViewerWindow::updateMenuBar()
 }
 
 //==============================================================================
+// Handle Image Browser Selection
+//==============================================================================
+void ViewerWindow::handleImageBrowserSelection()
+{
+    // Check Image Browser
+    if (imageBrowser) {
+        // Emit Image Selected
+        emit imageSelected(imageBrowser->getCurrentDir() + imageBrowser->getCurrentFile(), imageBrowser->getPanelName());
+    }
+
+    // Close Window
+    closeWindow();
+}
+
+//==============================================================================
 // Text Changed Slot
 //==============================================================================
 void ViewerWindow::textChanged()
@@ -641,7 +662,7 @@ void ViewerWindow::imageBrowserCurrentFileChanged(const QString& aCurrentFile)
 
     // Set Context Properties
     QQmlContext* ctx = ui->quickWidget->rootContext();
-    // Set Context Properties - Dummy Model
+    // Set Context Properties - Viewer Content
     ctx->setContextProperty(DEFAULT_IMAGE_VIEWER_CONTENT, fileName);
 
     // Set Window Title
@@ -859,13 +880,8 @@ void ViewerWindow::keyReleaseEvent(QKeyEvent* aEvent)
 
             case Qt::Key_Return:
             case Qt::Key_Enter:
-                // Check Image Browser
-                if (imageBrowser) {
-                    // Emit Image Selected
-                    emit imageSelected(imageBrowser->getCurrentDir() + imageBrowser->getCurrentFile(), imageBrowser->getPanelName());
-                }
-                // Close Window
-                closeWindow();
+                // Handle Selection
+                handleImageBrowserSelection();
             break;
 
             case Qt::Key_S: {
@@ -981,6 +997,9 @@ ViewerWindow::~ViewerWindow()
 {
     // Save Settings
     saveSettings();
+
+    // Delete Quick Widget
+    delete ui->quickWidget;
 
     // Delete UI
     delete ui;

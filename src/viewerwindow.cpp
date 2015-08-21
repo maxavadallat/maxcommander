@@ -259,9 +259,6 @@ bool ViewerWindow::loadFile(const QString& aFileName, const QString& aPanelName)
             ctx->setContextProperty(DEFAULT_IMAGE_BROWSER, imageBrowser);
         }
 
-        // Set Context Property
-        //ctx->setContextProperty(DEFAULT_IMAGE_BROWSER, imageBrowser);
-
     } else if (!editMode && mime.startsWith(DEFAULT_MIME_PREFIX_AUDIO)) {
 
         // Text Edit Set Visible
@@ -403,8 +400,6 @@ void ViewerWindow::showWindow()
     } else {
         // ...
     }
-
-
 }
 
 //==============================================================================

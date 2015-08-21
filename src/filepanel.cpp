@@ -1044,7 +1044,7 @@ void FilePanel::fileListWidgetDragStarted(const int& aPosX, const int aPosY)
 //==============================================================================
 bool FilePanel::isImage(const QString& aFilePath)
 {
-    return supportedImageFormats.indexOf(QFileInfo(aFilePath).suffix()) >= 0;
+    return supportedImageFormats.indexOf(QFileInfo(aFilePath).suffix().toLower()) >= 0;
 }
 
 //==============================================================================
@@ -1821,7 +1821,7 @@ void FilePanel::updateSupportedImageFormats()
     // Go Thru Formats
     for (int i=0; i<flCount; ++i) {
         // Add Format String
-        supportedImageFormats << QString(formats[i]);
+        supportedImageFormats << QString(formats[i]).toLower();
     }
 }
 

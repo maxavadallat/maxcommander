@@ -288,6 +288,9 @@
 // Open Files
 #define DEFAULT_OPEN_FILE_SYSTEM_COMMAND_MAC_OSX            "open \"%1\" &"
 
+// Set Desktop Background
+#define DEFAULT_CHANGE_DESKTOP_BACKGROUND_COMMAND_MAC_OSX   "osascript -e \'tell application \"Finder\" to set desktop picture to POSIX file \"%1\"\' &"
+
 // Default Min Height - Results
 #define DEFAULT_FILE_SEARCH_DIALOG_MIN_HEIGHT_RESULTS       480
 // Default Max Height - Results

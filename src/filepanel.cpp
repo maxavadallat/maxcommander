@@ -1568,25 +1568,26 @@ void FilePanel::handleItemSelection()
     // Get File Info
     QFileInfo fileInfo = fileListModel->getFileInfo(currentIndex);
 
-    // Check If Dir
-    if (fileInfo.isDir() && !fileInfo.isBundle() /*|| fileInfo.isBundle()*/) {
-        // Check File Name
-        if (fileInfo.fileName() == QString("..")) {
-            // Go Up
-            goUp();
-        } else {
-            // Check If Symbolic Link
-            if (fileInfo.isSymLink() && settings->getFollowLinks()) {
-                // Set Current Dir
-                setCurrentDir(fileInfo.symLinkTarget());
-            } else {
-                // Set Current Dir
-                setCurrentDir(fileInfo.absoluteFilePath());
-            }
+    // Check File Name
+    if (fileInfo.fileName() == QString("..")) {
+        // Go Up
+        goUp();
 
-            // Set Current Index
-            setCurrentIndex(0);
+    // Check If Dir
+    } else if (fileInfo.isDir() && !fileInfo.isBundle()) {
+
+        // Check If Symbolic Link
+        if (fileInfo.isSymLink() && settings->getFollowLinks()) {
+            // Set Current Dir
+            setCurrentDir(fileInfo.symLinkTarget());
+        } else {
+            // Set Current Dir
+            setCurrentDir(fileInfo.absoluteFilePath());
         }
+
+        // Set Current Index
+        setCurrentIndex(0);
+
     } else {
         qDebug() << "FilePanel::handleItemSelection - panelName: " << panelName << " - fileName: " << fileInfo.fileName();
 

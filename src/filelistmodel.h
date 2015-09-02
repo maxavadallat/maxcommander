@@ -16,10 +16,15 @@ class RemoteFileUtilClient;
 class FileListModelItem
 {
 public:
+    // Constructor
     explicit FileListModelItem(const QString& aPath, const QString& aFileName);
+    // Constructor
+    explicit FileListModelItem(const QString& aPath, const qint64& aSize, const QDateTime& aDate, const QString& aAttrs, const bool& aIsDir, const bool& aIsLink);
 
     // File Info
     QFileInfo       fileInfo;
+    // Archive File Info
+    ArchiveFileInfo archiveFileInfo;
     // Dir Size
     quint64         dirSize;
     // Selected
@@ -42,6 +47,7 @@ class FileListModel : public QAbstractListModel
     Q_PROPERTY(bool busy READ getBusy NOTIFY busyChanged)
     Q_PROPERTY(int count READ rowCount NOTIFY countChanged)
     Q_PROPERTY(int selectedCount READ getSelectedCount NOTIFY selectedCountChanged)
+    Q_PROPERTY(bool archiveMode READ getArchiveMode NOTIFY archiveModeChanged)
 
 public:
 
@@ -51,7 +57,10 @@ public:
     // Get Current Dir
     QString getCurrentDir();
     // Set Current Dir
-    void setCurrentDir(const QString& aCurrentDir);
+    void setCurrentDir(const QString& aDirPath);
+
+    // Set Archive Current Dir
+    void setArchiveCurrentDir(const QString& aFilePath, const QString& aDirPath);
 
     // Find Index by File Name
     int findIndex(const QString& aFileName);
@@ -60,6 +69,8 @@ public:
 
     // Get File Info
     QFileInfo getFileInfo(const int& aIndex);
+    // Get Archive File Info
+    ArchiveFileInfo getArchiveFileInfo(const int& aIndex);
 
     // Update Item
     void updateItem(const int& aIndex, const QFileInfo& aFileInfo);
@@ -71,9 +82,14 @@ public:
     bool isDir(const int& aIndex);
     // Check If Is Bundle
     bool isBundle(const int& aIndex);
+    // Check If Archive
+    bool isArchive(const int& aIndex);
 
     // Get Busy
     bool getBusy();
+
+    // Get Archive Mode
+    bool getArchiveMode();
 
     // Set Sorting Order
     void setSorting(const int& aSorting);
@@ -105,6 +121,9 @@ public:
 
     // Add Item Name-Sorted Manually
     void addItem(const QString& aFilePath, const bool& aSearchResult = false);
+
+    // Remove Item
+    void removeItem(const int& aIndex);
 
     // Set Selected Files Count
     void setSelectedCount(const int& aSelectedCount);
@@ -198,6 +217,9 @@ signals:
     // Selected Count Changed Signal
     void selectedCountChanged(const int& aSelectedCount);
 
+    // Archive Mode Changed Signal
+    void archiveModeChanged(const bool& aArchiveMode);
+
 public: // From QAbstractListModel
 
     // Get Role Names
@@ -217,8 +239,10 @@ protected slots:
     void init();
     // Fetch Dir
     void fetchDirItems();
-    // Delete Item
-    void deleteItem(const int& aIndex);
+    // Fetch Archive Dir Items
+    void fetchArchiveDirItems();
+    // Set Archive Mode
+    void setArchiveMode(const bool& aArchiveMode);
 
 protected slots: // For Remote File Client
 
@@ -277,6 +301,16 @@ protected slots: // For Remote File Client
                               const QString& aSource,
                               const QString& aTarget);
 
+    // Archive File List Item Found Slot
+    void archiveListItemFound(const unsigned int& aID,
+                              const QString& aArchive,
+                              const QString& aFilePath,
+                              const qint64& aSize,
+                              const QDateTime& aDate,
+                              const QString& aAttribs,
+                              const bool& aIsDir,
+                              const bool& aIsLink);
+
 protected:
 
     // Roles
@@ -302,7 +336,8 @@ protected:
 
     // Current Dir
     QString                             currentDir;
-
+    // Prev Current Dir
+    QString                             prevCurrentDir;
     // File Info List
     QList<FileListModelItem*>           itemList;
     // File Name List - For Quicker Search
@@ -327,6 +362,11 @@ protected:
 
     // Fetch Dir On Connection
     bool                                fetchOnConnection;
+
+    // Archive Mode
+    bool                                archiveMode;
+    // Archive Path
+    QString                             archivePath;
 
     // ...
 };

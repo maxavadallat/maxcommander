@@ -6,7 +6,9 @@
 #include <QDateTime>
 #include <QRgb>
 
+//==============================================================================
 // File Sorting Type
+//==============================================================================
 enum FileSortType {
     EFSName  = 0,
     EFSExt,
@@ -16,6 +18,27 @@ enum FileSortType {
     EFSOwner,
     EFSPerms
 };
+
+//==============================================================================
+// Archive File Info For File Util Client
+//==============================================================================
+struct ArchiveFileInfo {
+    // Full File Path
+    QString     filePath;
+    // File Name
+    QString     fileName;
+    // File Size
+    qint64      fileSize;
+    // File Date
+    QDateTime   fileDate;
+    // File Attribs
+    QString     fileAttribs;
+    // Is Dir
+    bool        fileIsDir;
+    // Is Link
+    bool        fileIsLink;
+};
+
 
 // Get Current User Name
 QString getCurrentUserName();
@@ -63,8 +86,10 @@ void storeAppExecPath(const char* aPath);
 // Get App Exec Path
 QString getAppExecPath();
 
-// Get File Name WithOut Extension From Full File Name
+// Get File Name From Full File Name
 QString getFileNameFromFullName(const QString& aFullFileName);
+// Get File Name WithOut Extension From Full File Name
+QString getBaseNameFromFullName(const QString& aFullFileName);
 // Get File Extension From Full File Name
 QString getExtensionFromFullName(const QString& aFullFileName);
 
@@ -99,6 +124,15 @@ bool isVolumePath(const QString& aFilePath);
 
 // Set Desktop Wallpaper
 void setDesktopWallpaper(const QString& aFilePath, const int& aDesktop = 0);
+
+// Check If File Archive/Compressed
+bool isFileArchiveByExt(const QString& aFilePath);
+
+// Get Permissions Text
+QString getPermsText(const QFileInfo& aFileInfo);
+
+// Get Archive Current Dir From Full Current Dir
+QString getArchiveCurrentDir(const QString& aFileName, const QString& aCurrentDir);
 
 #endif // UTILITY
 

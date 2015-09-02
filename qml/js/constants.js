@@ -13,6 +13,9 @@ var DEFAULT_GRID_ICON_PREFIX                            = "image://gridicon/";
 
 var DEFAULT_AUDIO_TAG_PREFIX                            = "image://audiotag/";
 
+var DEFAULT_FILE_ICON_DEFAULT_FILE                      = "defaultFile";
+var DEFAULT_FILE_ICON_DEFAULT_DIR                       = "defaultDir";
+
 var DEFAULT_DIR_SIZE_TITLE_LABEL_TEXT_DIR               = "[DIR]";
 var DEFAULT_DIR_SIZE_TITLE_LABEL_TEXT_BUNDLE            = "[BUNDLE]";
 

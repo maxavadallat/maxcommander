@@ -1310,6 +1310,28 @@ void TransferProgressDialog::fileOpError(const unsigned int& aID,
                 fileUtil->sendUserResponse(actionIndex == -1 ? DEFAULT_CONFIRM_ABORT : actionIndex, confirmDialog.getPath());
             }
         } break;
+
+        case DEFAULT_ERROR_NOT_ENOUGH_SPACE: {
+
+            // Set Error Text
+            confirmDialog.setConfirmText(tr(DEFAULT_ERROR_TEXT_NOT_ENOUGH_SPACE_ON_TARGET));
+
+            // Set Path
+            confirmDialog.setPath("");
+
+            // Configure Standard Buttons
+            confirmDialog.configureButtons(QDialogButtonBox::Abort);
+
+            // Exec Confirm Dialog
+            confirmDialog.exec();
+
+            // Check File Util
+            if (fileUtil) {
+                // Send User Response
+                fileUtil->sendUserResponse(DEFAULT_CONFIRM_ABORT, "");
+            }
+
+        } break;
     }
 }
 

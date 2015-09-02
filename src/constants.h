@@ -309,8 +309,6 @@
 // Max Numbers Of Patterns To Save
 #define DEFAULT_FILE_SEARCH_MAX_PATTERNS                    16
 
-// Suffix - .tag.gz
-#define DEFAULT_SUFFIX_TAR_GZ                               "tar.gz"
 
 // Default Icons
 #define DEFAULT_FILE_ICON_FILE                              ":/resources/images/icons/default_file.png"
@@ -325,6 +323,9 @@
 
 #define DEFAULT_FILE_LIST_SIZE_BUNDLE                       "[BUNDLE]"
 #define DEFAULT_FILE_LIST_SIZE_DIR                          "[DIR]"
+
+#define DEFAULT_FILE_LIST_DEFAULT_ICON_NAME_FILE            "defaultFile"
+#define DEFAULT_FILE_LIST_DEFAULT_ICON_NAME_DIR             "defaultDir"
 
 #define DEFAULT_ICON_INFO                                   ":/resources/images/info.png"
 #define DEFAULT_ICON_WARNING                                ":/resources/images/warning.png"
@@ -349,6 +350,20 @@
 // Eject External Drive Command
 #define DEFAULT_EXTERNAL_DRIVE_EJECT_COMMAND_MAC            "diskutil eject \"%1\" &"
 #define DEFAULT_EXTERNAL_DRIVE_EJECT_COMMAND_LINUX          "eject \"%1\" &"
+
+#define DEFAULT_ARCHIVE_FILE_DIR_PATTERN                    "%1://%2"
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -396,6 +411,8 @@
 
 #define DEFAULT_ERROR_TEXT_CANT_DELETE_SOURCE               "Can Not Delete Source:"
 #define DEFAULT_ERROR_TEXT_CANT_DELETE_TARGET               "Can Not Delete Target:"
+
+#define DEFAULT_ERROR_TEXT_NOT_ENOUGH_SPACE_ON_TARGET       "Not Enought Space On Target Volume"
 
 #define DEFAULT_CONFIRM_TEXT_TARGET_DIR_DOESNT_EXIST        "Target Dir Doesn\'t Exist. Create?"
 

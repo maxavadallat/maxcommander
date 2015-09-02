@@ -86,10 +86,17 @@ public:
     // Search File
     void searchFile(const QString& aName, const QString& aDirPath, const QString& aContent, const int& aOptions);
 
+    // Get File Archive
+    bool isFileArchive(const QString& aFilePath);
+    // List Archive
+    void listArchive(const QString& aFilePath, const QString& aDirPath, const int& aFilters = 0, const int& aSortFlags = 0);
+
     // Clear Global File Transfer Options
     void clearFileTransferOptions();
 
     // Get Drive Info
+
+    // ...
 
     // Abort Current Operation
     void abort();
@@ -212,6 +219,17 @@ signals:
                                    const QString& aPath,
                                    const QString& aFilePath);
 
+    // Archive File List Item Found Signal
+    void archiveListItemFound(const unsigned int& aID,
+                              const QString& aArchive,
+                              const QString& aFilePath,
+                              const qint64& aSize,
+                              const QDateTime& aDate,
+                              const QString& aAttribs,
+                              const bool& aIsDir,
+                              const bool& aIsLink);
+
+
 protected slots:
 
     // Init
@@ -259,6 +277,8 @@ protected slots:
     void handleDirSizeUpdate();
     // Handle File Search Item Found
     void handleSearchItemFound();
+    // Handle Archive List Item Found
+    void handleArchiveListItem();
 
     // Write Data
     void writeData(const QByteArray& aData);

@@ -428,6 +428,51 @@ void RemoteFileUtilClient::searchFile(const QString& aName, const QString& aDirP
 }
 
 //==============================================================================
+// Get File Archive
+//==============================================================================
+bool RemoteFileUtilClient::isFileArchive(const QString& aFilePath)
+{
+    return isFileArchiveByExt(aFilePath);
+}
+
+//==============================================================================
+// List Archive
+//==============================================================================
+void RemoteFileUtilClient::listArchive(const QString& aFilePath, const QString& aDirPath, const int& aFilters, const int& aSortFlags)
+{
+    // Check Status
+    if (status == ECSTBusy) {
+
+        qDebug() << "#########################################################################";
+        qDebug() << "#### RemoteFileUtilClient::listArchive - cID: " << cID << " - BUSY!!";
+        qDebug() << "#########################################################################";
+
+        // ...
+    }
+
+    //qDebug() << "RemoteFileUtilClient::listArchive - aFilePath: " << aFilePath << " - aDirPath: " << aDirPath << " - aFilters: " << aFilters << " - aSortFlags: " << aSortFlags;
+
+    // Init New Data
+    QVariantMap newData;
+
+    // Set Up New Data
+    newData[DEFAULT_KEY_CID]            = cID;
+    newData[DEFAULT_KEY_OPERATION]      = QString(DEFAULT_OPERATION_LIST_ARCHIVE);
+    newData[DEFAULT_KEY_FILENAME]       = aFilePath;
+    newData[DEFAULT_KEY_PATH]           = aDirPath;
+    newData[DEFAULT_KEY_FILTERS]        = aFilters;
+    newData[DEFAULT_KEY_FLAGS]          = aSortFlags;
+
+    // ...
+
+    // Write Data
+    writeData(newData);
+
+    // Set Status
+    setStatus(ECSTBusy);
+}
+
+//==============================================================================
 // Clear Global File Transfer Options
 //==============================================================================
 void RemoteFileUtilClient::clearFileTransferOptions()
@@ -1085,7 +1130,15 @@ void RemoteFileUtilClient::parseLastDataMap()
         goto finished;
     }
 
-    qDebug() << "RemoteFileUtilClient::parseLastDataMap - WTF?!??";
+    // Check Response
+    if (lastDataMap[DEFAULT_KEY_RESPONSE].toString() == QString(DEFAULT_RESPONSE_ARCHIVEITEM)) {
+        // Handle Archive List Item Found
+        handleArchiveListItem();
+
+        goto finished;
+    }
+
+    qDebug() << "RemoteFileUtilClient::parseLastDataMap - response: " << lastDataMap[DEFAULT_KEY_RESPONSE].toString() << " WTF?!??";
 
 finished:
 
@@ -1284,6 +1337,26 @@ void RemoteFileUtilClient::handleSearchItemFound()
 
     // Send Acknowledge
     sendAcknowledge();
+}
+
+//==============================================================================
+// Handle Archive List Item Found
+//==============================================================================
+void RemoteFileUtilClient::handleArchiveListItem()
+{
+    // Emit Archive List Item Found Signal
+    emit archiveListItemFound(cID,
+                              lastDataMap[DEFAULT_KEY_FILENAME].toString(),
+                              lastDataMap[DEFAULT_KEY_PATH].toString(),
+                              lastDataMap[DEFAULT_KEY_FILESIZE].toLongLong(),
+                              lastDataMap[DEFAULT_KEY_DATETIME].toDateTime(),
+                              lastDataMap[DEFAULT_KEY_ATTRIB].toString(),
+                              lastDataMap[DEFAULT_KEY_FLAGS].toInt() & 0x0010,
+                              lastDataMap[DEFAULT_KEY_FLAGS].toInt() & 0x0001
+                              );
+
+    // Send Acknowledge
+    //sendAcknowledge();
 }
 
 //==============================================================================

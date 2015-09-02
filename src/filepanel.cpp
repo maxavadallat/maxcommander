@@ -85,6 +85,7 @@ FilePanel::FilePanel(QWidget* aParent)
     , dirHistoryModel(NULL)
     , dirHistoryListPopup(NULL)
     , fileListItemPopupActive(false)
+    , archiveMode(false)
 {
     // Setup UI
     ui->setupUi(this);
@@ -195,6 +196,24 @@ int FilePanel::getCount()
 }
 
 //==============================================================================
+// Set Archive
+//==============================================================================
+void FilePanel::setArchive(const QString& aFilePath)
+{
+    // Check Current Archive
+    if (currentArchive != aFilePath) {
+        // Set Current Archive
+        currentArchive = aFilePath;
+
+        // Set Arhive Mode
+        setArchiveMode(true);
+
+        // Set Current Dir
+        setCurrentDir("");
+    }
+}
+
+//==============================================================================
 // Set Current Dir
 //==============================================================================
 void FilePanel::setCurrentDir(const QString& aCurrentDir, const QString& aLastFileName)
@@ -210,62 +229,96 @@ void FilePanel::setCurrentDir(const QString& aCurrentDir, const QString& aLastFi
 
     // Check Current Dir
     if (currentDir != localDir) {
-        // Init New Dir Info
-        QFileInfo newDirInfo(localDir);
 
-        // Check If Exists
-        if (!newDirInfo.exists()) {
+        // Check Archive Mode
+        if (archiveMode) {
+            // Check Local Dir
+            if (localDir.isEmpty())
+                // Reset Local Dir
+                localDir = "/";
+
+            // Set Current Dir
+            currentDir = QString(DEFAULT_ARCHIVE_FILE_DIR_PATTERN).arg(getFileNameFromFullName(currentArchive)).arg(localDir);
+
+            qDebug() << "FilePanel::setCurrentDir - panelName: " << panelName << " - currentDir: " << currentDir;
+
+            // Reset Current Index
+            setCurrentIndex(-1);
+
+            // Check LAst File Name
+            if (!aLastFileName.isEmpty()) {
+                // Set Last File Name
+                lastFileName = aLastFileName;
+            }
+
+            // Check Model
+            if (fileListModel) {
+                // Set Loading
+                setLoading(true);
+
+                // Set Archive
+                fileListModel->setArchiveCurrentDir(currentArchive, localDir);
+            }
 
             // ...
 
-            return;
-        }
+        } else {
 
-        // Check If Is Dir
-        if (!(newDirInfo.isDir() || newDirInfo.isBundle())) {
-            return;
-        }
+            // Init New Dir Info
+            QFileInfo newDirInfo(localDir);
 
-        // Check Access
-        if (!(newDirInfo.permissions() & QFileDevice::ReadUser)) {
+            // Check Access
+            if (!(newDirInfo.permissions() & QFileDevice::ReadUser)) {
+
+                // ...
+
+                return;
+            }
+
+            // Check If Exists
+            if (!newDirInfo.exists()) {
+                return;
+            }
+
+            // Check If Is Dir
+            if (!(newDirInfo.isDir() || newDirInfo.isBundle())) {
+                return;
+            }
+
+            // Set Current Dir
+            currentDir = localDir;
+
+            qDebug() << "FilePanel::setCurrentDir - panelName: " << panelName << " - currentDir: " << currentDir;
+
+            // Reset Current Index
+            setCurrentIndex(-1);
+
+            // Check LAst File Name
+            if (!aLastFileName.isEmpty()) {
+                // Set Last File Name
+                lastFileName = aLastFileName;
+            }
+
+            // Check Model
+            if (fileListModel) {
+                // Set Loading
+                setLoading(true);
+                // Set Current Dir
+                fileListModel->setCurrentDir(currentDir);
+            }
+
+            // Check Directory History List Model
+            if (dirHistoryModel) {
+                // Add Item
+                dirHistoryModel->addNewHistoryItem(currentDir);
+            }
 
             // ...
 
-            return;
         }
-
-        // Set Current Dir
-        currentDir = aCurrentDir;
-
-        qDebug() << "FilePanel::setCurrentDir - panelName: " << panelName << " - currentDir: " << currentDir;
 
         // Set Text
         ui->currDirLabel->setText(currentDir);
-
-        // Reset Current Index
-        setCurrentIndex(-1);
-
-        // Check LAst File Name
-        if (!aLastFileName.isEmpty()) {
-            // Set Last File Name
-            lastFileName = aLastFileName;
-        }
-
-        // Check Model
-        if (fileListModel) {
-            // Set Loading
-            setLoading(true);
-            // Set Current Dir
-            fileListModel->setCurrentDir(currentDir);
-        }
-
-        // Check Directory History List Model
-        if (dirHistoryModel) {
-            // Add Item
-            dirHistoryModel->addNewHistoryItem(currentDir);
-        }
-
-        // ...
 
         // Emit Current dir Changed Signal
         emit currentDirChanged(currentDir);
@@ -1157,6 +1210,37 @@ void FilePanel::setSearchResultsMode(const bool& aSearchResultMode)
 }
 
 //==============================================================================
+// Set ARchive Mode
+//==============================================================================
+void FilePanel::setArchiveMode(const bool& aArchiveMode)
+{
+    // Check Archive Mode
+    if (archiveMode != aArchiveMode) {
+        // Set Archive Mode
+        archiveMode = aArchiveMode;
+
+        // Check Archive Mode
+        if (!archiveMode) {
+            // Reset Current Archive
+            currentArchive = "";
+        }
+
+        // ...
+
+        // Emit Archive Mode Changed Signal
+        emit archiveModeChanged(archiveMode);
+    }
+}
+
+//==============================================================================
+// Get Archive Mode
+//==============================================================================
+bool FilePanel::getArchiveMode()
+{
+    return archiveMode;
+}
+
+//==============================================================================
 // Get File List Item Popup Active
 //==============================================================================
 bool FilePanel::getFileListItemPopupActive()
@@ -1203,27 +1287,18 @@ void FilePanel::setCurrentIndex(const int& aCurrentIndex)
 {
     // Check Current Index
     if (currentIndex != aCurrentIndex) {
-        // Check File List Model
-        if (!fileListModel) {
-            return;
-        }
-
-        //qDebug() << "FilePanel::setCurrentIndex - panelName: " << panelName << " - aCurrentIndex: " << aCurrentIndex;
-
         // Check New Index
-        if (aCurrentIndex >= 0 && aCurrentIndex < fileListModel->rowCount()) {
+        if (fileListModel && aCurrentIndex >= 0 && aCurrentIndex < fileListModel->rowCount()) {
+            //qDebug() << "FilePanel::setCurrentIndex - panelName: " << panelName << " - aCurrentIndex: " << aCurrentIndex;
             // Set Current Index
             currentIndex = aCurrentIndex;
-            // Emit Current Index Changed Signal
-            emit currentIndexChanged(currentIndex);
 
         } else {
-
-            qDebug() << "FilePanel::setCurrentIndex - panelName: " << panelName << " - aCurrentIndex: " << aCurrentIndex << " - INVALID INDEX!!";
-
-            // Emit Current Index Changed Signal
-            emit currentIndexChanged(currentIndex);
+            //qDebug() << "FilePanel::setCurrentIndex - panelName: " << panelName << " - aCurrentIndex: " << aCurrentIndex << " - INVALID INDEX!!";
         }
+
+        // Emit Current Index Changed Signal
+        emit currentIndexChanged(currentIndex);
     }
 }
 
@@ -1404,6 +1479,8 @@ void FilePanel::gotoHome()
 {
     //qDebug() << "FilePanel::gotoHome - panelName: " << panelName;
 
+    // Set Archive Mode
+    setArchiveMode(false);
     // Set Current Dir
     setCurrentDir(QDir::homePath());
     // Set Current Index
@@ -1417,6 +1494,8 @@ void FilePanel::gotoRoot()
 {
     //qDebug() << "FilePanel::gotoRoot - panelName: " << panelName;
 
+    // Set Archive Mode
+    setArchiveMode(false);
     // Set Current Dir
     setCurrentDir("/");
     // Set Current Index
@@ -1428,6 +1507,9 @@ void FilePanel::gotoRoot()
 //==============================================================================
 void FilePanel::gotoVolumes()
 {
+    // Set Archive Mode
+    setArchiveMode(false);
+
 #if defined(Q_OS_MAC)
 
     // Set Current Dir
@@ -1447,13 +1529,22 @@ void FilePanel::gotoVolumes()
 }
 
 //==============================================================================
-// Go To Drive
+// Go To Drive - Windows
 //==============================================================================
 void FilePanel::gotoDrive(const int& aDriveIndex)
 {
     qDebug() << "FilePanel::gotoDrive - panelName: " << panelName << " - aDriveIndex: " << aDriveIndex;
 
+    // Set Archive Mode
+    setArchiveMode(false);
+
     // ...
+
+    // Set Current Dir
+    setCurrentDir("/");
+
+    // Set Current Index
+    setCurrentIndex(0);
 }
 
 //==============================================================================
@@ -1461,18 +1552,50 @@ void FilePanel::gotoDrive(const int& aDriveIndex)
 //==============================================================================
 void FilePanel::goUp()
 {
-    // Get Parent Dir
-    QString parentDir = getParentDir(currentDir);
+    // Chekc Archive Mode
+    if (archiveMode) {
+        // Get ARchive Current Dir
+        QString archiveCurrentDir = getArchiveCurrentDir(currentArchive, currentDir);
 
-    // Check Parent Dir
-    if (!parentDir.isEmpty()) {
-        // Get Last Dir Name to Jump
-        lastDirName = getFileName(currentDir);
+        // Check Current Dir
+        if (archiveCurrentDir == "/") {
+            // Get Parent Dir
+            QString parentDir = getParentDirFromPath(currentArchive);
+            // Get Last File Name - Current Archive File Name
+            lastFileName = getFileNameFromFullName(currentArchive);
+            // Clear Archive Mode
+            setArchiveMode(false);
 
-        qDebug() << "FilePanel::goUp - panelName: " << panelName << " - parentDir: " << parentDir << " - lastDirName: " << lastDirName;
+            qDebug() << "FilePanel::goUp - panelName: " << panelName << " - parentDir: " << parentDir << " - lastDirName: " << lastDirName;
 
-        // Set Current Dir
-        setCurrentDir(parentDir);
+            // Set Current Dir
+            setCurrentDir(parentDir);
+
+        } else {
+            // Get Parent Dir
+            QString parentDir = getParentDirFromPath(archiveCurrentDir);
+            // Get Last Dir Name
+            lastDirName = getFileNameFromFullName(archiveCurrentDir);
+
+            qDebug() << "FilePanel::goUp - panelName: " << panelName << " - parentDir: " << parentDir << " - lastDirName: " << lastDirName;
+
+            // Set Current Dir
+            setCurrentDir(parentDir);
+        }
+    } else {
+        // Get Parent Dir
+        QString parentDir = getParentDir(currentDir);
+
+        // Check Parent Dir
+        if (!parentDir.isEmpty()) {
+            // Get Last Dir Name to Jump
+            lastDirName = getFileName(currentDir);
+
+            qDebug() << "FilePanel::goUp - panelName: " << panelName << " - parentDir: " << parentDir << " - lastDirName: " << lastDirName;
+
+            // Set Current Dir
+            setCurrentDir(parentDir);
+        }
     }
 }
 
@@ -1567,11 +1690,29 @@ void FilePanel::handleItemSelection()
 
     // Get File Info
     QFileInfo fileInfo = fileListModel->getFileInfo(currentIndex);
+    // Get Archive File Info
+    ArchiveFileInfo archiveFileInfo = fileListModel->getArchiveFileInfo(currentIndex);
+
+    // Get File Name
+    QString fileName = fileListModel->getArchiveMode() ? archiveFileInfo.fileName : fileInfo.fileName();
 
     // Check File Name
-    if (fileInfo.fileName() == QString("..")) {
+    if (fileName == QString("..")) {
+
         // Go Up
         goUp();
+
+    // Check If Archive
+    } else if (isFileArchiveByExt(fileInfo.fileName()) && !archiveMode) {
+
+        // Set Archive
+        setArchive(fileInfo.absoluteFilePath());
+
+    // Check If Archive Mode Is On
+    } else if (archiveMode && archiveFileInfo.fileIsDir) {
+
+        // Set Current Dir
+        setCurrentDir(archiveFileInfo.filePath);
 
     // Check If Dir
     } else if (fileInfo.isDir() && !fileInfo.isBundle()) {
@@ -1586,7 +1727,7 @@ void FilePanel::handleItemSelection()
         }
 
         // Set Current Index
-        setCurrentIndex(0);
+        //setCurrentIndex(0);
 
     } else {
         qDebug() << "FilePanel::handleItemSelection - panelName: " << panelName << " - fileName: " << fileInfo.fileName();
@@ -2605,7 +2746,7 @@ void FilePanel::focusInEvent(QFocusEvent* aEvent)
 {
     // Check Event
     if (aEvent) {
-        //qDebug() << "FilePanel::focusInEvent - panel: " << panelName;
+        qDebug() << "FilePanel::focusInEvent - panel: " << panelName;
 
         // Set Panel Focus
         setPanelFocus(true);
@@ -2619,7 +2760,7 @@ void FilePanel::focusOutEvent(QFocusEvent* aEvent)
 {
     // Check Event
     if (aEvent) {
-        //qDebug() << "FilePanel::focusOutEvent - panel: " << panelName;
+        qDebug() << "FilePanel::focusOutEvent - panel: " << panelName;
 
         // Set Panel Focus
         setPanelFocus(false);
@@ -2877,6 +3018,14 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
                 }
             break;
 
+            case Qt::Key_V:
+                // Check Modifier Keys
+                if (modifierKeys == Qt::NoModifier) {
+                    // Go To Volumes
+                    gotoVolumes();
+                }
+            break;
+
             case Qt::Key_Plus:
                 // Check Modifier Keys
                 if (modifierKeys == Qt::AltModifier) {
@@ -3029,35 +3178,56 @@ void FilePanel::timerEvent(QTimerEvent* aEvent)
             // Check File List Model
             if (fileListModel && !fileListModel->getBusy()) {
                 //qDebug() << "FilePanel::timerEvent - panelName: " << panelName;
-                // Check if Dir Exists
-                if (!QFileInfo(currentDir).exists()) {
-                    // Init Last Existing Dir
-                    QString lastExistingDir = currentDir;
-                    // Find Existing Dir
-                    while (!QFileInfo(lastExistingDir).exists() && lastExistingDir != DEFAULT_ROOT_DIR) {
-                        // Get Parent Dir
-                        lastExistingDir = getParentDirFromPath(lastExistingDir);
+
+                // Check Archive Mode
+                if (archiveMode) {
+
+                    // Check if Dir Exists
+                    if (!QFileInfo(currentArchive).exists()) {
+                        // Init Last Existing Dir
+                        QString lastExistingDir = getParentDirFromPath(currentArchive);
+
+                        // Find Existing Dir
+                        while (!QFileInfo(lastExistingDir).exists() && lastExistingDir != DEFAULT_ROOT_DIR) {
+                            // Get Parent Dir
+                            lastExistingDir = getParentDirFromPath(lastExistingDir);
+                        }
+
+                        // Set Current Dir
+                        setCurrentDir(lastExistingDir);
                     }
 
-                    // Set Current Dir
-                    setCurrentDir(lastExistingDir);
+                } else {
+                    // Check if Dir Exists
+                    if (!QFileInfo(currentDir).exists()) {
+                        // Init Last Existing Dir
+                        QString lastExistingDir = currentDir;
+                        // Find Existing Dir
+                        while (!QFileInfo(lastExistingDir).exists() && lastExistingDir != DEFAULT_ROOT_DIR) {
+                            // Get Parent Dir
+                            lastExistingDir = getParentDirFromPath(lastExistingDir);
+                        }
 
-                } else if (dwDirChanged || dwFileChanged){
+                        // Set Current Dir
+                        setCurrentDir(lastExistingDir);
 
-                    // Check Search Results Mode
-                    if (searchResultsMode) {
-                        return;
+                    } else if (dwDirChanged || dwFileChanged){
+
+                        // Check Search Results Mode
+                        if (searchResultsMode) {
+                            return;
+                        }
+
+                        //qDebug() << "FilePanel::timerEvent - dirWatcherTimerID";
+
+                        // Reset Dir Changed
+                        dwDirChanged = false;
+                        // Reset File Changed
+                        dwFileChanged = false;
+
+                        // Reload
+                        reload(currentIndex);
                     }
-
-                    //qDebug() << "FilePanel::timerEvent - dirWatcherTimerID";
-
-                    // Reset Dir Changed
-                    dwDirChanged = false;
-                    // Reset File Changed
-                    dwFileChanged = false;
-
-                    // Reload
-                    reload(currentIndex);
                 }
             }
         }

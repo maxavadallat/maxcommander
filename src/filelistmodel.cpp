@@ -24,6 +24,23 @@ FileListModelItem::FileListModelItem(const QString& aPath, const QString& aFileN
     // ...
 }
 
+//==============================================================================
+// Constructor
+//==============================================================================
+FileListModelItem::FileListModelItem(const QString& aPath, const qint64& aSize, const QDateTime& aDate, const QString& aAttrs, const bool& aIsDir, const bool& aIsLink)
+    : dirSize(0)
+    , selected(false)
+    , searchResult(false)
+{
+    // Set Up Archive File Info
+    archiveFileInfo.filePath    = aPath;
+    archiveFileInfo.fileName    = getFileNameFromFullName(aPath);
+    archiveFileInfo.fileSize    = aSize;
+    archiveFileInfo.fileDate    = aDate;
+    archiveFileInfo.fileAttribs = aAttrs;
+    archiveFileInfo.fileIsDir   = aIsDir;
+    archiveFileInfo.fileIsLink  = aIsLink;
+}
 
 
 
@@ -37,6 +54,7 @@ FileListModelItem::FileListModelItem(const QString& aPath, const QString& aFileN
 FileListModel::FileListModel(QObject* aParent)
     : QAbstractListModel(aParent)
     , currentDir("")
+    , prevCurrentDir("")
     , fileUtil(NULL)
     , sorting(0)
     , reverseOrder(false)
@@ -45,8 +63,10 @@ FileListModel::FileListModel(QObject* aParent)
     , caseSensitiveSort(false)
     , selectedCount(0)
     , fetchOnConnection(false)
+    , archiveMode(false)
+    , archivePath("")
 {
-    qDebug() << "FileListModel::FileListModel";
+    //qDebug() << "FileListModel::FileListModel";
 
     // Init
     init();
@@ -74,6 +94,7 @@ void FileListModel::init()
     connect(fileUtil, SIGNAL(fileOpFinished(uint,QString,QString,QString,QString)), this, SLOT(fileOpFinished(uint,QString,QString,QString,QString)));
     connect(fileUtil, SIGNAL(fileOpAborted(uint,QString,QString,QString,QString)), this, SLOT(fileOpAborted(uint,QString,QString,QString,QString)));
     connect(fileUtil, SIGNAL(fileOpError(uint,QString,QString,QString,QString,int)), this, SLOT(fileOpError(uint,QString,QString,QString,QString,int)));
+    connect(fileUtil, SIGNAL(archiveListItemFound(uint,QString,QString,qint64,QDateTime,QString,bool,bool)), this, SLOT(archiveListItemFound(uint,QString,QString,qint64,QDateTime,QString,bool,bool)));
 
     // Connect To File Server
     fileUtil->connectToFileServer();
@@ -92,20 +113,56 @@ QString FileListModel::getCurrentDir()
 //==============================================================================
 // Set Current Dir
 //==============================================================================
-void FileListModel::setCurrentDir(const QString& aCurrentDir)
+void FileListModel::setCurrentDir(const QString& aDirPath)
 {
     // Check Current Dir
-    if (currentDir != aCurrentDir) {
-        qDebug() << "FileListModel::setCurrentDir - aCurrentDir: " << aCurrentDir;
+    if (currentDir != aDirPath) {
+        qDebug() << "FileListModel::setCurrentDir - aDirPath: " << aDirPath;
 
         // Set Current Dir
-        currentDir = aCurrentDir;
+        currentDir = aDirPath;
+        // Reset Prev Current Dir
+        prevCurrentDir = "";
+
+        // Reset Archive Mode
+        setArchiveMode(false);
 
         // Reload
         reload();
 
         // Emit Current dir Changed Signal
         emit currentDirChanged(currentDir);
+    }
+}
+
+//==============================================================================
+// Set Archive Current Dir
+//==============================================================================
+void FileListModel::setArchiveCurrentDir(const QString& aFilePath, const QString& aDirPath)
+{
+    // Check Archiove Path
+    if (archivePath != aFilePath || currentDir != aDirPath) {
+
+        // Set Archive Path
+        archivePath = aFilePath;
+
+        // Check Archive Mode
+        if (!archiveMode) {
+            // Save Current Dir
+            prevCurrentDir = currentDir;
+        }
+
+        // Set Current Dir
+        currentDir = aDirPath;
+
+        // Set Archive Mode
+        setArchiveMode(true);
+
+        // Reload
+        reload();
+
+        // Emit Current dir Changed Signal
+        emit currentDirChanged(QString(DEFAULT_ARCHIVE_FILE_DIR_PATTERN).arg(getBaseNameFromFullName(archivePath)).arg(currentDir));
     }
 }
 
@@ -372,6 +429,40 @@ void FileListModel::addItem(const QString& aFilePath, const bool& aSearchResult)
 }
 
 //==============================================================================
+// Remove Item
+//==============================================================================
+void FileListModel::removeItem(const int& aIndex)
+{
+    // Check Index
+    if (aIndex >= 0 && aIndex < rowCount()) {
+        // Get Item
+        FileListModelItem* item = itemList[aIndex];
+
+        // Begin Remove Rows
+        beginRemoveRows(QModelIndex(), aIndex, aIndex);
+
+        itemList.removeAt(aIndex);
+
+        // End REmove Rows
+        endRemoveRows();
+        // Get Name Index
+        int nameIndex = fileNameList.indexOf(item->fileInfo.fileName());
+        // Check Index
+        if (nameIndex >= 0) {
+            // Remove From File NAme List
+            fileNameList.removeAt(nameIndex);
+        }
+
+        // Delete Item
+        delete item;
+        item = NULL;
+
+        // Emit Count Changed Signal
+        emit countChanged(itemList.count());
+    }
+}
+
+//==============================================================================
 // Clear
 //==============================================================================
 void FileListModel::clear()
@@ -421,8 +512,14 @@ void FileListModel::reload()
     // Clear
     clear();
 
-    // Fetch Dir Items
-    fetchDirItems();
+    // Check Archive Mode
+    if (archiveMode) {
+        // Fetch Archive Dir Items
+        fetchArchiveDirItems();
+    } else {
+        // Fetch Dir Items
+        fetchDirItems();
+    }
 }
 
 //==============================================================================
@@ -782,7 +879,6 @@ void FileListModel::fetchDirItems()
     if (!fileUtil->isConnected()) {
         // Set Fetch On Connection
         fetchOnConnection = true;
-
         return;
     }
 
@@ -815,27 +911,59 @@ void FileListModel::fetchDirItems()
 }
 
 //==============================================================================
-// Delete Item
+// Fetch Archive Dir Items
 //==============================================================================
-void FileListModel::deleteItem(const int& aIndex)
+void FileListModel::fetchArchiveDirItems()
 {
-    // Check Index
-    if (aIndex >= 0  && aIndex < itemList.count()) {
-        qDebug() << "FileListModel::deleteItem - aIndex: " << aIndex;
+    // Check File Util
+    if (!fileUtil) {
+        qWarning() << "FileListModel::fetchArchiveDirItems - NO FILE UTIL!!";
+        return;
+    }
 
-        // Get File Name
-        QString fileName = itemList[aIndex]->fileInfo.fileName();
+    // Init Filters
+    int filters = showHiddenFiles ? DEFAULT_FILTER_SHOW_HIDDEN : 0;
+    // Init Sort Flags
+    int sortFlags = showDirsFirst ? DEFAULT_SORT_DIRFIRST : 0;
 
-        // Delete Item
-        delete itemList.takeAt(aIndex);
+    // Adding Sorting Method
+    sortFlags |= sorting;
 
-        // Find File Name Index
-        int index = fileNameList.indexOf(fileName);
-        // Check Index
-        if (index >= 0 && index < fileNameList.count()) {
-            // Remove File Name
-            fileNameList.removeAt(index);
+    // Check Reverse Order
+    if (reverseOrder) {
+        // Adjust Sort Flags
+        sortFlags |= DEFAULT_SORT_REVERSE;
+    }
+
+    // Check Case Sensitve Sorting
+    if (caseSensitiveSort) {
+        // Adjust Sort Flags
+        sortFlags |= DEFAULT_SORT_CASE;
+    }
+
+    // ...
+
+    // Fetch Archive Dir Items
+    fileUtil->listArchive(archivePath, currentDir, filters, sortFlags);
+}
+
+//==============================================================================
+// Set Archive Mode
+//==============================================================================
+void FileListModel::setArchiveMode(const bool& aArchiveMode)
+{
+    // Check Archive Mode
+    if (archiveMode != aArchiveMode) {
+        // Set ARchive Mode
+        archiveMode = aArchiveMode;
+        // Check ARchive Mode
+        if (!archiveMode) {
+            // Reset ARchive Path
+            archivePath = "";
         }
+
+        // Emit Archive Mode Changed Signal
+        emit archiveModeChanged(archiveMode);
     }
 }
 
@@ -896,6 +1024,10 @@ void FileListModel::fileOpFinished(const unsigned int& aID,
         // Emit Dir Fetch Finished Signal
         emit dirFetchFinished();
 
+    } else if (aOp == DEFAULT_OPERATION_LIST_ARCHIVE) {
+        // Emit Dir Fetch Finished Signal
+        emit dirFetchFinished();
+
     } else if (aOp == DEFAULT_OPERATION_MAKE_DIR) {
         // Emit Dir Created Signal
         emit dirCreated(aPath);
@@ -926,7 +1058,7 @@ void FileListModel::fileOpFinished(const unsigned int& aID,
             }
         }
     } else {
-        qDebug() << "FileListModel::fileOpFinished - WTF?!?";
+        qDebug() << "FileListModel::fileOpFinished - aOp: " << aOp << " - WTF?!?";
     }
 }
 
@@ -1065,6 +1197,48 @@ void FileListModel::fileOpQueueItemFound(const unsigned int& aID,
 }
 
 //==============================================================================
+// Archive File List Item Found Slot
+//==============================================================================
+void FileListModel::archiveListItemFound(const unsigned int& aID,
+                                         const QString& aArchive,
+                                         const QString& aFilePath,
+                                         const qint64& aSize,
+                                         const QDateTime& aDate,
+                                         const QString& aAttribs,
+                                         const bool& aIsDir,
+                                         const bool& aIsLink)
+{
+    // Check Archive
+    if (archivePath != aArchive) {
+        qDebug() << "FileListModel::archiveListItemFound - aID: " << aID << " - aArchive: " << aArchive << " - INVALID ARCHIVE!!";
+
+        return;
+    }
+
+    //qDebug() << "FileListModel::archiveListItemFound - aID: " << aID << " - aArchive: " << aArchive << " - aFilePath: " << aFilePath << " - aSize: " << aSize;
+
+
+    // Create New File List Item
+    FileListModelItem* newItem = new FileListModelItem(aFilePath, aSize, aDate, aAttribs, aIsDir, aIsLink);
+
+    // Begin Insert Row
+    beginInsertRows(QModelIndex(), rowCount(), rowCount());
+
+    // Add Item To Item List
+    itemList << newItem;
+
+    // End Insert Row
+    endInsertRows();
+
+    // Add File Name To File Name List
+    fileNameList << newItem->archiveFileInfo.fileName;
+
+    // Emit Count Changed Signal
+    emit countChanged(itemList.count());
+
+}
+
+//==============================================================================
 // Get Role Names
 //==============================================================================
 QHash<int, QByteArray> FileListModel::roleNames() const
@@ -1133,119 +1307,140 @@ QVariant FileListModel::data(const QModelIndex& aIndex, int aRole) const
 {
     // Check Index
     if (aIndex.row() >= 0 && aIndex.row() < rowCount()) {
+
         // Get Model Item
         FileListModelItem* item = itemList[aIndex.row()];
 
-        // Switch Role
-        switch (aRole) {
-            case FileName: {
-                // Check If Search Result
-                if (item->searchResult) {
-                    return item->fileInfo.absoluteFilePath();
-                }
+        // Check Archive Mode
+        if (archiveMode) {
 
-                if (item->fileInfo.isSymLink()) {
-                    return item->fileInfo.fileName() + " -> " + item->fileInfo.symLinkTarget();
-                }
+            // Switch Role
+            switch (aRole) {
+                case FileName: {
+                // Check If Is Dir
+                    if (item->archiveFileInfo.fileIsDir) {
+                        return item->archiveFileInfo.fileName;
+                    }
 
-                // Check File Info
-                if (item->fileInfo.isBundle()) {
-                    if (!item->fileInfo.bundleName().isEmpty())
-                        return item->fileInfo.bundleName();
+                    return getBaseNameFromFullName(item->archiveFileInfo.fileName);
 
-                    return item->fileInfo.fileName();
-                }
+                } break;
 
-                // Check Base Name
-                if (/*item->fileInfo.baseName().isEmpty() || */
-                    item->fileInfo.isDir()) {
-                    return item->fileInfo.fileName();
-                }
+                case FileExtension: {
+                    // Check If Is Dir
+                    if (item->archiveFileInfo.fileIsDir) {
+                        return QString("");
+                    }
 
-                return getFileNameFromFullName(item->fileInfo.fileName());
+                    return getExtensionFromFullName(item->archiveFileInfo.fileName);
 
-            } break;
+                } break;
 
-            case FileExtension: {
-                // Check Base Name
-                if (/*item->fileInfo.baseName().isEmpty() ||*/
-                    item->fileInfo.isDir()              ||
-                    item->fileInfo.isBundle()) {
+                case FileSize: {
+                    // Check File Info
+                    if (item->archiveFileInfo.fileIsDir) {
+                        return QString(DEFAULT_FILE_LIST_SIZE_DIR);
+                    }
+
+                    return formattedSize(item->archiveFileInfo.fileSize);
+
+                } break;
+
+                case FileDateTime:      return formatDateTime(item->archiveFileInfo.fileDate);
+                case FileAttributes:
+                case FilePerms:         return item->archiveFileInfo.fileAttribs;
+                case FileSelected:      return item->selected;
+                case FileFullName:      return item->archiveFileInfo.fileName;
+                case FileIsHidden:      return false;
+                case FileIsLink:        return item->archiveFileInfo.fileIsLink;
+                case FileIsDir:         return item->archiveFileInfo.fileIsDir;
+                case FileDirSize:       return formattedSize(item->dirSize);
+
+                default:
+                break;
+            }
+
+        } else {
+            // Switch Role
+            switch (aRole) {
+                case FileName: {
+                    // Check If Search Result
+                    if (item->searchResult) {
+                        return item->fileInfo.absoluteFilePath();
+                    }
+
+                    if (item->fileInfo.isSymLink()) {
+                        return item->fileInfo.fileName() + " -> " + item->fileInfo.symLinkTarget();
+                    }
+
+                    // Check File Info
+                    if (item->fileInfo.isBundle()) {
+                        if (!item->fileInfo.bundleName().isEmpty())
+                            return item->fileInfo.bundleName();
+
+                        return item->fileInfo.fileName();
+                    }
+
+                    // Check Base Name
+                    if (/*item->fileInfo.baseName().isEmpty() || */
+                        item->fileInfo.isDir()) {
+                        return item->fileInfo.fileName();
+                    }
+
+                    return getBaseNameFromFullName(item->fileInfo.fileName());
+
+                } break;
+
+                case FileExtension: {
+                    // Check Base Name
+                    if (/*item->fileInfo.baseName().isEmpty() ||*/
+                        item->fileInfo.isDir()              ||
+                        item->fileInfo.isBundle()) {
+                        return QString("");
+                    }
+
+                    return getExtensionFromFullName(item->fileInfo.fileName());
+
+                } break;
+
+                case FileType: {
                     return QString("");
-                }
+                } break;
 
-                return getExtensionFromFullName(item->fileInfo.fileName());
+                case FileAttributes: {
+                    return QString("");
+                } break;
 
-            } break;
+                case FileSize: {
+                    // Check File Info
+                    if (item->fileInfo.isBundle()) {
+                        return QString(DEFAULT_FILE_LIST_SIZE_BUNDLE);
+                    }
 
-            case FileType: {
-                return QString("");
-            } break;
+                    // Check File Info
+                    if (item->fileInfo.isDir()) {
+                        return QString(DEFAULT_FILE_LIST_SIZE_DIR);
+                    }
 
-            case FileAttributes: {
+                    //return item->fileInfo.size();
+                    return formattedSize(item->fileInfo.size());
 
-            } break;
+                } break;
 
-            case FileSize: {
-                // Check File Info
-                if (item->fileInfo.isBundle()) {
-                    return QString(DEFAULT_FILE_LIST_SIZE_BUNDLE);
-                }
+                case FileDateTime:      return formatDateTime(item->fileInfo.lastModified());
+                case FileOwner:         return item->fileInfo.owner();
+                case FilePerms:         return getPermsText(item->fileInfo);
+                case FileSelected:      return item->selected;
+                case FileSearchResult:  return item->searchResult;
+                case FileFullName:      return item->fileInfo.fileName();
+                case FileIsHidden:      return (item->fileInfo.fileName() == QString("..") ? false : item->fileInfo.isHidden());
+                case FileIsLink:        return item->fileInfo.isSymLink();
+                case FileIsDir:         return item->fileInfo.isDir();
+                case FileDirSize:       return formattedSize(item->dirSize);
 
-                // Check File Info
-                if (item->fileInfo.isDir()) {
-                    return QString(DEFAULT_FILE_LIST_SIZE_DIR);
-                }
-
-                //return item->fileInfo.size();
-                return formattedSize(item->fileInfo.size());
-            } break;
-
-            case FileDateTime:      return formatDateTime(item->fileInfo.lastModified());
-            case FileOwner:         return item->fileInfo.owner();
-            case FilePerms: {
-                // Init Perms Text
-                QString permsText = DEFAULT_PERMISSIONS_TEXT;
-
-                // Check File Info
-                if (item->fileInfo.isSymLink()) {
-                    // Adjust Perms Text
-                    permsText[0] = 'l';
-                } else if (item->fileInfo.isDir()) {
-                    // Adjust Perms Text
-                    permsText[0] = 'd';
-                }
-
-                // Get Permissions
-                QFile::Permissions perms = item->fileInfo.permissions();
-
-                // Check Perms
-                if (perms & QFile::ReadUser)    { permsText[1] = 'r'; }
-                if (perms & QFile::WriteUser)   { permsText[2] = 'w'; }
-                if (perms & QFile::ExeUser)     { permsText[3] = 'x'; }
-
-                if (perms & QFile::ReadGroup)   { permsText[4] = 'r'; }
-                if (perms & QFile::WriteGroup)  { permsText[5] = 'w'; }
-                if (perms & QFile::ExeGroup)    { permsText[6] = 'x'; }
-
-                if (perms & QFile::ReadOther)   { permsText[7] = 'r'; }
-                if (perms & QFile::WriteOther)  { permsText[8] = 'w'; }
-                if (perms & QFile::ExeOther)    { permsText[9] = 'x'; }
-
-
-                return permsText;
-                //return (int)item->fileInfo.permissions();
-            } break;
-            case FileSelected:      return item->selected;
-            case FileSearchResult:  return item->searchResult;
-            case FileFullName:      return item->fileInfo.fileName();
-            case FileIsHidden:      return (item->fileInfo.fileName() == QString("..") ? false : item->fileInfo.isHidden());
-            case FileIsLink:        return item->fileInfo.isSymLink();
-            case FileIsDir:         return item->fileInfo.isDir();
-            case FileDirSize:       return formattedSize(item->dirSize);
-
-            default:
-            break;
+                default:
+                break;
+            }
         }
     }
 
@@ -1352,6 +1547,11 @@ int FileListModel::findIndex(const QString& aFileName)
         // Get Item
         FileListModelItem* item = itemList[i];
 
+        // Check Archive Mode
+        if (archiveMode && item->archiveFileInfo.fileName == aFileName) {
+            return i;
+        }
+
         // Check Item
         if (item->fileInfo.fileName() == aFileName) {
             return i;
@@ -1432,6 +1632,31 @@ QFileInfo FileListModel::getFileInfo(const int& aIndex)
 }
 
 //==============================================================================
+// Get Archive File Info
+//==============================================================================
+ArchiveFileInfo FileListModel::getArchiveFileInfo(const int& aIndex)
+{
+    // Check Index
+    if (archiveMode && aIndex >= 0 && aIndex < rowCount()) {
+        // Get Item
+        FileListModelItem* item = itemList[aIndex];
+
+        return item->archiveFileInfo;
+    }
+
+    // Init Null File Info
+    ArchiveFileInfo nullInfo;
+
+    nullInfo.fileName   = "";
+    nullInfo.filePath   = "";
+    nullInfo.fileIsDir  = false;
+    nullInfo.fileIsLink = false;
+    nullInfo.fileSize   = 0;
+
+    return nullInfo;
+}
+
+//==============================================================================
 // Update Item
 //==============================================================================
 void FileListModel::updateItem(const int& aIndex, const QFileInfo& aFileInfo)
@@ -1504,11 +1729,36 @@ bool FileListModel::isBundle(const int& aIndex)
 }
 
 //==============================================================================
+// Check If Archive
+//==============================================================================
+bool FileListModel::isArchive(const int& aIndex)
+{
+    // Check Index
+    if (aIndex >= 0 && aIndex < rowCount()) {
+        // Get Item
+        FileListModelItem* item = itemList[aIndex];
+
+        // Return File Info
+        return isFileArchiveByExt(item->fileInfo.fileName());
+    }
+
+    return false;
+}
+
+//==============================================================================
 // Get Busy
 //==============================================================================
 bool FileListModel::getBusy()
 {
     return fileUtil ? (fileUtil->getStatus() == ECSTBusy) || (fileUtil->getStatus() == ECSTAborting) : false;
+}
+
+//==============================================================================
+// Get Archive Mode
+//==============================================================================
+bool FileListModel::getArchiveMode()
+{
+    return archiveMode;
 }
 
 //==============================================================================
@@ -1531,6 +1781,6 @@ FileListModel::~FileListModel()
 
     // ...
 
-    qDebug() << "FileListModel::~FileListModel";
+    //qDebug() << "FileListModel::~FileListModel";
 }
 

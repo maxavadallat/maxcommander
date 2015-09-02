@@ -137,28 +137,37 @@ Rectangle {
 
                     return Const.DEFAULT_FILE_LIST_ICON_FILE;
 
-                } else {
+                }
 
-                    // Check Main Controller Search Result Mode
-                    if (mainController.searchResultsMode) {
-
-                        // Check File Name
-                        if (Utility.isImage(fileFullName, mainController)) {
-                            return Const.DEFAULT_FILE_PREFIX + fileListModel.getFullPath(index);
-                        }
-
-                        // Image Provider
-                        return Const.DEFAULT_FILE_ICON_PREFIX + fileListModel.getFullPath(index);
-
-                    } else {
-                        // Check File Name
-                        if (Utility.isImage(fileFullName, mainController)) {
-                            return Const.DEFAULT_FILE_PREFIX + mainController.currentDir + "/" + fileFullName;
-                        }
-
-                        // Image Provider
-                        return Const.DEFAULT_FILE_ICON_PREFIX + mainController.currentDir + "/" + fileFullName;
+                // Check Archive Mode
+                if (mainController.archiveMode) {
+                    // Check If File Is Dir
+                    if (fileIsDir) {
+                        return Const.DEFAULT_FILE_ICON_PREFIX + Const.DEFAULT_FILE_ICON_DEFAULT_DIR;
                     }
+
+                    return Const.DEFAULT_FILE_ICON_PREFIX + Const.DEFAULT_FILE_ICON_DEFAULT_FILE;
+                }
+
+                // Check Main Controller Search Result Mode
+                if (mainController.searchResultsMode) {
+
+                    // Check File Name
+                    if (Utility.isImage(fileFullName, mainController)) {
+                        return Const.DEFAULT_FILE_PREFIX + fileListModel.getFullPath(index);
+                    }
+
+                    // Image Provider
+                    return Const.DEFAULT_FILE_ICON_PREFIX + fileListModel.getFullPath(index);
+
+                } else {
+                    // Check File Name
+                    if (Utility.isImage(fileFullName, mainController)) {
+                        return Const.DEFAULT_FILE_PREFIX + mainController.currentDir + "/" + fileFullName;
+                    }
+
+                    // Image Provider
+                    return Const.DEFAULT_FILE_ICON_PREFIX + mainController.currentDir + "/" + fileFullName;
                 }
             }
 
@@ -420,28 +429,37 @@ Rectangle {
 
                     return Const.DEFAULT_FILE_LIST_ICON_FILE;
 
-                } else {
+                }
 
-                    // Check Main Controller Search Result Mode
-                    if (mainController.searchResultsMode) {
-
-                        // Check File Name
-                        if (Utility.isImage(fileFullName, mainController)) {
-                            return Const.DEFAULT_FILE_PREFIX + fileListModel.getFullPath(index);
-                        }
-
-                        // Image Provider
-                        return Const.DEFAULT_FILE_ICON_PREFIX + fileListModel.getFullPath(index);
-
-                    } else {
-                        // Check File Name
-                        if (Utility.isImage(fileFullName, mainController)) {
-                            return Const.DEFAULT_FILE_PREFIX + mainController.currentDir + "/" + fileFullName;
-                        }
-
-                        // Image Provider
-                        return Const.DEFAULT_FILE_ICON_PREFIX + mainController.currentDir + "/" + fileFullName;
+                // Check Archive Mode
+                if (mainController.archiveMode) {
+                    // Check If File Is Dir
+                    if (fileIsDir) {
+                        return Const.DEFAULT_FILE_ICON_PREFIX + Const.DEFAULT_FILE_ICON_DEFAULT_DIR;
                     }
+
+                    return Const.DEFAULT_FILE_ICON_PREFIX + Const.DEFAULT_FILE_ICON_DEFAULT_FILE;
+                }
+
+                // Check Main Controller Search Result Mode
+                if (mainController.searchResultsMode) {
+
+                    // Check File Name
+                    if (Utility.isImage(fileFullName, mainController)) {
+                        return Const.DEFAULT_FILE_PREFIX + fileListModel.getFullPath(index);
+                    }
+
+                    // Image Provider
+                    return Const.DEFAULT_FILE_ICON_PREFIX + fileListModel.getFullPath(index);
+
+                } else {
+                    // Check File Name
+                    if (Utility.isImage(fileFullName, mainController)) {
+                        return Const.DEFAULT_FILE_PREFIX + mainController.currentDir + "/" + fileFullName;
+                    }
+
+                    // Image Provider
+                    return Const.DEFAULT_FILE_ICON_PREFIX + mainController.currentDir + "/" + fileFullName;
                 }
             }
 

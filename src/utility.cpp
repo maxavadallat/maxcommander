@@ -11,6 +11,7 @@
 #include <QStorageInfo>
 #include <QColor>
 #include <QDebug>
+#include <QMimeDatabase>
 
 #if defined(Q_OS_WIN)
 
@@ -511,24 +512,50 @@ QString getAppExecPath()
 }
 
 //==============================================================================
-// Get File Name WithOut Extension From Full File Name
+// Get File Name From Full File Name
 //==============================================================================
 QString getFileNameFromFullName(const QString& aFullFileName)
+{
+    // Get Last Pos Of Slash
+    int lastSlashPos = aFullFileName.lastIndexOf("/");
+
+    // Check Last Slash Pos
+    if (lastSlashPos < 0)
+        return aFullFileName;
+
+    return aFullFileName.right(aFullFileName.length() - lastSlashPos - 1);
+}
+
+//==============================================================================
+// Get File Name WithOut Extension From Full File Name
+//==============================================================================
+QString getBaseNameFromFullName(const QString& aFullFileName)
 {
     // Get Last Dot Pos
     int lastDotPos = aFullFileName.lastIndexOf(".");
 
     // Check Last Dot Pos
-    if (lastDotPos == 0) {
+    if (lastDotPos <= 0) {
         return aFullFileName;
     }
 
-    // Get Specific Extension Positions
-    int tarGzPos = aFullFileName.indexOf(DEFAULT_SUFFIX_TAR_GZ);
+    // Check File Name
+    if (aFullFileName.endsWith(".")) {
+        return aFullFileName;
+    }
 
-    // Check File Full Name
-    if (tarGzPos > 0) {
-        return aFullFileName.left(tarGzPos);
+    // Get File Name
+    QString fileName = aFullFileName.left(lastDotPos);
+
+    // Init Tar Extension
+    QString tarExt = QString(".%1").arg(DEFAULT_EXTENSION_TAR);
+
+    // Check File Name
+    if (fileName.endsWith(tarExt)) {
+        // Get Tar Extension Pos
+        int tarExtensionPos = fileName.indexOf(tarExt);
+
+        return aFullFileName.left(tarExtensionPos);
     }
 
     return aFullFileName.left(lastDotPos);
@@ -547,9 +574,23 @@ QString getExtensionFromFullName(const QString& aFullFileName)
         return "";
     }
 
-    // Check Specific Ends
-    if (aFullFileName.endsWith(QString(".%1").arg(DEFAULT_SUFFIX_TAR_GZ), Qt::CaseInsensitive)) {
-        return DEFAULT_SUFFIX_TAR_GZ;
+    // Check File Name
+    if (aFullFileName.endsWith(".")) {
+        return "";
+    }
+
+    // Get File Name
+    QString fileName = aFullFileName.left(lastDotPos);
+
+    // Init Tar Extension
+    QString tarExt = QString(".%1").arg(DEFAULT_EXTENSION_TAR);
+
+    // Check File Name
+    if (fileName.endsWith(tarExt)) {
+        // Get Tar Extension Pos
+        int tarExtensionPos = fileName.indexOf(tarExt);
+
+        return aFullFileName.right(aFullFileName.length() - tarExtensionPos - 1);
     }
 
     return aFullFileName.right(aFullFileName.length() - lastDotPos - 1);
@@ -695,12 +736,12 @@ QString applyPattern(const QString& aSourceFileName, const QString& aPattern)
 
     // Check Pattern
     if (aPattern.startsWith("*.")) {
-        return QString("%1.%2").arg(getFileNameFromFullName(aSourceFileName)).arg(getExtensionFromFullName(aPattern));
+        return QString("%1.%2").arg(getBaseNameFromFullName(aSourceFileName)).arg(getExtensionFromFullName(aPattern));
     }
 
     // Check Pattern
     if (aPattern.endsWith(".*")) {
-        return QString("%1.%2").arg(getFileNameFromFullName(aPattern)).arg(getExtensionFromFullName(aSourceFileName));
+        return QString("%1.%2").arg(getBaseNameFromFullName(aPattern)).arg(getExtensionFromFullName(aSourceFileName));
     }
 
     // ...
@@ -759,7 +800,6 @@ bool isVolumePath(const QString& aFilePath)
     return false;
 }
 
-
 //==============================================================================
 // Set Desktop Wallpaper
 //==============================================================================
@@ -786,7 +826,95 @@ void setDesktopWallpaper(const QString& aFilePath, const int& aDesktop)
 
 }
 
+//==============================================================================
+// Check If File Compressed
+//==============================================================================
+bool isFileArchiveByExt(const QString& aFilePath)
+{
+    // Get File Extension
+    QString ext = getExtensionFromFullName(aFilePath);
 
+    // TODO: Make Better Implementation For Evaluation!
+
+    // Check Extension
+    if (ext.toLower() == DEFAULT_EXTENSION_RAR)
+        return true;
+
+    if (ext.toLower() == DEFAULT_EXTENSION_ZIP)
+        return true;
+
+    if (ext.toLower() == DEFAULT_EXTENSION_GZIP)
+        return true;
+
+    if (ext.toLower() == DEFAULT_EXTENSION_ARJ)
+        return true;
+
+    if (ext.toLower() == DEFAULT_EXTENSION_ACE)
+        return true;
+
+    if (ext.toLower() == DEFAULT_EXTENSION_TAR)
+        return true;
+
+    if (ext.startsWith(QString("%1.").arg(DEFAULT_EXTENSION_TAR)))
+        return true;
+
+    return false;
+}
+
+//==============================================================================
+// Get Permissions Text
+//==============================================================================
+QString getPermsText(const QFileInfo& aFileInfo)
+{
+    // Init Perms Text
+    QString permsText = DEFAULT_PERMISSIONS_TEXT;
+
+    // Check File Info
+    if (aFileInfo.isSymLink()) {
+        // Adjust Perms Text
+        permsText[0] = 'l';
+    } else if (aFileInfo.isDir()) {
+        // Adjust Perms Text
+        permsText[0] = 'd';
+    }
+
+    // Get Permissions
+    QFile::Permissions perms = aFileInfo.permissions();
+
+    // Check Perms
+    if (perms & QFile::ReadUser)    { permsText[1] = 'r'; }
+    if (perms & QFile::WriteUser)   { permsText[2] = 'w'; }
+    if (perms & QFile::ExeUser)     { permsText[3] = 'x'; }
+
+    if (perms & QFile::ReadGroup)   { permsText[4] = 'r'; }
+    if (perms & QFile::WriteGroup)  { permsText[5] = 'w'; }
+    if (perms & QFile::ExeGroup)    { permsText[6] = 'x'; }
+
+    if (perms & QFile::ReadOther)   { permsText[7] = 'r'; }
+    if (perms & QFile::WriteOther)  { permsText[8] = 'w'; }
+    if (perms & QFile::ExeOther)    { permsText[9] = 'x'; }
+
+    return permsText;
+}
+
+//==============================================================================
+// Get Archive Current Dir From Full Current Dir
+//==============================================================================
+QString getArchiveCurrentDir(const QString& aFilePath, const QString& aCurrentDir)
+{
+    // Get Archive Name
+    QString archiveName = getFileNameFromFullName(aFilePath);
+
+    // Check Current Dir
+    if (!aCurrentDir.startsWith(archiveName)) {
+        return "/";
+    }
+
+    // Init Result
+    QString result = aCurrentDir.right(aCurrentDir.length() - archiveName.length() - 3);
+
+    return result;
+}
 
 
 

@@ -68,6 +68,8 @@ class FilePanel : public QFrame
 
     Q_PROPERTY(bool fileListItemPopupActive READ getFileListItemPopupActive WRITE setFileListItemPopupActive NOTIFY fileListItemPopupActiveChanged)
 
+    Q_PROPERTY(bool archiveMode READ getArchiveMode NOTIFY archiveModeChanged)
+
 public:
     // Constructor
     explicit FilePanel(QWidget* aParent = NULL);
@@ -216,8 +218,9 @@ public:
 
     // Get Search REsults Mode
     bool getSearchResultsMode();
-    // Set Search REsults Mode
-    void setSearchResultsMode(const bool& aSearchResultMode);
+
+    // Get Archive Mode
+    bool getArchiveMode();
 
     // Get File List Item Popup Active
     bool getFileListItemPopupActive();
@@ -234,6 +237,8 @@ public:
 
 public slots:
 
+    // Set Archive
+    void setArchive(const QString& aFilePath);
     // Set Current Dir
     void setCurrentDir(const QString& aCurrentDir, const QString& aLastFileName = "");
 
@@ -245,8 +250,10 @@ public slots:
     void gotoVolumes();
     // Go To Drive
     void gotoDrive(const int& aDriveIndex);
+
     // Go Up To Parent Dir
     void goUp();
+
     // Go To Next Item Of The List
     void goNext();
     // Go To Prev Item Of The List
@@ -428,6 +435,9 @@ signals:
     // Search Results Mode Changed Signal
     void searchResultsModeChanged(const bool& aSearchResultsMode);
 
+    // Archive Mode Changed Signal
+    void archiveModeChanged(const bool& aArchiveMode);
+
     // Set List View Interactive
     void setListViewInteractive(const bool& aInteractive);
 
@@ -461,6 +471,12 @@ protected slots:
 
     // Reset Modifier Keys
     void resetModifierKeys();
+
+    // Set Search Results Mode
+    void setSearchResultsMode(const bool& aSearchResultMode);
+
+    // Set ARchive Mode
+    void setArchiveMode(const bool& aArchiveMode);
 
 protected slots: // From FileListWidget
 
@@ -683,6 +699,11 @@ private:
 
     // File List Item Popup Active
     bool                    fileListItemPopupActive;
+
+    // Archive Mode
+    bool                    archiveMode;
+    // Current Archive
+    QString                 currentArchive;
 };
 
 

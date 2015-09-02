@@ -67,13 +67,13 @@ QImage FileListImageProvider::requestImage(const QString& aID, QSize* aSize, con
 #if defined(Q_OS_MACX)
 
     // Check ID - Mac OSX HACK!!! X ((
-    if (aID == QString("//dev")) {
+    if (fileName == DEFAULT_FILE_LIST_DEFAULT_ICON_NAME_DIR || aID == QString("//dev") ) {
         // Update File Name
         fileName = "/etc";
     }
 
     // Check ID
-    if (aID.startsWith("/dev")) {
+    if (fileName == DEFAULT_FILE_LIST_DEFAULT_ICON_NAME_FILE || aID.startsWith("/dev")) {
         // Update File Name
         fileName = "/.file";
     }

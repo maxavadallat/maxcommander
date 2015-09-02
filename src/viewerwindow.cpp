@@ -147,6 +147,10 @@ bool ViewerWindow::newFile(const QString& aDirPath)
     ui->quickWidget->setVisible(false);
     // Text Edit Set Visible
     ui->textEdit->setVisible(true);
+
+    // Set Active Widget
+    activeWidget = ui->textEdit;
+
     // Set Wrap Mode
     ui->textEdit->setWordWrapMode(QTextOption::NoWrap);
     // Set Menu Item Checked

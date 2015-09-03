@@ -135,7 +135,7 @@ RESOURCES               += \
 OTHER_FILES             += \
                         createdmg.sh
 
-MCWORKERFILES.files     += mcworker
+MCWORKERFILES.files     += ../MCWorker/mcworker
 MCWORKERFILES.path      = Contents/MacOS
 
 QMAKE_BUNDLE_DATA       += MCWORKERFILES

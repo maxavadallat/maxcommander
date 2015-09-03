@@ -588,6 +588,8 @@ private:
 
     // Current Dir
     QString                 currentDir;
+    // Current Dir Backup
+    QString                 currentDirBackup;
 
     // Panel Name
     QString                 panelName;

@@ -39,6 +39,7 @@ FilePanel::FilePanel(QWidget* aParent)
     , globalSettingsUpdateIsOn(false)
     , needRefresh(false)
     , currentDir("")
+    , currentDirBackup("")
     , panelName("")
     , panelHasFocus(false)
     , gridMode(false)
@@ -1219,10 +1220,19 @@ void FilePanel::setArchiveMode(const bool& aArchiveMode)
         // Set Archive Mode
         archiveMode = aArchiveMode;
 
-        // Check Archive Mode
-        if (!archiveMode) {
+        // Check Erchive Mode
+        if (archiveMode) {
+
+            // Save Current Dir
+            currentDirBackup = currentDir;
+
+        } else  {
+
             // Reset Current Archive
             currentArchive = "";
+
+            // Reset Prev Current Dir
+            currentDirBackup = "";
         }
 
         // ...
@@ -1893,7 +1903,7 @@ void FilePanel::saveSettings()
     qDebug() << "FilePanel::saveSettings - panelName: " << panelName;
 
     // Set Value - Current Dir
-    settings->setValue(panelName + SETTINGS_KEY_PANEL_DIR, currentDir);
+    settings->setValue(panelName + SETTINGS_KEY_PANEL_DIR, archiveMode ? currentDirBackup : currentDir);
 
     // Set Value - Extension Visible
     settings->setValue(panelName + SETTINGS_KEY_PANEL_COL_ENABLED_EXT, extVisible);

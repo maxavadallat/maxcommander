@@ -38,6 +38,7 @@ Rectangle {
     property bool fileHidden: false
     property bool fileSelected: false
     property bool fileSymLink: false
+    property bool fileArchive: false
 
     property bool mouseHovered: false
 
@@ -55,6 +56,11 @@ Rectangle {
             return globalSettings.selectedColor;
         }
 
+        // Check If Current
+        if (itemIndex == listIndex) {
+            return globalSettings.currentColor;
+        }
+
         // Check If Hidden
         if (fileListDelegateRoot.fileHidden) {
             return globalSettings.hiddenColor;
@@ -65,9 +71,9 @@ Rectangle {
             return globalSettings.linkColor;
         }
 
-        // Check If Current
-        if (itemIndex == listIndex) {
-            return globalSettings.currentColor;
+        // Check If Archive
+        if (fileListDelegateRoot.fileArchive) {
+            return globalSettings.archiveColor;
         }
 
         return globalSettings.textColor;

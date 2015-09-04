@@ -182,6 +182,7 @@ Rectangle {
             fileSelected  : fileIsSelected
             fileSymLink   : fileIsLink
             fileDirectory : fileIsDir
+            fileArchive   : fileIsArchive
 
             nameWidth   : fileListHeader.nameWidth
             extWidth    : fileListHeader.extWidth

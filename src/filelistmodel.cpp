@@ -1272,6 +1272,8 @@ QHash<int, QByteArray> FileListModel::roleNames() const
     roles[FileIsLink]       = "fileIsLink";
     // File Is Dir
     roles[FileIsDir ]       = "fileIsDir";
+    // File Is Archive
+    roles[FileIsArchive]    = "fileIsArchive";
     // Full File Name
     roles[FileFullName]     = "fileFullName";
     // Dir Size
@@ -1436,6 +1438,7 @@ QVariant FileListModel::data(const QModelIndex& aIndex, int aRole) const
                 case FileIsHidden:      return (item->fileInfo.fileName() == QString("..") ? false : item->fileInfo.isHidden());
                 case FileIsLink:        return item->fileInfo.isSymLink();
                 case FileIsDir:         return item->fileInfo.isDir();
+                case FileIsArchive:     return isFileArchiveByExt(item->fileInfo.fileName());
                 case FileDirSize:       return formattedSize(item->dirSize);
 
                 default:

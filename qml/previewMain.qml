@@ -24,6 +24,7 @@ Rectangle {
             fileCurrent: false
             fileLink: false
             fileDir: true
+            fileArchive: false
         }
 
         ListElement {
@@ -34,6 +35,7 @@ Rectangle {
             fileCurrent: false
             fileLink: true
             fileDir: true
+            fileArchive: false
         }
 
         ListElement {
@@ -44,6 +46,7 @@ Rectangle {
             fileCurrent: true
             fileLink: false
             fileDir: false
+            fileArchive: false
         }
 
         ListElement {
@@ -54,6 +57,7 @@ Rectangle {
             fileCurrent: false
             fileLink: false
             fileDir: false
+            fileArchive: false
         }
 
         ListElement {
@@ -64,6 +68,7 @@ Rectangle {
             fileCurrent: true
             fileLink: false
             fileDir: false
+            fileArchive: false
         }
 
         ListElement {
@@ -74,6 +79,18 @@ Rectangle {
             fileCurrent: false
             fileLink: false
             fileDir: false
+            fileArchive: false
+        }
+
+        ListElement {
+            fileIcon: "/.file"
+            fileName: "Archive Item"
+            fileSelected: false
+            fileHidden: false
+            fileCurrent: false
+            fileLink: false
+            fileDir: false
+            fileArchive: true
         }
 
     }
@@ -169,24 +186,30 @@ Rectangle {
                     color: {
                         // Check If File Selected
                         if (fileSelected && fileCurrent) {
-                            previewController.currentSelectedColor
-                        } else if (fileSelected) {
-                            previewController.selectedColor
-                        } else {
-                            if (fileCurrent || index == previewList.currentIndex) {
-                                previewController.currentColor
-                            } else {
-                                if (fileLink) {
-                                    previewController.linkColor
-                                } else {
-                                    if (fileHidden) {
-                                        previewController.hiddenColor
-                                    } else {
-                                        previewController.textColor
-                                    }
-                                }
-                            }
+                            return previewController.currentSelectedColor;
                         }
+
+                        if (fileSelected) {
+                            return previewController.selectedColor;
+                        }
+
+                        if (fileCurrent || index == previewList.currentIndex) {
+                            return previewController.currentColor;
+                        }
+
+                        if (fileLink) {
+                            return previewController.linkColor;
+                        }
+
+                        if (fileHidden) {
+                            return previewController.hiddenColor;
+                        }
+
+                        if (fileArchive) {
+                            return previewController.archiveColor;
+                        }
+
+                        return previewController.textColor;
                     }
                 }
             }

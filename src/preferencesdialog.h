@@ -50,6 +50,9 @@ class PreferencesDialog : public QDialog
     Q_PROPERTY(QString linkColor READ getLinkColor WRITE setLinkColor NOTIFY linkColorChanged)
     Q_PROPERTY(QString linkBGColor READ getLinkBGColor WRITE setLinkBGColor NOTIFY linkBGColorChanged)
 
+    Q_PROPERTY(QString archiveColor READ getArchiveColor WRITE setArchiveColor NOTIFY archiveColorChanged)
+    Q_PROPERTY(QString archiveBGColor READ getArchiveBGColor WRITE setArchiveBGColor NOTIFY archiveBGColorChanged)
+
     Q_PROPERTY(QString fontName READ getFontName WRITE setFontName NOTIFY fontNameChanged)
     Q_PROPERTY(int fontSize READ getFontSize WRITE setFontSize NOTIFY fontSizeChanged)
     Q_PROPERTY(bool fontBold READ getFontBold WRITE setFontBold NOTIFY fontBoldChanged)
@@ -187,6 +190,16 @@ public:
     // Set Link Text BG Color
     void setLinkBGColor(const QString& aColor);
 
+    // Get Archive Text Color
+    QString getArchiveColor();
+    // Set Archive Text Color
+    void setArchiveColor(const QString& aColor);
+
+    // Get Archive Text BG Color
+    QString getArchiveBGColor();
+    // Set Archive Text BG Color
+    void setArchiveBGColor(const QString& aColor);
+
     // Get Font Name
     QString getFontName();
     // Set Font Name
@@ -291,6 +304,11 @@ signals:
     void linkColorChanged(const QString& aColor);
     // Link BG Color Changed Signal
     void linkBGColorChanged(const QString& aColor);
+    // Archive Color Changed Signal
+    void archiveColorChanged(const QString& aColor);
+    // Archive BG Color Changed Signal
+    void archiveBGColorChanged(const QString& aColor);
+
     // Font Name Changed Signal
     void fontNameChanged(const QString& aFontName);
     // Font Size Changed Signal
@@ -393,6 +411,11 @@ protected slots:
     void on_linkTextColorButton_clicked();
     // On Link BG Color Button Clicked Slot
     void on_linkTextBgButton_clicked();
+    // On Archive Text Color Button Clicked Slot
+    void on_archiveTextColorButton_clicked();
+    // On Archive Text BG Color Button Clicked Slot
+    void on_archiveTextBgButton_clicked();
+
     // On Font Select Button Clicked Slot
     void on_fontButton_clicked();
 
@@ -406,6 +429,8 @@ protected slots:
     void on_clearHiddenBGButton_clicked();
     // Clear Link BG Color Button Clicked Slot
     void on_clearLinkBGButton_clicked();
+    // Clear Archive Text BG Color Button Clicked Slot
+    void on_clearArchiveBGButton_clicked();
 
     // On Browse Terminal Button Clicked Slot
     void on_browseTerminalButton_clicked();
@@ -427,7 +452,6 @@ protected slots:
 
     // Button Box Button Clicked
     void buttonBoxButtonPressed(QAbstractButton* aButton);
-
 
 private:
     // UI
@@ -493,6 +517,11 @@ private:
     QString                 linkColor;
     // Link Item BG Color
     QString                 linkBGColor;
+    // Archive Item Text Color
+    QString                 archiveColor;
+    // Archive Item BG Color
+    QString                 archiveBGColor;
+
     // Font Name
     QString                 fontName;
     // Font Size
@@ -532,3 +561,4 @@ private:
 };
 
 #endif // PREFERENCESDIALOG_H
+

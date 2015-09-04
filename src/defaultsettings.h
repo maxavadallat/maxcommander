@@ -73,6 +73,10 @@
 #define DEFAULT_SETTINGS_LINK_COLOR                         "#FF000077"     // linkColor
 // Link Item BG Color
 #define DEFAULT_SETTINGS_LINK_BG_COLOR                      "#FFEFEFEF"     // linkBGColor
+// Archive Item Text Color
+#define DEFAULT_SETTINGS_ARCHIVE_COLOR                      "#FF770077"     // archiveColor
+// Archive Item BG Color
+#define DEFAULT_SETTINGS_ARCHIVE_BG_COLOR                   "#FFEFEFEF"     // archiveBGColor
 // Font Name
 #define DEFAULT_SETTINGS_FONT_NAME                          "System"        // fontName
 // Font Size

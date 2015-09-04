@@ -63,6 +63,8 @@ SettingsController::SettingsController(QObject* aParent)
     , hiddenBGColor(DEFAULT_SETTINGS_HIDDEN_BG_COLOR)
     , linkColor(DEFAULT_SETTINGS_LINK_COLOR)
     , linkBGColor(DEFAULT_SETTINGS_LINK_BG_COLOR)
+    , archiveColor(DEFAULT_SETTINGS_ARCHIVE_COLOR)
+    , archiveBGColor(DEFAULT_SETTINGS_ARCHIVE_BG_COLOR)
     , fontName(DEFAULT_SETTINGS_FONT_NAME)
     , fontSize(DEFAULT_SETTINGS_FONT_SIZE)
     , fontBold(DEFAULT_SETTINGS_FONT_BOLD)
@@ -191,6 +193,9 @@ void SettingsController::loadSettings()
     hiddenBGColor = settings.value(SETTINGS_KEY_PANEL_COLOR_HIDDEN_BG, DEFAULT_SETTINGS_HIDDEN_BG_COLOR).toString();
     linkColor = settings.value(SETTINGS_KEY_PANEL_COLOR_LINK, DEFAULT_SETTINGS_LINK_COLOR).toString();
     linkBGColor = settings.value(SETTINGS_KEY_PANEL_COLOR_LINK_BG, DEFAULT_SETTINGS_LINK_BG_COLOR).toString();
+    archiveColor = settings.value(SETTINGS_KEY_PANEL_COLOR_ARCHIVE, DEFAULT_SETTINGS_ARCHIVE_COLOR).toString();
+    archiveBGColor = settings.value(SETTINGS_KEY_PANEL_COLOR_ARCHIVE_BG, DEFAULT_SETTINGS_ARCHIVE_BG_COLOR).toString();
+
     fontName = settings.value(SETTINGS_KEY_PANEL_FONT_NAME, DEFAULT_SETTINGS_FONT_NAME).toString();
     fontSize = settings.value(SETTINGS_KEY_PANEL_FONT_SIZE, DEFAULT_SETTINGS_FONT_SIZE).toInt();
     fontBold = settings.value(SETTINGS_KEY_PANEL_FONT_BOLD, DEFAULT_SETTINGS_FONT_BOLD).toBool();
@@ -251,6 +256,9 @@ void SettingsController::saveSettings()
     settings.setValue(SETTINGS_KEY_PANEL_COLOR_HIDDEN_BG, hiddenBGColor);
     settings.setValue(SETTINGS_KEY_PANEL_COLOR_LINK, linkColor);
     settings.setValue(SETTINGS_KEY_PANEL_COLOR_LINK_BG, linkBGColor);
+    settings.setValue(SETTINGS_KEY_PANEL_COLOR_ARCHIVE, archiveColor);
+    settings.setValue(SETTINGS_KEY_PANEL_COLOR_ARCHIVE_BG, archiveBGColor);
+
     settings.setValue(SETTINGS_KEY_PANEL_FONT_NAME, fontName);
     settings.setValue(SETTINGS_KEY_PANEL_FONT_SIZE, fontSize);
     settings.setValue(SETTINGS_KEY_PANEL_FONT_BOLD, fontBold);
@@ -336,6 +344,10 @@ void SettingsController::restoreDefaults()
     setLinkColor(DEFAULT_SETTINGS_LINK_COLOR);
     // Reset Link Text BG Color
     setLinkBGColor(DEFAULT_SETTINGS_LINK_BG_COLOR);
+    // Reset Archive Text Color
+    setArchiveColor(DEFAULT_SETTINGS_ARCHIVE_COLOR);
+    // Reset Archive Text BG Color
+    setArchiveBGColor(DEFAULT_SETTINGS_ARCHIVE_BG_COLOR);
 
     // Reset Font Name
     setFontName(DEFAULT_SETTINGS_FONT_NAME);
@@ -916,7 +928,7 @@ void SettingsController::setHiddenBGColor(const QString& aColor)
         hiddenBGColor = aColor;
         // Set Dirty Flag
         setDirty(true);
-        // Emit hidden BG Color Changed Signal
+        // Emit Hidden BG Color Changed Signal
         emit hiddenBGColorChanged(hiddenBGColor);
     }
 }
@@ -964,8 +976,56 @@ void SettingsController::setLinkBGColor(const QString& aColor)
         linkBGColor = aColor;
         // Set Dirty Flag
         setDirty(true);
-        // Emit hidden BG Color Changed Signal
+        // Emit Link BG Color Changed Signal
         emit linkBGColorChanged(linkBGColor);
+    }
+}
+
+//==============================================================================
+// Get Archive Text Color
+//==============================================================================
+QString SettingsController::getArchiveColor()
+{
+    return archiveColor;
+}
+
+//==============================================================================
+// Set Archive Text Color
+//==============================================================================
+void SettingsController::setArchiveColor(const QString& aColor)
+{
+    // Check Archive Color
+    if (archiveColor != aColor) {
+        // Set Archive Color
+        archiveColor = aColor;
+        // Set Dirty Flag
+        setDirty(true);
+        // Emit Archive Color Changed Signal
+        emit archiveColorChanged(archiveColor);
+    }
+}
+
+//==============================================================================
+// Get Archive Text BG Color
+//==============================================================================
+QString SettingsController::getArchiveBGColor()
+{
+    return archiveBGColor;
+}
+
+//==============================================================================
+// Set Archive Text BG Color
+//==============================================================================
+void SettingsController::setArchiveBGColor(const QString& aColor)
+{
+    // Check Archive BG Color
+    if (archiveBGColor != aColor) {
+        // Set Archive BG Color
+        archiveBGColor = aColor;
+        // Set Dirty Flag
+        setDirty(true);
+        // Emit Archive BG Color Changed Signal
+        emit archiveBGColorChanged(archiveBGColor);
     }
 }
 

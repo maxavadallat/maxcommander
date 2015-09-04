@@ -328,6 +328,7 @@ protected:
         FileIsHidden,
         FileIsLink,
         FileIsDir,
+        FileIsArchive,
         FileFullName,
         FileDirSize,
 

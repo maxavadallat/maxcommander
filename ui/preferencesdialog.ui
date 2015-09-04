@@ -7,19 +7,19 @@
     <x>0</x>
     <y>0</y>
     <width>600</width>
-    <height>520</height>
+    <height>576</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>600</width>
-    <height>520</height>
+    <height>576</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>600</width>
-    <height>520</height>
+    <height>576</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -419,7 +419,7 @@
          <x>350</x>
          <y>12</y>
          <width>220</width>
-         <height>413</height>
+         <height>475</height>
         </rect>
        </property>
        <property name="minimumSize">
@@ -452,7 +452,7 @@
        <property name="geometry">
         <rect>
          <x>232</x>
-         <y>40</y>
+         <y>38</y>
          <width>88</width>
          <height>30</height>
         </rect>
@@ -906,7 +906,7 @@
        <property name="geometry">
         <rect>
          <x>82</x>
-         <y>410</y>
+         <y>468</y>
          <width>32</width>
          <height>16</height>
         </rect>
@@ -922,7 +922,7 @@
        <property name="geometry">
         <rect>
          <x>117</x>
-         <y>404</y>
+         <y>462</y>
          <width>205</width>
          <height>32</height>
         </rect>
@@ -1236,6 +1236,135 @@
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
+      <widget class="QLabel" name="label_21">
+       <property name="geometry">
+        <rect>
+         <x>98</x>
+         <y>404</y>
+         <width>129</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Archive Text Color:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="ColorPickerButton" name="archiveTextColorButton">
+       <property name="geometry">
+        <rect>
+         <x>232</x>
+         <y>398</y>
+         <width>88</width>
+         <height>30</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>58</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>90</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+       <property name="flat">
+        <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="clearArchiveBGButton">
+       <property name="geometry">
+        <rect>
+         <x>324</x>
+         <y>432</y>
+         <width>18</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>18</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>18</width>
+         <height>18</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../maxcommanderimages.qrc">
+         <normaloff>:/resources/images/delete_256.png</normaloff>:/resources/images/delete_256.png</iconset>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="ColorPickerButton" name="archiveTextBgButton">
+       <property name="geometry">
+        <rect>
+         <x>232</x>
+         <y>428</y>
+         <width>88</width>
+         <height>30</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>58</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>90</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+       <property name="flat">
+        <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_22">
+       <property name="geometry">
+        <rect>
+         <x>58</x>
+         <y>432</y>
+         <width>169</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Archive Text Background:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
       <zorder>fontButton</zorder>
       <zorder>iconSizeComboBox</zorder>
       <zorder>previewWidget</zorder>
@@ -1270,6 +1399,11 @@
       <zorder>linkTextColorButton</zorder>
       <zorder>clearLinkBGButton</zorder>
       <zorder>label_19</zorder>
+      <zorder>label_21</zorder>
+      <zorder>archiveTextColorButton</zorder>
+      <zorder>clearArchiveBGButton</zorder>
+      <zorder>archiveTextBgButton</zorder>
+      <zorder>label_22</zorder>
      </widget>
      <widget class="QWidget" name="toolsTab">
       <attribute name="title">

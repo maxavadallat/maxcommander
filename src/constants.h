@@ -83,6 +83,9 @@
 #define SETTINGS_KEY_PANEL_COLOR_LINK                       SETTINGS_GROUP_UI"/linkColor"
 #define SETTINGS_KEY_PANEL_COLOR_LINK_BG                    SETTINGS_GROUP_UI"/linkBGColor"
 
+#define SETTINGS_KEY_PANEL_COLOR_ARCHIVE                    SETTINGS_GROUP_UI"/archiveColor"
+#define SETTINGS_KEY_PANEL_COLOR_ARCHIVE_BG                 SETTINGS_GROUP_UI"/archiveBGColor"
+
 #define SETTINGS_KEY_PANEL_FONT_NAME                        SETTINGS_GROUP_UI"/fontName"
 #define SETTINGS_KEY_PANEL_FONT_SIZE                        SETTINGS_GROUP_UI"/fontSize"
 #define SETTINGS_KEY_PANEL_FONT_BOLD                        SETTINGS_GROUP_UI"/fontBold"

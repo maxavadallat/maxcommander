@@ -52,6 +52,9 @@ PreferencesDialog::PreferencesDialog(QWidget* aParent)
     , hiddenBGColor(DEFAULT_SETTINGS_HIDDEN_BG_COLOR)
     , linkColor(DEFAULT_SETTINGS_LINK_COLOR)
     , linkBGColor(DEFAULT_SETTINGS_LINK_BG_COLOR)
+    , archiveColor(DEFAULT_SETTINGS_ARCHIVE_COLOR)
+    , archiveBGColor(DEFAULT_SETTINGS_ARCHIVE_BG_COLOR)
+
     , fontName(DEFAULT_SETTINGS_FONT_NAME)
     , fontSize(DEFAULT_SETTINGS_FONT_SIZE)
     , fontBold(DEFAULT_SETTINGS_FONT_BOLD)
@@ -144,6 +147,10 @@ void PreferencesDialog::loadSettings()
     setLinkColor(settings->getLinkColor());
     // Set Link Text BG Color
     setLinkBGColor(settings->getLinkBGColor());
+    // Set Archive Text Color
+    setArchiveColor(settings->getArchiveColor());
+    // Set Archive Text BG Color
+    setArchiveBGColor(settings->getArchiveBGColor());
 
     // Set Font Name
     setFontName(settings->getFontName());
@@ -236,6 +243,10 @@ void PreferencesDialog::saveSettings()
     settings->setLinkColor(linkColor);
     // Set Link Text BG Color
     settings->setLinkBGColor(linkBGColor);
+    // Set Archive Text Color
+    settings->setArchiveColor(archiveColor);
+    // Set Archive Text BG Color
+    settings->setArchiveBGColor(archiveBGColor);
 
     // Set Font Name
     settings->setFontName(fontName);
@@ -374,6 +385,11 @@ void PreferencesDialog::restoreUI()
     ui->linkTextColorButton->setColor(string2Rgb(linkColor));
     // Set Button Color
     ui->linkTextBgButton->setColor(string2Rgb(linkBGColor));
+    // Set Button Color
+    ui->archiveTextColorButton->setColor(string2Rgb(archiveColor));
+    // Set Button Color
+    ui->archiveTextBgButton->setColor(string2Rgb(archiveBGColor));
+
 
     // ...
 
@@ -1041,6 +1057,54 @@ void PreferencesDialog::setLinkBGColor(const QString& aColor)
 }
 
 //==============================================================================
+// Get Archive Text Color
+//==============================================================================
+QString PreferencesDialog::getArchiveColor()
+{
+    return archiveColor;
+}
+
+//==============================================================================
+// Set Archive Text Color
+//==============================================================================
+void PreferencesDialog::setArchiveColor(const QString& aColor)
+{
+    // Check Archive Color
+    if (archiveColor != aColor) {
+        // Set Archive Color
+        archiveColor = aColor;
+        // Set Dirty Flag
+        setDirty(true);
+        // Emit Archive Color Changed Signal
+        emit archiveColorChanged(archiveColor);
+    }
+}
+
+//==============================================================================
+// Get Archive Text BG Color
+//==============================================================================
+QString PreferencesDialog::getArchiveBGColor()
+{
+    return archiveBGColor;
+}
+
+//==============================================================================
+// Set Archive Text BG Color
+//==============================================================================
+void PreferencesDialog::setArchiveBGColor(const QString& aColor)
+{
+    // Check Archive BG Color
+    if (archiveBGColor != aColor) {
+        // Set Archive BG Color
+        archiveBGColor = aColor;
+        // Set Dirty Flag
+        setDirty(true);
+        // Emit Archive BG Color Changed Signal
+        emit archiveBGColorChanged(archiveBGColor);
+    }
+}
+
+//==============================================================================
 // Get Font Name
 //==============================================================================
 QString PreferencesDialog::getFontName()
@@ -1602,6 +1666,42 @@ void PreferencesDialog::on_linkTextBgButton_clicked()
 }
 
 //==============================================================================
+// Archive Text Color Button Clicked Slot
+//==============================================================================
+void PreferencesDialog::on_archiveTextColorButton_clicked()
+{
+    // Init Color Dialog
+    QColorDialog colorDialog;
+    // Exec Color Dialog
+    if (colorDialog.exec()) {
+        // Get Current Color
+        QRgb currentColor = colorDialog.currentColor().rgba();
+        // Set Color
+        setArchiveColor(rgb2string(currentColor));
+        // Set Button Color
+        ui->archiveTextColorButton->setColor(currentColor);
+    }
+}
+
+//==============================================================================
+// On Archive Text BG Color Button Clicked Slot
+//==============================================================================
+void PreferencesDialog::on_archiveTextBgButton_clicked()
+{
+    // Init Color Dialog
+    QColorDialog colorDialog;
+    // Exec Color Dialog
+    if (colorDialog.exec()) {
+        // Get Current Color
+        QRgb currentColor = colorDialog.currentColor().rgba();
+        // Set Color
+        setArchiveBGColor(rgb2string(currentColor));
+        // Set Button Color
+        ui->archiveTextBgButton->setColor(currentColor);
+    }
+}
+
+//==============================================================================
 // On Font Select Button Clicked Slot
 //==============================================================================
 void PreferencesDialog::on_fontButton_clicked()
@@ -1682,6 +1782,15 @@ void PreferencesDialog::on_clearLinkBGButton_clicked()
 {
     // Set Link BG Color
     setLinkBGColor(DEFAULT_TRANSPARENT_COLOR);
+}
+
+//==============================================================================
+// Clear Archive Text BG Color Button Clicked Slot
+//==============================================================================
+void PreferencesDialog::on_clearArchiveBGButton_clicked()
+{
+    // Set Archive BG Color
+    setArchiveBGColor(DEFAULT_TRANSPARENT_COLOR);
 }
 
 //==============================================================================

@@ -29,8 +29,11 @@
 
 #elif defined(Q_OS_UNIX)
 
-#include <sys/stat.h>
-#include <sys/statvfs.h>
+#undef signals
+#include <gio/gio.h>
+#include <glib.h>
+//#include <sys/stat.h>
+//#include <sys/statvfs.h>
 
 #endif // Q_OS_UNIX
 
@@ -38,6 +41,9 @@
 
 #include "utility.h"
 #include "constants.h"
+
+// Icon Cache
+static QHash<QString, QString> iconCache;
 
 //==============================================================================
 // Get Current User Name
@@ -131,7 +137,110 @@ OSStatus convertMacIcon(const IconRef& aMacIconref, QImage& aIconImage)
 #elif defined(Q_OS_UNIX)
 
 
-// ...
+//==============================================================================
+// Search Icon Path
+//==============================================================================
+QString searchIconPath(const QString& aFileName, const QString& aFileType, const int& aWidth, const int& aHeight)
+{
+    // Check File Name
+    if (QFile::exists(aFileName) && !aFileType.isEmpty() && aWidth > 0 && aHeight > 0) {
+
+        // Check If Dir
+
+        // Check If It Is A Standard Path
+
+
+        //qDebug() << "searchIconPath - aFileName: " << aFileName << " - type: " << aFileType << " - size: [" << aWidth << "x" << aHeight << "]";
+
+        // Init Icon Path
+        QString iconPath(DEFAULT_ICONS_PATH_LINUX);
+
+        // Get Slash Pos
+        int slashPos = aFileType.indexOf(QChar('/'));
+        // Get Mime Main Type
+        QString mimeMainType = slashPos >= 0 ? aFileType.left(slashPos) : aFileType;
+        // Get Mime Sub Type
+        QString mimeSubType = slashPos >= 0 ? aFileType.right(aFileType.length() - slashPos - 1) : QString("");
+        // Get Mime File Name
+        QString mimeFileName = convertMimeToFileName(aFileType);
+
+        //qDebug() << "searchIconPath - aFileName: " << aFileName << " - mimeMainType: " << mimeMainType << " - mimeSubType: " << mimeSubType << " - mimeFileName: " << mimeFileName;
+
+        // Ini Icon Filters
+        QStringList iconFilters;
+
+        // Adding Filters - ORDER IS IMPORTANT!!
+
+        // Adding Mimetypes Dir Name
+        iconFilters << QString(DEFAULT_ICONS_MIMETYPES_DIR);
+        // Adding Mimes Dir Name
+        iconFilters << QString(DEFAULT_ICONS_MIMES_DIR);
+        // Adding Size
+        iconFilters << QString("%1x%2").arg(aWidth).arg(aHeight);
+        // Adding Full Mime
+        //iconFilters << mimeFileName;
+        // Adding Mime Sub Type
+        iconFilters << mimeSubType;
+
+        // Get Icon Paths
+        QStringList iconPaths = searchDir(iconPath, iconFilters);
+
+        int ipCount = iconPaths.count();
+
+        //qDebug() << " ";
+        //qDebug() << "searchIconPath - found: " << ipCount;
+
+        // Go Thru First For Exact MIME Match
+        for (int i=0; i<ipCount; i++) {
+            //qDebug() << "    - " << iconPaths[i];
+
+            // Check Paths - Not Checking Current Theme
+            if ((iconPaths[i].indexOf(QString(DEFAULT_ICONS_MIMETYPES_DIR)) > 0 || iconPaths[i].indexOf(QString(DEFAULT_ICONS_MIMES_DIR)) > 0) &&   // mimetypes & mimes dir
+                 iconPaths[i].indexOf(iconFilters[2]) > 0 &&                                                                                        // Exact Size
+                 iconPaths[i].indexOf(mimeFileName)   > 0) {                                                                                        // Mime File Name
+
+                return iconPaths[i];
+            }
+        }
+
+        // Go Thru Second Time For Fuzzy MIME Match
+        for (int j=0; j<ipCount; j++) {
+            // Check Paths
+            if ((iconPaths[j].indexOf(QString(DEFAULT_ICONS_MIMETYPES_DIR)) > 0 || iconPaths[j].indexOf(QString(DEFAULT_ICONS_MIMES_DIR)) > 0) &&   // mimetypes & mimes dir
+                 iconPaths[j].indexOf(mimeFileName)   > 0) {                                                                                        // Mime File Name
+
+                return iconPaths[j];
+            }
+        }
+
+        // Check Mime Sub Type
+        if (!mimeSubType.isEmpty()) {
+            // Go Thru Second Time For Fuzzy MIME Match
+            for (int k=0; k<ipCount; k++) {
+                // Check Paths
+                if (iconPaths[k].indexOf(mimeSubType)   > 0) {                                                                                      // Mime Sub Type
+
+                    return iconPaths[k];
+                }
+            }
+        }
+
+        // ...
+
+        //qDebug() << " ";
+
+        // ...
+
+        return iconPath;
+
+    } else {
+
+        qDebug() << "searchIconPath - aFileName: " << aFileName << " - type: " << aFileType << " - size: [" << aWidth << "x" << aHeight << "] - INVALID PARAMETER(S)!!";
+
+    }
+
+    return QString();
+}
 
 
 #else // Q_OS_WIN
@@ -244,6 +353,87 @@ QImage getFileIconImage(const QString& aFilePath, const int& aWidth, const int& 
     }
 
 #elif defined(Q_OS_UNIX)
+
+    // Init Error
+    GError* error = NULL;
+    // New File
+    GFile* file = g_file_new_for_path (aFileName.toLocal8Bit().data());
+    // Get File Info
+    GFileInfo* file_info = g_file_query_info (file, "standard::*", G_FILE_QUERY_INFO_NONE, NULL, &error);
+    // Check Error
+    if (error) {
+
+        qDebug() << "### getFileIconImage - aFileName: " << aFileName << " - error: " << error->code << " : " << error->message;
+
+        // Free Error
+        g_free(error);
+    }
+
+    // Get Content Type
+    const char* content_type = g_file_info_get_content_type(file_info);
+    // Get Description
+    char* description = g_content_type_get_description(content_type);
+    // Get App Info
+    //GAppInfo* app_info = g_app_info_get_default_for_type(content_type, FALSE);
+
+    //QString fileName = QString(g_file_get_basename(file));
+    QString fileType = QString(content_type);
+    //QString fileDesc = QString(description);
+    //QString fileAppName = app_info ? QString(g_app_info_get_name(app_info)) : QString();
+
+    //qDebug() << "==============================================================================";
+    //qDebug() << "File Name   : " << fileName;
+    //qDebug() << "Type        : " << fileType;
+    //qDebug() << "Description : " << fileDesc;
+    //qDebug() << "App Name    : " << fileAppName;
+    //qDebug() << "==============================================================================";
+
+    // Check Description
+    if (description) {
+        // Free Description
+        g_free(description);
+    }
+
+    // Get Icon Path From Icon Cache
+    QString iconPath = iconCache.value(fileType);
+    // Init Found In Cache
+    bool foundInCache = false;
+
+    // Check Icon Path
+    if (iconPath.isNull()) {
+
+        //qDebug() << "getFileIconImage - aFileName: " << aFileName << " - SEARCH";
+
+        // Search For Icon Path
+        iconPath = searchIconPath(aFileName, fileType, aWidth, aHeight);
+
+    } else {
+
+        //qDebug() << "getFileIconImage - aFileName: " << aFileName << " - CACHED";
+
+        // Set Found In Cache
+        foundInCache = true;
+    }
+
+    // Add Icon Path To Icon Path Cache
+    if (QFile::exists(iconPath) && !foundInCache /*&& fileType != QString()*/ ) {
+
+        //qDebug() << "getFileIconImage - CACHING - type: " << fileType << " - iconPath: " << iconPath;
+
+        // Add Path To Cache
+        iconCache[fileType] = iconPath;
+    }
+
+    // ...
+
+    // Check Icon Path
+    if (QFile::exists(iconPath)) {
+        // Create New QImage
+        return new QImage(iconPath);
+    }
+
+    // ...
+
 
     // Init Painter
     QPainter painter(&newImage);

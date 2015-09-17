@@ -189,6 +189,9 @@ public:
     // Get Current File Info
     QFileInfo getCurrFileInfo();
 
+    // Get Is Current Item Archive
+    bool isCurrentArchive();
+
     // Busy
     bool busy();
 
@@ -397,6 +400,9 @@ signals:
     void launchFileMove();
     // Launch File Rename
     void launchFileRename();
+
+    // Launch Extract Archive File Signal
+    void launchFileExtract();
 
     // Launch Create Dir Signal
     void launchCreateDir();

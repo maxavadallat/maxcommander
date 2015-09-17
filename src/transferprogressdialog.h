@@ -144,6 +144,9 @@ protected slots:
     // Stop Progress Refresh Timer
     void stopProgressRefreshTimer();
 
+    // Set Archive Mode
+    void setArchiveMode(const bool& aArchiveMode);
+
 protected slots: // For RemoteFileUtilClient
 
     // Client Connection Changed Slot
@@ -304,6 +307,9 @@ private:
 
     // Progress Refresh Timer ID
     int                             progressRefreshTimerID;
+
+    // Archive Mode
+    bool                            archiveMode;
 };
 
 #endif // TRANSFERPROGRESSDIALOG_H

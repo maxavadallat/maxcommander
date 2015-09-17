@@ -142,13 +142,13 @@ void FilePanel::init()
     engine->addImageProvider(QLatin1String(DEFAULT_FILE_ICON_PROVIDER_ID), newImageProvider);
 
     // Register Busy Indicator
-    qmlRegisterType<BusyIndicator>("MyCustomComponents", 1, 0, "BusyIndicator");
+    qmlRegisterType<BusyIndicator>(DEFAULT_CUSTOM_COMPONENTS, 1, 0, DEFAULT_CUSTOM_COMPONENTS_BUSY_INDICATOR);
 
     // Set Resize Mode
     ui->fileListWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
 
     // Set Source
-    ui->fileListWidget->setSource(QUrl("qrc:/qml/FileList.qml"));
+    ui->fileListWidget->setSource(QUrl(DEFAULT_FILE_LIST_QMLFILE_URL));
 
     // Connect Signals
     connect(ui->fileListWidget, SIGNAL(focusChanged(bool)), this, SLOT(setPanelFocus(bool)));
@@ -805,6 +805,19 @@ QFileInfo FilePanel::getCurrFileInfo()
     }
 
     return QFileInfo();
+}
+
+//==============================================================================
+// Get Is Current Item Archive
+//==============================================================================
+bool FilePanel::isCurrentArchive()
+{
+    // Check File List Model
+    if (fileListModel) {
+        return isFileArchiveByExt(fileListModel->getFileInfo(currentIndex).fileName());
+    }
+
+    return false;
 }
 
 //==============================================================================
@@ -3096,10 +3109,17 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
             break;
 
             case Qt::Key_F5:
+                // Check Archive Mode
+                if (archiveMode) {
+                    return;
+                }
                 // Check Modifier Keys
                 if (modifierKeys == Qt::NoModifier && !gridMode) {
                     // Emit Launch File Copy
                     emit launchFileCopy();
+                } else if (modifierKeys == Qt::AltModifier && fileListModel && fileListModel->getSelectedCount() == 0) {
+                    // Emit Launch File Extract
+                    emit launchFileExtract();
                 }
             break;
 
@@ -3121,6 +3141,10 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
             break;
 
             case Qt::Key_F7:
+                // Check Archive Mode
+                if (archiveMode) {
+                    return;
+                }
                 // Check Modifier Keys
                 if (modifierKeys == Qt::NoModifier) {
                     // Emit Launch Create Dir

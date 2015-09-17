@@ -207,6 +207,11 @@
 #define DEFAULT_DIR_HISTORY_LIST_CONTROLLER                 "dirHistoryListController"
 #define DEFAULT_DIR_HISTORY_LIST_MODEL                      "dirHistoryListModel"
 
+#define DEFAULT_CUSTOM_COMPONENTS                           "MyCustomComponents"
+
+#define DEFAULT_CUSTOM_COMPONENTS_BUSY_INDICATOR            "BusyIndicator"
+
+#define DEFAULT_FILE_LIST_QMLFILE_URL                       "qrc:/qml/FileList.qml"
 
 
 #define DEFAULT_ONE_KILO                                    1024
@@ -375,6 +380,27 @@
 
 // Localization Constants
 
+#define DEFAULT_FUNCTION_KEY_TEXT_HELP                      "Help"
+#define DEFAULT_FUNCTION_KEY_TEXT_TERMINAL                  "Terminal"
+#define DEFAULT_FUNCTION_KEY_TEXT_VIEW                      "View"
+#define DEFAULT_FUNCTION_KEY_TEXT_EDIT                      "Edit"
+#define DEFAULT_FUNCTION_KEY_TEXT_COPY                      "Copy"
+#define DEFAULT_FUNCTION_KEY_TEXT_MOVE                      "Move"
+#define DEFAULT_FUNCTION_KEY_TEXT_MAKEDIR                   "MakeDir"
+#define DEFAULT_FUNCTION_KEY_TEXT_DELETE                    "Delete"
+#define DEFAULT_FUNCTION_KEY_TEXT_OPTIONS                   "Options"
+#define DEFAULT_FUNCTION_KEY_TEXT_EXIT                      "Exit"
+
+#define DEFAULT_FUNCTION_KEY_TEXT_SEARCH                    "Search"
+#define DEFAULT_FUNCTION_KEY_TEXT_RENAME                    "Rename"
+#define DEFAULT_FUNCTION_KEY_TEXT_MAKELINK                  "MakeLink"
+#define DEFAULT_FUNCTION_KEY_TEXT_EXTRACT                   "Extract"
+
+#define DEFAULT_FUNCTION_KEY_TEXT_SORT_BY_NAME              "Sort By Name"
+#define DEFAULT_FUNCTION_KEY_TEXT_SORT_BY_EXT               "Sort By Ext"
+#define DEFAULT_FUNCTION_KEY_TEXT_SORT_BY_SIZE              "Sort By Size"
+#define DEFAULT_FUNCTION_KEY_TEXT_SORT_BY_DATE              "Sort By Date"
+
 #define DEFAULT_ERROR_TITLE_DELETE_FILE                     "File Deleting Error"
 #define DEFAULT_ERROR_TITLE_COPY_FILE                       "File Copy Error"
 #define DEFAULT_ERROR_TITLE_MOVE_FILE                       "File Rename/Move Error"
@@ -385,6 +411,7 @@
 #define DEFAULT_TITLE_CONFIRMATION                          "Confirmation"
 #define DEFAULT_TITLE_COPY_FILES                            "Copy File(s)"
 #define DEFAULT_TITLE_MOVE_FILES                            "Move/Rename File(s)"
+#define DEFAULT_TITLE_EXTRACT_FILE                          "Extract File"
 
 #define DEFAULT_CONFIRM_BUTTON_TEXT_YES                     "Yes"
 #define DEFAULT_CONFIRM_BUTTON_TEXT_YESTOALL                "Yes to All"

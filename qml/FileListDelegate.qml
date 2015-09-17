@@ -56,11 +56,6 @@ Rectangle {
             return globalSettings.selectedColor;
         }
 
-        // Check If Current
-        if (itemIndex == listIndex) {
-            return globalSettings.currentColor;
-        }
-
         // Check If Hidden
         if (fileListDelegateRoot.fileHidden) {
             return globalSettings.hiddenColor;
@@ -74,6 +69,11 @@ Rectangle {
         // Check If Archive
         if (fileListDelegateRoot.fileArchive) {
             return globalSettings.archiveColor;
+        }
+
+        // Check If Current
+        if (itemIndex == listIndex) {
+            return globalSettings.currentColor;
         }
 
         return globalSettings.textColor;

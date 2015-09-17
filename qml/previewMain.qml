@@ -193,10 +193,6 @@ Rectangle {
                             return previewController.selectedColor;
                         }
 
-                        if (fileCurrent || index == previewList.currentIndex) {
-                            return previewController.currentColor;
-                        }
-
                         if (fileLink) {
                             return previewController.linkColor;
                         }
@@ -207,6 +203,10 @@ Rectangle {
 
                         if (fileArchive) {
                             return previewController.archiveColor;
+                        }
+
+                        if (fileCurrent || index == previewList.currentIndex) {
+                            return previewController.currentColor;
                         }
 
                         return previewController.textColor;

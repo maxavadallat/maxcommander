@@ -24,6 +24,7 @@ void myMessageHandler(QtMsgType type, const QMessageLogContext& context, const Q
 
     // Switch Type
     switch (type) {
+        default:
         case QtDebugMsg:    txt = QString("Debug: %1").arg(msg);    break;
         case QtWarningMsg:  txt = QString("Warning: %1").arg(msg);  break;
         case QtCriticalMsg: txt = QString("Critical: %1").arg(msg); break;

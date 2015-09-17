@@ -25,6 +25,7 @@
 #include "remotefileutilclient.h"
 #include "infodialog.h"
 #include "settingscontroller.h"
+#include "filelistmodel.h"
 #include "utility.h"
 #include "defaultsettings.h"
 #include "constants.h"
@@ -149,6 +150,9 @@ void MainWindow::init()
 
     connect(leftPanel, SIGNAL(launchFileMove()), this, SLOT(launchFileMove()));
     connect(rightPanel, SIGNAL(launchFileMove()), this, SLOT(launchFileMove()));
+
+    connect(leftPanel, SIGNAL(launchFileExtract()), this, SLOT(launchFileExtract()));
+    connect(rightPanel, SIGNAL(launchFileExtract()), this, SLOT(launchFileExtract()));
 
     connect(leftPanel, SIGNAL(launchCreateDir()), this, SLOT(launchCreateDir()));
     connect(rightPanel, SIGNAL(launchCreateDir()), this, SLOT(launchCreateDir()));
@@ -350,6 +354,8 @@ void MainWindow::launchTerminal(const QString& aDirPath)
         return;
     }
 
+    qDebug() << "MainWindow::launchTerminal";
+
     // Get Terminal App
     QString terminalApp = settings ? settings->value(SETTINGS_KEY_APPS_TERMINAL, DEFAULT_SETTINGS_TERMINAL_PATH_MAC_OSX).toString() : "";
 
@@ -391,6 +397,8 @@ void MainWindow::launchViewer(const bool& aEditMode, const bool& aNewFile)
         return;
     }
 
+    qDebug() << "MainWindow::launchViewer";
+
     // Reset Modifier Keys
     focusedPanel->resetModifierKeys();
 
@@ -427,6 +435,8 @@ void MainWindow::launchViewer(const QString& aFileName, FilePanel* aFilePanel, c
 {
     // Create New Viewer Window
     ViewerWindow* newViewer = new ViewerWindow();
+
+    qDebug() << "MainWindow::launchViewer";
 
     // Set Edit Mode
     newViewer->setEditModeEnabled(aEditMode);
@@ -486,7 +496,7 @@ void MainWindow::launchFileCopy()
     //qDebug() << "MainWindow::launchFileCopy";
 
     // Launch Transfer
-    launchTransfer(DEFAULT_OPERATION_COPY_FILE);
+    launchFileTransfer(DEFAULT_OPERATION_COPY_FILE);
 }
 
 //==============================================================================
@@ -497,13 +507,13 @@ void MainWindow::launchFileMove()
     //qDebug() << "MainWindow::launchFileMove";
 
     // Launch Transfer
-    launchTransfer(DEFAULT_OPERATION_MOVE_FILE);
+    launchFileTransfer(DEFAULT_OPERATION_MOVE_FILE);
 }
 
 //==============================================================================
 // Launch Transfer
 //==============================================================================
-void MainWindow::launchTransfer(const QString& aOperation)
+void MainWindow::launchFileTransfer(const QString& aOperation)
 {
     // Check Focused Panel
     if (!focusedPanel) {
@@ -524,6 +534,9 @@ void MainWindow::launchTransfer(const QString& aOperation)
         // Set Title
         transferFileDialog->setWindowTitle(tr(DEFAULT_TITLE_MOVE_FILES));
     }
+
+    // Set Copy Hidden Visibility
+    transferFileDialog->setCopyHiddenVisible(true);
 
     // Init Selected Files
     QStringList selectedFiles = focusedPanel->getSelectedFiles();
@@ -570,7 +583,7 @@ void MainWindow::launchTransfer(const QString& aOperation)
 
     } else {
 
-        qDebug() << "MainWindow::launchTransfer - aOperation: " << aOperation << " - NO SELECTED FILE!";
+        qDebug() << "MainWindow::launchFileTransfer - aOperation: " << aOperation << " - NO SELECTED FILE!";
 
         // Nothing Selected
 
@@ -579,7 +592,7 @@ void MainWindow::launchTransfer(const QString& aOperation)
         return;
     }
 
-    qDebug() << "MainWindow::launchTransfer - aOperation: " << aOperation << " - count: " << selectedFiles.count();
+    qDebug() << "MainWindow::launchFileTransfer - aOperation: " << aOperation << " - count: " << selectedFiles.count();
 
     // ...
 
@@ -678,6 +691,87 @@ void MainWindow::launchTransfer(const QString& aOperation)
         // Clear Selected Files
         focusedPanel->deselectAllFiles();
     }
+}
+
+//==============================================================================
+// Launch Extract Archive File Slot
+//==============================================================================
+void MainWindow::launchFileExtract()
+{
+    // Check Focused Panel
+    if (!focusedPanel) {
+        return;
+    }
+
+    qDebug() << "MainWindow::launchExtract";
+
+    // Reset Modifier Keys
+    leftPanel->resetModifierKeys();
+    rightPanel->resetModifierKeys();
+
+    // Check Transfer File Dialog
+    if (!transferFileDialog) {
+        // Create Transfer File Dialog
+        transferFileDialog = new TransferFileDialog();
+    }
+
+    // Set Title
+    transferFileDialog->setWindowTitle(tr(DEFAULT_TITLE_EXTRACT_FILE));
+
+    // Set Copy Hidden Visibility
+    transferFileDialog->setCopyHiddenVisible(false);
+
+
+    // Init Selected Files
+    QStringList selectedFiles = focusedPanel->getSelectedFiles();
+
+    // Get Source Panel
+    FilePanel* sourcePanel = (focusedPanel == leftPanel) ? leftPanel : rightPanel;
+    // Get Target Panel
+    FilePanel* targetPanel = (focusedPanel == leftPanel) ? rightPanel : leftPanel;
+
+    // Init Transfer Source Dir
+    QString transferSourceDir = sourcePanel->getCurrentDir();
+    // Init Transfer Target Dir
+    QString transferTargetDir = targetPanel->getCurrentDir();
+
+    // Check Transfer Source
+    if (!transferSourceDir.endsWith("/")) {
+        // Adjust Transfer Source
+        transferSourceDir += "/";
+    }
+
+    // Check Transfer Target
+    if (!transferTargetDir.endsWith("/")) {
+        // Adjust Transfer Target
+        transferTargetDir += "/";
+    }
+
+    // Set Transfer Dialog Source File Text
+    transferFileDialog->setSourceFileText(selectedFiles[0], false);
+
+    // Set Transfer Dialog Target File Text
+    transferFileDialog->setTargetFileText(transferTargetDir);
+
+    // Launch Dialog
+    if (transferFileDialog->exec()) {
+
+        // Create Transfer Progress Dialog
+        TransferProgressDialog* newTransferProgressDialog = new TransferProgressDialog(DEFAULT_OPERATION_EXTRACT_ARCHIVE);
+        // Connect Closed Signal
+        connect(newTransferProgressDialog, SIGNAL(dialogClosed(TransferProgressDialog*)), this, SLOT(transferProgressClosed(TransferProgressDialog*)), Qt::QueuedConnection);
+
+        // Add To Transfer Progress Dialog List
+        transferProgressDialogs << newTransferProgressDialog;
+
+        // Launch Transfer Progress Dialog
+        newTransferProgressDialog->launch(transferFileDialog->getSourceFileText(), transferFileDialog->getTargetFileText(), 0);
+
+        // Clear Selected Files
+        focusedPanel->deselectAllFiles();
+    }
+
+    // ...
 }
 
 //==============================================================================
@@ -1006,6 +1100,8 @@ void MainWindow::launchProperties()
         return;
     }
 
+    qDebug() << "MainWindow::launchProperties";
+
     // Reset Modifier Keys
     focusedPanel->resetModifierKeys();
 
@@ -1293,76 +1389,89 @@ void MainWindow::updateFunctionKeys()
         //qDebug() << "MainWindow::updateFunctionKeys - SHIFT";
 
         // Set Button Text
-        ui->helpButton->setText(tr(""));
-        ui->terminalButton->setText(tr(""));
-        ui->viewButton->setText(tr(""));
-        ui->editButton->setText(tr(""));
-        ui->copyButton->setText(tr(""));
-        ui->moveButton->setText(tr("Rename"));
-        ui->makeDirButton->setText(tr("MakeLink"));
-        ui->delButton->setText(tr(""));
-        ui->optionsButton->setText(tr(""));
-        ui->exitButton->setText(tr(""));
+        ui->helpButton->setText("");
+        ui->terminalButton->setText("");
+        ui->viewButton->setText("");
+        ui->editButton->setText("");
+        ui->copyButton->setText("");
+        ui->moveButton->setText(tr(DEFAULT_FUNCTION_KEY_TEXT_RENAME));
+        ui->makeDirButton->setText(tr(DEFAULT_FUNCTION_KEY_TEXT_MAKELINK));
+        ui->delButton->setText("");
+        ui->optionsButton->setText("");
+        ui->exitButton->setText("");
 
     } else if (modifierKeys & Qt::ControlModifier) {
         //qDebug() << "MainWindow::updateFunctionKeys - CONTROL";
 
         // Set Button Text
-        ui->helpButton->setText(tr(""));
-        ui->terminalButton->setText(tr(""));
-        ui->viewButton->setText(tr("Sort by Name"));
-        ui->editButton->setText(tr("Sort by Ext"));
-        ui->copyButton->setText(tr("Sort by Size"));
-        ui->moveButton->setText(tr("Sort by Date"));
-        ui->makeDirButton->setText(tr(""));
-        ui->delButton->setText(tr(""));
-        ui->optionsButton->setText(tr(""));
-        ui->exitButton->setText(tr(""));
+        ui->helpButton->setText("");
+        ui->terminalButton->setText("");
+        if (focusedPanel) {
+            ui->viewButton->setText(tr(DEFAULT_FUNCTION_KEY_TEXT_SORT_BY_NAME));
+            ui->editButton->setText(tr(DEFAULT_FUNCTION_KEY_TEXT_SORT_BY_EXT));
+            ui->copyButton->setText(tr(DEFAULT_FUNCTION_KEY_TEXT_SORT_BY_SIZE));
+            ui->moveButton->setText(tr(DEFAULT_FUNCTION_KEY_TEXT_SORT_BY_DATE));
+        } else {
+            ui->viewButton->setText("");
+            ui->editButton->setText("");
+            ui->copyButton->setText("");
+            ui->moveButton->setText("");
+        }
+        ui->makeDirButton->setText("");
+        ui->delButton->setText("");
+        ui->optionsButton->setText("");
+        ui->exitButton->setText("");
 
     } else if (modifierKeys & Qt::AltModifier) {
         //qDebug() << "MainWindow::updateFunctionKeys - ALT";
 
         // Set Button Text
-        ui->helpButton->setText(tr(""));
-        ui->terminalButton->setText(tr(""));
-        ui->viewButton->setText(tr(""));
-        ui->editButton->setText(tr(""));
-        ui->copyButton->setText(tr(""));
-        ui->moveButton->setText(tr(""));
-        ui->makeDirButton->setText(tr("Search"));
-        ui->delButton->setText(tr(""));
-        ui->optionsButton->setText(tr(""));
-        ui->exitButton->setText(tr(""));
+        ui->helpButton->setText("");
+        ui->terminalButton->setText("");
+        ui->viewButton->setText("");
+        ui->editButton->setText("");
+        if (focusedPanel && focusedPanel->isCurrentArchive() && !focusedPanel->getArchiveMode() && focusedPanel->getSelectedFiles().count() == 1)
+            ui->copyButton->setText(tr(DEFAULT_FUNCTION_KEY_TEXT_EXTRACT));
+        else
+            ui->copyButton->setText("");
+        ui->moveButton->setText("");
+        if (focusedPanel && focusedPanel->getArchiveMode())
+            ui->makeDirButton->setText("");
+        else
+            ui->makeDirButton->setText(tr(DEFAULT_FUNCTION_KEY_TEXT_SEARCH));
+        ui->delButton->setText("");
+        ui->optionsButton->setText("");
+        ui->exitButton->setText("");
 
     } else if (modifierKeys & Qt::MetaModifier) {
         //qDebug() << "MainWindow::updateFunctionKeys - META";
 
         // Set Button Text
-        ui->helpButton->setText(tr(""));
-        ui->terminalButton->setText(tr(""));
-        ui->viewButton->setText(tr(""));
-        ui->editButton->setText(tr(""));
-        ui->copyButton->setText(tr(""));
-        ui->moveButton->setText(tr(""));
-        ui->makeDirButton->setText(tr(""));
-        ui->delButton->setText(tr(""));
-        ui->optionsButton->setText(tr(""));
-        ui->exitButton->setText(tr(""));
+        ui->helpButton->setText("");
+        ui->terminalButton->setText("");
+        ui->viewButton->setText("");
+        ui->editButton->setText("");
+        ui->copyButton->setText("");
+        ui->moveButton->setText("");
+        ui->makeDirButton->setText("");
+        ui->delButton->setText("");
+        ui->optionsButton->setText("");
+        ui->exitButton->setText("");
 
     } else {
         //qDebug() << "MainWindow::updateFunctionKeys";
 
         // Set Button Text
-        ui->helpButton->setText(tr("Help"));
-        ui->terminalButton->setText(tr("Terminal"));
-        ui->viewButton->setText(tr("View"));
-        ui->editButton->setText(tr("Edit"));
-        ui->copyButton->setText(tr("Copy"));
-        ui->moveButton->setText(tr("Move"));
-        ui->makeDirButton->setText(tr("MakeDir"));
-        ui->delButton->setText(tr("Delete"));
-        ui->optionsButton->setText(tr("Options"));
-        ui->exitButton->setText(tr("Exit"));
+        ui->helpButton->setText(tr(DEFAULT_FUNCTION_KEY_TEXT_HELP));
+        ui->terminalButton->setText(tr(DEFAULT_FUNCTION_KEY_TEXT_TERMINAL));
+        ui->viewButton->setText(tr(DEFAULT_FUNCTION_KEY_TEXT_VIEW));
+        ui->editButton->setText(tr(DEFAULT_FUNCTION_KEY_TEXT_EDIT));
+        ui->copyButton->setText(tr(DEFAULT_FUNCTION_KEY_TEXT_COPY));
+        ui->moveButton->setText(tr(DEFAULT_FUNCTION_KEY_TEXT_MOVE));
+        ui->makeDirButton->setText(tr(DEFAULT_FUNCTION_KEY_TEXT_MAKEDIR));
+        ui->delButton->setText(tr(DEFAULT_FUNCTION_KEY_TEXT_DELETE));
+        ui->optionsButton->setText(tr(DEFAULT_FUNCTION_KEY_TEXT_OPTIONS));
+        ui->exitButton->setText(tr(DEFAULT_FUNCTION_KEY_TEXT_EXIT));
     }
 }
 

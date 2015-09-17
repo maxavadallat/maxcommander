@@ -66,6 +66,9 @@ public slots:
     // Launch File Move/Rename Slot
     void launchFileMove();
 
+    // Launch Extract Archive File Slot
+    void launchFileExtract();
+
     // Launch Create Dir Slot
     void launchCreateDir();
     // Launch Create Link Slot
@@ -137,7 +140,7 @@ protected slots:
     void focusedPanelChanged(FilePanel* aFocusedPanel);
 
     // Launch Transfer Slot
-    void launchTransfer(const QString& aOperation);
+    void launchFileTransfer(const QString& aOperation);
 
     // Settings Has Changed Slot
     void settingsHasChanged();

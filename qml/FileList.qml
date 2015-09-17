@@ -9,7 +9,7 @@ import "qrc:/qml/js/utility.js" as Utility
 Rectangle {
     id: fileListRoot
 
-    color: globalSettings.textBGColor
+    color: mainController.archiveMode ? Utility.colorWithAlpha(globalSettings.archiveColor, Const.DEFAULT_ARCHIVE_MODE_BACKGROUND_ALPHA) : globalSettings.textBGColor
 
     width: 480
     height: 640

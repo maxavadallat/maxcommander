@@ -34,6 +34,8 @@ var DEFAULT_FILE_LIST_ICON_FILE_PLACEHOLDER_SMALL       = "qrc:/resources/images
 
 var DEFAULT_BACKGROUND_COLOR                            = "#FFEFEFEF";
 
+var DEFAULT_ARCHIVE_MODE_BACKGROUND_ALPHA               = "11";
+
 var DEFAULT_FILE_LIST_FONT_SIZE                         = 11;
 
 var DEFAULT_FILE_LIST_BACKGROUND_COLOR                  = DEFAULT_BACKGROUND_COLOR;

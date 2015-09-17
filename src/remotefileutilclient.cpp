@@ -1,6 +1,7 @@
 
 #include <QHostAddress>
 #include <QMutexLocker>
+#include <QDataStream>
 #include <QDebug>
 
 #include <cstdio>
@@ -462,6 +463,42 @@ void RemoteFileUtilClient::listArchive(const QString& aFilePath, const QString& 
     newData[DEFAULT_KEY_PATH]           = aDirPath;
     newData[DEFAULT_KEY_FILTERS]        = aFilters;
     newData[DEFAULT_KEY_FLAGS]          = aSortFlags;
+
+    // ...
+
+    // Write Data
+    writeData(newData);
+
+    // Set Status
+    setStatus(ECSTBusy);
+}
+
+//==============================================================================
+// Extract Archive
+//==============================================================================
+void RemoteFileUtilClient::extractArchive(const QString& aFilePath, const QString& aDirPath, const int& aOptions)
+{
+    // Check Status
+    if (status == ECSTBusy) {
+
+        qDebug() << "#########################################################################";
+        qDebug() << "#### RemoteFileUtilClient::extractArchive - cID: " << cID << " - BUSY!!";
+        qDebug() << "#########################################################################";
+
+        // ...
+    }
+
+    //qDebug() << "RemoteFileUtilClient::extractArchive - aFilePath: " << aFilePath << " - aDirPath: " << aDirPath << " - aOptions: " << aOptions;
+
+    // Init New Data
+    QVariantMap newData;
+
+    // Set Up New Data
+    newData[DEFAULT_KEY_CID]            = cID;
+    newData[DEFAULT_KEY_OPERATION]      = QString(DEFAULT_OPERATION_EXTRACT_ARCHIVE);
+    newData[DEFAULT_KEY_SOURCE]         = aFilePath;
+    newData[DEFAULT_KEY_TARGET]         = aDirPath;
+    newData[DEFAULT_KEY_OPTIONS]        = aOptions;
 
     // ...
 

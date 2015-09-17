@@ -1045,6 +1045,9 @@ bool isFileArchiveByExt(const QString& aFilePath)
     if (ext.toLower() == DEFAULT_EXTENSION_TAR)
         return true;
 
+    if (ext.toLower() == DEFAULT_EXTENSION_TGZ)
+        return true;
+
     if (ext.startsWith(QString("%1.").arg(DEFAULT_EXTENSION_TAR)))
         return true;
 

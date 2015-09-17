@@ -40,6 +40,9 @@ public:
     // Set Copy Hidden Files
     void setCopyHidden(const bool& aCopyHidden);
 
+    // Set Copy Hidden Visible
+    void setCopyHiddenVisible(const bool& aVisible);
+
     // Exec
     virtual int exec();
 

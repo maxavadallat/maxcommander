@@ -226,7 +226,8 @@ void SearchDialog::restoreUI()
     ui->buttonBox->setStandardButtons(QDialogButtonBox::Cancel);
 
     // Add Start Button
-    startButton = ui->buttonBox->addButton(tr(DEFAULT_BUTTON_TEXT_START), QDialogButtonBox::AcceptRole);
+    //startButton = ui->buttonBox->addButton(tr(DEFAULT_BUTTON_TEXT_START), QDialogButtonBox::AcceptRole);
+    startButton = ui->buttonBox->addButton(tr(DEFAULT_BUTTON_TEXT_START), QDialogButtonBox::ActionRole);
 
     // Set Current Dir Label
     ui->currentDirLabel->setText(currentDir);
@@ -1122,7 +1123,7 @@ void SearchDialog::hideEvent(QHideEvent* aEvent)
 
     // Clear Buttons
     ui->buttonBox->clear();
-    
+
     // ...
 }
 

@@ -104,6 +104,15 @@ void TransferFileDialog::setCopyHidden(const bool& aCopyHidden)
 }
 
 //==============================================================================
+// Set Copy Hidden Visible
+//==============================================================================
+void TransferFileDialog::setCopyHiddenVisible(const bool& aVisible)
+{
+    // Set Visibility
+    ui->copyHiddenFilesCheckBox->setVisible(aVisible);
+}
+
+//==============================================================================
 // Exec
 //==============================================================================
 int TransferFileDialog::exec()

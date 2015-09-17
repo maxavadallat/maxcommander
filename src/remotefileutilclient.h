@@ -90,6 +90,8 @@ public:
     bool isFileArchive(const QString& aFilePath);
     // List Archive
     void listArchive(const QString& aFilePath, const QString& aDirPath, const int& aFilters = 0, const int& aSortFlags = 0);
+    // Extract Archive
+    void extractArchive(const QString& aFilePath, const QString& aDirPath, const int& aOptions = 0);
 
     // Clear Global File Transfer Options
     void clearFileTransferOptions();

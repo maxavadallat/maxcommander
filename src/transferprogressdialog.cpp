@@ -176,6 +176,7 @@ TransferProgressDialog::TransferProgressDialog(const QString& aOperation, QWidge
     , overallSize(0)
     , overallProgressScale(0)
     , progressRefreshTimerID(-1)
+    , archiveMode(false)
 {
     qDebug() << "TransferProgressDialog::TransferProgressDialog";
 
@@ -242,6 +243,9 @@ void TransferProgressDialog::launch(const QString& aSourcePath, const QString& a
     // Set Options
     options    = aOptions;
 
+    // Set Archive Mode
+    setArchiveMode(false);
+
     // Restore UI
     restoreUI();
     // Show
@@ -289,6 +293,9 @@ void TransferProgressDialog::launch(const QString& aSourcePath, const QString& a
     // Set Target Pattern
     targetPattern = aTargetPattern;
 
+    // Set Archive Mode
+    setArchiveMode(false);
+
     // Restore UI
     restoreUI();
     // Show
@@ -328,6 +335,9 @@ void TransferProgressDialog::launch(const QString& aSource, const QString& aTarg
     // Set Options
     options    = aOptions;
 
+    // Set Archive Mode
+    setArchiveMode(isFileArchiveByExt(aSource) && operation == DEFAULT_OPERATION_EXTRACT_ARCHIVE);
+
     // Restore UI
     restoreUI();
     // Show
@@ -337,7 +347,7 @@ void TransferProgressDialog::launch(const QString& aSource, const QString& aTarg
     needQueue = false;
 
     // Check If File Exists
-    if (QFile::exists(aSource)) {
+    if (sourceInfo.exists()) {
 
         // Compare Source And Target
         if (aSource == aTarget) {
@@ -351,10 +361,6 @@ void TransferProgressDialog::launch(const QString& aSource, const QString& aTarg
 
             return;
         }
-
-
-        // Init Source Info
-        QFileInfo sourceInfo(aSource);
 
         // Check If Source Is a Dir
         if (sourceInfo.isDir()) {
@@ -380,7 +386,7 @@ void TransferProgressDialog::launch(const QString& aSource, const QString& aTarg
         queueModel->addItem(operation, aSource, aTarget);
 
         // Check If Is Dir
-        if (!sourceInfo.isDir() && !sourceInfo.isSymLink()) {
+        if (!sourceInfo.isDir() && !sourceInfo.isSymLink() && !archiveMode) {
             // Add Size To Overall Size
             overallSize += sourceInfo.size();
             // Configure Overall Progress Bar
@@ -550,6 +556,13 @@ void TransferProgressDialog::processQueue()
             } else if (operation == DEFAULT_OPERATION_MOVE_FILE) {
                 // Move File
                 fileUtil->moveFile(sourceFileName, targetFileName);
+            } else if (operation == DEFAULT_OPERATION_EXTRACT_ARCHIVE) {
+                // Extract File
+                fileUtil->extractArchive(sourceFileName, targetFileName);
+            } else {
+
+                qDebug() << "TransferProgressDialog::processQueue - queueIndex: " << queueIndex << " - UNKNOWN OPERATION!!";
+
             }
 
             // Configure Buttons
@@ -606,10 +619,15 @@ void TransferProgressDialog::restoreUI()
     // Check Operation
     if (operation == DEFAULT_OPERATION_COPY_FILE) {
         // Set Title
-        setTitle(DEFAULT_TITLE_COPY_FILES);
-    } else {
+        setTitle(tr(DEFAULT_TITLE_COPY_FILES));
+    } else if (operation == DEFAULT_OPERATION_MOVE_FILE) {
         // Set Title
-        setTitle(DEFAULT_TITLE_MOVE_FILES);
+        setTitle(tr(DEFAULT_TITLE_MOVE_FILES));
+    } else if (operation == DEFAULT_OPERATION_EXTRACT_ARCHIVE) {
+        // Set Title
+        setTitle(tr(DEFAULT_TITLE_EXTRACT_FILE));
+    } else {
+        // ...
     }
 
     // Init Settings
@@ -632,10 +650,29 @@ void TransferProgressDialog::restoreUI()
     // Reset Overall Size
     overallSize = 0;
 
-    // Set Minimum
-    ui->currentProgress->setMinimum(0);
-    // Set Maximum
-    ui->currentProgress->setMaximum(0);
+    // Chekc ARchive Mode
+    if (archiveMode) {
+
+        // Set Visibility
+        //ui->currentFileNameLabel->setVisible(false);
+        // Set Visibility
+        //ui->currentFileTitleLabel->setVisible(false);
+        // Set Visibility
+        ui->currentProgress->setVisible(false);
+
+    } else {
+        // Set Visibility
+        //ui->currentFileNameLabel->setVisible(true);
+        // Set Visibility
+        //ui->currentFileTitleLabel->setVisible(true);
+        // Set Visibility
+        ui->currentProgress->setVisible(true);
+        // Set Minimum
+        ui->currentProgress->setMinimum(0);
+        // Set Maximum
+        ui->currentProgress->setMaximum(0);
+    }
+
     // Set Minimum
     ui->overallProgress->setMinimum(0);
     // Set Maximum
@@ -780,6 +817,20 @@ void TransferProgressDialog::stopProgressRefreshTimer()
         killTimer(progressRefreshTimerID);
         // Reset Timer ID
         progressRefreshTimerID = -1;
+    }
+}
+
+//==============================================================================
+// Set Archive Mode
+//==============================================================================
+void TransferProgressDialog::setArchiveMode(const bool& aArchiveMode)
+{
+    // Check Archive Mode
+    if (archiveMode != aArchiveMode) {
+        // Set Archive Mode
+        archiveMode = aArchiveMode;
+
+        // ...
     }
 }
 
@@ -1206,6 +1257,13 @@ void TransferProgressDialog::fileOpFinished(const unsigned int& aID,
     } else if (operation == DEFAULT_OPERATION_LIST_DIR) {
 
         // ...
+
+        // Process Queue
+        processQueue();
+    } else if (operation == DEFAULT_OPERATION_EXTRACT_ARCHIVE) {
+
+        // Increase Current Queue Index
+        queueIndex++;
 
         // Process Queue
         processQueue();

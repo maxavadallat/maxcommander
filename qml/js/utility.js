@@ -97,3 +97,13 @@ function formatSecs(totalSecs)
 
     return minutes + ":" + seconds;
 }
+
+//==============================================================================
+// Color With Alpha
+//==============================================================================
+function colorWithAlpha(color, alpha)
+{
+    return color.slice(0, 1) + alpha + color.slice(3, color.length);
+}
+
+

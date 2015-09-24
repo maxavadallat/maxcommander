@@ -24,6 +24,7 @@
         <file>qml/DirHistory.qml</file>
         <file>qml/FileListItemPopup.qml</file>
         <file>qml/FileGridDelegate.qml</file>
+        <file>qml/FileListDropPopup.qml</file>
     </qresource>
 </RCC>
 

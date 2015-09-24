@@ -3,6 +3,7 @@
 #include <QPainter>
 #include <QFileInfo>
 #include <QDir>
+#include <QDialogButtonBox>
 #include <QDebug>
 
 #include <mcwinterface.h>
@@ -393,6 +394,14 @@ void TransferProgressDialog::launch(const QString& aSource, const QString& aTarg
             configureOverallProgressBar(overallSize);
         }
 
+        // Check Queue Count
+        if (queueModel->rowCount() == 0) {
+            // Close
+            reject();
+
+            return;
+        }
+
         // Reset Queue Index
         queueIndex = 0;
 
@@ -419,6 +428,162 @@ void TransferProgressDialog::launch(const QString& aSource, const QString& aTarg
 
         // close
         reject();
+    }
+}
+
+//==============================================================================
+// Launch Progress Dialog
+//==============================================================================
+void TransferProgressDialog::launch(const QStringList& aSourceList, const QString& aTargetPath, const int& aOptions)
+{
+    // Set Source Path
+    sourcePath = "";
+    // Set Target Path
+    targetPath = aTargetPath;
+    // Set Options
+    options    = aOptions;
+
+    // Set Archive Mode
+    setArchiveMode(false);
+
+    // Restore UI
+    restoreUI();
+    // Show
+    show();
+
+    // Get Dropped Items List Count
+    int dilCount = aSourceList.count();
+
+    // Check Dropped Items List Count
+    if (dilCount > 0) {
+        // Init Default File URL Prefix
+        QString fileURLPrefix(DEFAULT_URL_PREFIX_FILE);
+        // Get Length
+        int fupLength = fileURLPrefix.length();
+        // Init Build Queue Options
+        int bqOptions = 0;
+
+        // Iterate Through Dropped Items List
+        for (int i=0; i<dilCount; i++) {
+            // Init Local Source File Name
+            QString localSource = aSourceList[i];
+
+            // Check Local Source
+            if (localSource.startsWith(DEFAULT_URL_PREFIX_FILE)) {
+                // Adjust Local Source
+                localSource = localSource.right(localSource.length() - fupLength);
+            }
+
+            // Init Source Info
+            QFileInfo sourceInfo(localSource);
+
+            // Check If Source Info Exists
+            if (sourceInfo.exists()) {
+
+                // Get File Name
+                QString fileName = sourceInfo.fileName();
+                // Init Target File Path
+                QString targetFilePath = aTargetPath;
+                // Check Target Path
+                if (!targetFilePath.endsWith("/")) {
+                    // Adjust Target File Path
+                    targetFilePath += "/";
+                }
+
+                // Add File Name To Target File Path
+                targetFilePath += fileName;
+
+                // Init Target File Info
+                QFileInfo targetInfo(targetFilePath);
+
+                // Compare Target File Info
+                if (sourceInfo != targetInfo) {
+                    // Check If Is Dir
+                    if (!sourceInfo.isDir() && !sourceInfo.isSymLink()) {
+                        // Add Size To Overall Size
+                        overallSize += sourceInfo.size();
+                        // Configure Overall Progress Bar
+                        configureOverallProgressBar(overallSize);
+                    }
+
+                    // Add To Queue Model
+                    queueModel->addItem(operation, sourceInfo.absoluteFilePath(), targetFilePath);
+
+                } else {
+                    // Check Options
+                    if (bqOptions & DEFAULT_CONFIRM_SKIPALL) {
+                        continue;
+                    }
+
+                    // Init Confirm Dialog
+                    ConfirmDialog confirmDialog;
+
+                    // Set Dialog Title
+                    confirmDialog.setConfirmTitle(tr(DEFAULT_TITLE_WARNING));
+
+                    // Set Error Text
+                    confirmDialog.setConfirmText(tr(DEFAULT_WARNING_TEXT_SAME_SOURCE_TARGET));
+
+                    // Configure Standard Buttons
+                    confirmDialog.configureButtons(QDialogButtonBox::Abort);
+
+                    // Add Button
+                    confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_SKIP), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_SKIP);
+                    confirmDialog.addCustomButton(tr(DEFAULT_CONFIRM_BUTTON_TEXT_SKIPALL), QDialogButtonBox::AcceptRole, DEFAULT_CONFIRM_SKIPALL);
+
+                    // Exec Confirm Dialog
+                    confirmDialog.exec();
+
+                    // Get Action Index
+                    int actionIndex = confirmDialog.getActionIndex();
+
+                    // Switch Action Index
+                    switch (actionIndex) {
+                        case DEFAULT_CONFIRM_SKIPALL:
+                            // Add Skip All To Options
+                            bqOptions |= DEFAULT_CONFIRM_SKIPALL;
+                        case DEFAULT_CONFIRM_SKIP:
+                        break;
+
+                        default:
+                            // close
+                            reject();
+
+                            return;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Check Queue Count
+        if (queueModel->rowCount() == 0) {
+            // Close
+            reject();
+
+            return;
+        }
+
+        // Set Queue Index
+        queueIndex = 0;
+
+        // Check File Util Client
+        if (fileUtil) {
+            // Check If Connected
+            if (!fileUtil->isConnected()) {
+                // Connect
+                fileUtil->connectToFileServer();
+            } else {
+                // Clear Options
+                fileUtil->clearFileTransferOptions();
+                // Process Queue
+                QTimer::singleShot(1, this, SLOT(processQueue()));
+            }
+        }
+
+    } else {
+        // Reset Queue Index
+        queueIndex = -1;
     }
 }
 

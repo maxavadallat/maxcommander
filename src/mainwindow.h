@@ -66,6 +66,9 @@ public slots:
     // Launch File Move/Rename Slot
     void launchFileMove();
 
+    // Launch Drag Dropped Slot
+    void launchDragDropped();
+
     // Launch Extract Archive File Slot
     void launchFileExtract();
 
@@ -248,6 +251,9 @@ private:
 
     // UI
     Ui::MainWindow*                 ui;
+
+    // Reference Count
+    int                             refCount;
 
     // Settings
     SettingsController*             settings;

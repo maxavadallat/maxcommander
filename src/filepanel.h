@@ -307,7 +307,10 @@ public slots:
     void hideDirHistoryPopup();
 
     // Drag Dropped
-    void dragDropped(const QString& aDroppedItems, const int& aModifiers);
+    void dragDropped();
+
+    // Drop Operation Selected
+    void dropOperationSelected(const QString& aDroppedItems, const int& aCommand);
 
     // Drag Started Slot
     void fileListWidgetDragStarted(const int& aPosX, const int aPosY);
@@ -400,6 +403,9 @@ signals:
     void launchFileMove();
     // Launch File Rename
     void launchFileRename();
+
+    // Launch Drag Dropped Signal
+    void launchDragDropped();
 
     // Launch Extract Archive File Signal
     void launchFileExtract();
@@ -712,6 +718,11 @@ private:
     bool                    archiveMode;
     // Current Archive
     QString                 currentArchive;
+
+    // Dropped Items List
+    QStringList             droppedItemsList;
+    // Drop Command
+    int                     dropCommand;
 };
 
 

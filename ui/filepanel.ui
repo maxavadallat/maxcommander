@@ -72,7 +72,7 @@
         <string notr="true">background-color: #00000000</string>
        </property>
        <property name="text">
-        <string>/</string>
+        <string notr="true">/</string>
        </property>
       </widget>
      </item>

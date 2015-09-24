@@ -87,6 +87,7 @@ FilePanel::FilePanel(QWidget* aParent)
     , dirHistoryListPopup(NULL)
     , fileListItemPopupActive(false)
     , archiveMode(false)
+    , dropCommand(-1)
 {
     // Setup UI
     ui->setupUi(this);
@@ -993,18 +994,41 @@ void FilePanel::hideDirHistoryPopup()
 //==============================================================================
 // Drag Dropped
 //==============================================================================
-void FilePanel::dragDropped(const QString& aDroppedItems, const int& aModifiers)
+void FilePanel::dragDropped()
 {
-    qDebug() << "FilePanel::dragDropped - aDroppedItems: " << aDroppedItems;
+    qDebug() << "FilePanel::dragDropped";
 
-    // Check Modifiers
-    if (aModifiers & Qt::AltModifier) {
-
-    } else {
-
-    }
+    // Get Main Widnow Instance
+    MainWindow* mainWindow = MainWindow::getInstance();
+    // Activate Window
+    mainWindow->activateWindow();
+    // Bring Main Window To Front
+    mainWindow->raise();
 
     // ...
+
+    // Release Main Window Instance
+    mainWindow->release();
+}
+
+//==============================================================================
+// Drop Operation Selected
+//==============================================================================
+void FilePanel::dropOperationSelected(const QString& aDroppedItems, const int& aCommand)
+{
+    //qDebug() << "FilePanel::dropOperationSelected - aDroppedItems: " << aDroppedItems << " - aCommand: " << aCommand;
+
+    // Set Dropped Items List
+    droppedItemsList = aDroppedItems.split("\n", QString::SkipEmptyParts);
+    // Set Command
+    dropCommand = aCommand;
+
+    //qDebug() << "FilePanel::dropOperationSelected - droppedItemsList: " << droppedItemsList << " - aCommand: " << aCommand;
+
+    // ...
+
+    // Emit Launch Drag Dropped
+    emit launchDragDropped();
 }
 
 //==============================================================================
@@ -2329,6 +2353,9 @@ void FilePanel::setPanelFocus(const bool& aFocus)
 
             // Emit Focused Panle Has Changed
             emit focusedPanelChanged(this);
+
+            // Set File List Widget Focus
+            ui->fileListWidget->setFocus();
 
         } else {
             // Set Style Sheet

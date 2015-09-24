@@ -85,6 +85,8 @@ public:
     void launch(const QString& aSourcePath, const QString& aTargetPath, const QString& aSourcePattern = "*.*", const QString& aTargetPattern = "", const int& aOptions = 0);
     // Launch Progress Dialog
     void launch(const QString& aSource, const QString& aTarget, const int& aOptions = 0);
+    // Launch Progress Dialog
+    void launch(const QStringList& aSourceList, const QString& aTargetPath, const int& aOptions = 0);
 
     // Suspend
     void suspend();

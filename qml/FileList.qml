@@ -78,6 +78,8 @@ Rectangle {
                     fileListHeaderPopup.hidePopup();
                     // Hide File List Item Popup
                     fileListItemPopup.hidePopup();
+                    // Hide File List Drop Popup
+                    fileListDropPopup.hidePopup();
                 break;
 
                 case 16:
@@ -232,6 +234,8 @@ Rectangle {
                     fileListHeaderPopup.hidePopup();
                     // Hide File List Item Popup
                     fileListItemPopup.hidePopup();
+                    // Hide File List Drop Popup
+                    fileListDropPopup.hidePopup();
                 }
                 // On Released
                 onReleased: {
@@ -491,6 +495,8 @@ Rectangle {
                     fileListHeaderPopup.hidePopup();
                     // Hide File List Item Popup
                     fileListItemPopup.hidePopup();
+                    // Hide File List Drop Popup
+                    fileListDropPopup.hidePopup();
                 }
                 // On Released
                 onReleased: {
@@ -698,9 +704,26 @@ Rectangle {
         onDropped: {
             // Accept
             drop.accept();
+
             //console.log("dragArea.onDropped - drop.source: " + drop.text);
+
             // Drag Dropped
-            mainController.dragDropped(drop.text, drop.keys);
+            mainController.dragDropped();
+
+            // Set Panel Has Focus
+            mainController.panelHasFocus = true;
+
+            // Set File List Item Popup Pos
+            fileListDropPopup.x = Math.min(drop.x, fileListRoot.width - fileListDropPopup.width - 1);
+            fileListDropPopup.y = Math.min(drop.y, fileListRoot.height - fileListDropPopup.height - 1);
+
+            // Set Dropped Items
+            fileListDropPopup.dropItemList = drop.text;
+            // Set Drop Keys
+            fileListDropPopup.dropKeyList = drop.keys;
+
+            // Show Popup
+            fileListDropPopup.showPopup(true);
 
             // ...
         }
@@ -765,6 +788,8 @@ Rectangle {
 
             // Hide File List Item Popup
             fileListItemPopup.hidePopup();
+            // Hide File List Drop Popup
+            fileListDropPopup.hidePopup();
         }
 
         // On Released
@@ -839,7 +864,7 @@ Rectangle {
                 fileListItemPopup.currentItemPath = fileListModel.getFullPath(pressedItem.itemIndex);
 
                 // Show Item Popup
-                fileListItemPopup.showPopup(false);
+                fileListItemPopup.showPopup(true);
 
                 // Set Selected
                 //fileListModel.setSelected(pressedItem.itemIndex, false);
@@ -862,6 +887,10 @@ Rectangle {
     // File List Item Popup
     FileListItemPopup {
         id: fileListItemPopup
+    }
+
+    FileListDropPopup {
+        id: fileListDropPopup
     }
 
     // Helper Timer
@@ -1041,6 +1070,8 @@ Rectangle {
             fileListHeaderPopup.hidePopup();
             // Hide File List Item Popup
             fileListItemPopup.hidePopup();
+            // Hide File List Drop Popup
+            fileListDropPopup.hidePopup();
         }
 
         // On Grid Mode Changed

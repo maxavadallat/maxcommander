@@ -43,6 +43,9 @@ MainWindow* MainWindow::getInstance()
     if (!mainWindowInstance) {
         // Create Singleton Instance
         mainWindowInstance = new MainWindow();
+    } else {
+        // Increase Reference Count
+        mainWindowInstance->refCount++;
     }
 
     return mainWindowInstance;
@@ -55,9 +58,16 @@ void MainWindow::release()
 {
     // Check Main Window Singleton Instance
     if (mainWindowInstance) {
-        // Delete Singleton
-        delete mainWindowInstance;
-        mainWindowInstance = NULL;
+
+        // Decrease Reference Count
+        mainWindowInstance->refCount--;
+
+        // Check Reference Count
+        if (mainWindowInstance->refCount == 0) {
+            // Delete Singleton
+            delete mainWindowInstance;
+            mainWindowInstance = NULL;
+        }
     }
 }
 
@@ -67,6 +77,7 @@ void MainWindow::release()
 MainWindow::MainWindow(QWidget* aParent)
     : QMainWindow(aParent)
     , ui(new Ui::MainWindow)
+    , refCount(1)
     , settings(SettingsController::getInstance())
     , leftPanel(NULL)
     , rightPanel(NULL)
@@ -134,8 +145,6 @@ void MainWindow::init()
     connect(leftPanel, SIGNAL(focusedPanelChanged(FilePanel*)), this, SLOT(focusedPanelChanged(FilePanel*)));
     connect(rightPanel, SIGNAL(focusedPanelChanged(FilePanel*)), this, SLOT(focusedPanelChanged(FilePanel*)));
 
-    // ...
-
     connect(leftPanel, SIGNAL(showHelp()), this, SLOT(showHelp()));
     connect(rightPanel, SIGNAL(showHelp()), this, SLOT(showHelp()));
 
@@ -150,6 +159,9 @@ void MainWindow::init()
 
     connect(leftPanel, SIGNAL(launchFileMove()), this, SLOT(launchFileMove()));
     connect(rightPanel, SIGNAL(launchFileMove()), this, SLOT(launchFileMove()));
+
+    connect(leftPanel, SIGNAL(launchDragDropped()), this, SLOT(launchDragDropped()));
+    connect(rightPanel, SIGNAL(launchDragDropped()), this, SLOT(launchDragDropped()));
 
     connect(leftPanel, SIGNAL(launchFileExtract()), this, SLOT(launchFileExtract()));
     connect(rightPanel, SIGNAL(launchFileExtract()), this, SLOT(launchFileExtract()));
@@ -511,6 +523,33 @@ void MainWindow::launchFileMove()
 }
 
 //==============================================================================
+// Launch Drag Dropped Slot
+//==============================================================================
+void MainWindow::launchDragDropped()
+{
+    //qDebug() << "MainWindow::launchDragDropped";
+
+    // Check Focused Panel
+    if (!focusedPanel) {
+        return;
+    }
+
+    // Create Transfer Progress Dialog
+    TransferProgressDialog* newTransferProgressDialog = new TransferProgressDialog(focusedPanel->dropCommand == DEFAULT_DROP_COMMAND_COPY ? DEFAULT_OPERATION_COPY_FILE : DEFAULT_OPERATION_MOVE_FILE);
+
+    // Add To Transfer Progress Dialog List
+    transferProgressDialogs << newTransferProgressDialog;
+
+    // Init Copy Options
+    int copyOptions = settings->getCopyHiddenFiles() ? DEFAULT_COPY_OPTIONS_COPY_HIDDEN : 0;
+
+    // Launch Transfer Dialog
+    newTransferProgressDialog->launch(focusedPanel->droppedItemsList, focusedPanel->getCurrentDir(), copyOptions);
+
+    // ...
+}
+
+//==============================================================================
 // Launch Transfer
 //==============================================================================
 void MainWindow::launchFileTransfer(const QString& aOperation)
@@ -622,6 +661,9 @@ void MainWindow::launchFileTransfer(const QString& aOperation)
 
             // Check If Source File Exists
             if (sourceInfo.exists()) {
+
+                // Add To Transfer Progress Dialog List
+                transferProgressDialogs << newTransferProgressDialog;
 
                 // Launch Progress Dialog
                 newTransferProgressDialog->launch(sourceText, targetText, copyOptions);

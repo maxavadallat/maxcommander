@@ -362,9 +362,8 @@
 #define DEFAULT_ARCHIVE_FILE_DIR_PATTERN                    "%1://%2"
 
 
-
-
-
+#define DEFAULT_DROP_COMMAND_COPY                           1
+#define DEFAULT_DROP_COMMAND_MOVE                           2
 
 
 
@@ -491,6 +490,8 @@
 
 #define DEFAULT_WARNING_TEXT_INVALID_SOURCE                 "Invalid Source"
 #define DEFAULT_WARNING_TEXT_INVALID_TARGET                 "Invalid Target"
+
+#define DEFAULT_WARNING_TEXT_SAME_SOURCE_TARGET             "Target File Is The Same"
 
 #define DEFAULT_FILE_PANEL_TITLE_SEARCH_RESULTS             "Search Results"
 #define DEFAULT_BUTTON_TEXT_FEED_TO_LIST                    "Feed to List"

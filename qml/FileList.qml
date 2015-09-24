@@ -720,7 +720,7 @@ Rectangle {
             // Set Dropped Items
             fileListDropPopup.dropItemList = drop.text;
             // Set Drop Keys
-            fileListDropPopup.dropKeyList = drop.keys;
+            //fileListDropPopup.dropKeyList = drop.keys;
 
             // Show Popup
             fileListDropPopup.showPopup(true);

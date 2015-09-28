@@ -17,6 +17,10 @@ class PasswordDialog : public QDialog
 public:
     // Constructor
     explicit PasswordDialog(QWidget* aParent = NULL);
+
+    // Get Pass
+    QString getPass();
+
     // Destructor
     virtual ~PasswordDialog();
 

@@ -6,6 +6,8 @@
 #include <QDateTime>
 #include <QRgb>
 
+#include "constants.h"
+
 //==============================================================================
 // File Sorting Type
 //==============================================================================
@@ -55,7 +57,7 @@ QImage getFileIconImage(const QString& aFilePath, const int& aWidth, const int& 
 int execShellCommand(const QString& aCommand, const bool& asRoot = false, const QString& aRootPass = "");
 
 // Check If File Server Running
-bool checkRemoteFileServerRunning();
+bool checkRemoteFileServerRunning(const QString& aUser = qgetenv(DEFAULT_ENV_VARIABLE_USER));
 
 // Launch File Server
 int launchRemoteFileServer(const bool& asRoot = false, const QString& aRootPass = "");

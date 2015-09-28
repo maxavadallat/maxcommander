@@ -475,20 +475,11 @@ int execShellCommand(const QString& aCommand, const bool& asRoot, const QString&
 #if defined(Q_OS_MAC) || defined (Q_OS_UNIX)
 
     // Init Command Line
-    QString commandLine = asRoot ? QString(DEFAULT_ROOT_SHELL_COMMAND_TEMPLATE).arg(aRootPass).arg(aCommand) : aCommand;
+    QString commandLine = asRoot ? QString(DEFAULT_ROOT_SHELL_COMMAND_TEMPLATE).arg(aRootPass).arg(aCommand)
+                                 : QString(DEFAULT_SHELL_COMMAND_TEMPLATE).arg(aCommand);
 
-    // Check If As Root
-    if (asRoot) {
-        // Run With System
-        result = system(commandLine.toLocal8Bit().data());
-    } else {
-        // Init Process
-        QProcess process;
-        // Start New Process
-        if (!process.startDetached(commandLine.toLocal8Bit().data())) {
-            qDebug() << "utility::execShellCommand - ERROR STARTING commandLine: " << commandLine << " - error: " << process.errorString();
-        }
-    }
+    // Run With System
+    result = system(commandLine.toLocal8Bit().data());
 
 #elif defined(Q_OS_WIN)
 
@@ -501,27 +492,56 @@ int execShellCommand(const QString& aCommand, const bool& asRoot, const QString&
 //==============================================================================
 // Check If File Server Running
 //==============================================================================
-bool checkRemoteFileServerRunning()
+bool checkRemoteFileServerRunning(const QString& aUser)
 {
 #if defined(Q_OS_MAC) || defined (Q_OS_UNIX)
 
-    // Init New PS Process
-    QProcess psProcess;
+    // Init Command Line
+    QString cmdLine = QString(DEFAULT_PS_COMMAND_CHECK_FILESERVER).arg(DEFAULT_FILE_SERVER_EXEC_NAME).arg(QDir::tempPath() + "/" + DEFAULT_SERVER_CHECK_OUT_FILENAME);
 
-    // Execute Process
-    psProcess.start(QString(DEFAULT_PS_COMMAND_CHECK_FILESERVER));
-    // Wait For Finished
-    psProcess.waitForFinished();
+    //qDebug() << cmdLine;
 
-    // Process Output
-    QString output = psProcess.readAllStandardOutput();
+    // Exec PS
+    int result = system(cmdLine.toLocal8Bit().data());
 
-    //qDebug() << "utility::checkRemoteFileServerRunning";
-    //qDebug() << output;
+    // Check Result
+    if (result) {
+        qWarning() << "checkRemoteFileServerRunning - ERROR EXEC CMD!";
 
-    // Check Occurence
-    if (output.indexOf(DEFAULT_FILE_SERVER_EXEC_NAME) > 0) {
-        return true;
+        return false;
+    }
+
+    // Init Server Check Output File
+    QFile serverCheckOutFile(QDir::tempPath() + "/" + DEFAULT_SERVER_CHECK_OUT_FILENAME);
+
+    // Open File
+    if (serverCheckOutFile.open(QIODevice::ReadOnly)) {
+        // Init Text Stream
+        QTextStream readStream(&serverCheckOutFile);
+
+        // Iterate Thru
+        while (!readStream.atEnd()) {
+            // Get Current Line
+            QString currLine = readStream.readLine();
+            // Check Current Line
+            if (currLine.indexOf(DEFAULT_GREP) < 0 && currLine.indexOf(DEFAULT_SUDO) < 0) {
+                //qDebug() << currLine;
+                // Check Line
+                if (currLine.startsWith(aUser)) {
+                    // Close File
+                    serverCheckOutFile.close();
+                    // Delete File
+                    serverCheckOutFile.remove();
+
+                    return true;
+                }
+            }
+        }
+
+        // Close File
+        serverCheckOutFile.close();
+        // Delete File
+        serverCheckOutFile.remove();
     }
 
 #elif defined(Q_OS_WIN)
@@ -536,9 +556,10 @@ bool checkRemoteFileServerRunning()
 //==============================================================================
 int launchRemoteFileServer(const bool& asRoot, const QString& aRootPass)
 {
-    QString fileServerCommandLine = asRoot ? QString(getAppExecPath() + "/%1 %2").arg(DEFAULT_FILE_SERVER_EXEC_NAME)
-                                                                                 .arg(DEFAULT_OPTION_RUNASROOT)
-                                           : QString(getAppExecPath() + "/%1").arg(DEFAULT_FILE_SERVER_EXEC_NAME);
+    // Init File Server Startup Command Line
+    QString fileServerCommandLine = asRoot ? QString("\"" + getAppExecPath() + "/%1\" %2").arg(DEFAULT_FILE_SERVER_EXEC_NAME)
+                                                                                          .arg(DEFAULT_OPTION_RUNASROOT)
+                                           : QString("\"" + getAppExecPath() + "/%1\"").arg(DEFAULT_FILE_SERVER_EXEC_NAME);
 
     qDebug() << "launchRemoteFileServer - fileServerCommandLine: " << fileServerCommandLine;
 
@@ -547,6 +568,11 @@ int launchRemoteFileServer(const bool& asRoot, const QString& aRootPass)
 
     // Wait a bit
     QThread::msleep(DEFAULT_FILE_SERVER_LAUNCH_DELAY);
+
+    // Check If Server Running
+    if (!checkRemoteFileServerRunning(asRoot ? DEFAULT_ROOT : qgetenv(DEFAULT_ENV_VARIABLE_USER))) {
+        return -1;
+    }
 
     return result;
 }
@@ -698,7 +724,9 @@ QString getAppExecPath()
     // Init Settings
     QSettings settings;
 
-    return settings.value(SETTINGS_KEY_MAIN_EXEC_PATH).toString();
+    QString execPath = settings.value(SETTINGS_KEY_MAIN_EXEC_PATH).toString();
+
+    return execPath.isEmpty() ? "." : execPath;
 }
 
 //==============================================================================

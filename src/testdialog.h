@@ -69,6 +69,8 @@ protected slots: // Buttons
     void on_createClientButton_clicked();
     // On Connect Client Button Clicked Slot
     void on_connectButton_clicked();
+    // Connect As Root Button Clicked Slot
+    void on_connectAsRootButton_clicked();
     // On Start Client Button Clicked Slot
     void on_startButton_clicked();
     // On Send Yes To Client Button Clicked Slot
@@ -85,8 +87,6 @@ protected slots: // Buttons
     void on_disconnectButton_clicked();
     // On Clear Clients Button Clicked Slot
     void on_clearButton_clicked();
-
-private slots:
 
 private:
     // UI
@@ -124,6 +124,8 @@ public:
 
     // Connect
     void connectClient();
+    // Connect Client As Admin
+    void connectClientAsAdmin(const QString& aRootPass);
     // Start
     void start();
     // Abort
@@ -146,6 +148,9 @@ public:
     // Is Suspended
     bool isSuspended();
 
+    // Is Admin Mode On
+    bool isAdminModeOn();
+
     // Destructor
     virtual ~TestClient();
 
@@ -155,6 +160,10 @@ signals:
     void connectionChanged(TestClient* aClient, const bool& aConnected);
     // Status Changed Signal
     void statusChanged(TestClient* aClient, const int& aStatus);
+    // Admin Mode Changed Signal
+    void adminModeChanged(TestClient* aClient, const bool& aAdminModeIsOn);
+    // Operation Finished Signal
+    void finished(TestClient* aClient);
 
 protected slots: // For RemoteFileUtilClient
 
@@ -163,6 +172,9 @@ protected slots: // For RemoteFileUtilClient
 
     // Client Status Changed Slot
     void clientStatusChanged(const unsigned int& aID, const int& aStatus);
+
+    // Admin Mode Changed Slot
+    void clientAdminModeChanged(const unsigned int& aID, const bool& aAdminMode);
 
     // File Operation Started Slot
     void fileOpStarted(const unsigned int& aID,
@@ -260,9 +272,13 @@ public:
 
     // Is Client Connect
     bool clientConnected(const int& aIndex);
+    // Is Admin Mode On
+    bool adminModeOn(const int& aIndex);
 
     // Connect CLient
     void connectClient(const int& aIndex);
+    // Connect Client In Admin Mode
+    void connectClientAsAdmin(const int& aIndex, const QString& aRootPass);
     // Disconnect Client
     void disconnectClient(const int& aIndex);
 
@@ -313,8 +329,12 @@ protected slots:
 
     // Client Connection Changed Slot
     void clientConnectionChanged(TestClient* aClient, const bool& aConnected);
-    // Status Changed SLot
+    // Status Changed Slot
     void clientStatusChanged(TestClient* aClient, const int& aStatus);
+    // Admin Mode Changed Slot
+    void clientAdminModeChanged(TestClient* aClient, const bool& aAdminModeIsOn);
+    // Client Operation Finished Slot
+    void clientFinished(TestClient* aClient);
 
 protected:
 
@@ -322,6 +342,7 @@ protected:
     enum Roles {
         ClientID            = Qt::UserRole + 1,
         ClientConnected,
+        ClientAdmin,
         ClientBusy,
         ClientListModelRolesCount
     };

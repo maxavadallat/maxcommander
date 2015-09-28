@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>360</height>
+    <height>417</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -80,6 +80,16 @@
        </property>
        <property name="autoDefault">
         <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="connectAsRootButton">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>Connect As Root</string>
        </property>
       </widget>
      </item>
@@ -251,6 +261,20 @@
    <header>QQuickWidget</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>testView</tabstop>
+  <tabstop>createClientButton</tabstop>
+  <tabstop>connectButton</tabstop>
+  <tabstop>connectAsRootButton</tabstop>
+  <tabstop>disconnectButton</tabstop>
+  <tabstop>startButton</tabstop>
+  <tabstop>yesButton</tabstop>
+  <tabstop>noButton</tabstop>
+  <tabstop>stopButton</tabstop>
+  <tabstop>pauseButton</tabstop>
+  <tabstop>resumeButton</tabstop>
+  <tabstop>clearButton</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

@@ -3,7 +3,8 @@
 
 #include <mcwinterface.h>
 
-#include "src/testdialog.h"
+#include "passworddialog.h"
+#include "testdialog.h"
 #include "ui_testdialog.h"
 #include "remotefileutilclient.h"
 #include "utility.h"
@@ -59,6 +60,9 @@ void TestDialog::clear()
         clientListModel->clear();
     }
 
+    // Set Current Index
+    setCurrentIndex(-1);
+
     // Configure Buttons
     configureButtons();
 }
@@ -101,7 +105,8 @@ void TestDialog::configureButtons()
         TestClient* client = clientListModel->getClient(currentIndex);
 
         // Enable/Disable Buttons
-        ui->connectButton->setEnabled(client && !client->isConnected());
+        ui->connectButton->setEnabled(client && !client->isConnected() && !client->isAdminModeOn());
+        ui->connectAsRootButton->setEnabled(client && (!client->isConnected() || (client->isConnected() && !client->isAdminModeOn())));
         ui->disconnectButton->setEnabled(client && client->isConnected());
 
         ui->startButton->setEnabled(client && client->isConnected() && !client->isBusy());
@@ -118,6 +123,7 @@ void TestDialog::configureButtons()
         // Enable/Disable Buttons
         ui->createClientButton->setEnabled(false);
         ui->connectButton->setEnabled(false);
+        ui->connectAsRootButton->setEnabled(false);
         ui->startButton->setEnabled(false);
         ui->yesButton->setEnabled(false);
         ui->noButton->setEnabled(false);
@@ -201,6 +207,36 @@ void TestDialog::on_connectButton_clicked()
     if (clientListModel) {
         // Connect
         clientListModel->connectClient(currentIndex);
+    }
+}
+
+//==============================================================================
+// Connect As Root Button Clicked Slot
+//==============================================================================
+void TestDialog::on_connectAsRootButton_clicked()
+{
+    // Check Model
+    if (clientListModel) {
+
+        // Init Root Pass
+        QString rootPass = "";
+
+        // Check If Remote File Server Running
+        if (!checkRemoteFileServerRunning(DEFAULT_ROOT)) {
+            // Init Password Dialog
+            PasswordDialog passwordDialog;
+            // Exec Password Dialog
+            if (passwordDialog.exec()) {
+                // Get Root Pass
+                rootPass = passwordDialog.getPass().trimmed();
+
+            } else {
+                return;
+            }
+        }
+
+        // Connect As Admin
+        clientListModel->connectClientAsAdmin(currentIndex, rootPass);
     }
 }
 
@@ -352,6 +388,7 @@ TestClient::TestClient(QObject* aParent)
     // Connect Signals
     connect(fileUtil, SIGNAL(clientConnectionChanged(uint,bool)), this, SLOT(clientConnectionChanged(uint,bool)));
     connect(fileUtil, SIGNAL(clientStatusChanged(uint,int)), this, SLOT(clientStatusChanged(uint,int)));
+    connect(fileUtil, SIGNAL(clientAdminModeChanged(uint, bool)), this, SLOT(clientAdminModeChanged(uint,bool)));
     connect(fileUtil, SIGNAL(fileOpStarted(uint,QString,QString,QString,QString)), this, SLOT(fileOpStarted(uint,QString,QString,QString,QString)));
     connect(fileUtil, SIGNAL(fileOpProgress(uint,QString,QString,quint64,quint64)), this, SLOT(fileOpProgress(uint,QString,QString,quint64,quint64)));
     connect(fileUtil, SIGNAL(fileOpNeedConfirm(uint,QString,int,QString,QString,QString)), this, SLOT(fileOpNeedConfirm(uint,QString,int,QString,QString,QString)));
@@ -371,6 +408,18 @@ void TestClient::connectClient()
     if (fileUtil) {
         // Connect To Server
         fileUtil->connectToFileServer();
+    }
+}
+
+//==============================================================================
+// Connect Client As Admin
+//==============================================================================
+void TestClient::connectClientAsAdmin(const QString& aRootPass)
+{
+    // Check File Util
+    if (fileUtil) {
+        // Reconnect As Root
+        fileUtil->reconnectAsRoot(aRootPass);
     }
 }
 
@@ -480,6 +529,14 @@ bool TestClient::isSuspended()
 }
 
 //==============================================================================
+// Is Admin Mode On
+//==============================================================================
+bool TestClient::isAdminModeOn()
+{
+    return fileUtil ? fileUtil->isAdminModeOn() : false;
+}
+
+//==============================================================================
 // Client Connection Changed Slot
 //==============================================================================
 void TestClient::clientConnectionChanged(const unsigned int& aID, const bool& aConnected)
@@ -503,6 +560,19 @@ void TestClient::clientStatusChanged(const unsigned int& aID, const int& aStatus
 
     // Emit Status Changed Signal
     emit statusChanged(this, aStatus);
+}
+
+//==============================================================================
+// Admin Mode Changed Slot
+//==============================================================================
+void TestClient::clientAdminModeChanged(const unsigned int& aID, const bool& aAdminMode)
+{
+    qDebug() << "TestClient::clientAdminModeChanged - aID: " << aID << " - aAdminMode: " << aAdminMode;
+
+    // ...
+
+    // Emit Admin Mode Changed Signal
+    emit adminModeChanged(this, aAdminMode);
 }
 
 //==============================================================================
@@ -560,8 +630,15 @@ void TestClient::fileOpFinished(const unsigned int& aID,
 {
     qDebug() << "TestClient::fileOpFinished - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath << " - aSource: " << aSource << " - aTarget: " << aTarget;
 
+    // Check Operation
+    if (aOp == DEFAULT_OPERATION_TEST) {
+
+    }
+
     // ...
 
+    // Emit Finished Signal
+    emit finished(this);
 }
 
 //==============================================================================
@@ -688,6 +765,7 @@ TestClient* ClientListModel::createNewClient()
     // Connect Signals
     connect(newClient, SIGNAL(connectionChanged(TestClient*,bool)), this, SLOT(clientConnectionChanged(TestClient*,bool)));
     connect(newClient, SIGNAL(statusChanged(TestClient*,int)), this, SLOT(clientStatusChanged(TestClient*,int)));
+    connect(newClient, SIGNAL(finished(TestClient*)), this, SLOT(clientFinished(TestClient*)));
 
     // Begin Insert Rows
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
@@ -728,6 +806,19 @@ bool ClientListModel::clientConnected(const int& aIndex)
 }
 
 //==============================================================================
+// Is Admin Mode On
+//==============================================================================
+bool ClientListModel::adminModeOn(const int& aIndex)
+{
+    // Check Index
+    if (aIndex >= 0 && aIndex < clientList.count()) {
+        return clientList[aIndex]->isAdminModeOn();
+    }
+
+    return false;
+}
+
+//==============================================================================
 // Connect CLient
 //==============================================================================
 void ClientListModel::connectClient(const int& aIndex)
@@ -736,6 +827,18 @@ void ClientListModel::connectClient(const int& aIndex)
     if (aIndex >= 0 && aIndex < clientList.count()) {
         // Connect
         clientList[aIndex]->connectClient();
+    }
+}
+
+//==============================================================================
+// Connect Client In Admin Mode
+//==============================================================================
+void ClientListModel::connectClientAsAdmin(const int& aIndex, const QString& aRootPass)
+{
+    // Check Index
+    if (aIndex >= 0 && aIndex < clientList.count()) {
+        // Connect
+        clientList[aIndex]->connectClientAsAdmin(aRootPass);
     }
 }
 
@@ -880,6 +983,8 @@ QHash<int, QByteArray> ClientListModel::roleNames() const
     roles[ClientID]         = "clientID";
     // Client Connected
     roles[ClientConnected]  = "clientConnected";
+    // Client Admin
+    roles[ClientAdmin]      = "clientAdmin";
     // Client Busy
     roles[ClientBusy]       = "clientBusy";
 
@@ -920,6 +1025,7 @@ QVariant ClientListModel::data(const QModelIndex& aIndex, int aRole) const
         switch (aRole) {
             case ClientID:          return item->getID();
             case ClientConnected:   return item->isConnected();
+            case ClientAdmin:       return item->isAdminModeOn();
             case ClientBusy:        return item->isBusy();
 
             default:
@@ -999,6 +1105,46 @@ void ClientListModel::clientStatusChanged(TestClient* aClient, const int& aStatu
 }
 
 //==============================================================================
+// Admin Mode Changed Slot
+//==============================================================================
+void ClientListModel::clientAdminModeChanged(TestClient* aClient, const bool& aAdminModeIsOn)
+{
+    qDebug() << "ClientListModel::clientStatusChanged - aClient: " << aClient << " - aAdminModeIsOn: " << aAdminModeIsOn;
+
+    // Get Client List Count
+    int tclCount = clientList.count();
+
+    // Go Thru Client List
+    for (int i=0; i<tclCount; ++i) {
+        // Get Client
+        TestClient* client = clientList[i];
+        // Check Client
+        if (client == aClient) {
+            // Get Index
+            QModelIndex updateIndex = createIndex(i, 0);
+            // Emit Data Changed
+            emit dataChanged(updateIndex, updateIndex);
+
+            // Emit Client Updated Signal
+            emit clientUpdated();
+            return;
+        }
+    }
+}
+
+//==============================================================================
+// Client Operation Finished Slot
+//==============================================================================
+void ClientListModel::clientFinished(TestClient* aClient)
+{
+    qDebug() << "ClientListModel::clientFinished - aClient: " << aClient;
+
+    // Emit Client Updated Signal
+    emit clientUpdated();
+}
+
+
+//==============================================================================
 // Destructor
 //==============================================================================
 ClientListModel::~ClientListModel()
@@ -1006,5 +1152,6 @@ ClientListModel::~ClientListModel()
     // Clear
     clear();
 }
+
 
 

@@ -36,7 +36,7 @@ Rectangle {
 
             property string busyColor: busyOn ? "#FFAA00AA" : "#77770077"
 
-            color: clientConnected ? (clientBusy ? delegateRoot.busyColor : "#77007700") : "#77770000"
+            color: clientConnected ? (clientBusy ? delegateRoot.busyColor : clientAdmin ? "orange" : "#77007700") : "#77770000"
 
             Behavior on color { PropertyAnimation { duration: delegateRoot.transitionDuration } }
 

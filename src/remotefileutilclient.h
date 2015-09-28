@@ -40,10 +40,16 @@ public:
     explicit RemoteFileUtilClient(QObject* aParent = NULL);
 
     // Connect To File Server
-    void connectToFileServer(const QString& aHost = "", const bool& asRoot = false, const QString& aRootPass = "");
+    bool connectToFileServer(const QString& aHost = "", const bool& asRoot = false, const QString& aRootPass = "");
+
+    // Reconnect As Root
+    bool reconnectAsRoot(const QString& aRootPass, const QString& aHost = "");
 
     // Is Client Connected
     bool isConnected();
+
+    // Admin Mode Is On
+    bool isAdminModeOn();
 
     // Get ID
     unsigned int getID();
@@ -137,6 +143,9 @@ signals:
 
     // Client Status Changed Signal
     void clientStatusChanged(const unsigned int& aID, const int& aStatus);
+
+    // Client Admin Mode Changed Signal
+    void clientAdminModeChanged(const unsigned int& aID, const bool& aAdminMode);
 
     // File Operation Started Signal
     void fileOpStarted(const unsigned int& aID,
@@ -244,10 +253,10 @@ protected slots:
     void setStatus(const ClientStatusType& aStatus);
 
     // Check If File Server Running
-    bool checkFileServerRunning();
+    bool checkFileServerRunning(const bool& asRoot = false);
 
     // Start File Server
-    void startFileServer(const bool& asRoot = false, const QString& aRootPass = "");
+    bool startFileServer(const bool& asRoot = false, const QString& aRootPass = "");
 
     // Parse Last Buffer
     void parseLastBuffer();
@@ -311,10 +320,16 @@ protected slots:
     // Send Acknowledge
     void sendAcknowledge();
 
+    // Set Admin Mode
+    void setAdminMode(const bool& aAdminMode);
+
 private:
 
     // Client ID
     unsigned int                    cID;
+
+    // Admin Mode
+    bool                            adminMode;
 
     // Status
     ClientStatusType                status;
@@ -329,12 +344,6 @@ private:
 
     // Last Data Map
     QVariantMap                     lastDataMap;
-
-    // Reconnect As Root
-    bool                            reconnectAsRoot;
-
-    // Need Reconnect After Disconnect
-    bool                            needReconnect;
 
     // General Mutex
     QMutex                          mutex;

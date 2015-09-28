@@ -23,10 +23,9 @@
 RemoteFileUtilClient::RemoteFileUtilClient(QObject* aParent)
     : QObject(aParent)
     , cID(0)
+    , adminMode(false)
     , status(ECSTCreated)
     , client(NULL)
-    , reconnectAsRoot(false)
-    , needReconnect(false)
 {
     //qDebug() << "RemoteFileUtilClient::RemoteFileUtilClient";
 
@@ -70,32 +69,61 @@ void RemoteFileUtilClient::init()
 //==============================================================================
 // Connect To File Server
 //==============================================================================
-void RemoteFileUtilClient::connectToFileServer(const QString& aHost, const bool& asRoot, const QString& aRootPass)
+bool RemoteFileUtilClient::connectToFileServer(const QString& aHost, const bool& asRoot, const QString& aRootPass)
 {
     // Check Client
     if (!client) {
         qWarning() << "RemoteFileUtilClient::connectToFileServer - NO CLIENT SOCKET!!";
 
-        return;
+        return false;
     }
 
-    // Check If Server Runnind
-    if (!checkFileServerRunning()) {
-        qDebug() << "RemoteFileUtilClient::connectToFileServer - File Server Not Running! Starting...";
+    // Init Result
+    bool result = false;
 
-        // Launch REmote File Server
-        startFileServer(asRoot, aRootPass);
+    // Check If Server Runnind
+    if (!checkFileServerRunning(asRoot)) {
+        qDebug() << "RemoteFileUtilClient::connectToFileServer - File Server Not Running! Starting...";
+        // Launch Remote File Server
+        result = startFileServer(asRoot, aRootPass);
+    } else {
+        // Set REsult
+        result = true;
     }
 
     // Check Client Status
     if (client->state() == QAbstractSocket::ConnectingState || client->state() == QAbstractSocket::ConnectedState) {
-        return;
+        return false;
     }
 
     qDebug() << "RemoteFileUtilClient::connectToFileServer - host: " << (aHost.isEmpty() ? DEFAULT_WORKER_HOST_NAME : aHost) << " - port:" << (asRoot ? DEFAULT_FILE_SERVER_ROOT_HOST_PORT : DEFAULT_FILE_SERVER_HOST_PORT);
 
     // Connect To Host
     client->connectToHost(DEFAULT_WORKER_HOST_NAME, asRoot ? DEFAULT_FILE_SERVER_ROOT_HOST_PORT : DEFAULT_FILE_SERVER_HOST_PORT);
+
+    return result;
+}
+
+//==============================================================================
+// Reconnect As Root
+//==============================================================================
+bool RemoteFileUtilClient::reconnectAsRoot(const QString& aRootPass, const QString& aHost)
+{
+    // Close
+    close();
+
+    // Connect To File Server
+    bool result = connectToFileServer(aHost, true, aRootPass);
+
+    // Check REsult
+    if (result) {
+        // Set Admin Mode
+        setAdminMode(true);
+    }
+
+    // ...
+
+    return result;
 }
 
 //==============================================================================
@@ -104,6 +132,14 @@ void RemoteFileUtilClient::connectToFileServer(const QString& aHost, const bool&
 bool RemoteFileUtilClient::isConnected()
 {
     return client ? client->state() == QAbstractSocket::ConnectedState : false;
+}
+
+//==============================================================================
+// Admin Mode Is On
+//==============================================================================
+bool RemoteFileUtilClient::isAdminModeOn()
+{
+    return adminMode && isConnected();
 }
 
 //==============================================================================
@@ -633,6 +669,9 @@ void RemoteFileUtilClient::close()
 
         // Reset ID
         cID = 0;
+
+        // Reset Admin Mode
+        setAdminMode(false);
     }
 }
 
@@ -780,22 +819,26 @@ void RemoteFileUtilClient::setStatus(const ClientStatusType& aStatus)
 //==============================================================================
 // Check If File Server Running
 //==============================================================================
-bool RemoteFileUtilClient::checkFileServerRunning()
+bool RemoteFileUtilClient::checkFileServerRunning(const bool& asRoot)
 {
-    return checkRemoteFileServerRunning();
+    return checkRemoteFileServerRunning(asRoot ? DEFAULT_ROOT : qgetenv(DEFAULT_ENV_VARIABLE_USER));
 }
 
 //==============================================================================
 // Start File Server
 //==============================================================================
-void RemoteFileUtilClient::startFileServer(const bool& asRoot, const QString& aRootPass)
+bool RemoteFileUtilClient::startFileServer(const bool& asRoot, const QString& aRootPass)
 {
     qDebug() << "RemoteFileUtilClient::startFileServer - cID: " << cID << " - asRoot: " << asRoot;
 
     // Launch Remote File Sever
     if (launchRemoteFileServer(asRoot, aRootPass) != 0) {
         qDebug() << "RemoteFileUtilClient::startFileServer - cID: " << cID << " - ERROR LAUNCHING FILE SERVER!!";
+
+        return false;
     }
+
+    return true;
 }
 
 //==============================================================================
@@ -880,6 +923,9 @@ void RemoteFileUtilClient::socketDisconnected()
 
     // Emit Client Connection Changed Signal
     emit clientConnectionChanged(cID, false);
+
+    // Reset Admin Mode
+    setAdminMode(false);
 
     // Reset Client ID
     cID = 0;
@@ -974,6 +1020,30 @@ void RemoteFileUtilClient::sendAcknowledge()
     writeData(newData);
 
     // ...
+}
+
+//==============================================================================
+// Set Admin Mode
+//==============================================================================
+void RemoteFileUtilClient::setAdminMode(const bool& aAdminMode)
+{
+    // Check Admin Mode
+    if (adminMode != aAdminMode) {
+        // Set Admin Mode
+        adminMode = aAdminMode;
+
+        // Check Admin Mode
+        if (adminMode) {
+            // Start Admin Mode Idle Timer
+            //startAdminModeIdleTimer();
+        } else {
+            // Stop Admin Mode Idle Timer
+            //stopAdminModeIdleTimer();
+        }
+
+        // Emit Admin Mode Changed Signal
+        emit clientAdminModeChanged(cID, adminMode);
+    }
 }
 
 //==============================================================================
@@ -1438,4 +1508,6 @@ RemoteFileUtilClient::~RemoteFileUtilClient()
 
     //qDebug() << "RemoteFileUtilClient::~RemoteFileUtilClient - cID: " << cID;
 }
+
+
 

@@ -12,7 +12,6 @@
 #define DEFAULT_ORGANIZATION_NAME                           "MySoft"
 #define DEFAULT_ORGANIZATION_DOMAIN                         "mysoft.com"
 
-
 #define DEFAULT_WORKER_HOST_NAME                            "localhost"
 
 
@@ -234,11 +233,24 @@
 // Default Icon Get Retry Count Max
 #define DEFAULT_ICOM_GET_RETRY_COUNT_MAX                    5
 
+// Default Shell Command Template
+#define DEFAULT_SHELL_COMMAND_TEMPLATE                      "%1 &"
 // Default Root Shell Command Template
-#define DEFAULT_ROOT_SHELL_COMMAND_TEMPLATE                 "echo \"%1\" | sudo -S \"%2\" &"
+#define DEFAULT_ROOT_SHELL_COMMAND_TEMPLATE                 "echo \"%1\" | sudo -S -k %2 &"
 
-// Default PS Command Line To Check If File Serverr Is Running
-#define DEFAULT_PS_COMMAND_CHECK_FILESERVER                 "ps x"
+// Commands
+#define DEFAULT_GREP                                        "grep"
+#define DEFAULT_SUDO                                        "sudo"
+
+// Default Root Name
+#define DEFAULT_ROOT                                        "root"
+
+// Default Environment Value Name - User
+#define DEFAULT_ENV_VARIABLE_USER                           "USER"
+// Default PS Command Line To Check If File Server Is Running
+#define DEFAULT_PS_COMMAND_CHECK_FILESERVER                 "ps aux | grep \"%1\" > \"%2\""
+// Default Server Check Out
+#define DEFAULT_SERVER_CHECK_OUT_FILENAME                   "server_check.out"
 
 // Default File Server Launch Delay
 #define DEFAULT_FILE_SERVER_LAUNCH_DELAY                    200

@@ -1157,6 +1157,24 @@ void MainWindow::launchProperties()
 }
 
 //==============================================================================
+// Get Current Dir
+//==============================================================================
+QString MainWindow::getCurrentDir(const QString& aPanelName)
+{
+    // Check Panel Name & Panel
+    if (aPanelName == DEFAULT_PANEL_NAME_LEFT && leftPanel) {
+        return leftPanel->getCurrentDir();
+    }
+
+    // Check Panel Name & Panel
+    if (aPanelName == DEFAULT_PANEL_NAME_RIGHT && rightPanel) {
+        return rightPanel->getCurrentDir();
+    }
+
+    return "";
+}
+
+//==============================================================================
 // Settings Has Changed Slot
 //==============================================================================
 void MainWindow::settingsHasChanged()
@@ -2277,6 +2295,50 @@ void MainWindow::on_actionVolumes_triggered()
     if (focusedPanel) {
         // Goto Volumes
         focusedPanel->gotoVolumes();
+    }
+}
+
+//==============================================================================
+// Action Swap Dirs Triggered Slot
+//==============================================================================
+void MainWindow::on_actionSwap_Dirs_triggered()
+{
+    // Check Left Panel
+    if (!leftPanel) {
+        return;
+    }
+
+    // Check Right Panel
+    if (!rightPanel) {
+        return;
+    }
+
+    // Get Left Current Dir
+    QString leftCurrentDir = leftPanel->getCurrentDir();
+    // Get Left Last File
+    QString lastFileLeft = leftPanel->getCurrFileInfo().fileName();
+    // Get Right Current Dir
+    QString rightCurrentDir = rightPanel->getCurrentDir();
+    // Get Right Last File
+    QString lastFileRight = rightPanel->getCurrFileInfo().fileName();
+
+    // Compare Dirs
+    if (leftCurrentDir == rightCurrentDir) {
+        return;
+    }
+
+    // Set Left Current Dir
+    leftPanel->setCurrentDir(rightCurrentDir, lastFileRight);
+    // Set Right Current Dir
+    rightPanel->setCurrentDir(leftCurrentDir, lastFileLeft);
+
+    // Check Focused Panel
+    if (leftPanel->getPanelFocus()) {
+        // Set Panel Focus
+        rightPanel->setPanelFocus(true);
+    } else {
+        // Set Panel Focus
+        leftPanel->setPanelFocus(true);
     }
 }
 

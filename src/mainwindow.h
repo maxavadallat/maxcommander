@@ -94,6 +94,9 @@ public slots:
     // Launch Properties Slot
     void launchProperties();
 
+    // Get Current Dir
+    QString getCurrentDir(const QString& aPanelName);
+
     // Quit Application Slot
     void quitApp();
 
@@ -243,6 +246,8 @@ protected slots: // Actions & Button
     void on_actionDir_Hotlist_triggered();
     // Action Volumes Triggered Slot
     void on_actionVolumes_triggered();
+    // Action Swap Dirs Triggered Slot
+    void on_actionSwap_Dirs_triggered();
 
     // Action Exit Triggered Slot
     void on_actionExit_triggered();

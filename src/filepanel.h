@@ -7,6 +7,7 @@
 #include <QFileInfo>
 #include <QFileSystemWatcher>
 #include <QTimerEvent>
+#include <QAbstractListModel>
 
 namespace Ui {
 class FilePanel;
@@ -235,6 +236,9 @@ public:
     // Set QML Widget Focus Policy
     void setQMLWidgetFocusPolicy(Qt::FocusPolicy aPolicy);
 
+    // Get File List Model
+    const FileListModel* getModel() const;
+
     // Destructor
     virtual ~FilePanel();
 
@@ -278,6 +282,9 @@ public slots:
 
     // Reload
     void reload(const int& aIndex = -1);
+
+    // Sync Current Dir To Other Panel Current Dir
+    void syncCurrentDir();
 
     // Select All Files
     void selectAllFiles();

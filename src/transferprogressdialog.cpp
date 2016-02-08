@@ -1166,7 +1166,10 @@ void TransferProgressDialog::clientConnectionChanged(const unsigned int& aID, co
 //==============================================================================
 void TransferProgressDialog::clientStatusChanged(const unsigned int& aID, const int& aStatus)
 {
-    qDebug() << "TransferProgressDialog::clientStatusChanged - aID: " << aID << " - aStatus: " << RemoteFileUtilClient::statusToString(aStatus);
+    Q_UNUSED(aID);
+    Q_UNUSED(aStatus);
+
+    //qDebug() << "TransferProgressDialog::clientStatusChanged - aID: " << aID << " - aStatus: " << RemoteFileUtilClient::statusToString(aStatus);
 
     // ...
 

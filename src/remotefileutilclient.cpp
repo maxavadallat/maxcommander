@@ -25,6 +25,7 @@ RemoteFileUtilClient::RemoteFileUtilClient(QObject* aParent)
     , cID(0)
     , adminMode(false)
     , status(ECSTCreated)
+    , ignoreAbort(false)
     , client(NULL)
 {
     //qDebug() << "RemoteFileUtilClient::RemoteFileUtilClient";
@@ -185,9 +186,15 @@ void RemoteFileUtilClient::getDirList(const QString& aDirPath, const int& aFilte
         qDebug() << "#########################################################################";
 
         // ...
+
+        // Abort
+        abort(true);
     }
 
     //qDebug() << "RemoteFileUtilClient::getDirList - aDirPath: " << aDirPath << " - aFilters: " << aFilters << " - aSortFlags: " << aSortFlags;
+
+    // Set Status
+    setStatus(ECSTBusy);
 
     // Init New Data
     QVariantMap newData;
@@ -204,8 +211,6 @@ void RemoteFileUtilClient::getDirList(const QString& aDirPath, const int& aFilte
     // Write Data
     writeData(newData);
 
-    // Set Status
-    setStatus(ECSTBusy);
 }
 
 //==============================================================================
@@ -566,7 +571,7 @@ void RemoteFileUtilClient::clearFileTransferOptions()
 //==============================================================================
 // Abort Current Operation
 //==============================================================================
-void RemoteFileUtilClient::abort()
+void RemoteFileUtilClient::abort(const bool& aIgnoreResponse)
 {
     // Check Client & Status
     if (client && cID > 0 && (status == ECSTBusy || status == ECSTWaiting || status == ECSTSuspended)) {
@@ -574,6 +579,9 @@ void RemoteFileUtilClient::abort()
         setStatus(ECSTAborting);
 
         qDebug() << "RemoteFileUtilClient::abort - cID: " << cID;
+
+        // Set Ignore Abort
+        ignoreAbort = aIgnoreResponse;
 
         // Init New Data
         QVariantMap newData;
@@ -865,6 +873,8 @@ void RemoteFileUtilClient::writeData(const QByteArray& aData)
         client->write(aData);
         // Flush
         client->flush();
+        // Wait For Bytes Written
+        client->waitForBytesWritten();
     }
 }
 
@@ -1326,6 +1336,8 @@ void RemoteFileUtilClient::handleConfirm()
 //==============================================================================
 void RemoteFileUtilClient::handleFinished()
 {
+    //qDebug() << "RemoteFileUtilClient::handleFinished";
+
     // Set Status
     setStatus(ECSTIdle);
 
@@ -1342,15 +1354,23 @@ void RemoteFileUtilClient::handleFinished()
 //==============================================================================
 void RemoteFileUtilClient::handleAbort()
 {
-    // Set Status
-    setStatus(ECSTAborted);
+    //qDebug() << "RemoteFileUtilClient::handleAbort";
 
-    // Emit File Operation Aborted Signal
-    emit fileOpAborted(cID,
-                       lastDataMap[DEFAULT_KEY_OPERATION].toString(),
-                       lastDataMap[DEFAULT_KEY_PATH].toString(),
-                       lastDataMap[DEFAULT_KEY_SOURCE].toString(),
-                       lastDataMap[DEFAULT_KEY_TARGET].toString());
+    // Check Ignore Abort
+    if (ignoreAbort) {
+        // Reset Ignore Abort
+        ignoreAbort = true;
+    } else {
+        // Set Status
+        setStatus(ECSTAborted);
+
+        // Emit File Operation Aborted Signal
+        emit fileOpAborted(cID,
+                           lastDataMap[DEFAULT_KEY_OPERATION].toString(),
+                           lastDataMap[DEFAULT_KEY_PATH].toString(),
+                           lastDataMap[DEFAULT_KEY_SOURCE].toString(),
+                           lastDataMap[DEFAULT_KEY_TARGET].toString());
+    }
 }
 
 //==============================================================================

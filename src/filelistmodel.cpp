@@ -241,6 +241,11 @@ void FileListModel::setCaseSensitiveSorting(const bool& aCaseSensitiveSort)
 //==============================================================================
 int FileListModel::getFileCount()
 {
+    // Check If Empty
+    if (itemList.isEmpty()) {
+        return 0;
+    }
+
     // Check First Item
     if (itemList[0]->fileInfo.fileName() == QString(".."))
         return itemList.count() - 1;

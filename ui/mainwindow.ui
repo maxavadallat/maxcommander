@@ -381,6 +381,8 @@
     <addaction name="separator"/>
     <addaction name="actionDir_Hotlist"/>
     <addaction name="actionVolumes"/>
+    <addaction name="separator"/>
+    <addaction name="actionSwap_Dirs"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -592,6 +594,14 @@
    </property>
    <property name="shortcut">
     <string>V</string>
+   </property>
+  </action>
+  <action name="actionSwap_Dirs">
+   <property name="text">
+    <string>Swap Dirs</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+U</string>
    </property>
   </action>
  </widget>

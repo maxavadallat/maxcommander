@@ -107,7 +107,7 @@ public:
     // ...
 
     // Abort Current Operation
-    void abort();
+    void abort(const bool& aIgnoreResponse = false);
     // Suspend Current Operation
     void suspend();
     // Resume Current Operation
@@ -334,6 +334,9 @@ private:
     // Status
     ClientStatusType                status;
 
+    // Ignore, Don't Wait For Abort Abort
+    bool                            ignoreAbort;
+
     // Client Socket
     QTcpSocket*                     client;
 
@@ -341,6 +344,9 @@ private:
     QByteArray                      lastBuffer;
     // Frame Pattern
     QByteArray                      framePattern;
+
+    // Last Request Map
+    QVariantMap                     lastRequestMap;
 
     // Last Data Map
     QVariantMap                     lastDataMap;

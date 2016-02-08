@@ -1425,6 +1425,32 @@ void FilePanel::reload(const int& aIndex)
 }
 
 //==============================================================================
+// Sync Current Dir To Other Panel Current Dir
+//==============================================================================
+void FilePanel::syncCurrentDir()
+{
+    qDebug() << "FilePanel::syncCurrentDir - panelName: " << panelName;
+
+    // Get Main Widnow Instance
+    MainWindow* mainWindow = MainWindow::getInstance();
+
+    // Check Panel Name
+    if (panelName == DEFAULT_PANEL_NAME_LEFT) {
+        // Set Current Dir
+        setCurrentDir(mainWindow->getCurrentDir(DEFAULT_PANEL_NAME_RIGHT));
+    } else {
+        // Set Current Dir
+        setCurrentDir(mainWindow->getCurrentDir(DEFAULT_PANEL_NAME_LEFT));
+    }
+
+    // ...
+
+    // RElease Main Widnow Instance
+    mainWindow->release();
+
+}
+
+//==============================================================================
 // Select All Files
 //==============================================================================
 void FilePanel::selectAllFiles()
@@ -2814,6 +2840,9 @@ void FilePanel::focusOutEvent(QFocusEvent* aEvent)
 
         // Set Panel Focus
         setPanelFocus(false);
+
+        // Reset Modifier Keys
+        resetModifierKeys();
     }
 }
 
@@ -3068,6 +3097,14 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
                 }
             break;
 
+            case Qt::Key_D:
+                // Check Modifier Keys
+                if (modifierKeys == Qt::NoModifier) {
+                    // Sync Current Dir
+                    syncCurrentDir();
+                }
+            break;
+
             case Qt::Key_V:
                 // Check Modifier Keys
                 if (modifierKeys == Qt::NoModifier) {
@@ -3220,7 +3257,7 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
             break;
 
             default:
-                //qDebug() << "FilePanel::keyReleaseEvent - key: " << aEvent->key();
+                qDebug() << "FilePanel::keyReleaseEvent - key: " << aEvent->key();
                 //QFrame::keyReleaseEvent(aEvent);
             break;
         }
@@ -3293,6 +3330,14 @@ void FilePanel::timerEvent(QTimerEvent* aEvent)
             }
         }
     }
+}
+
+//==============================================================================
+// Get Model
+//==============================================================================
+const FileListModel* FilePanel::getModel() const
+{
+    return fileListModel;
 }
 
 //==============================================================================

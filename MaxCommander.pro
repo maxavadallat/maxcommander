@@ -17,6 +17,9 @@ QT                      += network
 QT                      += webkitwidgets
 QT                      += multimedia
 
+# Mac SDK
+QMAKE_MAC_SDK           = macosx10.11
+
 macx: {
 # Icon
 ICON                    = resources/images/icons/MaxCommander.icns

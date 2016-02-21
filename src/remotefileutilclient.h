@@ -161,13 +161,19 @@ signals:
                         const quint64& aCurrProgress,
                         const quint64& aCurrTotal);
 
-    // åFile Operation Suspended
+    // File Operation Suspended Signal
     void fileOpSuspended(const unsigned int& aID,
-                         const QString& aOp);
+                         const QString& aOp,
+                         const QString& aPath,
+                         const QString& aSource,
+                         const QString& aTarget);
 
-    // File Operation Resumed
+    // File Operation Resumed Signal
     void fileOpResumed(const unsigned int& aID,
-                       const QString& aOp);
+                       const QString& aOp,
+                       const QString& aPath,
+                       const QString& aSource,
+                       const QString& aTarget);
 
     // File Operation Finished Signal
     void fileOpFinished(const unsigned int& aID,
@@ -240,7 +246,6 @@ signals:
                               const bool& aIsDir,
                               const bool& aIsLink);
 
-
 protected slots:
 
     // Init
@@ -268,6 +273,10 @@ protected slots:
 
     // Handle Started
     void handleStarted();
+    // Handle Suspended
+    void handleSuspended();
+    // Handle Resumed
+    void handleResumed();
     // Handle Preogress
     void handleProgress();
     // Handle Confirm

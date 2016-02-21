@@ -123,7 +123,7 @@ void SettingsController::setValue(const QString& aKey, const QVariant& aValue)
     settings.setValue(aKey, aValue);
 
     // Set Dirty
-    //setDirty(true);
+    setDirty(true);
 
     // Emit Setting Has Changed Signal
     emit settingHasChanged(aKey);

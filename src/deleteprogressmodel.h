@@ -13,6 +13,7 @@ enum DeleteProgressState
 {
     EDPIdle         = 0,
     EDPRunning,
+    EDPSuspended,
     EDPFinished,
     EDPSkipped,
     EDPError
@@ -109,6 +110,10 @@ protected:
     enum RolesIDs
     {
         ERIDFileName    = Qt::UserRole + 1,
+        ERIDIsHidden,
+        ERIDIsLink,
+        ERIDIsDir,
+        ERIDIsArchive,
         ERIDState
     };
 

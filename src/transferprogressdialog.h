@@ -14,48 +14,10 @@ namespace Ui {
 class TransferProgressDialog;
 }
 
+class SettingsController;
 class TransferProgressModel;
 class RemoteFileUtilClient;
 class ConfirmDialog;
-
-
-//==============================================================================
-// Transfer Progress Dialog Queue Item Delegate Class
-//==============================================================================
-class TransferProgressQueueItemDelegate : public QStyledItemDelegate
-{
-public:
-    // Constructor
-    explicit TransferProgressQueueItemDelegate(QObject* aParent = NULL);
-
-    // Paint
-    virtual void paint(QPainter* aPainter,
-                       const QStyleOptionViewItem& aOption,
-                       const QModelIndex& aIndex) const;
-
-    // Create Edirot
-    virtual QWidget* createEditor(QWidget* aParent,
-                                  const QStyleOptionViewItem& aOption,
-                                  const QModelIndex& aIndex) const;
-
-    // Destructor
-    virtual ~TransferProgressQueueItemDelegate();
-
-protected:
-    // Done Icon
-    QImage                  doneIcon;
-    // Error Icon
-    QImage                  errorIcon;
-    // Progress Icon
-    QImage                  progressIcon;
-};
-
-
-
-
-
-
-
 
 
 //==============================================================================
@@ -64,6 +26,12 @@ protected:
 class TransferProgressDialog : public QDialog
 {
     Q_OBJECT
+
+    Q_PROPERTY(int currentIndex READ getCurrentIndex NOTIFY currentIndexChanged)
+
+    Q_PROPERTY(bool panelHasFocus READ getPanelFocus WRITE setPanelFocus NOTIFY panelFocusChanged)
+
+    Q_PROPERTY(bool archiveMode READ getArchiveMode NOTIFY archiveModeChanged)
 
 public:
     // Constructor
@@ -98,13 +66,38 @@ public:
     // Get Last Operation Target
     QString getLastTarget();
 
+    // Get Current Index
+    int getCurrentIndex();
+
+    // Get Panel Focus
+    bool getPanelFocus();
+    // Set Panel Focus
+    void setPanelFocus(const bool& aPanelFocus);
+
+    // Get Archive Mode
+    bool getArchiveMode();
+
     // Destructor
     virtual ~TransferProgressDialog();
 
 signals:
 
+    // Current Index Changed Signal
+    void currentIndexChanged(const int& aCurrentIndex);
+
+    // Panel Focus Changed Singal
+    void panelFocusChanged(const bool& aPanelFocus);
+
+    // Archive Mode Changed Signal
+    void archiveModeChanged(const bool& aArchiveMode);
+
     // Dialog Closed
     void dialogClosed(TransferProgressDialog* aDialog);
+
+public slots:
+
+    // Get Supported Image Formats For Transfer Queue List
+    QStringList getSupportedImageFormats();
 
 protected slots:
 
@@ -146,6 +139,9 @@ protected slots:
     // Stop Progress Refresh Timer
     void stopProgressRefreshTimer();
 
+    // Set Queue Index
+    void setQueueIndex(const int& aQueueIndex);
+
     // Set Archive Mode
     void setArchiveMode(const bool& aArchiveMode);
 
@@ -170,6 +166,20 @@ protected slots: // For RemoteFileUtilClient
                         const QString& aCurrFilePath,
                         const quint64& aCurrProgress,
                         const quint64& aCurrTotal);
+
+    // File Operation Suspended Slot
+    void fileOpSuspended(const unsigned int& aID,
+                         const QString& aOp,
+                         const QString& aPath,
+                         const QString& aSource,
+                         const QString& aTarget);
+
+    // File Operation Resumed Slot
+    void fileOpResumed(const unsigned int& aID,
+                       const QString& aOp,
+                       const QString& aPath,
+                       const QString& aSource,
+                       const QString& aTarget);
 
     // File Operation Skipped Slot
     void fileOpSkipped(const unsigned int& aID,
@@ -251,6 +261,8 @@ private:
 
     // UI
     Ui::TransferProgressDialog*     ui;
+    // Settings
+    SettingsController*             settings;
     // Queue Model
     TransferProgressModel*          queueModel;
     // Remote File Util Client
@@ -261,8 +273,9 @@ private:
     bool                            closeWhenFinished;
     // Queue Index
     int                             queueIndex;
-
-    // Current File Name
+    // Panel Has Focus
+    bool                            panelHasFocus;
+        // Current File Name
     QString                         currentFileName;
     // Source Path
     QString                         sourcePath;
@@ -312,6 +325,9 @@ private:
 
     // Archive Mode
     bool                            archiveMode;
+
+    // Supported Image Formats For Queue List
+    QStringList                     supportedImageFormats;
 };
 
 #endif // TRANSFERPROGRESSDIALOG_H

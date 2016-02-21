@@ -116,10 +116,13 @@ public:
     // Send User Response
     void sendUserResponse(const int& aConfirm, const QString& aNewPath = "");
 
-    // Append Item Manually
+    // Append Item By File Path
     void appendItem(const QString& aFilePath, const bool& aSearchResult = false);
 
-    // Add Item Name-Sorted Manually
+    // Insert Item By File Path
+    void insertItem(const int& aIndex, const QString& aFilePath, const bool& aSearchResult = false);
+
+    // Add Item Name-Sorted By File Path
     void addItem(const QString& aFilePath, const bool& aSearchResult = false);
 
     // Remove Item
@@ -127,8 +130,12 @@ public:
 
     // Set Selected Files Count
     void setSelectedCount(const int& aSelectedCount);
+
     // Get Selected Files Count
     int getSelectedCount();
+
+    // Calculate Item Index Based On Sorting Criterias
+    int calculateIndex(const QFileInfo& aItem);
 
     // Destructor
     virtual ~FileListModel();

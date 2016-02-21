@@ -1,111 +1,23 @@
 #include <QTimer>
-#include <QSettings>
-#include <QPainter>
 #include <QDir>
+#include <QQmlEngine>
+#include <QQmlContext>
+#include <QImageReader>
 #include <QDebug>
 
 #include <mcwinterface.h>
+
+#include "ui_deleteprogressdialog.h"
 
 #include "deleteprogressdialog.h"
 #include "deleteprogressmodel.h"
 #include "infodialog.h"
 #include "confirmdialog.h"
-#include "ui_deleteprogressdialog.h"
+#include "busyindicator.h"
 #include "remotefileutilclient.h"
+#include "filelistimageprovider.h"
+#include "settingscontroller.h"
 #include "constants.h"
-
-
-
-//==============================================================================
-// Constructor
-//==============================================================================
-DeleteProgressQueueItemDelegate::DeleteProgressQueueItemDelegate(QObject* aParent)
-    : QStyledItemDelegate(aParent)
-    , doneIcon(QImage(DEFAULT_ICON_PATH_OK).scaled(QSize(DEFAULT_ICON_WIDTH_16, DEFAULT_ICON_HEIGHT_16), Qt::KeepAspectRatio, Qt::SmoothTransformation))
-    , errorIcon(QImage(DEFAULT_ICON_PATH_CANCEL).scaled(QSize(DEFAULT_ICON_WIDTH_16, DEFAULT_ICON_HEIGHT_16), Qt::KeepAspectRatio, Qt::SmoothTransformation))
-    , progressIcon(QImage(DEFAULT_ICON_PATH_PROGRESS).scaled(QSize(DEFAULT_ICON_WIDTH_16, DEFAULT_ICON_HEIGHT_16), Qt::KeepAspectRatio, Qt::SmoothTransformation))
-{
-}
-
-//==============================================================================
-// Paint
-//==============================================================================
-void DeleteProgressQueueItemDelegate::paint(QPainter* aPainter,
-                                            const QStyleOptionViewItem& aOption,
-                                            const QModelIndex& aIndex) const
-{
-    // Check Painter
-    if (!aPainter) {
-        return;
-    }
-
-    // Check State
-    if (aOption.state & QStyle::State_Selected) {
-        // Fill Selected Background
-        aPainter->fillRect(aOption.rect, aOption.palette.highlight());
-    }
-
-    // Switch Column
-    switch (aIndex.column()) {
-        default:
-        case 0:
-            // Draw Text
-            aPainter->drawText(aOption.rect.adjusted(DEFAULT_PROGRESS_DIALOG_TEXT_MARGIN, 0, -DEFAULT_PROGRESS_DIALOG_TEXT_MARGIN, 0), Qt::AlignVCenter, aIndex.model()->data(aIndex).toString());
-        break;
-
-        case 1:
-            // Switch State
-            switch (aIndex.model()->data(aIndex).toInt()) {
-                case EDPSkipped:
-                case EDPIdle:
-                    // Save
-                    aPainter->save();
-                    // Set Opacity
-                    aPainter->setOpacity(DEFAULT_PROGRESS_DIALOG_SEMI_TRANSPARENCY);
-                    // Draw Image
-                    aPainter->drawImage(aOption.rect.center() - QPoint(progressIcon.width() / 2, progressIcon.height() / 2), progressIcon);
-                    // Restore
-                    aPainter->restore();
-                break;
-                case EDPRunning:    aPainter->drawImage(aOption.rect.center() - QPoint(progressIcon.width() / 2, progressIcon.height() / 2), progressIcon); break;
-                case EDPFinished:   aPainter->drawImage(aOption.rect.center() - QPoint(doneIcon.width() / 2, doneIcon.height() / 2), doneIcon);             break;
-                case EDPError:      aPainter->drawImage(aOption.rect.center() - QPoint(errorIcon.width() / 2, errorIcon.height() / 2), errorIcon);          break;
-            }
-        break;
-    }
-}
-
-//==============================================================================
-// Create Editor
-//==============================================================================
-QWidget* DeleteProgressQueueItemDelegate::createEditor(QWidget* aParent,
-                                                       const QStyleOptionViewItem& aOption,
-                                                       const QModelIndex& aIndex) const
-{
-    Q_UNUSED(aParent);
-    Q_UNUSED(aOption);
-    Q_UNUSED(aIndex);
-
-    return NULL;
-}
-
-//==============================================================================
-// Destructor
-//==============================================================================
-DeleteProgressQueueItemDelegate::~DeleteProgressQueueItemDelegate()
-{
-
-}
-
-
-
-
-
-
-
-
-
-
 
 //==============================================================================
 // Constructor
@@ -113,13 +25,16 @@ DeleteProgressQueueItemDelegate::~DeleteProgressQueueItemDelegate()
 DeleteProgressDialog::DeleteProgressDialog(QWidget* aParent)
     : QDialog(aParent)
     , ui(new Ui::DeleteProgressDialog)
+    , settings(SettingsController::getInstance())
     , queueModel(NULL)
     , fileUtil(NULL)
     , closeWhenFinished(false)
     , queueIndex(-1)
+    , panelHasFocus(true)
     , dirPath("")
     , needQueue(false)
     , progressRefreshTimerID(-1)
+    , archiveMode(false)
 {
     qDebug() << "DeleteProgressDialog::DeleteProgressDialog";
 
@@ -142,10 +57,33 @@ void DeleteProgressDialog::init()
 
     // Create New Queue Model
     queueModel = new DeleteProgressModel();
-    // Set Model
-    ui->deleteQueue->setModel(queueModel);
-    // Set Item Delegate
-    ui->deleteQueue->setItemDelegate(new DeleteProgressQueueItemDelegate());
+
+    // Get Root Contenxt
+    QQmlContext* ctx = ui->deleteQueueListView->rootContext();
+
+    // Set Context Property - Main Controller
+    ctx->setContextProperty(DEFAULT_MAIN_CONTROLLER_NAME, this);
+    // Set Context Property - Transfer List Model
+    ctx->setContextProperty(DEFAULT_FILE_DELETE_LIST_MODEL, queueModel);
+    // Set Context Property - Settings
+    ctx->setContextProperty(DEFAULT_GLOBAL_SETTINGS_CONTROLLER, settings);
+
+    // Get Engine
+    QQmlEngine* engine = ui->deleteQueueListView->engine();
+    // Create New Image Provider
+    FileListImageProvider* newImageProvider = new FileListImageProvider();
+    // Add Image Provider
+    engine->addImageProvider(QLatin1String(DEFAULT_FILE_ICON_PROVIDER_ID), newImageProvider);
+
+    // Register Busy Indicator
+    qmlRegisterType<BusyIndicator>(DEFAULT_CUSTOM_COMPONENTS, 1, 0, DEFAULT_CUSTOM_COMPONENTS_BUSY_INDICATOR);
+
+    // Set Resize Mode
+    ui->deleteQueueListView->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    // Set Source
+    ui->deleteQueueListView->setSource(QUrl(DEFAULT_FILE_DELETE_LIST_QMLFILE_URL));
+
+    // ...
 
     // Create File Util
     fileUtil = new RemoteFileUtilClient();
@@ -157,6 +95,8 @@ void DeleteProgressDialog::init()
         connect(fileUtil, SIGNAL(clientStatusChanged(uint,int)), this, SLOT(clientStatusChanged(uint,int)));
         connect(fileUtil, SIGNAL(fileOpStarted(uint,QString,QString,QString,QString)), this, SLOT(fileOpStarted(uint,QString,QString,QString,QString)));
         connect(fileUtil, SIGNAL(fileOpProgress(uint,QString,QString,quint64,quint64)), this, SLOT(fileOpProgress(uint,QString,QString,quint64,quint64)));
+        connect(fileUtil, SIGNAL(fileOpSuspended(uint,QString,QString,QString,QString)), this, SLOT(fileOpSuspended(uint,QString,QString,QString,QString)));
+        connect(fileUtil, SIGNAL(fileOpResumed(uint,QString,QString,QString,QString)), this, SLOT(fileOpResumed(uint,QString,QString,QString,QString)));
         connect(fileUtil, SIGNAL(fileOpNeedConfirm(uint,QString,int,QString,QString,QString)), this, SLOT(fileOpNeedConfirm(uint,QString,int,QString,QString,QString)));
         connect(fileUtil, SIGNAL(fileOpAborted(uint,QString,QString,QString,QString)), this, SLOT(fileOpAborted(uint,QString,QString,QString,QString)));
         connect(fileUtil, SIGNAL(fileOpError(uint,QString,QString,QString,QString,int)), this, SLOT(fileOpError(uint,QString,QString,QString,QString,int)));
@@ -175,6 +115,16 @@ void DeleteProgressDialog::init()
 
     // Connect Signals
     connect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int)));
+
+    // Get Supported Image Formats Bye Array
+    QList<QByteArray> formats = QImageReader::supportedImageFormats();
+    // Get Count
+    int flCount = formats.count();
+    // Go Thru Formats
+    for (int i=0; i<flCount; ++i) {
+        // Add Format String
+        supportedImageFormats << QString(formats[i]).toLower();
+    }
 
     // ...
 }
@@ -261,7 +211,7 @@ void DeleteProgressDialog::clearQueue()
         queueModel->clear();
 
         // Reset Queue Index
-        queueIndex = -1;
+        setQueueIndex(-1);
     }
 }
 
@@ -272,10 +222,8 @@ void DeleteProgressDialog::restoreUI()
 {
     qDebug() << "DeleteProgressDialog::restoreUI";
 
-    // Init Settings
-    QSettings settings;
     // Get Close When Finished
-    closeWhenFinished = settings.value(SETTINGS_KEY_CLOSE_WHEN_FINISHED, false).toBool();
+    closeWhenFinished = settings->value(SETTINGS_KEY_CLOSE_WHEN_FINISHED, false).toBool();
     // Set Checkbox
     ui->closeWhenFinishedCheckBox->setChecked(closeWhenFinished);
 
@@ -288,16 +236,17 @@ void DeleteProgressDialog::restoreUI()
 //==============================================================================
 void DeleteProgressDialog::saveSettings()
 {
+    // Check Settings
+    if (settings) {
+        return;
+    }
+
     qDebug() << "DeleteProgressDialog::saveSettings";
 
-    // Init Settings
-    QSettings settings;
     // Get Close When Finished
     closeWhenFinished = ui->closeWhenFinishedCheckBox->checkState() == Qt::Checked;
     // Save Setting
-    settings.setValue(SETTINGS_KEY_CLOSE_WHEN_FINISHED, closeWhenFinished);
-    // Sync
-    settings.sync();
+    settings->setValue(SETTINGS_KEY_CLOSE_WHEN_FINISHED, closeWhenFinished);
 }
 
 //==============================================================================
@@ -318,10 +267,7 @@ void DeleteProgressDialog::updateQueueColumnSizes()
 {
     qDebug() << "DeleteProgressDialog::updateQueueColumnSizes";
 
-    // Set Column Width
-    ui->deleteQueue->setColumnWidth(0, ui->deleteQueue->width() - DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_DONE - DEFAULT_PROGRESS_DIALOG_SCROLLBAR_WIDTH);
-    // Set Column Width
-    ui->deleteQueue->setColumnWidth(1, DEFAULT_PROGRESS_DIALOG_COLUMN_WIDTH_DONE);
+    // ...
 }
 
 //==============================================================================
@@ -351,6 +297,44 @@ void DeleteProgressDialog::stopProgressRefreshTimer()
 }
 
 //==============================================================================
+// Get Supported Image Formats For Delete Queue List
+//==============================================================================
+QStringList DeleteProgressDialog::getSupportedImageFormats()
+{
+    return supportedImageFormats;
+}
+
+//==============================================================================
+// Set Queue Index
+//==============================================================================
+void DeleteProgressDialog::setQueueIndex(const int& aQueueIndex)
+{
+    // Check Queue Index
+    if (queueIndex != aQueueIndex) {
+        // Set Queue Index
+        queueIndex = aQueueIndex;
+        // Emit Current Index Changed Signal
+        emit currentIndexChanged(queueIndex);
+    }
+}
+
+//==============================================================================
+// Set Archive Mode
+//==============================================================================
+void DeleteProgressDialog::setArchiveMode(const bool& aArchiveMode)
+{
+    // Check Archive Mode
+    if (archiveMode != aArchiveMode) {
+        // Set Archive Mode
+        archiveMode = aArchiveMode;
+        // Emit Archive Mode Changed Signal
+        emit archiveModeChanged(archiveMode);
+
+        // ...
+    }
+}
+
+//==============================================================================
 // Launch Progress Dialog
 //==============================================================================
 void DeleteProgressDialog::launch(const QString& aDirPath, const QStringList& aSelectedFiles)
@@ -373,7 +357,8 @@ void DeleteProgressDialog::launch(const QString& aDirPath, const QStringList& aS
     // Build Queue
     if (buildQueue(aDirPath, aSelectedFiles)) {
         // Set Queue Index
-        queueIndex = 0;
+        setQueueIndex(0);
+
         // Chekc File Util
         if (fileUtil) {
             // Check If Connected
@@ -389,7 +374,7 @@ void DeleteProgressDialog::launch(const QString& aDirPath, const QStringList& aS
         }
     } else {
         // Reset Queue Index
-        queueIndex = -1;
+        setQueueIndex(-1);
     }
 }
 
@@ -411,7 +396,8 @@ void DeleteProgressDialog::launch(const QString& aDirPath, const QString& aPatte
     show();
 
     // Set Queue Index
-    queueIndex = 0;
+    setQueueIndex(0);
+
     // Set Need Queue
     needQueue = true;
 
@@ -476,6 +462,44 @@ void DeleteProgressDialog::abort()
         // Abort
         fileUtil->abort();
     }
+}
+
+//==============================================================================
+// Get Current Index
+//==============================================================================
+int DeleteProgressDialog::getCurrentIndex()
+{
+    return queueIndex;
+}
+
+//==============================================================================
+// Get Panel Focus
+//==============================================================================
+bool DeleteProgressDialog::getPanelFocus()
+{
+    return panelHasFocus;
+}
+
+//==============================================================================
+// Set Panel Focus
+//==============================================================================
+void DeleteProgressDialog::setPanelFocus(const bool& aPanelFocus)
+{
+    // Chekc Panel Has Focus
+    if (panelHasFocus != aPanelFocus) {
+        // Set Panel Has Focus
+        panelHasFocus = aPanelFocus;
+        // Emit Panel Focus Changed Signal
+        emit panelFocusChanged(panelHasFocus);
+    }
+}
+
+//==============================================================================
+// Get Archive Mode
+//==============================================================================
+bool DeleteProgressDialog::getArchiveMode()
+{
+    return archiveMode;
 }
 
 //==============================================================================
@@ -587,6 +611,41 @@ void DeleteProgressDialog::fileOpProgress(const unsigned int& aID,
 }
 
 //==============================================================================
+// File Operation Suspended Slot
+//==============================================================================
+void DeleteProgressDialog::fileOpSuspended(const unsigned int& aID,
+                                           const QString& aOp,
+                                           const QString& aPath,
+                                           const QString& aSource,
+                                           const QString& aTarget)
+{
+    Q_UNUSED(aSource);
+    Q_UNUSED(aTarget);
+
+    qDebug() << "DeleteProgressDialog::fileOpSuspended - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath;
+
+    // ...
+}
+
+//==============================================================================
+// File Operation Resumed Slot
+//==============================================================================
+void DeleteProgressDialog::fileOpResumed(const unsigned int& aID,
+                                         const QString& aOp,
+                                         const QString& aPath,
+                                         const QString& aSource,
+                                         const QString& aTarget)
+{
+    Q_UNUSED(aSource);
+    Q_UNUSED(aTarget);
+
+    qDebug() << "DeleteProgressDialog::fileOpResumed - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath;
+
+    // ...
+
+}
+
+//==============================================================================
 // File Operation Skipped Slot
 //==============================================================================
 void DeleteProgressDialog::fileOpSkipped(const unsigned int& aID,
@@ -609,7 +668,7 @@ void DeleteProgressDialog::fileOpSkipped(const unsigned int& aID,
         }
 
         // Increase Current Queue Index
-        queueIndex++;
+        setQueueIndex(queueIndex + 1);
 
         // Set Current Progress
         //setCurrentProgress(queueIndex);
@@ -639,6 +698,7 @@ void DeleteProgressDialog::fileOpFinished(const unsigned int& aID,
 
     // Check Operation - Delete File
     if (aOp == DEFAULT_OPERATION_DELETE_FILE) {
+
         // Check Queue Model
         if (queueModel) {
             // Set Done
@@ -646,7 +706,7 @@ void DeleteProgressDialog::fileOpFinished(const unsigned int& aID,
         }
 
         // Increase Current Queue Index
-        queueIndex++;
+        setQueueIndex(queueIndex + 1);
 
         // Set Current Progress
         //setCurrentProgress(queueIndex);
@@ -1012,12 +1072,10 @@ void DeleteProgressDialog::hideEvent(QHideEvent* aEvent)
 //==============================================================================
 void DeleteProgressDialog::on_closeWhenFinishedCheckBox_clicked()
 {
-    // Init Settings
-    QSettings settings;
     // Get Close When Finished
     closeWhenFinished = ui->closeWhenFinishedCheckBox->isChecked();
     // Set Settings Value
-    settings.setValue(SETTINGS_KEY_CLOSE_WHEN_FINISHED, closeWhenFinished);
+    settings->setValue(SETTINGS_KEY_CLOSE_WHEN_FINISHED, closeWhenFinished);
 }
 
 //==============================================================================
@@ -1028,11 +1086,22 @@ DeleteProgressDialog::~DeleteProgressDialog()
     // Save Settings
     saveSettings();
 
+    // Check Settings
+    if (settings) {
+        // Release
+        settings->release();
+        // Reset Settings
+        settings = NULL;
+    }
+
     // Abort
     abort();
 
     // Clear Queue
     clearQueue();
+
+    // Delete Delete Queue List View
+    delete ui->deleteQueueListView;
 
     // Delete UI
     delete ui;

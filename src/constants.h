@@ -205,6 +205,8 @@
 #define DEFAULT_GLOBAL_SETTINGS_CONTROLLER                  "globalSettings"
 #define DEFAULT_DIR_HISTORY_LIST_CONTROLLER                 "dirHistoryListController"
 #define DEFAULT_DIR_HISTORY_LIST_MODEL                      "dirHistoryListModel"
+#define DEFAULT_FILE_TRANSFER_LIST_MODEL                    "fileTransferListModel"
+#define DEFAULT_FILE_DELETE_LIST_MODEL                      "fileDeleteListModel"
 
 #define DEFAULT_CUSTOM_COMPONENTS                           "MyCustomComponents"
 
@@ -212,6 +214,8 @@
 
 #define DEFAULT_FILE_LIST_QMLFILE_URL                       "qrc:/qml/FileList.qml"
 
+#define DEFAULT_FILE_TRANSFER_LIST_QMLFILE_URL              "qrc:/qml/FileTransferList.qml"
+#define DEFAULT_FILE_DELETE_LIST_QMLFILE_URL                "qrc:/qml/FileDeleteList.qml"
 
 #define DEFAULT_ONE_KILO                                    1024
 

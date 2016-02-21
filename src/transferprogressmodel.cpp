@@ -1,6 +1,8 @@
+#include <QFileInfo>
 #include <QDebug>
 
 #include "transferprogressmodel.h"
+#include "utility.h"
 #include "constants.h"
 
 
@@ -219,13 +221,21 @@ QHash<int, QByteArray> TransferProgressModel::roleNames() const
     QHash<int, QByteArray> roles;
 
     // File Operation
-    roles[ERIDOp]       = "fileOp";
+    roles[ERIDOp]           = "fileOp";
     // File Source
-    roles[ERIDSource]   = "fileSource";
+    roles[ERIDSource]       = "fileSource";
     // File Target
-    roles[ERIDTarget]   = "fileTarget";
+    roles[ERIDTarget]       = "fileTarget";
+    // Operation File Is Hidden
+    roles[ERIDIsHidden]     = "fileIsHidden";
+    // Operation File Is Dir
+    roles[ERIDIsDir]        = "fileIsDir";
+    // Operation File Is Link
+    roles[ERIDIsLink]       = "fileIsLink";
+    // Operation File Is Archive
+    roles[ERIDIsArchive]    = "fileIsArchive";
     // Operation State
-    roles[ERIDState]     = "fileOpState";
+    roles[ERIDState]        = "fileOpState";
 
     return roles;
 }
@@ -276,6 +286,12 @@ QVariant TransferProgressModel::data(const QModelIndex& aIndex, int aRole) const
             case ERIDOp:        return item->op;
             case ERIDSource:    return item->source;
             case ERIDTarget:    return item->target;
+
+            case ERIDIsHidden:  return false;
+            case ERIDIsLink:    return QFileInfo(item->source).isSymLink();
+            case ERIDIsDir:     return QFileInfo(item->source).isDir();
+            case ERIDIsArchive: return isFileArchiveByExt(item->source);
+
             case ERIDState:     return item->state;
 
             default:

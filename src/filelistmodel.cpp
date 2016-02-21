@@ -363,6 +363,40 @@ void FileListModel::sendUserResponse(const int& aConfirm, const QString& aNewPat
 }
 
 //==============================================================================
+// Calculate Item Index Based On Sorting Criterias
+//==============================================================================
+int FileListModel::calculateIndex(const QFileInfo& aItem)
+{
+    // Check Item
+    if (aItem.exists()) {
+        // Init Compare Method
+
+        // Switch Sorting Mode
+        switch (sorting) {
+            default:
+
+            case DEFAULT_SORT_NAME:
+            case DEFAULT_SORT_EXT:
+            case DEFAULT_SORT_TYPE:
+            case DEFAULT_SORT_SIZE:
+            case DEFAULT_SORT_DATE:
+            case DEFAULT_SORT_OWNER:
+            case DEFAULT_SORT_PERMS:
+            case DEFAULT_SORT_ATTRS:
+
+            break;
+        }
+
+        // Iterate While Item Is Greater
+
+        // Return Index
+
+    }
+
+    return 0;
+}
+
+//==============================================================================
 // Append Item Manually
 //==============================================================================
 void FileListModel::appendItem(const QString& aFilePath, const bool& aSearchResult)
@@ -389,7 +423,35 @@ void FileListModel::appendItem(const QString& aFilePath, const bool& aSearchResu
 
     // Emit Count Changed Signal
     emit countChanged(itemList.count());
+}
 
+//==============================================================================
+// Insert Item By File Path
+//==============================================================================
+void FileListModel::insertItem(const int& aIndex, const QString& aFilePath, const bool& aSearchResult)
+{
+    // Init File Info
+    QFileInfo fileInfo(aFilePath);
+
+    // Create New File List Item
+    FileListModelItem* newItem = new FileListModelItem(fileInfo.absolutePath(), fileInfo.fileName());
+    // Set Search Result
+    newItem->searchResult = aSearchResult;
+
+    // Begin Insert Row
+    beginInsertRows(QModelIndex(), aIndex, aIndex);
+
+    // Add Item To Item List
+    itemList.insert(aIndex, newItem);
+
+    // End Insert Row
+    endInsertRows();
+
+    // Add File Name To File Name List
+    fileNameList.insert(aIndex, fileInfo.fileName());
+
+    // Emit Count Changed Signal
+    emit countChanged(itemList.count());
 }
 
 //==============================================================================
@@ -1050,14 +1112,14 @@ void FileListModel::fileOpFinished(const unsigned int& aID,
             int fileIndex = findIndex(sourceInfo.fileName());
             // Check File Index
             if (fileIndex >= 0) {
-                // Get Item
-                FileListModelItem* item = itemList[fileIndex];
-                // Update File Info
-                item->fileInfo = QFileInfo(aTarget);
-                // Create Index
-                QModelIndex updateIndex = createIndex(fileIndex, 0);
-                // Emit Data Changed
-                emit dataChanged(updateIndex, updateIndex);
+                // Remove item
+                removeItem(fileIndex);
+                // Init Target File Info
+                QFileInfo targetInfo(aTarget);
+                // Calculate New Index For Target
+                int newIndex = calculateIndex(targetInfo);
+                // Insert Item
+                insertItem(newIndex, aTarget);
                 // Emit File Renamed
                 emit fileRenamed(aSource, aTarget);
             }
@@ -1636,7 +1698,7 @@ QFileInfo FileListModel::getFileInfo(const int& aIndex)
         return item->fileInfo;
     }
 
-    return QFileInfo("/");
+    return QFileInfo("");
 }
 
 //==============================================================================

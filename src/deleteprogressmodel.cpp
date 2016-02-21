@@ -1,6 +1,8 @@
+#include <QFileInfo>
 #include <QDebug>
 
 #include "deleteprogressmodel.h"
+#include "utility.h"
 #include "constants.h"
 
 
@@ -182,9 +184,17 @@ QHash<int, QByteArray> DeleteProgressModel::roleNames() const
     QHash<int, QByteArray> roles;
 
     // File Name
-    roles[ERIDFileName] = "fileName";
+    roles[ERIDFileName]     = "fileName";
+    // Operation File Is Hidden
+    roles[ERIDIsHidden]     = "fileIsHidden";
+    // Operation File Is Dir
+    roles[ERIDIsDir]        = "fileIsDir";
+    // Operation File Is Link
+    roles[ERIDIsLink]       = "fileIsLink";
+    // Operation File Is Archive
+    roles[ERIDIsArchive]    = "fileIsArchive";
     // Operation State
-    roles[ERIDState]    = "state";
+    roles[ERIDState]        = "fileOpState";
 
     return roles;
 
@@ -235,6 +245,10 @@ QVariant DeleteProgressModel::data(const QModelIndex& aIndex, int aRole) const
             break;
 
             case ERIDFileName:  return item->fileName;
+            case ERIDIsHidden:  return false;
+            case ERIDIsLink:    return QFileInfo(item->fileName).isSymLink();
+            case ERIDIsDir:     return QFileInfo(item->fileName).isDir();
+            case ERIDIsArchive: return isFileArchiveByExt(item->fileName);
             case ERIDState:     return item->state;
 
             default:

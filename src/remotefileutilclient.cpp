@@ -1296,6 +1296,38 @@ void RemoteFileUtilClient::handleStarted()
 }
 
 //==============================================================================
+// Handle Suspended
+//==============================================================================
+void RemoteFileUtilClient::handleSuspended()
+{
+    // Set Status
+    setStatus(ECSTSuspended);
+
+    // Emit File Operation Suspended Signal
+    emit fileOpSuspended(cID,
+                         lastDataMap[DEFAULT_KEY_OPERATION].toString(),
+                         lastDataMap[DEFAULT_KEY_PATH].toString(),
+                         lastDataMap[DEFAULT_KEY_SOURCE].toString(),
+                         lastDataMap[DEFAULT_KEY_TARGET].toString());
+}
+
+//==============================================================================
+// Handle Resumed
+//==============================================================================
+void RemoteFileUtilClient::handleResumed()
+{
+    // Set Status
+    setStatus(ECSTBusy);
+
+    // Emit File Operation Resumed Signal
+    emit fileOpResumed(cID,
+                       lastDataMap[DEFAULT_KEY_OPERATION].toString(),
+                       lastDataMap[DEFAULT_KEY_PATH].toString(),
+                       lastDataMap[DEFAULT_KEY_SOURCE].toString(),
+                       lastDataMap[DEFAULT_KEY_TARGET].toString());
+}
+
+//==============================================================================
 // Handle Preogress
 //==============================================================================
 void RemoteFileUtilClient::handleProgress()

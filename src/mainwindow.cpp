@@ -3,8 +3,8 @@
 #include <QDir>
 #include <QDesktopWidget>
 #include <QDebug>
-
 #include <QDialogButtonBox>
+
 #include <mcwinterface.h>
 
 #include "mainwindow.h"
@@ -1299,7 +1299,7 @@ void MainWindow::mainSlitterMoved(const int& aPos, const int& aIndex)
             // Set Grid Mode
             rightPanel->setGridMode(true);
             // Reload
-            rightPanel->reload(rightPanel->getCurrentIndex());
+            rightPanel->reload(/*rightPanel->getCurrentIndex()*/);
 
             // Check Left Panel
             if (leftPanel) {
@@ -1320,7 +1320,7 @@ void MainWindow::mainSlitterMoved(const int& aPos, const int& aIndex)
             // Set Grid Mode
             leftPanel->setGridMode(true);
             // Reload
-            leftPanel->reload(leftPanel->getCurrentIndex());
+            leftPanel->reload(/*leftPanel->getCurrentIndex()*/);
 
             // Check Right Panel
             if (rightPanel) {
@@ -1566,14 +1566,14 @@ void MainWindow::updateMenu()
 //==============================================================================
 // Toggle Hidden Files
 //==============================================================================
-void MainWindow::toggleHiddenFile()
+void MainWindow::toggleHiddenFiles()
 {
     // Check Settings
     if (!settings) {
         return;
     }
 
-    qDebug() << "MainWindow::toggleHiddenFile";
+    qDebug() << "MainWindow::toggleHiddenFiles";
 
     // Set Show Hidden Files
     settings->setShowHiddenFiles(!settings->getShowHiddenFiles());
@@ -1684,7 +1684,7 @@ void MainWindow::deleteProgressClosed(DeleteProgressDialog* aDeleteProgressDialo
                     // Check Current Dir
                     if (dialog->dirPath == leftPanel->currentDir) {
                         // Reload
-                        leftPanel->reload(leftPanel->currentIndex);
+                        leftPanel->reload(/*leftPanel->currentIndex*/);
                     }
                 }
 
@@ -1693,7 +1693,7 @@ void MainWindow::deleteProgressClosed(DeleteProgressDialog* aDeleteProgressDialo
                     // Check Current Dir
                     if (dialog->dirPath == rightPanel->currentDir) {
                         // Reload
-                        rightPanel->reload(rightPanel->currentIndex);
+                        rightPanel->reload(/*rightPanel->currentIndex*/);
                     }
                 }
 
@@ -1737,7 +1737,7 @@ void MainWindow::transferProgressClosed(TransferProgressDialog* aTransferProgres
 
                     } else if (dialog->operation == DEFAULT_OPERATION_MOVE_FILE && QDir(dialog->sourcePath) == QDir(leftPanel->currentDir)) {
                         // Reload
-                        leftPanel->reload(leftPanel->currentIndex);
+                        leftPanel->reload(/*leftPanel->currentIndex*/);
                     }
                 }
 
@@ -1752,7 +1752,7 @@ void MainWindow::transferProgressClosed(TransferProgressDialog* aTransferProgres
 
                     } else if (dialog->operation == DEFAULT_OPERATION_MOVE_FILE && QDir(dialog->sourcePath) == QDir(rightPanel->currentDir)) {
                         // Reload
-                        rightPanel->reload(rightPanel->currentIndex);
+                        rightPanel->reload(/*rightPanel->currentIndex*/);
                     }
                 }
 
@@ -2178,7 +2178,7 @@ void MainWindow::on_actionSort_by_Permissions_triggered()
 void MainWindow::on_actionShow_Hide_Hiden_triggered()
 {
     // Toggle Show Hidden
-    toggleHiddenFile();
+    toggleHiddenFiles();
 }
 
 //==============================================================================
@@ -2270,7 +2270,7 @@ void MainWindow::on_actionReload_triggered()
     // Check Focused Panel
     if (focusedPanel) {
         // Reload Focused Panel
-        focusedPanel->reload(focusedPanel->currentIndex);
+        focusedPanel->reload(/*focusedPanel->currentIndex*/);
     }
 }
 

@@ -55,7 +55,7 @@ Rectangle {
         clip: true
         focus: !mainController.gridMode
         highlightFollowsCurrentItem: true
-        highlightMoveDuration: Const.DEFAULT_LIST_HIGHLIGHT_MOVE_DURATION
+        highlightMoveDuration: mainController.busy ? 0 : Const.DEFAULT_LIST_HIGHLIGHT_MOVE_DURATION
         highlightResizeDuration: 0
         snapMode: ListView.SnapToItem
         visible: opacity > 0.0
@@ -265,6 +265,7 @@ Rectangle {
 
         // On Current Index Changed
         onCurrentIndexChanged: {
+/*
             // Check Loading
             if (mainController.loading) {
                 //console.log("fileListView.onCurrentIndexChanged - currentIndex: " + fileListView.currentIndex + " - LOADING IS ON!!");
@@ -281,6 +282,12 @@ Rectangle {
                     // Set Main Controller Current Index
                     mainController.currentIndex = fileListView.currentIndex;
                 }
+            }
+*/
+            // Check If Current Index Matches
+            if (mainController.currentIndex != fileListView.currentIndex) {
+                // Set Main Controller Current Index
+                mainController.currentIndex = fileListView.currentIndex;
             }
 
             // Check If Shift Pressed
@@ -372,7 +379,7 @@ Rectangle {
         clip: true
         focus: mainController.gridMode
         highlightFollowsCurrentItem: true
-        highlightMoveDuration: Const.DEFAULT_LIST_HIGHLIGHT_MOVE_DURATION
+        highlightMoveDuration: mainController.busy ? 0 : Const.DEFAULT_LIST_HIGHLIGHT_MOVE_DURATION
         snapMode: GridView.SnapToRow
         visible: opacity > 0.0
         Behavior on opacity { NumberAnimation { duration: Const.DEFAULT_TRANSITION_DURATION * 2 } }
@@ -457,15 +464,15 @@ Rectangle {
                     // Image Provider
                     return Const.DEFAULT_FILE_ICON_PREFIX + fileListModel.getFullPath(index);
 
-                } else {
-                    // Check File Name
-                    if (Utility.isImage(fileFullName, mainController)) {
-                        return Const.DEFAULT_FILE_PREFIX + mainController.currentDir + "/" + fileFullName;
-                    }
-
-                    // Image Provider
-                    return Const.DEFAULT_FILE_ICON_PREFIX + mainController.currentDir + "/" + fileFullName;
                 }
+
+                // Check File Name
+                if (Utility.isImage(fileFullName, mainController)) {
+                    return Const.DEFAULT_FILE_PREFIX + mainController.currentDir + "/" + fileFullName;
+                }
+
+                // Image Provider
+                return Const.DEFAULT_FILE_ICON_PREFIX + mainController.currentDir + "/" + fileFullName;
             }
 
             // Delegate Mouse Area
@@ -600,6 +607,7 @@ Rectangle {
 
         // On Current Index Changed
         onCurrentIndexChanged: {
+/*
             // Check Loading
             if (mainController.loading) {
                 // Reset Loading
@@ -614,6 +622,14 @@ Rectangle {
                     mainController.currentIndex = fileGridView.currentIndex;
                 }
             }
+*/
+
+            // Check If Current Index Matches
+            if (mainController.currentIndex != fileGridView.currentIndex) {
+                // Set Main Controller Current Index
+                mainController.currentIndex = fileGridView.currentIndex;
+            }
+
         }
     }
 
@@ -1091,6 +1107,10 @@ Rectangle {
             }
 
             // ...
+        }
+
+        onBusyChanged: {
+            console.log("fileListRoot.Connections.mainController.onBusyChanged - busy: " + mainController.busy);
         }
     }
 }

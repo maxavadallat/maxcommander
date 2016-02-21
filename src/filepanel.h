@@ -61,7 +61,7 @@ class FilePanel : public QFrame
     Q_PROPERTY(bool reverseOrder READ getReverseOrder WRITE setReverseOrder NOTIFY reverseOrderChanged)
 
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
-    Q_PROPERTY(bool loading READ getloading WRITE setLoading NOTIFY loadingChanged)
+    //Q_PROPERTY(bool loading READ getloading WRITE setLoading NOTIFY loadingChanged)
     Q_PROPERTY(bool fileRenameActive READ getFileRenameActive WRITE setFileRenameActive NOTIFY fileRenameActiveChanged)
     Q_PROPERTY(int modifierKeys READ getModifierKeys NOTIFY modifierKeysChanged)
 
@@ -195,12 +195,12 @@ public:
 
     // Busy
     bool busy();
-
+/*
     // Get Loading
     bool getloading();
     // Set Loading
     void setLoading(const bool& aLoading);
-
+*/
     // Get File Index By File Name
     int getFileIndex(const QString& aFileName);
 
@@ -281,7 +281,7 @@ public slots:
     QStringList getSupportedImageFormats();
 
     // Reload
-    void reload(const int& aIndex = -1);
+    void reload(/*const int& aIndex = -1*/);
 
     // Sync Current Dir To Other Panel Current Dir
     void syncCurrentDir();
@@ -634,11 +634,11 @@ private:
     int                     visualItemsCount;
 
     // Last Directory Name To Jump After CD UP
-    QString                 lastDirName;
+    //QString                 lastDirName;
     // Last File Name To Jump After Reload
     QString                 lastFileName;
     // Last Index Before Reload
-    int                     lastIndex;
+    //int                     lastIndex;
 
     // Supported Image Formats
     QStringList             supportedImageFormats;
@@ -705,7 +705,7 @@ private:
     DirScanner*             dirScanner;
 
     // Loading State Indicator
-    bool                    loading;
+    //bool                    loading;
 
     // Search Result Mode
     bool                    searchResultsMode;

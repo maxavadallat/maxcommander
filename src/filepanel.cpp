@@ -48,9 +48,8 @@ FilePanel::FilePanel(QWidget* aParent)
     , currentIndex(-1)
     , pressedIndex(-1)
     , visualItemsCount(-1)
-    , lastDirName("")
     , lastFileName("")
-    , lastIndex(-1)
+//    , lastIndex(-1)
     , extVisible(true)
     , typeVisible(false)
     , sizeVisible(true)
@@ -80,7 +79,6 @@ FilePanel::FilePanel(QWidget* aParent)
     , fileTransferUpdate(false)
     , fileDeleteUpdate(false)
     , dirScanner(NULL)
-    , loading(false)
     , searchResultsMode(false)
     , searchTerm("")
     , dirHistoryModel(NULL)
@@ -133,7 +131,7 @@ void FilePanel::init()
     // Get Engine
     QQmlEngine* engine = ui->fileListWidget->engine();
 
-    // Create New Image Provides
+    // Create New Image Provider
     FileListImageProvider* newImageProvider = new FileListImageProvider();
 
     // Connect Signal
@@ -245,7 +243,7 @@ void FilePanel::setCurrentDir(const QString& aCurrentDir, const QString& aLastFi
             qDebug() << "FilePanel::setCurrentDir - panelName: " << panelName << " - currentDir: " << currentDir;
 
             // Reset Current Index
-            setCurrentIndex(-1);
+            setCurrentIndex(0);
 
             // Check LAst File Name
             if (!aLastFileName.isEmpty()) {
@@ -256,7 +254,7 @@ void FilePanel::setCurrentDir(const QString& aCurrentDir, const QString& aLastFi
             // Check Model
             if (fileListModel) {
                 // Set Loading
-                setLoading(true);
+                //setLoading(true);
 
                 // Set Archive
                 fileListModel->setArchiveCurrentDir(currentArchive, localDir);
@@ -293,7 +291,7 @@ void FilePanel::setCurrentDir(const QString& aCurrentDir, const QString& aLastFi
             qDebug() << "FilePanel::setCurrentDir - panelName: " << panelName << " - currentDir: " << currentDir;
 
             // Reset Current Index
-            setCurrentIndex(-1);
+            setCurrentIndex(0);
 
             // Check LAst File Name
             if (!aLastFileName.isEmpty()) {
@@ -304,7 +302,7 @@ void FilePanel::setCurrentDir(const QString& aCurrentDir, const QString& aLastFi
             // Check Model
             if (fileListModel) {
                 // Set Loading
-                setLoading(true);
+                //setLoading(true);
                 // Set Current Dir
                 fileListModel->setCurrentDir(currentDir);
             }
@@ -754,7 +752,7 @@ void FilePanel::setSorting(const int& aSorting)
         }
 
         // Reload
-        reload(0);
+        reload();
 
         // Emit Sorting Changed Signal
         emit sortingChanged(sorting);
@@ -787,7 +785,7 @@ void FilePanel::setReverseOrder(const bool& aReverse)
         }
 
         // Reload
-        reload(0);
+        reload();
 
         // Emit Reverse Order Changed Signal
         emit reverseOrderChanged(reverseOrder);
@@ -833,29 +831,6 @@ bool FilePanel::busy()
     }
 
     return false;
-}
-
-//==============================================================================
-// Get Loading
-//==============================================================================
-bool FilePanel::getloading()
-{
-    return loading;
-}
-
-//==============================================================================
-// Set Loading
-//==============================================================================
-void FilePanel::setLoading(const bool& aLoading)
-{
-    // Check Loading
-    if (loading != aLoading) {
-        //qDebug() << "FilePanel::setLoading - aLoading: " << aLoading;
-        // Set Loading
-        loading = aLoading;
-        // Emit Loading Changed Signal
-        emit loadingChanged(loading);
-    }
 }
 
 //==============================================================================
@@ -1400,15 +1375,15 @@ QStringList FilePanel::getSupportedImageFormats()
 //==============================================================================
 // Reload
 //==============================================================================
-void FilePanel::reload(const int& aIndex)
+void FilePanel::reload(/*const int& aIndex*/)
 {
-    qDebug() << "FilePanel::reload - panelName: " << panelName << " - aIndex: " << aIndex;
+    qDebug() << "FilePanel::reload - panelName: " << panelName/* << " - aIndex: " << aIndex*/;
 
     // Get Last Index
-    lastIndex = aIndex;
+    //lastIndex = aIndex;
 
     // Reset Current Index
-    currentIndex = -1;
+    //currentIndex = -1;
 
     // Reset DW Dir Changed
     dwDirChanged = false;
@@ -1418,7 +1393,11 @@ void FilePanel::reload(const int& aIndex)
     // Check File List Model
     if (fileListModel) {
         // Set Loading
-        setLoading(true);
+        //setLoading(true);
+
+        // Get Lat File Name
+        lastFileName = fileListModel->getFileInfo(currentIndex).fileName();
+
         // Reload
         fileListModel->reload();
     }
@@ -1639,7 +1618,7 @@ void FilePanel::goUp()
             // Clear Archive Mode
             setArchiveMode(false);
 
-            qDebug() << "FilePanel::goUp - panelName: " << panelName << " - parentDir: " << parentDir << " - lastDirName: " << lastDirName;
+            qDebug() << "FilePanel::goUp - panelName: " << panelName << " - parentDir: " << parentDir << " - lastFileName: " << lastFileName;
 
             // Set Current Dir
             setCurrentDir(parentDir);
@@ -1647,10 +1626,11 @@ void FilePanel::goUp()
         } else {
             // Get Parent Dir
             QString parentDir = getParentDirFromPath(archiveCurrentDir);
-            // Get Last Dir Name
-            lastDirName = getFileNameFromFullName(archiveCurrentDir);
 
-            qDebug() << "FilePanel::goUp - panelName: " << panelName << " - parentDir: " << parentDir << " - lastDirName: " << lastDirName;
+            // Get Last File Name
+            lastFileName = getFileNameFromFullName(archiveCurrentDir);
+
+            qDebug() << "FilePanel::goUp - panelName: " << panelName << " - parentDir: " << parentDir << " - lastFileName: " << lastFileName;
 
             // Set Current Dir
             setCurrentDir(parentDir);
@@ -1662,9 +1642,9 @@ void FilePanel::goUp()
         // Check Parent Dir
         if (!parentDir.isEmpty()) {
             // Get Last Dir Name to Jump
-            lastDirName = getFileName(currentDir);
+            lastFileName = getFileName(currentDir);
 
-            qDebug() << "FilePanel::goUp - panelName: " << panelName << " - parentDir: " << parentDir << " - lastDirName: " << lastDirName;
+            qDebug() << "FilePanel::goUp - panelName: " << panelName << " - parentDir: " << parentDir << " - lastFileName: " << lastFileName;
 
             // Set Current Dir
             setCurrentDir(parentDir);
@@ -1770,6 +1750,11 @@ void FilePanel::handleItemSelection()
     QString fileName = fileListModel->getArchiveMode() ? archiveFileInfo.fileName : fileInfo.fileName();
 
     // Check File Name
+    if (fileName.isEmpty()) {
+        return;
+    }
+
+    // Check File Name
     if (fileName == QString("..")) {
 
         // Go Up
@@ -1867,7 +1852,7 @@ void FilePanel::clear()
     //qDebug() << "FilePanel::clear - panelName: " << panelName;
 
     // Reset Current Index
-    setCurrentIndex(-1);
+    setCurrentIndex(0);
 
     // Check File List Model
     if (fileListModel) {
@@ -2049,13 +2034,16 @@ void FilePanel::fileModelBusyChanged(const bool& aBusy)
     if (aBusy) {
         // Stop Dir Watcher
         stopDirWatcher();
+
+        // Emit Busy Changed Signal
+        emit busyChanged(aBusy);
+
     } else {
+
         // Start Dir Watcher
         startDirWatcher();
-    }
 
-    // Emit Busy Changed Signal
-    emit busyChanged(aBusy);
+    }
 }
 
 //==============================================================================
@@ -2063,31 +2051,7 @@ void FilePanel::fileModelBusyChanged(const bool& aBusy)
 //==============================================================================
 void FilePanel::fileModelDirFetchFinished()
 {
-    // Check Last Dir Name
-    if (!lastDirName.isEmpty()) {
-        qDebug() << "FilePanel::fileModelDirFetchFinished - panelName: " << panelName << " - lastDirName: " << lastDirName;
-
-        // Find Index
-        int lastDirIndex = fileListModel ? fileListModel->findIndex(lastDirName) : 0;
-        // Reset Last Dir Name
-        lastDirName = "";
-
-        // Check Last Index - FOR A FUCKING QML LISTVIEW BUG!
-        if (fileListModel && lastDirIndex == fileListModel->rowCount() - 1) {
-            // Set Current Index
-            setCurrentIndex(lastDirIndex - 1);
-        }
-
-        // Adjust Last Dir Index
-        lastDirIndex = qBound(0, lastDirIndex, (fileListModel ? fileListModel->rowCount()-1 : -1));
-
-        // Set Current Index
-        setCurrentIndex(lastDirIndex);
-
-        // Set Loading
-        setLoading(false);
-
-    } else if (!lastFileName.isEmpty()) {
+    if (!lastFileName.isEmpty()) {
         qDebug() << "FilePanel::fileModelDirFetchFinished - panelName: " << panelName << " - lastFileName: " << lastFileName;
 
         // Find Index
@@ -2100,14 +2064,9 @@ void FilePanel::fileModelDirFetchFinished()
 
         // Set Current Index
         setCurrentIndex(lastFileIndex);
-
-        // Check Last Index
-        if (lastIndex == 0) {
-            // Set Loading
-            setLoading(false);
-        }
-
-    } else if (lastIndex != -1) {
+    }
+/*
+    else if (lastIndex != -1) {
         qDebug() << "FilePanel::fileModelDirFetchFinished - panelName: " << panelName << " - lastIndex: " << lastIndex;
 
         // Set Current Index
@@ -2122,14 +2081,13 @@ void FilePanel::fileModelDirFetchFinished()
         // Reset LAst Index
         lastIndex = -1;
 
-    } else {
+    }
+*/
+    else {
         qDebug() << "FilePanel::fileModelDirFetchFinished - panelName: " << panelName << " - currentDir: " << currentDir;
 
         // Set Current Index
         setCurrentIndex(0);
-
-        // Set Loading
-        setLoading(false);
 
         // ...
     }
@@ -2147,6 +2105,9 @@ void FilePanel::fileModelDirFetchFinished()
 
     // Emit Current Index Changed Signal For Sync
     //emit currentIndexChanged(currentIndex);
+
+    // Emit Busy Changed Signal
+    emit busyChanged(false);
 
     // ...
 }
@@ -2173,6 +2134,9 @@ void FilePanel::fileModelDirCreated(const QString& aDirPath)
             // Set Current Index
             setCurrentIndex(fileListModel->findIndex(dirName));
         }
+
+        // Emit Busy Changed Signal
+        emit busyChanged(false);
     }
 }
 
@@ -2213,7 +2177,22 @@ void FilePanel::fileModelFileRenamed(const QString& aSource, const QString& aTar
     if (path == currentDir) {
         qDebug() << "FilePanel::fileModelFileRenamed - panelName: " << panelName << " - aSource: " << aSource << " - aTarget: " << aTarget;
 
+        // Check File List Model
+        if (fileListModel) {
+            // Get File Info
+            QFileInfo newFileInfo(aTarget);
+
+            // Get New Index
+            int newIndex = fileListModel->findIndex(newFileInfo.fileName());
+
+            // Set Current Index
+            setCurrentIndex(newIndex);
+        }
+
         // ...
+
+        // Emit Busy Changed
+        emit busyChanged(false);
     }
 }
 
@@ -2552,11 +2531,15 @@ void FilePanel::showHiddenFilesChanged(const bool& aHidden)
         if (globalSettingsUpdateIsOn) {
             return;
         }
-
+/*
         // Set Loading
-        setLoading(true);
+        //setLoading(true);
+
         // Reload
         fileListModel->reload();
+*/
+        // Reload
+        reload();
     }
 }
 
@@ -2576,11 +2559,16 @@ void FilePanel::showDirsFirstChanged(const bool& aDirFirst)
         if (globalSettingsUpdateIsOn) {
             return;
         }
-
+/*
         // Set Loading
-        setLoading(true);
+        //setLoading(true);
+
         // Reload
         fileListModel->reload();
+*/
+
+        // Reload
+        reload();
     }
 }
 
@@ -2600,11 +2588,16 @@ void FilePanel::caseSensitiveSortChanged(const bool& aCaseSensitive)
         if (globalSettingsUpdateIsOn) {
             return;
         }
-
+/*
         // Set Loading
-        setLoading(true);
+        //setLoading(true);
+
         // Reload
         fileListModel->reload();
+*/
+
+        // Reload
+        reload();
     }
 }
 
@@ -2626,11 +2619,16 @@ void FilePanel::useDefaultIconsChanged(const bool& aUseDefaultIcons)
         if (globalSettingsUpdateIsOn) {
             return;
         }
-
+/*
         // Set Loading
-        setLoading(true);
+        //setLoading(true);
+
         // Reload
         fileListModel->reload();
+*/
+
+        // Reload
+        reload();
     }
 }
 
@@ -3324,7 +3322,7 @@ void FilePanel::timerEvent(QTimerEvent* aEvent)
                         dwFileChanged = false;
 
                         // Reload
-                        reload(currentIndex);
+                        reload();
                     }
                 }
             }

@@ -3,8 +3,7 @@
 
 #include <QObject>
 #include <QAbstractListModel>
-#include <QString>
-#include <QList>
+#include <QStringList>
 
 
 //==============================================================================
@@ -14,6 +13,7 @@ enum TransferProgressState
 {
     ETPIdle         = 0,
     ETPRunning,
+    ETPSuspended,
     ETPFinished,
     ETPSkipped,
     ETPError
@@ -44,7 +44,6 @@ protected:
     // State
     TransferProgressState   state;
 };
-
 
 
 //==============================================================================
@@ -123,7 +122,13 @@ protected:
         ERIDOp      = Qt::UserRole + 1,
         ERIDSource,
         ERIDTarget,
-        ERIDState
+        ERIDIsHidden,
+        ERIDIsLink,
+        ERIDIsDir,
+        ERIDIsArchive,
+        ERIDState,
+
+        ERIDCount
     };
 
     // Items

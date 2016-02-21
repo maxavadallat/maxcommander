@@ -133,7 +133,7 @@ protected slots:
     void updateMenu();
 
     // Toggle Hidden Files Slot
-    void toggleHiddenFile();
+    void toggleHiddenFiles();
 
     // Viewer Window Closed Slot
     void viewerWindowClosed(ViewerWindow* aViewer);

@@ -17,8 +17,6 @@ QT                      += network
 QT                      += webkitwidgets
 QT                      += multimedia
 
-# Mac SDK
-QMAKE_MAC_SDK           = macosx10.11
 
 macx: {
 # Icon
@@ -145,8 +143,12 @@ QMAKE_BUNDLE_DATA       += MCWORKERFILES
 
 
 macx: {
+# Mac SDK
+QMAKE_MAC_SDK           = macosx10.11
+
 # Libs
 LIBS                    += -framework Carbon
+
 } else {
 
 }

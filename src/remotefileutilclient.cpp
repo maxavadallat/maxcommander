@@ -457,7 +457,8 @@ void RemoteFileUtilClient::searchFile(const QString& aName, const QString& aDirP
     newData[DEFAULT_KEY_OPERATION]      = QString(DEFAULT_OPERATION_SEARCH_FILE);
     newData[DEFAULT_KEY_FILENAME]       = aName;
     newData[DEFAULT_KEY_PATH]           = aDirPath;
-    newData[DEFAULT_KEY_CONTENT]        = aContent;
+    newData[DEFAULT_KEY_SEARCHTERM]     = aName;
+    newData[DEFAULT_KEY_CONTENTTERM]    = aContent;
     newData[DEFAULT_KEY_OPTIONS]        = aOptions;
 
     // ...
@@ -555,6 +556,8 @@ void RemoteFileUtilClient::extractArchive(const QString& aFilePath, const QStrin
 //==============================================================================
 void RemoteFileUtilClient::clearFileTransferOptions()
 {
+    qDebug() << "RemoteFileUtilClient::clearFileTransferOptions";
+
     // Init New Data
     QVariantMap newData;
 
@@ -1465,7 +1468,7 @@ void RemoteFileUtilClient::handleQueueItem()
                               lastDataMap[DEFAULT_KEY_TARGET].toString());
 
     // Send Acknowledge
-    sendAcknowledge();
+    //sendAcknowledge();
 }
 
 //==============================================================================
@@ -1495,7 +1498,7 @@ void RemoteFileUtilClient::handleSearchItemFound()
                                    lastDataMap[DEFAULT_KEY_FILENAME].toString());
 
     // Send Acknowledge
-    sendAcknowledge();
+    //sendAcknowledge();
 }
 
 //==============================================================================

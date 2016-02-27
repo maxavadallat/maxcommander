@@ -3517,7 +3517,7 @@ void FileRenamer::setItemState(const int& aIndex, const int& aState)
         // Get Item
         TransferProgressModelItem* item = renameQueue[aIndex];
         // Set State
-        item->state = (TransferProgressState)aState;
+        item->status = (TransferProgressStatus)aState;
     }
 }
 

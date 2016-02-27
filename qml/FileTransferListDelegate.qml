@@ -21,7 +21,7 @@ Rectangle {
     property int itemIndex: 0
     property int listIndex: -1
 
-    property int status: 0
+    property int opStatus: 0
 
     property string textColor: {
         // Check If Hidden
@@ -109,11 +109,11 @@ Rectangle {
                 asynchronous: false
                 cache: true
                 fillMode: Image.PreserveAspectFit
-                opacity: fileTransferListDelegateRoot.status == 1 ? 0.0 : 1.0
+                opacity: fileTransferListDelegateRoot.opStatus == 1 ? 0.0 : 1.0
                 visible: opacity > 0.0
                 Behavior on opacity { NumberAnimation { duration: 500 } }
                 source: {
-                    switch (fileTransferListDelegateRoot.status) {
+                    switch (fileTransferListDelegateRoot.opStatus) {
                         //case 1: return "resources/images/play-icon.png";
                         case 2: return "qrc:/resources/images/pause-icon.png";
                         case 3: return "qrc:/resources/images/check_256.png";
@@ -129,7 +129,7 @@ Rectangle {
             BusyIndicator {
                 id: busyIndicator
                 anchors.fill: parent
-                running: fileTransferListDelegateRoot.status == 1
+                running: fileTransferListDelegateRoot.opStatus == 1
                 opacity: running ? 1.0 : 0.0
                 visible: opacity > 0.0
                 Behavior on opacity { NumberAnimation { duration: 500 } }

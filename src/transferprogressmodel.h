@@ -7,9 +7,9 @@
 
 
 //==============================================================================
-// Transfer Progress Item State
+// Transfer Progress Item Status
 //==============================================================================
-enum TransferProgressState
+enum TransferProgressStatus
 {
     ETPIdle         = 0,
     ETPRunning,
@@ -42,7 +42,7 @@ protected:
     // Target
     QString                 target;
     // State
-    TransferProgressState   state;
+    TransferProgressStatus  status;
 };
 
 
@@ -64,8 +64,8 @@ public:
     void insertItem(const int& aIndex, const QString& aOp, const QString& aSource, const QString& aTarget);
     // Remove Item
     void removeItem(const int& aIndex);
-    // Set Progress State
-    void setProgressState(const int& aIndex, const TransferProgressState& aState);
+    // Set Progress Status
+    void setProgressStatus(const int& aIndex, const TransferProgressStatus& aStatus);
 
     // Get Operation
     QString getOperation(const int& aIndex);
@@ -73,8 +73,8 @@ public:
     QString getSourceFileName(const int& aIndex);
     // Get Target File Name
     QString getTargetFileName(const int& aIndex);
-    // Get Progress State
-    TransferProgressState getProgressState(const int& aIndex);
+    // Get Progress Status
+    TransferProgressStatus getProgressStatus(const int& aIndex);
 
     // Get Source
     QString getSource(const int& aIndex);
@@ -126,7 +126,7 @@ protected:
         ERIDIsLink,
         ERIDIsDir,
         ERIDIsArchive,
-        ERIDState,
+        ERIDStatus,
 
         ERIDCount
     };

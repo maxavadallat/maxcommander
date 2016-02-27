@@ -39,6 +39,8 @@ Rectangle {
         property int visualItemsCount: Math.floor((fileDeleteListView.height + fileDeleteListView.spacing) / fileDeleteListView.delegateHeight);
         property int prevIndex: -1
 
+        highlightMoveDuration: 0
+
         model: fileDeleteListModel
 
         delegate: FileDeleteListDelegate {
@@ -54,7 +56,7 @@ Rectangle {
             fileSymLink: fileIsLink
             fileArchive: fileIsArchive
 
-            status: fileOpState
+            status: fileOpStatus
 
             itemIndex: index
             listIndex: fileDeleteListView.currentIndex

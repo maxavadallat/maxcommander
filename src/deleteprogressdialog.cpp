@@ -171,15 +171,16 @@ void DeleteProgressDialog::processQueue()
     if (fileUtil && queueModel) {
         // Check Queue Index
         if (queueIndex >= 0 && queueIndex < queueModel->rowCount()) {
-            qDebug() << "DeleteProgressDialog::processQueue";
             // Get File Name
             QString fileName = queueModel->getFileName(queueIndex);
+
+            qDebug() << "DeleteProgressDialog::processQueue - fileName: " << fileName;
+
             // Delete File
             fileUtil->deleteFile(fileName);
             // Configure Buttons
             configureButtons(QDialogButtonBox::Abort);
         } else {
-
             // Check Close When Finished
             if (closeWhenFinished) {
                 // Close
@@ -223,7 +224,7 @@ void DeleteProgressDialog::restoreUI()
     qDebug() << "DeleteProgressDialog::restoreUI";
 
     // Get Close When Finished
-    closeWhenFinished = settings->value(SETTINGS_KEY_CLOSE_WHEN_FINISHED, false).toBool();
+    closeWhenFinished = settings->getCloseWhenFinished();
     // Set Checkbox
     ui->closeWhenFinishedCheckBox->setChecked(closeWhenFinished);
 
@@ -664,7 +665,7 @@ void DeleteProgressDialog::fileOpSkipped(const unsigned int& aID,
         // Check Queue Model
         if (queueModel) {
             // Set Done
-            queueModel->setProgressState(queueIndex, EDPSkipped);
+            queueModel->setProgressStatus(queueIndex, EDPSkipped);
         }
 
         // Increase Current Queue Index
@@ -692,7 +693,7 @@ void DeleteProgressDialog::fileOpFinished(const unsigned int& aID,
     Q_UNUSED(aSource);
     Q_UNUSED(aTarget);
 
-    qDebug() << "DeleteProgressDialog::fileOpFinished - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath;
+    //qDebug() << "DeleteProgressDialog::fileOpFinished - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath;
 
     // ...
 
@@ -702,8 +703,10 @@ void DeleteProgressDialog::fileOpFinished(const unsigned int& aID,
         // Check Queue Model
         if (queueModel) {
             // Set Done
-            queueModel->setProgressState(queueIndex, EDPFinished);
+            queueModel->setProgressStatus(queueIndex, EDPFinished);
         }
+
+        qDebug() << "DeleteProgressDialog::fileOpFinished - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath;
 
         // Increase Current Queue Index
         setQueueIndex(queueIndex + 1);
@@ -714,10 +717,11 @@ void DeleteProgressDialog::fileOpFinished(const unsigned int& aID,
     // Check Operation - Queue
     } else if (aOp == DEFAULT_OPERATION_QUEUE) {
 
-        // Just Move On To Inserted Files
+        // Queue Is Set Just Move On To Inserted Files
 
         // ...
 
+    // Check Operation - List Dir
     } else if (aOp == DEFAULT_OPERATION_LIST_DIR) {
 
         // Check Queue Model
@@ -1075,7 +1079,7 @@ void DeleteProgressDialog::on_closeWhenFinishedCheckBox_clicked()
     // Get Close When Finished
     closeWhenFinished = ui->closeWhenFinishedCheckBox->isChecked();
     // Set Settings Value
-    settings->setValue(SETTINGS_KEY_CLOSE_WHEN_FINISHED, closeWhenFinished);
+    settings->setCloseWhenFinished(closeWhenFinished);
 }
 
 //==============================================================================

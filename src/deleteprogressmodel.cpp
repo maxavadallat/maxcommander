@@ -11,7 +11,7 @@
 //==============================================================================
 DeleteProgressModelItem::DeleteProgressModelItem(const QString& aFileName)
     : fileName(aFileName)
-    , state(EDPIdle)
+    , status(EDPIdle)
 {
 
 }
@@ -126,15 +126,15 @@ void DeleteProgressModel::removeItem(const int& aIndex)
 }
 
 //==============================================================================
-// Set Progress State
+// Set Progress Status
 //==============================================================================
-void DeleteProgressModel::setProgressState(const int& aIndex, const DeleteProgressState& aState)
+void DeleteProgressModel::setProgressStatus(const int& aIndex, const DeleteProgressStatus& aStatus)
 {
     // Check Index
     if (aIndex >=0 && aIndex < rowCount()) {
         //qDebug() << "DeleteProgressModel::setDone - aIndex: " << aIndex;
         // Set Data
-        setData(createIndex(aIndex, ERIDState - Qt::UserRole - 1), aState, ERIDState);
+        setData(createIndex(aIndex, ERIDStatus - Qt::UserRole - 1), aStatus, ERIDStatus);
     }
 }
 
@@ -147,11 +147,11 @@ QString DeleteProgressModel::getFileName(const int& aIndex)
 }
 
 //==============================================================================
-// Get Progress State
+// Get Progress Status
 //==============================================================================
-DeleteProgressState DeleteProgressModel::getProgressState(const int& aIndex)
+DeleteProgressStatus DeleteProgressModel::getProgressStatus(const int& aIndex)
 {
-    return (DeleteProgressState)data(createIndex(aIndex, ERIDState - Qt::UserRole - 1), ERIDState).toInt();
+    return (DeleteProgressStatus)data(createIndex(aIndex, ERIDStatus - Qt::UserRole - 1), ERIDStatus).toInt();
 }
 
 //==============================================================================
@@ -193,8 +193,8 @@ QHash<int, QByteArray> DeleteProgressModel::roleNames() const
     roles[ERIDIsLink]       = "fileIsLink";
     // Operation File Is Archive
     roles[ERIDIsArchive]    = "fileIsArchive";
-    // Operation State
-    roles[ERIDState]        = "fileOpState";
+    // Operation Status
+    roles[ERIDStatus]       = "fileOpStatus";
 
     return roles;
 
@@ -240,7 +240,7 @@ QVariant DeleteProgressModel::data(const QModelIndex& aIndex, int aRole) const
                 switch (aIndex.column()) {
                     default:
                     case 0: return item->fileName;
-                    case 1: return item->state;
+                    case 1: return item->status;
                 }
             break;
 
@@ -249,7 +249,7 @@ QVariant DeleteProgressModel::data(const QModelIndex& aIndex, int aRole) const
             case ERIDIsLink:    return QFileInfo(item->fileName).isSymLink();
             case ERIDIsDir:     return QFileInfo(item->fileName).isDir();
             case ERIDIsArchive: return isFileArchiveByExt(item->fileName);
-            case ERIDState:     return item->state;
+            case ERIDStatus:    return item->status;
 
             default:
             break;
@@ -278,11 +278,11 @@ bool DeleteProgressModel::setData(const QModelIndex& aIndex, const QVariant& aVa
                 emit dataChanged(aIndex, aIndex);
             return true;
 
-            case ERIDState:
-                // Check State
-                if (item->state != (DeleteProgressState)aValue.toInt()) {
-                    // Set State
-                    item->state = (DeleteProgressState)aValue.toInt();
+            case ERIDStatus:
+                // Check Status
+                if (item->status != (DeleteProgressStatus)aValue.toInt()) {
+                    // Set Status
+                    item->status = (DeleteProgressStatus)aValue.toInt();
                     // Emit Data Changed Signal
                     emit dataChanged(aIndex, aIndex);
                 }

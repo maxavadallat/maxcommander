@@ -13,7 +13,7 @@ TransferProgressModelItem::TransferProgressModelItem(const QString& aOp, const Q
     : op(aOp)
     , source(aSource)
     , target(aTarget)
-    , state(ETPIdle)
+    , status(ETPIdle)
 {
 }
 
@@ -56,7 +56,7 @@ void TransferProgressModel::init()
 //==============================================================================
 void TransferProgressModel::addItem(const QString& aOp, const QString& aSource, const QString& aTarget)
 {
-    qDebug() << "TransferProgressModel::addItem - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget;
+    //qDebug() << "TransferProgressModel::addItem - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget;
 
     // Create New Item
     TransferProgressModelItem* newItem = new TransferProgressModelItem(aOp, aSource, aTarget);
@@ -83,7 +83,7 @@ void TransferProgressModel::insertItem(const int& aIndex, const QString& aOp, co
         return;
     }
 
-    qDebug() << "TransferProgressModel::insertItem - aIndex: " << aIndex << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget;
+    //qDebug() << "TransferProgressModel::insertItem - aIndex: " << aIndex << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget;
 
     // Create New Item
     TransferProgressModelItem* newItem = new TransferProgressModelItem(aOp, aSource, aTarget);
@@ -120,15 +120,15 @@ void TransferProgressModel::removeItem(const int& aIndex)
 }
 
 //==============================================================================
-// Set Progress State
+// Set Progress Status
 //==============================================================================
-void TransferProgressModel::setProgressState(const int& aIndex, const TransferProgressState& aState)
+void TransferProgressModel::setProgressStatus(const int& aIndex, const TransferProgressStatus& aStatus)
 {
     // Check Index
     if (aIndex >=0 && aIndex < rowCount()) {
-        //qDebug() << "TransferProgressModel::setProgressState - aIndex: " << aIndex << " - aState: " << aState;
+        //qDebug() << "TransferProgressModel::setProgressStatus - aIndex: " << aIndex << " - aStatus: " << aStatus;
         // Set Data
-        setData(createIndex(aIndex, ERIDState - Qt::UserRole - 1), aState, ERIDState);
+        setData(createIndex(aIndex, ERIDStatus - Qt::UserRole - 1), aStatus, ERIDStatus);
     }
 }
 
@@ -157,11 +157,11 @@ QString TransferProgressModel::getTargetFileName(const int& aIndex)
 }
 
 //==============================================================================
-// Get Progress State
+// Get Progress Status
 //==============================================================================
-TransferProgressState TransferProgressModel::getProgressState(const int& aIndex)
+TransferProgressStatus TransferProgressModel::getProgressStatus(const int& aIndex)
 {
-    return (TransferProgressState)(data(createIndex(aIndex, ERIDState - Qt::UserRole - 1)).toInt());
+    return (TransferProgressStatus)(data(createIndex(aIndex, ERIDStatus - Qt::UserRole - 1)).toInt());
 }
 
 //==============================================================================
@@ -234,8 +234,8 @@ QHash<int, QByteArray> TransferProgressModel::roleNames() const
     roles[ERIDIsLink]       = "fileIsLink";
     // Operation File Is Archive
     roles[ERIDIsArchive]    = "fileIsArchive";
-    // Operation State
-    roles[ERIDState]        = "fileOpState";
+    // Operation Status
+    roles[ERIDStatus]       = "fileOpStatus";
 
     return roles;
 }
@@ -279,7 +279,7 @@ QVariant TransferProgressModel::data(const QModelIndex& aIndex, int aRole) const
                     case 0: return item->op;
                     case 1: return item->source;
                     case 2: return item->target;
-                    case 3: return item->state;
+                    case 3: return item->status;
                 }
             break;
 
@@ -292,7 +292,7 @@ QVariant TransferProgressModel::data(const QModelIndex& aIndex, int aRole) const
             case ERIDIsDir:     return QFileInfo(item->source).isDir();
             case ERIDIsArchive: return isFileArchiveByExt(item->source);
 
-            case ERIDState:     return item->state;
+            case ERIDStatus:    return item->status;
 
             default:
             break;
@@ -335,12 +335,11 @@ bool TransferProgressModel::setData(const QModelIndex& aIndex, const QVariant& a
                 emit dataChanged(aIndex, aIndex);
             return true;
 
-            case ERIDState:
-                // Check State
-                if (item->state != (TransferProgressState)aValue.toInt()) {
-                    //qDebug() << "TransferProgressModel::setData - aRole: ERIDState";
-                    // Set State
-                    item->state = (TransferProgressState)aValue.toInt();
+            case ERIDStatus:
+                // Check Status
+                if (item->status != (TransferProgressStatus)aValue.toInt()) {
+                    // Set Status
+                    item->status = (TransferProgressStatus)aValue.toInt();
                     // Emit Data Changed Signal
                     emit dataChanged(aIndex, aIndex);
                 }

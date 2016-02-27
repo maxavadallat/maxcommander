@@ -98,6 +98,8 @@ void SettingsController::release()
     // Dec Ref Count
     refCount--;
 
+    //qDebug() << "SettingsController::release - refCount: " << refCount;
+
     // Check Ref Count
     if (refCount <= 0 && settingsSingleton) {
         // Delete Settings Singleton
@@ -119,11 +121,14 @@ QVariant SettingsController::value(const QString& aKey, const QVariant& aDefault
 //==============================================================================
 void SettingsController::setValue(const QString& aKey, const QVariant& aValue)
 {
-    // Set Value
+    // Set Value Directly
     settings.setValue(aKey, aValue);
 
+    // Sync Values
+    settings.sync();
+
     // Set Dirty
-    setDirty(true);
+    //setDirty(true);
 
     // Emit Setting Has Changed Signal
     emit settingHasChanged(aKey);
@@ -496,6 +501,8 @@ void SettingsController::setCloseWhenFinished(const bool& aClose)
     if (closeWhenFinished != aClose) {
         // Set Close When Finished
         closeWhenFinished = aClose;
+        // Set Dirty
+        setDirty(true);
         // Emit Close When Finished Changed Signal
         emit closeWhenFinishedChanged(closeWhenFinished);
     }
@@ -1190,6 +1197,8 @@ void SettingsController::setGridThumbWidth(const int& aWidth)
     if (gridThumbWidth != aWidth) {
         // Set Grid Thumb Width
         gridThumbWidth = aWidth;
+        // Set Dirty
+        setDirty(true);
         // Emit Signal
         emit gridThumbWidthChanged(gridThumbWidth);
     }
@@ -1212,6 +1221,8 @@ void SettingsController::setGridThumbHeight(const int& aHeight)
     if (gridThumbHeight != aHeight) {
         // Set Grid Thumb Height
         gridThumbHeight = aHeight;
+        // Set Dirty
+        setDirty(true);
         // Emit Signal
         emit gridThumbHeightChanged(gridThumbHeight);
     }

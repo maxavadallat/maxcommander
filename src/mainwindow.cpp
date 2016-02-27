@@ -1673,16 +1673,23 @@ void MainWindow::deleteProgressClosed(DeleteProgressDialog* aDeleteProgressDialo
         int dpdCount = deleteProgressDialogs.count();
 
         // Go Thru Dialogs
-        for (int i=0; i<dpdCount; ++i) {
+        for (int i = 0; i < dpdCount; ++i) {
             // Get Dialog
             DeleteProgressDialog* dialog = deleteProgressDialogs[i];
+
             // Check Dialog
             if (dialog == aDeleteProgressDialog) {
 
                 // Check Left Panel
                 if (leftPanel /*&& (leftPanel->dwDirChanged || leftPanel->dwFileChanged)*/) {
+
                     // Check Current Dir
                     if (dialog->dirPath == leftPanel->currentDir) {
+
+                        // Try to Find Closets Index To Current
+
+                        // ...
+
                         // Reload
                         leftPanel->reload(/*leftPanel->currentIndex*/);
                     }
@@ -1690,8 +1697,14 @@ void MainWindow::deleteProgressClosed(DeleteProgressDialog* aDeleteProgressDialo
 
                 // Check Right Panel
                 if (rightPanel /*&& (rightPanel->dwDirChanged || rightPanel->dwFileChanged)*/) {
+
                     // Check Current Dir
                     if (dialog->dirPath == rightPanel->currentDir) {
+
+                        // Try to Find Closets Index To Current
+
+                        // ...
+
                         // Reload
                         rightPanel->reload(/*rightPanel->currentIndex*/);
                     }
@@ -1720,7 +1733,7 @@ void MainWindow::transferProgressClosed(TransferProgressDialog* aTransferProgres
         int tpdCount = transferProgressDialogs.count();
 
         // Go Thru Dialogs
-        for (int i=0; i<tpdCount; ++i) {
+        for (int i = 0; i < tpdCount; ++i) {
             // Get Dialog
             TransferProgressDialog* dialog = transferProgressDialogs[i];
 
@@ -1730,12 +1743,19 @@ void MainWindow::transferProgressClosed(TransferProgressDialog* aTransferProgres
                 if (leftPanel /*&& (leftPanel->dwDirChanged || leftPanel->dwFileChanged)*/) {
                     // Check Source Path
                     if (QDir(dialog->targetPath) == QDir(leftPanel->currentDir)) {
+
                         // Set Last File Name
                         leftPanel->lastFileName = QFileInfo(dialog->getLastTarget()).fileName();
-                        // Try To Find Lat Item File Name & Reload
+
+                        // Reload
                         leftPanel->reload();
 
                     } else if (dialog->operation == DEFAULT_OPERATION_MOVE_FILE && QDir(dialog->sourcePath) == QDir(leftPanel->currentDir)) {
+
+                        // Try to Find Closets Index To Current
+
+                        // ...
+
                         // Reload
                         leftPanel->reload(/*leftPanel->currentIndex*/);
                     }
@@ -1745,12 +1765,19 @@ void MainWindow::transferProgressClosed(TransferProgressDialog* aTransferProgres
                 if (rightPanel /*&& (rightPanel->dwDirChanged || rightPanel->dwFileChanged)*/) {
                     // Check Dialog Target Path
                     if (QDir(dialog->targetPath) == QDir(rightPanel->currentDir)) {
+
                         // Set Last Target File Name
                         rightPanel->lastFileName = QFileInfo(dialog->getLastTarget()).fileName();
+
                         // Reload
                         rightPanel->reload();
 
                     } else if (dialog->operation == DEFAULT_OPERATION_MOVE_FILE && QDir(dialog->sourcePath) == QDir(rightPanel->currentDir)) {
+
+                        // Try to Find Closets Index To Current
+
+                        // ...
+
                         // Reload
                         rightPanel->reload(/*rightPanel->currentIndex*/);
                     }

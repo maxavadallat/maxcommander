@@ -39,6 +39,8 @@ Rectangle {
         property int visualItemsCount: Math.floor((fileTransferListView.height + fileTransferListView.spacing) / fileTransferListView.delegateHeight);
         property int prevIndex: -1
 
+        highlightMoveDuration: 0
+
         model: fileTransferListModel
 
         delegate: FileTransferListDelegate {
@@ -55,7 +57,7 @@ Rectangle {
             fileSymLink: fileIsLink
             fileArchive: fileIsArchive
 
-            status: fileOpState
+            opStatus: fileOpStatus
 
             itemIndex: index
             listIndex: fileTransferListView.currentIndex
@@ -91,6 +93,8 @@ Rectangle {
 
                     return Const.DEFAULT_FILE_ICON_PREFIX + Const.DEFAULT_FILE_ICON_DEFAULT_FILE;
                 }
+
+                // TODO: Get Proper File Name, Source Or Target when Moving and Operation Status is Done
 
                 // Check File Name
                 if (Utility.isImage(fileSource, mainController)) {

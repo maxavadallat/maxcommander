@@ -7,9 +7,9 @@
 
 
 //==============================================================================
-// Delete Progress Queue Item State
+// Delete Progress Queue Item Status
 //==============================================================================
-enum DeleteProgressState
+enum DeleteProgressStatus
 {
     EDPIdle         = 0,
     EDPRunning,
@@ -36,9 +36,9 @@ protected:
     friend class DeleteProgressModel;
 
     // File Name
-    QString             fileName;
-    // Progress State
-    DeleteProgressState state;
+    QString                 fileName;
+    // Progress Status
+    DeleteProgressStatus    status;
 };
 
 
@@ -60,13 +60,13 @@ public:
     void insertItem(const int& aIndex, const QString& aFileName);
     // Remove Item
     void removeItem(const int& aIndex);
-    // Set Progress State
-    void setProgressState(const int& aIndex, const DeleteProgressState& aState);
+    // Set Progress Status
+    void setProgressStatus(const int& aIndex, const DeleteProgressStatus& aStatus);
 
     // Get File Name
     QString getFileName(const int& aIndex);
-    // Get Progress State
-    DeleteProgressState getProgressState(const int& aIndex);
+    // Get Progress Status
+    DeleteProgressStatus getProgressStatus(const int& aIndex);
 
     // Find Index
     int findIndex(const QString& aFileName);
@@ -114,7 +114,7 @@ protected:
         ERIDIsLink,
         ERIDIsDir,
         ERIDIsArchive,
-        ERIDState
+        ERIDStatus
     };
 
     // Items

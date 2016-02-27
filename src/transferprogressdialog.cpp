@@ -706,12 +706,12 @@ void TransferProgressDialog::restoreUI()
     }
 
     // Get Close When Finished
-    closeWhenFinished = settings->value(SETTINGS_KEY_CLOSE_WHEN_FINISHED, false).toBool();
+    closeWhenFinished = settings->getCloseWhenFinished();
     // Set Checkbox
     ui->closeWhenFinishedCheckBox->setChecked(closeWhenFinished);
 
     // Update Queue Column Sizes
-    updateQueueColumnSizes();
+    //updateQueueColumnSizes();
 
     // Reset Current Progress
     currentProgress = 0;
@@ -1150,40 +1150,44 @@ void TransferProgressDialog::fileOpStarted(const unsigned int& aID,
 {
     Q_UNUSED(aPath);
 
+    // Check Operation Parameter
+    if (aOp == DEFAULT_OPERATION_COPY_FILE || aOp == DEFAULT_OPERATION_MOVE_FILE) {
 
-    //qDebug() << " ";
-    //qDebug() << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>";
-    //qDebug() << " ";
-    qDebug() << "TransferProgressDialog::fileOpStarted - aID: " << aID << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget;
+        qDebug() << "TransferProgressDialog::fileOpStarted - aID: " << aID << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget;
 
-    // Configure Buttons
-    configureButtons(QDialogButtonBox::Abort);
+        // Configure Buttons
+        configureButtons(QDialogButtonBox::Abort);
 
-    // Set Current File Name
-    setCurrentFileName(aSource);
+        // Set Current File Name
+        setCurrentFileName(aSource);
 
-    // Init File Info
-    QFileInfo sourceInfo(aSource);
+        // Init File Info
+        QFileInfo sourceInfo(aSource);
 
-    // Reset Last Transfer Size
-    lastTransferedSize = 0;
-    // Reset Current Transfer Size
-    currTransferedSize = 0;
+        // Reset Last Transfer Size
+        lastTransferedSize = 0;
+        // Reset Current Transfer Size
+        currTransferedSize = 0;
 
-    // Set Current Progress
-    //setCurrentProgress(0, 0);
-    currentProgress = 0;
-    // Set Current Size
-    currentSize = sourceInfo.size();
+        // Set Current Progress
+        //setCurrentProgress(0, 0);
+        currentProgress = 0;
+        // Set Current Size
+        currentSize = sourceInfo.size();
 
-    // Configure Current Progress Bar
-    configureCurrentProgressBar(currentSize);
+        // Configure Current Progress Bar
+        configureCurrentProgressBar(currentSize);
 
-    // Start Transfer Speed Timer
-    startTransferSpeedTimer();
+        // Start Transfer Speed Timer
+        startTransferSpeedTimer();
 
-    // Start Progress Refresh Timer
-    startProgressRefreshTimer();
+        // Start Progress Refresh Timer
+        startProgressRefreshTimer();
+    } else {
+
+        qDebug() << "TransferProgressDialog::fileOpStarted - aID: " << aID << " - aOp: " << aOp << " - aSource: " << aSource << " - aTarget: " << aTarget << " - WTF ?!?";
+
+    }
 }
 
 //==============================================================================
@@ -1200,13 +1204,12 @@ void TransferProgressDialog::fileOpProgress(const unsigned int& aID,
     Q_UNUSED(aCurrFilePath);
     Q_UNUSED(aCurrTotal);
 
-    //qDebug() << "p: " << aCurrProgress << " - t: " << aCurrTotal;
-    //qDebug() << "p: " << aCurrProgress;
+    //qDebug() << "DeleteProgressDialog::fileOpProgress - aID: " << aID << " - aOp: " << aOp << " - aCurrFilePath: " << aCurrFilePath << " - aCurrProgress: " << aCurrProgress << " - aCurrTotal: " << aCurrTotal;
 
     // Check Queue Model
     if (queueModel) {
         // Set Done
-        queueModel->setProgressState(queueIndex, ETPRunning);
+        queueModel->setProgressStatus(queueIndex, ETPRunning);
     }
 
     // Set Current Progress
@@ -1281,7 +1284,7 @@ void TransferProgressDialog::fileOpSkipped(const unsigned int& aID,
         // Check Queue Model
         if (queueModel) {
             // Set Progress State Skipped
-            queueModel->setProgressState(queueIndex, ETPSkipped);
+            queueModel->setProgressStatus(queueIndex, ETPSkipped);
         }
 
         // Init Source Info
@@ -1323,9 +1326,6 @@ void TransferProgressDialog::fileOpFinished(const unsigned int& aID,
     Q_UNUSED(aPath);
 
     qDebug() << "TransferProgressDialog::fileOpFinished - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath << " - aSource: " << aSource << " - aTarget: " << aTarget;
-    //qDebug() << " ";
-    //qDebug() << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<";
-    //qDebug() << " ";
 
     // ...
 
@@ -1338,7 +1338,7 @@ void TransferProgressDialog::fileOpFinished(const unsigned int& aID,
             // Check Queue Model
             if (queueModel) {
                 // Set Progress State Finished
-                queueModel->setProgressState(queueIndex, ETPFinished);
+                queueModel->setProgressStatus(queueIndex, ETPFinished);
             }
 
             // Configure Current Progress
@@ -1370,10 +1370,14 @@ void TransferProgressDialog::fileOpFinished(const unsigned int& aID,
         // Check Finished Operation - Move
         if (aOp == DEFAULT_OPERATION_MOVE_FILE) {
 
+            // Check Source and Target !!!!
+
+            // ...
+
             // Check Queue Model
             if (queueModel) {
                 // Set Done
-                queueModel->setProgressState(queueIndex, ETPFinished);
+                queueModel->setProgressStatus(queueIndex, ETPFinished);
             }
 
             // Configure Current Progress
@@ -1390,25 +1394,12 @@ void TransferProgressDialog::fileOpFinished(const unsigned int& aID,
         // Check Finished Operation - Queue
         } else if (aOp == DEFAULT_OPERATION_QUEUE) {
 
-            // Do Nothing, Process Queue
-
-        // Check Finished Operation - Copy
-        } else if (aOp == DEFAULT_OPERATION_COPY_FILE) {
-
-            // Return, Delete Ready Suppose to Follow
-
-            return;
-
-        } else if (aOp == DEFAULT_OPERATION_DELETE_FILE) {
-
-            // Return, Move Ready Suppose to Follow
-
-            return;
+            // Emit Current Index Changed to Reset after inserts
+            emit currentIndexChanged(queueIndex);
 
         } else {
 
             // Unhandled
-
             qDebug() << "TransferProgressDialog::fileOpFinished - aID: " << aID << " - aOp: " << aOp << " - WTF?!?";
 
             // ...
@@ -1419,12 +1410,7 @@ void TransferProgressDialog::fileOpFinished(const unsigned int& aID,
         // Process Queue
         processQueue();
 
-    } else if (operation == DEFAULT_OPERATION_LIST_DIR) {
-
-        // ...
-
-        // Process Queue
-        processQueue();
+    // Check Operation - List Dir
     } else if (operation == DEFAULT_OPERATION_EXTRACT_ARCHIVE) {
 
         // Increase Current Queue Index
@@ -1432,6 +1418,12 @@ void TransferProgressDialog::fileOpFinished(const unsigned int& aID,
 
         // Process Queue
         processQueue();
+
+    // Unhandled
+    } else {
+
+        qDebug() << "TransferProgressDialog::fileOpFinished - aID: " << aID << " - aOp: " << aOp << " - WTF?!?";
+
     }
 }
 
@@ -1834,7 +1826,7 @@ void TransferProgressDialog::on_closeWhenFinishedCheckBox_clicked()
     // Set Close When Finished
     closeWhenFinished = ui->closeWhenFinishedCheckBox->isChecked();
     // Set Settings Value
-    settings->setValue(SETTINGS_KEY_CLOSE_WHEN_FINISHED, closeWhenFinished);
+    settings->setCloseWhenFinished(closeWhenFinished);
 }
 
 //==============================================================================

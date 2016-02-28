@@ -41,6 +41,12 @@ protected:
     QString                 source;
     // Target
     QString                 target;
+    // Is Directory
+    bool                    fileIsDir;
+    // Is Link
+    bool                    fileIsLink;
+    // Is Archive
+    bool                    fileIsArchive;
     // State
     TransferProgressStatus  status;
 };

@@ -13,8 +13,20 @@ TransferProgressModelItem::TransferProgressModelItem(const QString& aOp, const Q
     : op(aOp)
     , source(aSource)
     , target(aTarget)
+    , fileIsDir(false)
+    , fileIsLink(false)
+    , fileIsArchive(false)
     , status(ETPIdle)
 {
+    // Init File Info
+    QFileInfo fileInfo(aSource);
+
+    // Set File Is Dir
+    fileIsDir = fileInfo.isDir();
+    // Set File Is Link
+    fileIsLink = fileInfo.isSymLink();
+    // Set File Is Archive
+    fileIsArchive = isFileArchiveByExt(fileInfo.fileName());
 }
 
 //==============================================================================
@@ -288,9 +300,9 @@ QVariant TransferProgressModel::data(const QModelIndex& aIndex, int aRole) const
             case ERIDTarget:    return item->target;
 
             case ERIDIsHidden:  return false;
-            case ERIDIsLink:    return QFileInfo(item->source).isSymLink();
-            case ERIDIsDir:     return QFileInfo(item->source).isDir();
-            case ERIDIsArchive: return isFileArchiveByExt(item->source);
+            case ERIDIsLink:    return item->fileIsLink;
+            case ERIDIsDir:     return item->fileIsDir;
+            case ERIDIsArchive: return item->fileIsArchive;
 
             case ERIDStatus:    return item->status;
 

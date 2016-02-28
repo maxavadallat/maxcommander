@@ -49,7 +49,8 @@ FilePanel::FilePanel(QWidget* aParent)
     , pressedIndex(-1)
     , visualItemsCount(-1)
     , lastFileName("")
-//    , lastIndex(-1)
+    , lastIndex(-1)
+    , firstSelectionIndex(-1)
     , extVisible(true)
     , typeVisible(false)
     , sizeVisible(true)
@@ -116,6 +117,7 @@ void FilePanel::init()
         connect(fileListModel, SIGNAL(linkCreated(QString,QString)), this, SLOT(fileModelLinkCreated(QString,QString)));
         connect(fileListModel, SIGNAL(fileRenamed(QString,QString)), this, SLOT(fileModelFileRenamed(QString,QString)));
         connect(fileListModel, SIGNAL(error(QString,QString,QString,int)), this, SLOT(fileModelError(QString,QString,QString,int)));
+        connect(fileListModel, SIGNAL(fileSelectionChanged(int,bool)), this, SLOT(handleFileSelectionChanged(int,bool)));
     }
 
     // Set Context Properties
@@ -316,6 +318,9 @@ void FilePanel::setCurrentDir(const QString& aCurrentDir, const QString& aLastFi
             // ...
 
         }
+
+        // Reset First Selection Index
+        firstSelectionIndex = -1;
 
         // Set Text
         ui->currDirLabel->setText(currentDir);
@@ -1031,7 +1036,7 @@ void FilePanel::fileListWidgetDragStarted(const int& aPosX, const int aPosY)
         QList<QUrl> uriList;
 
         // Go Thru Selected Items
-        for (int i=0; i<siCount; ++i) {
+        for (int i = 0; i < siCount; ++i) {
             // Adjust Selected Items
             selectedItems.replace(i, QString("%1%2").arg(DEFAULT_URL_PREFIX_FILE).arg(selectedItems[i]));
 
@@ -1176,7 +1181,7 @@ void FilePanel::feedSearchResults(const QStringList& aSearchResults, const QStri
         int srCount = aSearchResults.count();
 
         // Add Items
-        for (int i=0; i<srCount; ++i) {
+        for (int i = 0; i < srCount; ++i) {
             // Add Item
             fileListModel->addItem(aSearchResults[i], true);
         }
@@ -1314,10 +1319,12 @@ void FilePanel::setCurrentIndex(const int& aCurrentIndex)
             //qDebug() << "FilePanel::setCurrentIndex - panelName: " << panelName << " - aCurrentIndex: " << aCurrentIndex;
             // Set Current Index
             currentIndex = aCurrentIndex;
-
         } else {
             //qDebug() << "FilePanel::setCurrentIndex - panelName: " << panelName << " - aCurrentIndex: " << aCurrentIndex << " - INVALID INDEX!!";
         }
+
+        // Reset Last Index
+        lastIndex = currentIndex;
 
         // Emit Current Index Changed Signal
         emit currentIndexChanged(currentIndex);
@@ -1375,15 +1382,12 @@ QStringList FilePanel::getSupportedImageFormats()
 //==============================================================================
 // Reload
 //==============================================================================
-void FilePanel::reload(/*const int& aIndex*/)
+void FilePanel::reload()
 {
-    qDebug() << "FilePanel::reload - panelName: " << panelName/* << " - aIndex: " << aIndex*/;
+    qDebug() << "FilePanel::reload - panelName: " << panelName;
 
-    // Get Last Index
-    //lastIndex = aIndex;
-
-    // Reset Current Index
-    //currentIndex = -1;
+    // Set Last Index
+    lastIndex = currentIndex;
 
     // Reset DW Dir Changed
     dwDirChanged = false;
@@ -1392,11 +1396,14 @@ void FilePanel::reload(/*const int& aIndex*/)
 
     // Check File List Model
     if (fileListModel) {
-        // Set Loading
-        //setLoading(true);
-
         // Get Lat File Name
         lastFileName = fileListModel->getFileInfo(currentIndex).fileName();
+
+        // Check Lat File Name
+        if (lastFileName.isEmpty()) {
+            // Adjust Last Index To Set The Previous Index
+            lastIndex = currentIndex - 1;
+        }
 
         // Reload
         fileListModel->reload();
@@ -1430,29 +1437,72 @@ void FilePanel::syncCurrentDir()
 }
 
 //==============================================================================
+// Set File Selected
+//==============================================================================
+void FilePanel::setFileSelected(const int& aIndex, const bool& aSelected)
+{
+    // Check File List Model
+    if (fileListModel) {
+        //qDebug() << "FilePanel::setFileSelected - panelName: " << panelName << " - aIndex: " << aIndex << " - aSelected: " << aSelected;
+
+        // Set File Selected
+        if (fileListModel->setSelected(aIndex, aSelected)) {
+            // Check Selected
+            if (aSelected) {
+                // Check First Selection Index
+                if (firstSelectionIndex > aIndex || firstSelectionIndex == -1) {
+                    // Set First Selection Index
+                    firstSelectionIndex = aIndex;
+                }
+            } else {
+                // Check First Selection Index
+                if (firstSelectionIndex == aIndex) {
+                    // Set First Selection Index
+                    firstSelectionIndex = fileListModel->findNextSelected(aIndex);
+                }
+            }
+        }
+
+        qDebug() << "FilePanel::setFileSelected - panelName: " << panelName << " - firstSelectionIndex: " << firstSelectionIndex;
+
+    }
+}
+
+//==============================================================================
 // Select All Files
 //==============================================================================
 void FilePanel::selectAllFiles()
 {
     // Check File List Model
     if (fileListModel) {
-        qDebug() << "FilePanel::selectAllFiles - panelName: " << panelName;
         // Select All Items
         fileListModel->selectAll();
+
+        // Set First Selection Index
+        firstSelectionIndex = fileListModel->findNextSelected(0);
+
+        qDebug() << "FilePanel::selectAllFiles - panelName: " << panelName << " - firstSelectionIndex: " << firstSelectionIndex;
     }
 }
 
 //==============================================================================
 // Deselect All Files
 //==============================================================================
-void FilePanel::deselectAllFiles()
+void FilePanel::deselectAllFiles(const bool& aClearFirstSelectionIndex)
 {
     // Check File List Model
     if (fileListModel) {
-        qDebug() << "FilePanel::deselectAllFiles - panelName: " << panelName;
         // Deselect All Items
         fileListModel->deselectAll();
     }
+
+    // Check Clear First Selection Index
+    if (aClearFirstSelectionIndex) {
+        // Reset First Selection Index
+        firstSelectionIndex = -1;
+    }
+
+    qDebug() << "FilePanel::deselectAllFiles - panelName: " << panelName << " - firstSelectionIndex: " << firstSelectionIndex;
 }
 
 //==============================================================================
@@ -1463,8 +1513,8 @@ void FilePanel::toggleCurrentFileSelection()
     // Check File List Model
     if (fileListModel) {
         qDebug() << "FilePanel::toggleCurrentFileSelection - panelName: " << panelName;
-        // Set Item Selection
-        fileListModel->setSelected(currentIndex, !fileListModel->getSelected(currentIndex));
+        // Set File Selected
+        setFileSelected(currentIndex, !fileListModel->getSelected(currentIndex));
     }
 }
 
@@ -1475,9 +1525,13 @@ void FilePanel::selectFiles(const QString& aPattern)
 {
     // Check File List Model
     if (fileListModel) {
-        qDebug() << "FilePanel::selectFiles - panelName: " << panelName << " - aPattern: " << aPattern;
         // Select Files
         fileListModel->selectFiles(aPattern);
+
+        // Set First Selection Index
+        firstSelectionIndex = fileListModel->findNextSelected(0);
+
+        qDebug() << "FilePanel::selectFiles - panelName: " << panelName << " - aPattern: " << aPattern << " - firstSelectionIndex: " << firstSelectionIndex;
     }
 }
 
@@ -1488,9 +1542,13 @@ void FilePanel::deselectFiles(const QString& aPattern)
 {
     // Check File List Model
     if (fileListModel) {
-        qDebug() << "FilePanel::deselectFiles - panelName: " << panelName << " - aPattern: " << aPattern;
         // Deselect Files
         fileListModel->deselectFiles(aPattern);
+
+        // Set First Selection Index
+        firstSelectionIndex = fileListModel->findNextSelected(0);
+
+        qDebug() << "FilePanel::deselectFiles - panelName: " << panelName << " - aPattern: " << aPattern << " - firstSelectionIndex: " << firstSelectionIndex;
     }
 }
 
@@ -1825,8 +1883,40 @@ void FilePanel::handleItemSelect()
         }
     } else {
         // Toggle Selection
-        fileListModel->setSelected(currentIndex, !fileListModel->getSelected(currentIndex));
+        //fileListModel->setSelected(currentIndex, !fileListModel->getSelected(currentIndex));
+        setFileSelected(currentIndex, !fileListModel->getSelected(currentIndex));
     }
+}
+
+//==============================================================================
+// Handle File Selection Changed Slot
+//==============================================================================
+void FilePanel::handleFileSelectionChanged(const int& aIndex, const bool& aSelected)
+{
+    // Check Selected
+    if (aSelected) {
+        // Check First Selection Index
+        if (firstSelectionIndex > aIndex || firstSelectionIndex == -1) {
+            // Set First Selection Index
+            firstSelectionIndex = aIndex;
+        }
+    } else {
+        // Check File List Model
+        if (fileListModel) {
+
+            // Check First Selection Index
+            if (firstSelectionIndex == aIndex || (!fileListModel->hasSelection() && firstSelectionIndex != -1)) {
+                // Set First Selection Index
+                firstSelectionIndex = fileListModel->findNextSelected(aIndex);
+            }
+
+        } else {
+            // Reset First Selection Index
+            firstSelectionIndex = -1;
+        }
+    }
+
+    qDebug() << "FilePanel::handleFileSelectionChanged - panelName: " << panelName << " - aIndex: " << aIndex << " - aSelected: " << aSelected << " - firstSelectionIndex: " << firstSelectionIndex;
 }
 
 //==============================================================================
@@ -2019,7 +2109,7 @@ void FilePanel::updateSupportedImageFormats()
     // Get Count
     int flCount = formats.count();
     // Go Thru Formats
-    for (int i=0; i<flCount; ++i) {
+    for (int i = 0; i < flCount; ++i) {
         // Add Format String
         supportedImageFormats << QString(formats[i]).toLower();
     }
@@ -2051,39 +2141,61 @@ void FilePanel::fileModelBusyChanged(const bool& aBusy)
 //==============================================================================
 void FilePanel::fileModelDirFetchFinished()
 {
+    // Check If Last File Name Was Not Empty
     if (!lastFileName.isEmpty()) {
         qDebug() << "FilePanel::fileModelDirFetchFinished - panelName: " << panelName << " - lastFileName: " << lastFileName;
 
-        // Find Index
-        int lastFileIndex = fileListModel ? fileListModel->findIndex(lastFileName) : 0;
+        // Init Last File Index
+        int lastFileIndex = lastIndex;
+
+        // Get File Info
+        QFileInfo fileInfo = fileListModel ? fileListModel->getFileInfo(lastFileIndex) : QFileInfo("");
+
+        // Check Last Index
+        if (fileInfo.fileName() == lastFileName) {
+
+            // ...
+
+        } else {
+
+            // Try To Find Index
+            lastFileIndex = fileListModel ? fileListModel->findIndex(lastFileName) : -1;
+
+            // Check Last File Index If Not Found
+            if (lastFileIndex == -1) {
+                // Check First Selection Index
+                if (firstSelectionIndex != -1) {
+                    // Set Last File index
+                    lastFileIndex = firstSelectionIndex - 1;
+                    // Reset First Selection Index
+                    firstSelectionIndex = -1;
+                } else {
+                    // Set Last File Index
+                    lastFileIndex = lastIndex - 1;
+                }
+            }
+
+            // Adjust Last File Index
+            lastFileIndex = qBound(0, lastFileIndex, (fileListModel ? fileListModel->rowCount()-1 : -1));
+        }
+
         // Reset Last File Name
         lastFileName = "";
 
-        // Adjust Last File Index
-        lastFileIndex = qBound(0, lastFileIndex, (fileListModel ? fileListModel->rowCount()-1 : -1));
-
         // Set Current Index
         setCurrentIndex(lastFileIndex);
-    }
-/*
-    else if (lastIndex != -1) {
+
+    // Check If Last Index Is Set
+    } else if (lastIndex != -1) {
         qDebug() << "FilePanel::fileModelDirFetchFinished - panelName: " << panelName << " - lastIndex: " << lastIndex;
 
         // Set Current Index
         setCurrentIndex(qBound(0, lastIndex, fileListModel ? fileListModel->rowCount()-1 : -1));
 
-        // Check Last Index
-        if (lastIndex == 0) {
-            // Set Loading
-            setLoading(false);
-        }
+        // Reset Last Index
+        //lastIndex = -1;
 
-        // Reset LAst Index
-        lastIndex = -1;
-
-    }
-*/
-    else {
+    } else {
         qDebug() << "FilePanel::fileModelDirFetchFinished - panelName: " << panelName << " - currentDir: " << currentDir;
 
         // Set Current Index
@@ -2325,7 +2437,7 @@ void FilePanel::stopDirWatcher()
         int dwdCount = dwDirs.count();
 
         // Go Thru Dri Watcher Dirs
-        for (int i=0; i<dwdCount; ++i) {
+        for (int i = 0; i < dwdCount; ++i) {
             // Stop Dir Watcher/ Remove Dir
             dirWatcher.removePath(dwDirs[i]);
         }
@@ -2386,13 +2498,13 @@ void FilePanel::directoryChanged(const QString& aDirPath)
 
         // Check File Renamer Update
         if (fileRenamerUpdate) {
-            // Reset file Renamer Update
+            // Reset File Renamer Update
             fileRenamerUpdate = false;
 
             return;
         }
 
-        qDebug() << "#### FilePanel::directoryChanged - aDirPath: " << aDirPath;
+        qDebug() << "FilePanel::directoryChanged - aDirPath: " << aDirPath;
 
         // Set Dir Changed
         dwDirChanged = true;
@@ -2406,10 +2518,11 @@ void FilePanel::fileChanged(const QString& aFilePath)
 {
     // Init File Info
     QFileInfo fileInfo(aFilePath);
+
     // Check File Path
     if (currentDir == fileInfo.absolutePath()) {
 
-        qDebug() << "#### FilePanel::fileChanged - aFilePath: " << aFilePath;
+        qDebug() << "FilePanel::fileChanged - aFilePath: " << aFilePath;
 
         // Set File Changed
         dwFileChanged = true;
@@ -3002,7 +3115,8 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
                     // Check Current Index
                     if (currentIndex == 0) {
                         // Set Selected
-                        fileListModel->setSelected(currentIndex, !fileListModel->getSelected(currentIndex));
+                        //fileListModel->setSelected(currentIndex, !fileListModel->getSelected(currentIndex));
+                        setFileSelected(currentIndex, !fileListModel->getSelected(currentIndex));
                     }
                 }
 
@@ -3017,7 +3131,8 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
                     // Check Current Index
                     if (currentIndex == fileListModel->rowCount()-1) {
                         // Set Selected
-                        fileListModel->setSelected(currentIndex, !fileListModel->getSelected(currentIndex));
+                        //fileListModel->setSelected(currentIndex, !fileListModel->getSelected(currentIndex));
+                        setFileSelected(currentIndex, !fileListModel->getSelected(currentIndex));
                     }
                 }
 
@@ -3134,6 +3249,8 @@ void FilePanel::keyReleaseEvent(QKeyEvent* aEvent)
                     if (fileListModel) {
                         // Toggle All Selection
                         fileListModel->toggleAllSelection();
+                        // Set First Selection Index
+                        firstSelectionIndex = fileListModel->findNextSelected(0);
                     }
                 }
             break;
@@ -3321,8 +3438,11 @@ void FilePanel::timerEvent(QTimerEvent* aEvent)
                         // Reset File Changed
                         dwFileChanged = false;
 
-                        // Reload
-                        reload();
+                        // Check If File List Model Busy
+                        if (!fileListModel->getBusy()) {
+                            // Reload
+                            reload();
+                        }
                     }
                 }
             }
@@ -4060,7 +4180,7 @@ int DirScanner::findIndex(const QString& aDirPath)
     int sqiCount = scanQueue.count();
 
     // Go Thru Queue Items
-    for (int i=0; i<sqiCount; ++i) {
+    for (int i = 0; i < sqiCount; ++i) {
         // Get Queue Item
         DirScannerQueueItem* item = scanQueue[i];
         // Check Dir Path

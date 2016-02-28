@@ -731,7 +731,7 @@ void MainWindow::launchFileTransfer(const QString& aOperation)
         }
 
         // Clear Selected Files
-        focusedPanel->deselectAllFiles();
+        focusedPanel->deselectAllFiles(aOperation == DEFAULT_OPERATION_COPY_FILE);
     }
 }
 
@@ -1030,7 +1030,7 @@ void MainWindow::launchDelete()
         }
 
         // Clear Selected Files
-        focusedPanel->deselectAllFiles();
+        focusedPanel->deselectAllFiles(false);
     }
 }
 

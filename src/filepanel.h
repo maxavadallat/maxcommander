@@ -281,15 +281,18 @@ public slots:
     QStringList getSupportedImageFormats();
 
     // Reload
-    void reload(/*const int& aIndex = -1*/);
+    void reload();
 
     // Sync Current Dir To Other Panel Current Dir
     void syncCurrentDir();
 
+    // Set File Selected
+    void setFileSelected(const int& aIndex, const bool& aSelected);
+
     // Select All Files
     void selectAllFiles();
     // Deselect All Files
-    void deselectAllFiles();
+    void deselectAllFiles(const bool& aClearFirstSelectionIndex = true);
 
     // Toggle Current File Selection
     void toggleCurrentFileSelection();
@@ -483,10 +486,13 @@ protected slots:
     // Stop Dir Watcher Slot
     void stopDirWatcher();
 
-    // Handle Item Selection - Dir/Execution
+    // Handle Item Selection Slot - Dir/Execution
     void handleItemSelection();
-    // Handle Item Select
+    // Handle Item Select Slot
     void handleItemSelect();
+
+    // Handle File Selection Changed Slot
+    void handleFileSelectionChanged(const int& aIndex, const bool& aSelected);
 
     // Reset Modifier Keys
     void resetModifierKeys();
@@ -633,12 +639,13 @@ private:
     // Visual Items Count
     int                     visualItemsCount;
 
-    // Last Directory Name To Jump After CD UP
-    //QString                 lastDirName;
     // Last File Name To Jump After Reload
     QString                 lastFileName;
     // Last Index Before Reload
-    //int                     lastIndex;
+    int                     lastIndex;
+
+    // First Selection Index
+    int                     firstSelectionIndex;
 
     // Supported Image Formats
     QStringList             supportedImageFormats;

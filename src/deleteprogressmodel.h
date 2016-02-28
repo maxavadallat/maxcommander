@@ -37,6 +37,12 @@ protected:
 
     // File Name
     QString                 fileName;
+    // Is Directory
+    bool                    fileIsDir;
+    // Is Link
+    bool                    fileIsLink;
+    // Is Archive
+    bool                    fileIsArchive;
     // Progress Status
     DeleteProgressStatus    status;
 };

@@ -35,7 +35,7 @@ Rectangle {
 
         focus: true
 
-        property int delegateHeight: globalSettings.thumbHeight
+        property int delegateHeight: Const.DEFAULT_FILE_LIST_DELEGATE_HEIGHT //globalSettings.thumbHeight
         property int visualItemsCount: Math.floor((fileDeleteListView.height + fileDeleteListView.spacing) / fileDeleteListView.delegateHeight);
         property int prevIndex: -1
 
@@ -63,8 +63,8 @@ Rectangle {
 
             // File Icon Source
             fileIconSource: {
-                // Check Global Settings
-                if (globalSettings.useDefaultIcons) {
+                // Check Global Settings And Status if Finished
+                if (globalSettings.useDefaultIcons || fileOpStatus == 3) {
                     // Check If Is Dir
                     if (fileIsDir) {
                        // Check Size

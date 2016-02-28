@@ -128,9 +128,6 @@ public:
     // Remove Item
     void removeItem(const int& aIndex);
 
-    // Set Selected Files Count
-    void setSelectedCount(const int& aSelectedCount);
-
     // Get Selected Files Count
     int getSelectedCount();
 
@@ -150,7 +147,7 @@ public slots:
     // Get Selected
     bool getSelected(const int& aIndex);
     // Set Selected
-    void setSelected(const int& aIndex, const bool& aSelected);
+    bool setSelected(const int& aIndex, const bool& aSelected);
 
     // Has Selection
     bool hasSelection();
@@ -170,6 +167,9 @@ public slots:
 
     // Get All Selected Files
     QStringList getAllSelected();
+
+    // Find Next Selected Index
+    int findNextSelected(const int& aIndex);
 
     // Rename File
     void renameFile(const QString& aSource, const QString& aTarget);
@@ -221,6 +221,9 @@ signals:
     // Need Confirm Signal
     void needConfirm(const int& aCode, const QString& aPath, const QString& aSource, const QString& aTarget);
 
+    // File Selection Changed Signal
+    void fileSelectionChanged(const int& aIndex, const bool& aSelected);
+
     // Selected Count Changed Signal
     void selectedCountChanged(const int& aSelectedCount);
 
@@ -250,6 +253,8 @@ protected slots:
     void fetchArchiveDirItems();
     // Set Archive Mode
     void setArchiveMode(const bool& aArchiveMode);
+    // Set Selected Files Count
+    void setSelectedCount(const int& aSelectedCount);
 
 protected slots: // For Remote File Client
 

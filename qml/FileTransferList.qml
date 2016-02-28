@@ -35,7 +35,7 @@ Rectangle {
 
         focus: true
 
-        property int delegateHeight: globalSettings.thumbHeight
+        property int delegateHeight: Const.DEFAULT_FILE_LIST_DELEGATE_HEIGHT//globalSettings.thumbHeight
         property int visualItemsCount: Math.floor((fileTransferListView.height + fileTransferListView.spacing) / fileTransferListView.delegateHeight);
         property int prevIndex: -1
 
@@ -94,15 +94,21 @@ Rectangle {
                     return Const.DEFAULT_FILE_ICON_PREFIX + Const.DEFAULT_FILE_ICON_DEFAULT_FILE;
                 }
 
-                // TODO: Get Proper File Name, Source Or Target when Moving and Operation Status is Done
+                // Init Icon Source
+                var iconSource = fileSource;
+                // Check Operation and Status if Finished
+                if (fileOp == "MV" && fileOpStatus == 3) {
+                    // Set Icon Source For Target
+                    iconSource = fileTarget;
+                }
 
                 // Check File Name
-                if (Utility.isImage(fileSource, mainController)) {
-                    return Const.DEFAULT_FILE_PREFIX + fileSource;
+                if (Utility.isImage(iconSource, mainController)) {
+                    return Const.DEFAULT_FILE_PREFIX + iconSource;
                 }
 
                 // Image Provider
-                return Const.DEFAULT_FILE_ICON_PREFIX + fileSource;
+                return Const.DEFAULT_FILE_ICON_PREFIX + iconSource;
             }
 
             // ...

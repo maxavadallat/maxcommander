@@ -595,7 +595,7 @@ void FileListModel::reload()
 bool FileListModel::getSelected(const int& aIndex)
 {
     // Check Index
-    if (aIndex >=0 && aIndex < itemList.count()) {
+    if (aIndex >= 0 && aIndex < itemList.count()) {
         return itemList[aIndex]->selected;
     }
 
@@ -605,15 +605,14 @@ bool FileListModel::getSelected(const int& aIndex)
 //==============================================================================
 // Set Selected
 //==============================================================================
-void FileListModel::setSelected(const int& aIndex, const bool& aSelected)
+bool FileListModel::setSelected(const int& aIndex, const bool& aSelected)
 {
     // Check Index
-    if (aIndex >=0 && aIndex < itemList.count()) {
-
+    if (aIndex >= 0 && aIndex < itemList.count()) {
         // Check File Name
         if (itemList[aIndex]->fileInfo.fileName() == "." || itemList[aIndex]->fileInfo.fileName() == "..") {
             // Skip
-            return;
+            return false;
         }
 
         // Check If Item Selected
@@ -633,11 +632,18 @@ void FileListModel::setSelected(const int& aIndex, const bool& aSelected)
                 // Dec Selected Count
                 selectedCount--;
             }
-        }
 
-        // Emit Selected Count Changed Signal
-        emit selectedCountChanged(selectedCount);
+            // Emit File Selection Changed Signal
+            emit fileSelectionChanged(aIndex, itemList[aIndex]->selected);
+
+            // Emit Selected Count Changed Signal
+            emit selectedCountChanged(selectedCount);
+
+            return true;
+        }
     }
+
+    return false;
 }
 
 //==============================================================================
@@ -652,7 +658,7 @@ void FileListModel::selectAll()
     // Reset Selected Count
     selectedCount = 0;
     // Go Thru Item List
-    for (int i=0; i<ilCount; ++i) {
+    for (int i = 0; i < ilCount; ++i) {
         // Check File Name
         if (itemList[i]->fileInfo.fileName() != QString("..") && itemList[i]->fileInfo.fileName() != QString(".")) {
             // Check Selected
@@ -683,7 +689,7 @@ void FileListModel::deselectAll()
     // Get Item List Count
     int ilCount = itemList.count();
     // Go Thru Item List
-    for (int i=0; i<ilCount; ++i) {
+    for (int i = 0; i < ilCount; ++i) {
         // Check Selected
         if (itemList[i]->selected) {
             // Set Item Selected
@@ -711,7 +717,7 @@ void FileListModel::toggleAllSelection()
     // Reset Selected Count
     selectedCount = 0;
     // Go Thru Item List
-    for (int i=0; i<ilCount; ++i) {
+    for (int i = 0; i < ilCount; ++i) {
         // Check File Name
         if (itemList[i]->fileInfo.fileName() != QString("..") && itemList[i]->fileInfo.fileName() != QString(".")) {
             // Set Item Selected
@@ -754,7 +760,7 @@ void FileListModel::selectFiles(const QString& aPattern)
     // Init Dir
     QDir dir(QDir::homePath());
     // Go Thru Item List
-    for (int i=0; i<ilCount; ++i) {
+    for (int i = 0; i < ilCount; ++i) {
         // Get Item
         FileListModelItem* item = itemList[i];
         // Check File Name
@@ -799,7 +805,7 @@ void FileListModel::deselectFiles(const QString& aPattern)
     // Init Dir
     QDir dir(QDir::homePath());
     // Go Thru Item List
-    for (int i=0; i<ilCount; ++i) {
+    for (int i = 0; i < ilCount; ++i) {
         // Get Item
         FileListModelItem* item = itemList[i];
         // Check File Name
@@ -837,7 +843,7 @@ QStringList FileListModel::getAllSelected()
     // Get Item List Count
     int ilCount = itemList.count();
     // Go Thru Item List
-    for (int i=0; i<ilCount; ++i) {
+    for (int i = 0; i < ilCount; ++i) {
         // Check Selected
         if (itemList[i]->selected && itemList[i]->fileInfo.fileName() != "." && itemList[i]->fileInfo.fileName() != "..") {
             // Add File Name To Result
@@ -847,6 +853,30 @@ QStringList FileListModel::getAllSelected()
     }
 
     return result;
+}
+
+//==============================================================================
+// Find Next Selected Index
+//==============================================================================
+int FileListModel::findNextSelected(const int& aIndex)
+{
+    // Chekc If Has Selection
+    if (!hasSelection()) {
+        return -1;
+    }
+
+    // Get Item List Count
+    int ilCount = itemList.count();
+
+    // Iterate Thru Items
+    for (int i = aIndex; i< ilCount; ++i) {
+        // Check Selected
+        if (itemList[i]->selected) {
+            return i;
+        }
+    }
+
+    return -1;
 }
 
 //==============================================================================
@@ -1613,7 +1643,7 @@ int FileListModel::findIndex(const QString& aFileName)
     int flmCount = itemList.count();
 
     // Go Thru List
-    for (int i=0; i<flmCount; ++i) {
+    for (int i = 0; i < flmCount; ++i) {
         // Get Item
         FileListModelItem* item = itemList[i];
 
@@ -1694,8 +1724,11 @@ QFileInfo FileListModel::getFileInfo(const int& aIndex)
     if (aIndex >= 0 && aIndex < rowCount()) {
         // Get Item
         FileListModelItem* item = itemList[aIndex];
-        // Return File Info
-        return item->fileInfo;
+        // Check if file Still Exists
+        if (item && item->fileInfo.exists()) {
+            // Return File Info
+            return item->fileInfo;
+        }
     }
 
     return QFileInfo("");

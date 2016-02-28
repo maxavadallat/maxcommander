@@ -11,9 +11,20 @@
 //==============================================================================
 DeleteProgressModelItem::DeleteProgressModelItem(const QString& aFileName)
     : fileName(aFileName)
+    , fileIsDir(false)
+    , fileIsLink(false)
+    , fileIsArchive(false)
     , status(EDPIdle)
 {
+    // Init File Info
+    QFileInfo fileInfo(fileName);
 
+    // Set File Is Dir
+    fileIsDir = fileInfo.isDir();
+    // Set File Is Link
+    fileIsLink = fileInfo.isSymLink();
+    // File Is Archive
+    fileIsArchive = isFileArchiveByExt(fileInfo.fileName());
 }
 
 //==============================================================================
@@ -246,9 +257,9 @@ QVariant DeleteProgressModel::data(const QModelIndex& aIndex, int aRole) const
 
             case ERIDFileName:  return item->fileName;
             case ERIDIsHidden:  return false;
-            case ERIDIsLink:    return QFileInfo(item->fileName).isSymLink();
-            case ERIDIsDir:     return QFileInfo(item->fileName).isDir();
-            case ERIDIsArchive: return isFileArchiveByExt(item->fileName);
+            case ERIDIsLink:    return item->fileIsLink;
+            case ERIDIsDir:     return item->fileIsDir;
+            case ERIDIsArchive: return item->fileIsArchive;
             case ERIDStatus:    return item->status;
 
             default:

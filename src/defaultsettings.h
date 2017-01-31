@@ -1,6 +1,7 @@
 #ifndef DEFAULTSETTINGS
 #define DEFAULTSETTINGS
 
+#include <qsystemdetection.h>
 
 // Default Main Window Width
 #define DEFAULT_MAIN_WINDOW_WIDTH                           800             // width
@@ -98,12 +99,32 @@
 
 // ...
 
+#if defined (Q_OS_MACX)
 // Terminal App Path
-#define DEFAULT_SETTINGS_TERMINAL_PATH_MAC_OSX              "Terminal"      // terminalPath
+#define DEFAULT_SETTINGS_TERMINAL_PATH_MAC_OSX              "/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal"      // terminalPath
 // Viewer App Path
-#define DEFAULT_SETTINGS_VIEWER_PATH_MAC_OSX                "Preview"       // viewerPath
+#define DEFAULT_SETTINGS_VIEWER_PATH_MAC_OSX                "/Applications/Preview.app/Contents/MacOS/Preview"                  // viewerPath
 // Editor App Path
-#define DEFAULT_SETTINGS_EDITOR_PATH_MAC_OSX                "TextEdit"      // editorPath
+#define DEFAULT_SETTINGS_EDITOR_PATH_MAC_OSX                "/Applications/TextEdit.app/Contents/MacOS/TextEdit"                // editorPath
+
+// Terminal App Path
+#define DEFAULT_SETTINGS_TERMINAL_PATH                      DEFAULT_SETTINGS_TERMINAL_PATH_MAC_OSX
+// Viewer App Path
+#define DEFAULT_SETTINGS_VIEWER_PATH                        DEFAULT_SETTINGS_VIEWER_PATH_MAC_OSX
+// Editor App Path
+#define DEFAULT_SETTINGS_EDITOR_PATH                        DEFAULT_SETTINGS_EDITOR_PATH_MAC_OSX
+
+#else
+
+// Terminal App Path
+#define DEFAULT_SETTINGS_TERMINAL_PATH                      ""
+// Viewer App Path
+#define DEFAULT_SETTINGS_VIEWER_PATH                        ""
+// Editor App Path
+#define DEFAULT_SETTINGS_EDITOR_PATH                        ""
+
+#endif
+
 // Compare Path
 #define DEFAULT_SETTINGS_COMPARE_PATH                       ""              // comparePath
 // Packer Path

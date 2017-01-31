@@ -23,6 +23,8 @@ signals:
 
     // Right Mouse Clicked
     void rightMouseClicked(const QPoint& aPos);
+    // Mouse Double Clicked Signal
+    void mouseDoubleClicked();
 
 protected: // From QWidget
 
@@ -30,6 +32,8 @@ protected: // From QWidget
     virtual void mousePressEvent(QMouseEvent* aEvent);
     // Mouse Release Event
     virtual void mouseReleaseEvent(QMouseEvent* aEvent);
+    // Mouse Double Clicked Event
+    virtual void mouseDoubleClickEvent(QMouseEvent* aEvent);
 
 protected: // Data
 

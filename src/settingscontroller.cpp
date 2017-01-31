@@ -76,12 +76,12 @@ SettingsController::SettingsController(QObject* aParent)
     , gridThumbWidth(DEFAULT_SETTINGS_GRID_THUMB_WIDTH)
     , gridThumbHeight(DEFAULT_SETTINGS_GRID_THUMB_HEIGHT)
 
-    , terminalPath("")
-    , viewerPath("")
-    , editorPath("")
-    , comparePath("")
-    , packerPath("")
-    , unPackerPath("")
+    , terminalPath(DEFAULT_SETTINGS_TERMINAL_PATH)
+    , viewerPath(DEFAULT_SETTINGS_VIEWER_PATH)
+    , editorPath(DEFAULT_SETTINGS_EDITOR_PATH)
+    , comparePath(DEFAULT_SETTINGS_COMPARE_PATH)
+    , packerPath(DEFAULT_SETTINGS_PACKER_PATH)
+    , unPackerPath(DEFAULT_SETTINGS_UNPACKER_PATH)
 
 {
     qDebug() << "SettingsController::SettingsController";
@@ -212,12 +212,12 @@ void SettingsController::loadSettings()
     gridThumbWidth = settings.value(SETTINGS_KEY_GRID_THUMBS_WIDTH, DEFAULT_SETTINGS_GRID_THUMB_WIDTH).toInt();
     gridThumbHeight = settings.value(SETTINGS_KEY_GRID_THUMBS_HEIGHT, DEFAULT_SETTINGS_GRID_THUMB_HEIGHT).toInt();
 
-    terminalPath = settings.value(SETTINGS_KEY_APPS_TERMINAL, "").toString();
-    viewerPath = settings.value(SETTINGS_KEY_APPS_VIEWER, "").toString();
-    editorPath = settings.value(SETTINGS_KEY_APPS_EDITOR, "").toString();
-    comparePath = settings.value(SETTINGS_KEY_APPS_COMPARE, "").toString();
-    packerPath = settings.value(SETTINGS_KEY_APPS_PACKER, "").toString();
-    unPackerPath = settings.value(SETTINGS_KEY_APPS_UNPACKER, "").toString();
+    terminalPath = settings.value(SETTINGS_KEY_APPS_TERMINAL, DEFAULT_SETTINGS_TERMINAL_PATH).toString();
+    viewerPath = settings.value(SETTINGS_KEY_APPS_VIEWER, DEFAULT_SETTINGS_VIEWER_PATH).toString();
+    editorPath = settings.value(SETTINGS_KEY_APPS_EDITOR, DEFAULT_SETTINGS_EDITOR_PATH).toString();
+    comparePath = settings.value(SETTINGS_KEY_APPS_COMPARE, DEFAULT_SETTINGS_COMPARE_PATH).toString();
+    packerPath = settings.value(SETTINGS_KEY_APPS_PACKER, DEFAULT_SETTINGS_PACKER_PATH).toString();
+    unPackerPath = settings.value(SETTINGS_KEY_APPS_UNPACKER, DEFAULT_SETTINGS_UNPACKER_PATH).toString();
 
     // ...
 }
@@ -374,11 +374,11 @@ void SettingsController::restoreDefaults()
     setGridThumbHeight(DEFAULT_SETTINGS_GRID_THUMB_HEIGHT);
 
     // Set Terminal Path
-    setTerminalPath(DEFAULT_SETTINGS_TERMINAL_PATH_MAC_OSX);
+    setTerminalPath(DEFAULT_SETTINGS_TERMINAL_PATH);
     // Set Viewer Path
-    setViewerPath(DEFAULT_SETTINGS_VIEWER_PATH_MAC_OSX);
+    setViewerPath(DEFAULT_SETTINGS_VIEWER_PATH);
     // Set Editor Path
-    setEditorPath(DEFAULT_SETTINGS_EDITOR_PATH_MAC_OSX);
+    setEditorPath(DEFAULT_SETTINGS_EDITOR_PATH);
     // Set Compare Path
     setComparePath(DEFAULT_SETTINGS_COMPARE_PATH);
     // Set Packer Path

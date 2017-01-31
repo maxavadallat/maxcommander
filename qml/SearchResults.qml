@@ -1,5 +1,7 @@
 import QtQuick 2.0
 
+import MyCustomComponents 1.0
+
 import "qrc:/qml"
 import "qrc:/qml/js/constants.js" as Const
 import "qrc:/qml/js/utility.js" as Utility
@@ -50,6 +52,18 @@ Rectangle {
     function gotoPageDown() {
         // Set Current Index
         searchResultList.currentIndex = Math.min(searchResultList.count - 1, searchResultList.currentIndex + searchResultList.visualCount);
+    }
+
+    // On Completed
+    Component.onCompleted: {
+        //console.log("searchResultsRoot.onCompleted");
+
+    }
+
+    // On Destruction
+    Component.onDestruction: {
+        //console.log("searchResultsRoot.onDestruction");
+
     }
 
     Keys.onPressed: {
@@ -159,6 +173,23 @@ Rectangle {
         }
     }
 
+    Connections {
+        target: searchResultController
+
+        onSearchReset: {
+            // Reset No Result Label Opacity
+            noResultsLabel.opacity = 0.0;
+        }
+
+        onBusyChanged: {
+            // Check Search Result Count
+            if (!searchResultController.busy && (searchResultList.count === 0)) {
+                // Set No Result Label Opacity
+                noResultsLabel.opacity = 1.0;
+            }
+        }
+    }
+
     // Search Result List
     ListView {
         id: searchResultList
@@ -173,6 +204,10 @@ Rectangle {
         snapMode: ListView.SnapToItem
 
         property int visualCount: Math.min(count, Math.ceil(searchResultList.height / Const.DEFAULT_SEARCH_RESULTS_DELEGATE_HEIGHT))
+
+        opacity: (!searchResultController.busy && (count > 0)) ? 1.0 : 0.0
+        Behavior on opacity { NumberAnimation { duration: 100 } }
+        visible: opacity > 0.0
 
         // Model
         model: searchResultModel
@@ -280,17 +315,26 @@ Rectangle {
         }
     }
 
-
-    // On Completed
-    Component.onCompleted: {
-        //console.log("searchResultsRoot.onCompleted");
-
+    BusyIndicator {
+        id: busyIndicator
+        width: Const.DEFAULT_BUSY_INDICATOR_WIDTH
+        height: Const.DEFAULT_BUSY_INDICATOR_HEIGHT
+        anchors.centerIn: parent
+        running: searchResultController.busy
+        opacity: running ? 1.0 : 0.0
+        Behavior on opacity { NumberAnimation { duration: 100 } }
+        visible: opacity > 0.0
     }
 
-    // On Destruction
-    Component.onDestruction: {
-        //console.log("searchResultsRoot.onDestruction");
-
+    Text {
+        id: noResultsLabel
+        anchors.centerIn: parent
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+        text: qsTr("No Items Found")
+        opacity: 0.0
+        Behavior on opacity { NumberAnimation { duration: 100 } }
+        visible: opacity > 0.0
     }
 
     // Connections

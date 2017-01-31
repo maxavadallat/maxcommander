@@ -30,6 +30,7 @@ class SearchDialog : public QDialog
 {
     Q_OBJECT
 
+    Q_PROPERTY(bool busy READ getBusy WRITE setBusy NOTIFY busyChanged)
     Q_PROPERTY(int currentIndex READ getCurrentIndex WRITE setCurrentIndex NOTIFY currentIndexChanged)
     Q_PROPERTY(int visualItemCount READ getVisualItemCount WRITE setVisualItemCount NOTIFY visualItemCountChanged)
 
@@ -44,6 +45,11 @@ public:
 
     // Is Dialog Shown
     bool isDialogShown();
+
+    // Get Busy State
+    bool getBusy();
+    // Set Busy Stte
+    void setBusy(const bool& aBusy);
 
     // Get Current Index
     int getCurrentIndex();
@@ -62,6 +68,8 @@ public:
     virtual ~SearchDialog();
 
 signals:
+    // Busy Changed Signal
+    void busyChanged(const bool& aBusy);
 
     // Current Index Changed Signal
     void currentIndexChanged(const int& aIndex);
@@ -72,6 +80,9 @@ signals:
     void searchResultSelected(const QString& aFilePath);
     // Search Result Item View Signal
     void searchResultView(const QString& aFilePath, const bool& aEdit, const QString& aSearchTerm);
+
+    // Search Reset
+    void searchReset();
 
 public slots:
 

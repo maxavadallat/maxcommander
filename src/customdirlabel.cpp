@@ -21,7 +21,6 @@ void CustomDirLabel::mousePressEvent(QMouseEvent* aEvent)
 {
     // Check Event
     if (aEvent) {
-
         // Set Mouse Pressed
         mousePressed = true;
     }
@@ -41,6 +40,18 @@ void CustomDirLabel::mouseReleaseEvent(QMouseEvent* aEvent)
             // Emit Right Mouse Clicked Signal
             emit rightMouseClicked(aEvent->globalPos());
         }
+    }
+}
+
+//==============================================================================
+// Mouse Double Clicked Event
+//==============================================================================
+void CustomDirLabel::mouseDoubleClickEvent(QMouseEvent* aEvent)
+{
+    // Check Event
+    if (aEvent) {
+        // Emit Mouse Double Clicked Event
+        emit mouseDoubleClicked();
     }
 }
 

@@ -509,7 +509,7 @@ protected:
     // Unpacker Path
     QString                 unPackerPath;
 
-
+    // ...
 };
 
 #endif // SETTINGSCONTROLLER_H

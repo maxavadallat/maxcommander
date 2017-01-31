@@ -1041,15 +1041,15 @@ Rectangle {
                 // Get Current Grid Item
                 var currentGridItem = fileGridView.currentItem;
 
-                fileRenamer.x = currentGridItem.mapToItem(fileListRoot).x + currentGridItem.width / 2 - fileRenamer.width / 2;
-                fileRenamer.y = Math.min(currentGridItem.mapToItem(fileListRoot).y + currentGridItem.height - fileRenamer.height, fileListRoot.height - fileRenamer.height);
+                fileRenamer.x = currentGridItem.x + currentGridItem.width / 2 - fileRenamer.width / 2;
+                fileRenamer.y = Math.min(currentGridItem.y - fileGridView.contentY + currentGridItem.height - fileRenamer.height, fileListRoot.height - fileRenamer.height);
             } else {
                 // Set File Renamer Pos & Size
                 fileRenamer.width = fileListView.width - 4;
                 fileRenamer.height = Math.max(fileListView.currentItem.height, Const.DEFAULT_FILE_LIST_ITEM_RENAMER_MINIMUM_HEIGHT);
 
-                fileRenamer.x = fileListView.currentItem.mapToItem(fileListRoot).x;
-                fileRenamer.y = Math.min(fileListView.currentItem.mapToItem(fileListRoot).y - (fileRenamer.height - fileListView.currentItem.height) / 2, fileListRoot.height - fileRenamer.height);
+                fileRenamer.x = fileListView.currentItem.x;
+                fileRenamer.y = Math.min(fileListView.currentItem.y - fileListView.contentY + fileListHeader.height - (fileRenamer.height - fileListView.currentItem.height) / 2, fileListRoot.height - fileRenamer.height);
             }
 
             // Set Original File Name

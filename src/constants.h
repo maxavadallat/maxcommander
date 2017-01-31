@@ -305,10 +305,12 @@
 #define DEFAULT_ICON_PATH_PROGRESS                          ":/resources/images/synchronize_256.png"
 
 
-// Exec Command
-#define DEFAULT_EXEC_APP_SYSTEM_COMMAND_MAC_OSX             "open -a \"%1\" &"
 // Exec App with Parameter
-#define DEFAULT_EXEC_APP_SYSTEM_COMMAND_WITH_PARAM_MAC_OSX  "open -a %1 \"%2\" &"
+#define DEFAULT_EXEC_APP_SYSTEM_COMMAND_WITH_PARAM_MAC_OSX  "open -a \"%1\" &"
+// Exec App with 2 Parameters
+#define DEFAULT_EXEC_APP_SYSTEM_COMMAND_WITH_2PARAM_MAC_OSX "open -a \"%1\" \"%2\" &"
+// Exec App with 3 Parameters
+#define DEFAULT_EXEC_APP_SYSTEM_COMMAND_WITH_3PARAM_MAC_OSX "open -a \"%1\" \"%2\" \"%3\" &"
 // Open Files
 #define DEFAULT_OPEN_FILE_SYSTEM_COMMAND_MAC_OSX            "open \"%1\" &"
 
@@ -525,6 +527,8 @@
 #define DEFAULT_BUTTON_TEXT_FIND                            "Find"
 #define DEFAULT_BUTTON_TEXT_FIND_NEXT                       "Find Next"
 
+#define DEFAULT_STYLE_SHEET_BGCOLOR                         "background-color: %1"
+#define DEFAULT_BG_COLOR_FILE_DOES_NOT_EXISTS               "#11770000"
 
 #endif // CONSTANTS_H
 

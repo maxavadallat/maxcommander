@@ -64,6 +64,13 @@ class PreferencesDialog : public QDialog
     Q_PROPERTY(int gridThumbWidth READ getGridThumbWidth WRITE setGridThumbWidth NOTIFY gridThumbWidthChanged)
     Q_PROPERTY(int gridThumbHeight READ getGridThumbHeight WRITE setGridThumbHeight NOTIFY gridThumbHeightChanged)
 
+    Q_PROPERTY(QString terminalPath READ getTerminalPath WRITE setTerminalPath NOTIFY terminalPathChanged)
+    Q_PROPERTY(QString viewerPath READ getViewerPath WRITE setViewerPath NOTIFY viewerPathChanged)
+    Q_PROPERTY(QString editorPath READ getEditorPath WRITE setEditorPath NOTIFY editorPathChanged)
+    Q_PROPERTY(QString comparePath READ getComparePath WRITE setComparePath NOTIFY comparePathChanged)
+    Q_PROPERTY(QString packerPath READ getPackerPath WRITE setPackerPath NOTIFY packerPathChanged)
+    Q_PROPERTY(QString unPackerPath READ getUnpackerPath WRITE setUnPackerPath NOTIFY unPackerPathChanged)
+
     // ...
 
 public:
@@ -240,6 +247,36 @@ public:
     // Set Grid Thumb Height
     void setGridThumbHeight(const int& aHeight);
 
+    // Get Terminal Path
+    QString getTerminalPath();
+    // Set Terminal Path
+    void setTerminalPath(const QString& aTerminalPath);
+
+    // Get Viewer Path
+    QString getViewerPath();
+    // Set Viewer Path
+    void setViewerPath(const QString& aViewerPath);
+
+    // Get Editor Path
+    QString getEditorPath();
+    // Set Editor Path
+    void setEditorPath(const QString& aEditorPath);
+
+    // Get Compare Tool Path
+    QString getComparePath();
+    // Set Compare Tool Path
+    void setComparePath(const QString& aComparePath);
+
+    // Get Packer Tool Path
+    QString getPackerPath();
+    // Set Packer Tool Path
+    void setPackerPath(const QString& aPackerPath);
+
+    // Get Un Packer Tool Path
+    QString getUnpackerPath();
+    // Set Unpacker Tool Path
+    void setUnPackerPath(const QString& aUnPackerPath);
+
     // Destructor
     virtual ~PreferencesDialog();
 
@@ -327,6 +364,19 @@ signals:
     void gridThumbWidthChanged(const int& aWidth);
     // Grid Thumb Height Changed Signal
     void gridThumbHeightChanged(const int& aHeight);
+
+    // Terminal Path Changed Signal
+    void terminalPathChanged(const QString& aTerminalPath);
+    // Viewer Path Changed Signal
+    void viewerPathChanged(const QString& aViewerPath);
+    // Editor Path Changed Signal
+    void editorPathChanged(const QString& aEditorPath);
+    // Compare Tool Path Changed Signal
+    void comparePathChanged(const QString& aComparePath);
+    // Packer Tool Path Changed Signal
+    void packerPathChanged(const QString& aPackerPath);
+    // Unpacker Tool Path Changed Signal
+    void unPackerPathChanged(const QString& aUnPackerPath);
 
 protected slots:
 
@@ -444,6 +494,19 @@ protected slots:
     void on_browsePackerButton_clicked();
     // On Browse Unpacker Button Clicked Slot
     void on_browseUnpackerButton_clicked();
+
+    // On Terminal Editor Text Changed Slot
+    void on_terminalEditor_textChanged(const QString &arg1);
+    // On Viewer Editor text Changed Slot
+    void on_vieverEditor_textChanged(const QString &arg1);
+    // On Editor Editor Text Changed Slot
+    void on_editorEditor_textChanged(const QString &arg1);
+    // On Compare Editor Text Changed Slot
+    void on_compareEditor_textChanged(const QString &arg1);
+    // On Packer Tool Editor Text Changed Slot
+    void on_packerEditor_textChanged(const QString &arg1);
+    // On Unpacker Tool Editor Text Changed Slot
+    void on_unpackerEditor_textChanged(const QString &arg1);
 
     // Icon/Thumb Size Combo Box Current Index Changed Slot
     void on_iconSizeComboBox_currentIndexChanged(const QString& arg1);

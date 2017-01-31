@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QQuickImageProvider>
+#include <QFileIconProvider>
 
 class SettingsController;
 class SettingsReciever;
@@ -55,6 +56,9 @@ protected: // Data
 
     // Settings Reciever
     SettingsReciever*   settingsReciever;
+
+    // File Icon Provider
+    QFileIconProvider   fileIconProvider;
 };
 
 

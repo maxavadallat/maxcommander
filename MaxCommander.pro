@@ -14,7 +14,7 @@ QT                      += quickwidgets
 QT                      += qml quick
 QT                      += widgets
 QT                      += network
-QT                      += webkitwidgets
+QT                      += webenginewidgets
 QT                      += multimedia
 
 
@@ -60,7 +60,8 @@ SOURCES                 += src/main.cpp \
                         src/customdirlabel.cpp \
                         src/dirhistorylistpopup.cpp \
                         src/dirhistorylistmodel.cpp \
-                        src/findtextdialog.cpp
+                        src/findtextdialog.cpp \
+                        src/comparedialog.cpp
 
 # Heders
 HEADERS                 += src/constants.h \
@@ -98,10 +99,12 @@ HEADERS                 += src/constants.h \
                         src/customdirlabel.h \
                         src/dirhistorylistpopup.h \
                         src/dirhistorylistmodel.h \
-                        src/findtextdialog.h
+                        src/findtextdialog.h \
+                        src/comparedialog.h
 
 # Include Path
 INCLUDEPATH             += \
+                        ../MCWorker/src \
                         /usr/local/include/mcw
 
 # Forms
@@ -125,7 +128,8 @@ FORMS                   += \
                         ui/createlinkdialog.ui \
                         ui/selectfilesdialog.ui \
                         ui/dirhistorylistpopup.ui \
-                        ui/findtextdialog.ui
+                        ui/findtextdialog.ui \
+                        ui/comparedialog.ui
 
 # Resources
 RESOURCES               += \

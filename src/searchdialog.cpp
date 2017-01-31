@@ -228,6 +228,8 @@ void SearchDialog::restoreUI()
     // Add Start Button
     //startButton = ui->buttonBox->addButton(tr(DEFAULT_BUTTON_TEXT_START), QDialogButtonBox::AcceptRole);
     startButton = ui->buttonBox->addButton(tr(DEFAULT_BUTTON_TEXT_START), QDialogButtonBox::ActionRole);
+    // Set Default
+    startButton->setDefault(true);
 
     // Set Current Dir Label
     ui->currentDirLabel->setText(currentDir);
@@ -589,11 +591,16 @@ void SearchDialog::buttonBoxClicked(QAbstractButton* aButton)
             resultModel->clear();
         }
 
-        // Add Start Button
-        startButton = ui->buttonBox->addButton(tr(DEFAULT_BUTTON_TEXT_START), QDialogButtonBox::AcceptRole);
+        // Re-Add Start Button
+        startButton = ui->buttonBox->addButton(tr(DEFAULT_BUTTON_TEXT_START), QDialogButtonBox::ActionRole);
+        // Set Default
+        startButton->setDefault(true);
 
         // Set Show Results Button Enabled
         ui->showResultsButton->setEnabled(false);
+
+        // Emit Search reset
+        emit searchReset();
 
         return;
     }
@@ -648,8 +655,8 @@ void SearchDialog::showDialog(const QString& aDirPath, FilePanel* aFocusedPanel)
     // Restore UI
     restoreUI();
 
-    // Reset Seach Active
-    searchActive = false;
+    // Reset Seach Active/Busy State
+    setBusy(false);
     // Reset Search Finished
     searchFinished = false;
 
@@ -686,6 +693,28 @@ void SearchDialog::hideDialog()
 bool SearchDialog::isDialogShown()
 {
     return dialogShown;
+}
+
+//==============================================================================
+// Get Busy State
+//==============================================================================
+bool SearchDialog::getBusy()
+{
+    return searchActive;
+}
+
+//==============================================================================
+// Set Busy Stte
+//==============================================================================
+void SearchDialog::setBusy(const bool& aBusy)
+{
+    // Check Busy State
+    if (searchActive != aBusy) {
+        // Set Busy State
+        searchActive = aBusy;
+        // Emit Busy State Changed Signal
+        emit busyChanged(searchActive);
+    }
 }
 
 //==============================================================================
@@ -813,6 +842,12 @@ void SearchDialog::startSearch()
 
         qDebug() << "SearchDialog::startSearch - fileNamePattern: " << fileNamePattern << " - contentPattern: " << contentPattern << " - searchOptions: " << searchOptions;
 
+        // Show Results
+        showResults();
+
+        // Set Busy
+        setBusy(true);
+
         // Search File
         fileUtil->searchFile(fileNamePattern, currentDir, contentPattern, searchOptions);
     }
@@ -871,8 +906,8 @@ void SearchDialog::fileOpStarted(const unsigned int& aID,
     if (aOp == DEFAULT_OPERATION_SEARCH_FILE) {
         qDebug() << "SearchDialog::fileOpStarted - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath;
 
-        // Set Search Active
-        searchActive = true;
+        // Set Search Active/Busy State
+        setBusy(true);
 
         // Set Button Box
         ui->buttonBox->setStandardButtons(QDialogButtonBox::Abort);
@@ -916,8 +951,8 @@ void SearchDialog::fileOpFinished(const unsigned int& aID,
     if (aOp == DEFAULT_OPERATION_SEARCH_FILE) {
         qDebug() << "SearchDialog::fileOpFinished - aID: " << aID << " - aOp: " << aOp << " - aPath: " << aPath;
 
-        // Reset Search Active
-        searchActive = false;
+        // Reset Search Active/Busy State
+        setBusy(false);
 
         // Set Search Finished
         searchFinished = true;
@@ -958,8 +993,8 @@ void SearchDialog::fileOpAborted(const unsigned int& aID,
 
         // ...
 
-        // Reset Search Active
-        searchActive = false;
+        // Reset Search Active/Busy State
+        setBusy(false);
 
         // Set Search Finished
         searchFinished = false;
@@ -988,8 +1023,8 @@ void SearchDialog::fileOpError(const unsigned int& aID,
 
         // ...
 
-        // Reset Search Active
-        searchActive = false;
+        // Reset Search Active/Busy State
+        setBusy(false);
 
         // Set Search Finished
         searchFinished = false;
@@ -1175,6 +1210,11 @@ void SearchDialog::on_contentSearchCheckBox_clicked()
         ui->wholeWordCheckBox->setEnabled(false);
         // Set Content Pattern Combo Enabled
         ui->contentPatternComboBox->setEnabled(false);
+
+        // Set Focus
+        ui->filePatternComboBox->setFocus();
+        // Select all
+        ui->filePatternComboBox->lineEdit()->selectAll();
 
     }
 }

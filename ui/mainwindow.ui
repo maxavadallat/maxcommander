@@ -360,14 +360,13 @@
     <property name="title">
      <string>Commands</string>
     </property>
-    <addaction name="actionCompare_Files"/>
-    <addaction name="separator"/>
-    <addaction name="actionCreate_Link"/>
-    <addaction name="separator"/>
     <addaction name="actionView"/>
     <addaction name="actionEdit"/>
     <addaction name="actionCopy"/>
     <addaction name="actionMove"/>
+    <addaction name="separator"/>
+    <addaction name="actionCreate_Link"/>
+    <addaction name="actionCompare_Files"/>
     <addaction name="separator"/>
     <addaction name="actionReload"/>
    </widget>
@@ -411,9 +410,6 @@
    <property name="text">
     <string>Quit</string>
    </property>
-   <property name="shortcut">
-    <string>Q</string>
-   </property>
   </action>
   <action name="actionHelp">
    <property name="text">
@@ -428,6 +424,9 @@
   <action name="actionCompare_Files">
    <property name="text">
     <string>Compare Files</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+C</string>
    </property>
   </action>
   <action name="actionSelect_all">
@@ -449,6 +448,9 @@
   <action name="actionTerminal">
    <property name="text">
     <string>Terminal</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+T</string>
    </property>
   </action>
   <action name="actionSort_by_Name">
@@ -593,7 +595,7 @@
     <string>Volumes</string>
    </property>
    <property name="shortcut">
-    <string>V</string>
+    <string>Ctrl+Shift+V</string>
    </property>
   </action>
   <action name="actionSwap_Dirs">

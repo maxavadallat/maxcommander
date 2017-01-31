@@ -26,6 +26,7 @@ class TransferProgressDialog;
 class SearchDialog;
 class SettingsController;
 class SelectFilesDialog;
+class CompareDialog;
 
 
 //==============================================================================
@@ -93,6 +94,9 @@ public slots:
 
     // Launch Properties Slot
     void launchProperties();
+
+    // Launch File Compare Slot
+    void launchFileCompare();
 
     // Get Current Dir
     QString getCurrentDir(const QString& aPanelName);
@@ -303,6 +307,8 @@ private:
     SearchDialog*                   searchFileDialog;
     // Select Files Dialog
     SelectFilesDialog*              selectFilesDialog;
+    // Compare Dialog
+    CompareDialog*                  compareDialog;
 
     // Transfer Progress Dialogs
     QList<TransferProgressDialog*>  transferProgressDialogs;

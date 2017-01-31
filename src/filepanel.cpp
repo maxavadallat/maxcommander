@@ -1396,13 +1396,15 @@ void FilePanel::reload()
 
     // Check File List Model
     if (fileListModel) {
-        // Get Lat File Name
-        lastFileName = fileListModel->getFileInfo(currentIndex).fileName();
-
-        // Check Lat File Name
+        // Check Last File Name
         if (lastFileName.isEmpty()) {
-            // Adjust Last Index To Set The Previous Index
-            lastIndex = currentIndex - 1;
+            // Get Lat File Name
+            lastFileName = fileListModel->getFileInfo(currentIndex).fileName();
+            // Check Lat File Name
+            if (lastFileName.isEmpty()) {
+                // Adjust Last Index To Set The Previous Index
+                lastIndex = currentIndex - 1;
+            }
         }
 
         // Reload
@@ -1617,6 +1619,11 @@ void FilePanel::gotoRoot()
 //==============================================================================
 void FilePanel::gotoVolumes()
 {
+    // Check If File Renamer Active
+    if (fileRenameActive) {
+        return;
+    }
+
     // Set Archive Mode
     setArchiveMode(false);
 
@@ -2235,20 +2242,17 @@ void FilePanel::fileModelDirCreated(const QString& aDirPath)
     // Check Path
     if (path == currentDir) {
         qDebug() << "FilePanel::fileModelDirCreated - panelName: " << panelName << " - aDirPath: " << aDirPath;
+        // Init Dir File Info
+        QFileInfo dirInfo(aDirPath);
 
-        // Get Dir Name
-        QString dirName = getFileName(aDirPath);
+        // Set Last File Name
+        lastFileName = dirInfo.fileName();
 
-        // Insert Dir Name
-        if (fileListModel) {
-            // Insert Dir Name
-            fileListModel->insertDirItem(dirName);
-            // Set Current Index
-            setCurrentIndex(fileListModel->findIndex(dirName));
-        }
+        // Reload
+        reload();
 
-        // Emit Busy Changed Signal
-        emit busyChanged(false);
+        // ...
+
     }
 }
 
@@ -2288,23 +2292,14 @@ void FilePanel::fileModelFileRenamed(const QString& aSource, const QString& aTar
     // Check Path
     if (path == currentDir) {
         qDebug() << "FilePanel::fileModelFileRenamed - panelName: " << panelName << " - aSource: " << aSource << " - aTarget: " << aTarget;
+        // Init target File Info
+        QFileInfo targetInfo(aTarget);
 
-        // Check File List Model
-        if (fileListModel) {
-            // Get File Info
-            QFileInfo newFileInfo(aTarget);
+        // Set Last File Name
+        lastFileName = targetInfo.fileName();
 
-            // Get New Index
-            int newIndex = fileListModel->findIndex(newFileInfo.fileName());
-
-            // Set Current Index
-            setCurrentIndex(newIndex);
-        }
-
-        // ...
-
-        // Emit Busy Changed
-        emit busyChanged(false);
+        // Reload
+        reload();
     }
 }
 

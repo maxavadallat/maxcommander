@@ -80,11 +80,11 @@ QImage FileListImageProvider::requestImage(const QString& aID, QSize* aSize, con
 
 #endif // Q_OS_MACX
 
+    // Init File Info
+    QFileInfo fileInfo(fileName);
+
     // Check Use Default Icons
     if (useDefaultIcons) {
-        // Init File Info
-        QFileInfo fileInfo(fileName);
-
         // Check If Is Dir
         if (fileInfo.isDir()) {
             return QImage(DEFAULT_FILE_ICON_DIR);
@@ -94,7 +94,7 @@ QImage FileListImageProvider::requestImage(const QString& aID, QSize* aSize, con
     }
 
     // Get File Icon Image
-    QImage image = getFileIconImage(fileName, gridMode ? thumbHeight : iconWidth, gridMode ? thumbHeight : iconHeight);
+    QImage image = fileIconProvider.icon(fileInfo).pixmap(gridMode ? thumbHeight : iconWidth, gridMode ? thumbHeight : iconHeight).toImage();
 
     // Check Image
     if (!image.isNull()) {

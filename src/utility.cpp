@@ -12,6 +12,8 @@
 #include <QColor>
 #include <QDebug>
 #include <QMimeDatabase>
+#include <QFileIconProvider>
+#include <QIcon>
 
 #if defined(Q_OS_WIN)
 
@@ -261,96 +263,11 @@ QImage getFileIconImage(const QString& aFilePath, const int& aWidth, const int& 
 
 #if defined(Q_OS_MAC)
 
-    //qDebug() << "getFileIconImage MAC - size: " << newImage.size();
+    // Init File Icon Provider
+    QFileIconProvider iconProvider;
 
-    // Init File System Reference
-    FSRef macRef;
-
-    // Init Status
-    OSStatus status = noErr;
-
-    // Init Safe Counter
-    int safeCount = 0;
-
-    do {
-        // Get file System Reference
-        status = FSPathMakeRef(reinterpret_cast<const UInt8*>(aFilePath.toUtf8().constData()), &macRef, 0);
-
-        // Check Status
-        if (status != noErr) {
-            //qDebug() << "### getFileIconImage - FSPathMakeRef: " << status;
-            // Increase Safe Count
-            safeCount++;
-            //return QImage(0, 0, QImage::Format_ARGB32_Premultiplied);
-            continue;
-        }
-
-        // Init file System Catalog Info
-        FSCatalogInfo info;
-
-        // Init Mac Name
-        HFSUniStr255 macName;
-
-        // Get Catalog Info
-        status = FSGetCatalogInfo(&macRef, kIconServicesCatalogInfoMask, &info, &macName, 0, 0);
-
-        // Check Status
-        if (status != noErr) {
-            qDebug() << "### getFileIconImage - FSGetCatalogInfo: " << status;
-            // Increase Safe Count
-            safeCount++;
-            //return QImage(0, 0, QImage::Format_ARGB32_Premultiplied);
-            continue;
-        }
-
-        // Init Icon Reference
-        IconRef iconRef;
-        // Init Icon Label
-        SInt16 iconLabel;
-
-        // Get Icon Reference
-        status = GetIconRefFromFileInfo(&macRef, macName.length, macName.unicode, kIconServicesCatalogInfoMask, &info, kIconServicesNormalUsageFlag, &iconRef, &iconLabel);
-
-        // Check Status
-        if (status != noErr) {
-            qDebug() << "### getFileIconImage - GetIconRefFromFileInfo: " << status;
-            // Release Icon Ref
-            ReleaseIconRef(iconRef);
-            // Increase Safe Count
-            safeCount++;
-            //return QImage(0, 0, QImage::Format_ARGB32_Premultiplied);
-            continue;
-        }
-
-        // Convert Mac Icon
-        status = convertMacIcon(iconRef, newImage);
-
-        // Check Status
-        if (status != noErr) {
-            qDebug() << "### getFileIconImage - convertMacIcon: " << status;
-
-            // Release Icon Ref
-            //ReleaseIconRef(iconRef);
-            //return QImage(0, 0, QImage::Format_ARGB32_Premultiplied);
-            //continue;
-        }
-
-        // Release Icon Ref
-        ReleaseIconRef(iconRef);
-        // Increase Safe Count
-        safeCount++;
-
-    } while (status != noErr && safeCount < DEFAULT_ICOM_GET_RETRY_COUNT_MAX);
-
-    // Check Safe Count
-    if (safeCount >= DEFAULT_ICOM_GET_RETRY_COUNT_MAX) {
-        // Init Painter
-        QPainter painter(&newImage);
-        // Fill Image
-        newImage.fill(QColor(0, 0, 0, 0));
-        // Draw Default Icon
-        painter.drawImage(newImage.rect(), QImage(QString(":/resources/images/icons/default_file.png")));
-    }
+    // Get New Image
+    newImage = iconProvider.icon(QFileInfo(aFilePath)).pixmap(aWidth, aHeight).toImage();
 
 #elif defined(Q_OS_UNIX)
 

@@ -4,6 +4,8 @@
 #include <QFont>
 #include <QDialogButtonBox>
 #include <QQmlContext>
+#include <QFileDialog>
+#include <QStandardPaths>
 #include <QDebug>
 
 #include "preferencesdialog.h"
@@ -66,9 +68,9 @@ PreferencesDialog::PreferencesDialog(QWidget* aParent)
     , gridThumbWidth(DEFAULT_SETTINGS_GRID_THUMB_WIDTH)
     , gridThumbHeight(DEFAULT_SETTINGS_GRID_THUMB_HEIGHT)
 
-    , terminalPath(DEFAULT_SETTINGS_TERMINAL_PATH_MAC_OSX)
-    , viewerPath(DEFAULT_SETTINGS_VIEWER_PATH_MAC_OSX)
-    , editorPath(DEFAULT_SETTINGS_EDITOR_PATH_MAC_OSX)
+    , terminalPath(DEFAULT_SETTINGS_TERMINAL_PATH)
+    , viewerPath(DEFAULT_SETTINGS_VIEWER_PATH)
+    , editorPath(DEFAULT_SETTINGS_EDITOR_PATH)
     , comparePath(DEFAULT_SETTINGS_COMPARE_PATH)
     , packerPath(DEFAULT_SETTINGS_PACKER_PATH)
     , unPackerPath(DEFAULT_SETTINGS_UNPACKER_PATH)
@@ -197,6 +199,19 @@ void PreferencesDialog::loadSettings()
     setUseDefaultIcons(settings->getUseDefaultIcons());
     // Set Follow Links
     setFollowLinks(settings->getFollowLinks());
+
+    // Set Terminal Path
+    setTerminalPath(settings->getTerminalPath());
+    // Set Viewer Path
+    setViewerPath(settings->getViewerPath());
+    // Set EDitor Path
+    setEditorPath(settings->getEditorPath());
+    // Set Compare Tool Path
+    setComparePath(settings->getComparePath());
+    // Set Packer Tool Path
+    setPackerPath(settings->getPackerPath());
+    // Set Unpacker Tool Path
+    setUnPackerPath(settings->getUnPackerPath());
 
     // ...
 
@@ -443,17 +458,17 @@ void PreferencesDialog::restoreUI()
         break;
     }
 
-    // Set Terminal Path
+    // Set Terminal Editor Text
     ui->terminalEditor->setText(terminalPath);
-    // Set Viewer Path
+    // Set Viewer Editor Text
     ui->vieverEditor->setText(viewerPath);
-    // Set Editor Path
+    // Set Editor Editor Text
     ui->editorEditor->setText(editorPath);
-    // Set Compare Path
+    // Set Compare Editor Text
     ui->compareEditor->setText(comparePath);
-    // Set Packer Path
+    // Set Packer Editor Text
     ui->packerEditor->setText(packerPath);
-    // Set Unpacker Path
+    // Set Unpacker Editor Text
     ui->unpackerEditor->setText(unPackerPath);
 
     // ...
@@ -1292,6 +1307,149 @@ void PreferencesDialog::setGridThumbHeight(const int& aHeight)
     }
 }
 
+//==============================================================================
+// Get Terminal Path
+//==============================================================================
+QString PreferencesDialog::getTerminalPath()
+{
+    return terminalPath;
+}
+
+//==============================================================================
+// Set Terminal Path
+//==============================================================================
+void PreferencesDialog::setTerminalPath(const QString& aTerminalPath)
+{
+    // Check Terminal Path
+    if (terminalPath != aTerminalPath) {
+        // Set Terminal Path
+        terminalPath = aTerminalPath;
+        // Set Dirty Flag
+        setDirty(true);
+        // Emit Terminal Path Changed Signal
+        emit terminalPathChanged(terminalPath);
+    }
+}
+
+//==============================================================================
+// Get Viewer Path
+//==============================================================================
+QString PreferencesDialog::getViewerPath()
+{
+    return viewerPath;
+}
+
+//==============================================================================
+// Set Viewer Path
+//==============================================================================
+void PreferencesDialog::setViewerPath(const QString& aViewerPath)
+{
+    // Check Viewer Path
+    if (viewerPath != aViewerPath) {
+        // Set Viewer Path
+        viewerPath = aViewerPath;
+        // Set Dirty Flag
+        setDirty(true);
+        // Emit Viewer Path Changed Signal
+        emit viewerPathChanged(viewerPath);
+    }
+}
+
+//==============================================================================
+// Get Editor Path
+//==============================================================================
+QString PreferencesDialog::getEditorPath()
+{
+    return editorPath;
+}
+
+//==============================================================================
+// Set Editor Path
+//==============================================================================
+void PreferencesDialog::setEditorPath(const QString& aEditorPath)
+{
+    // Check Edito Path
+    if (editorPath != aEditorPath) {
+        // Set Editor Path
+        editorPath = aEditorPath;
+        // Set Dirty Flag
+        setDirty(true);
+        // Emit Editor Path Changed Signal
+        emit editorPathChanged(editorPath);
+    }
+}
+
+//==============================================================================
+// Get Compare Tool Path
+//==============================================================================
+QString PreferencesDialog::getComparePath()
+{
+    return comparePath;
+}
+
+//==============================================================================
+// Set Compare Tool Path
+//==============================================================================
+void PreferencesDialog::setComparePath(const QString& aComparePath)
+{
+    // Check Compare Tool Path
+    if (comparePath != aComparePath) {
+        // Set Compare Tool Path
+        comparePath = aComparePath;
+        // Set Dirty Flag
+        setDirty(true);
+        // Emit Compare Tool Path Changed Signal
+        emit comparePathChanged(comparePath);
+    }
+}
+
+//==============================================================================
+// Get Packer Tool Path
+//==============================================================================
+QString PreferencesDialog::getPackerPath()
+{
+    return packerPath;
+}
+
+//==============================================================================
+// Set Packer Tool Path
+//==============================================================================
+void PreferencesDialog::setPackerPath(const QString& aPackerPath)
+{
+    // Check Packer Tool Path
+    if (packerPath != aPackerPath) {
+        // Set Packer Tool Path
+        packerPath = aPackerPath;
+        // Set Dirty Flag
+        setDirty(true);
+        // Emit Packer Tool Path Changed Signal
+        emit packerPathChanged(packerPath);
+    }
+}
+
+//==============================================================================
+// Get Un Packer Tool Path
+//==============================================================================
+QString PreferencesDialog::getUnpackerPath()
+{
+    return unPackerPath;
+}
+
+//==============================================================================
+// Set Unpacker Tool Path
+//==============================================================================
+void PreferencesDialog::setUnPackerPath(const QString& aUnPackerPath)
+{
+    // Check Unpacker Tool Path
+    if (unPackerPath != aUnPackerPath) {
+        // Set Unpacker Tool Path
+        unPackerPath = aUnPackerPath;
+        // Set Dirty Flag
+        setDirty(true);
+        // Emit Unpacker Tool Path Changed Signal
+        emit unPackerPathChanged(unPackerPath);
+    }
+}
 
 //==============================================================================
 // Update Preview
@@ -1798,6 +1956,28 @@ void PreferencesDialog::on_clearArchiveBGButton_clicked()
 //==============================================================================
 void PreferencesDialog::on_browseTerminalButton_clicked()
 {
+    // Init Initial Path
+    QString initialPath = "";
+
+    // Init Terminal File Info
+    QFileInfo terminalFileInfo(terminalPath);
+    // Init Terminal Path Info
+    QFileInfo terminalDirPathInfo(terminalFileInfo.absolutePath());
+
+#if defined(Q_OS_MACX)
+    // Init Initial Path
+    initialPath = terminalDirPathInfo.exists() ? terminalDirPathInfo.absoluteFilePath() : "/Applications";
+#else
+    // Init Initial Path
+    initialPath = terminalDirPathInfo.exists() ? terminalDirPathInfo.absoluteFilePath() : QDir::homePath();
+#endif
+
+    // Get Terminal File Path
+    QString filePath = QFileDialog::getOpenFileName(this, tr("Select Terminal app"), initialPath);
+    // Set Terminal Editor Text
+    ui->terminalEditor->setText(terminalPath);
+
+    // ...
 
 }
 
@@ -1806,6 +1986,29 @@ void PreferencesDialog::on_browseTerminalButton_clicked()
 //==============================================================================
 void PreferencesDialog::on_browseViewerButton_clicked()
 {
+    // Init Initial Path
+    QString initialPath = "";
+
+    // Init Viewer Tool File Info
+    QFileInfo viewerFileInfo(viewerPath);
+    // Init Viewer Tool Path Info
+    QFileInfo viewerDirPathInfo(viewerFileInfo.absolutePath());
+
+#if defined(Q_OS_MACX)
+    // Init Initial Path
+    initialPath = viewerDirPathInfo.exists() ? viewerDirPathInfo.absoluteFilePath() : "/Applications";
+#else
+    // Init Initial Path
+    initialPath = viewerDirPathInfo.exists() ? viewerDirPathInfo.absoluteFilePath() : QDir::homePath();
+#endif
+
+    // Get Viewer Tool File Path
+    QString filePath = QFileDialog::getOpenFileName(this, tr("Select Viewer Tool"), initialPath);
+
+    // Set Viewer Editor Text
+    ui->vieverEditor->setText(filePath);
+
+    // ...
 
 }
 
@@ -1814,7 +2017,29 @@ void PreferencesDialog::on_browseViewerButton_clicked()
 //==============================================================================
 void PreferencesDialog::on_browseEditorButton_clicked()
 {
+    // Init Initial Path
+    QString initialPath = "";
 
+    // Init Editor Tool File Info
+    QFileInfo editorFileInfo(editorPath);
+    // Init Editor Tool Path
+    QFileInfo editorDirPathInfo(editorFileInfo.absolutePath());
+
+#if defined(Q_OS_MACX)
+    // Init Initial Path
+    initialPath = editorDirPathInfo.exists() ? editorDirPathInfo.absoluteFilePath() : "/Applications";
+#else
+    // Init Initial Path
+    initialPath = editorDirPathInfo.exists() ? editorDirPathInfo.absoluteFilePath() : QDir::homePath();
+#endif
+
+    // Get Editor Tool File Path
+    QString filePath = QFileDialog::getOpenFileName(this, tr("Select Editor Tool"), initialPath);
+
+    // Set Editor Editor Text
+    ui->editorEditor->setText(filePath);
+
+    // ...
 }
 
 //==============================================================================
@@ -1822,7 +2047,28 @@ void PreferencesDialog::on_browseEditorButton_clicked()
 //==============================================================================
 void PreferencesDialog::on_browseCompareButton_clicked()
 {
+    // Init Initial Path
+    QString initialPath = "";
+    // Init Compare Tooll File Info
+    QFileInfo compareFileInfo(comparePath);
+    // Init Compare Tool Path
+    QFileInfo compareDirPathInfo(compareFileInfo.absolutePath());
 
+#if defined(Q_OS_MACX)
+    // Init Initial Path
+    initialPath = compareDirPathInfo.exists() ? compareDirPathInfo.absoluteFilePath() : "/Applications";
+#else
+    // Init Initial Path
+    initialPath = compareDirPathInfo.exists() ? compareDirPathInfo.absoluteFilePath() : QDir::homePath();
+#endif
+
+    // Get Compare Tool File Path
+    QString filePath = QFileDialog::getOpenFileName(this, tr("Select Compare Tool"), initialPath);
+
+    // Set Compare Path
+    ui->compareEditor->setText(filePath);
+
+    // ...
 }
 
 //==============================================================================
@@ -1830,7 +2076,29 @@ void PreferencesDialog::on_browseCompareButton_clicked()
 //==============================================================================
 void PreferencesDialog::on_browsePackerButton_clicked()
 {
+    // Init Initial Path
+    QString initialPath = "";
 
+    // Init Packer File Info
+    QFileInfo packerFileInfo(packerPath);
+    // Init Packer Path
+    QFileInfo packerDirPathInfo(packerFileInfo.absolutePath());
+
+#if defined(Q_OS_MACX)
+    // Init Initial Path
+    initialPath = packerDirPathInfo.exists() ? packerDirPathInfo.absoluteFilePath() : "/Applications";
+#else
+    // Init Initial Path
+    initialPath = packerDirPathInfo.exists() ? packerDirPathInfo.absoluteFilePath() : "QDir::homePath();
+#endif
+
+    // Get Packer Tool File Path
+    QString filePath = QFileDialog::getOpenFileName(this, tr("Select Packer Tool"), initialPath);
+
+    // Set Packer Editor Text
+    ui->packerEditor->setText(filePath);
+
+    // ...
 }
 
 //==============================================================================
@@ -1838,7 +2106,84 @@ void PreferencesDialog::on_browsePackerButton_clicked()
 //==============================================================================
 void PreferencesDialog::on_browseUnpackerButton_clicked()
 {
+    // Init Initial Path
+    QString initialPath = "";
 
+    // Init Unpacker File Info
+    QFileInfo unpackerFileInfo(unPackerPath);
+    // Init Unpacker Path
+    QFileInfo unpackerDirPathInfo(unpackerFileInfo.absolutePath());
+
+#if defined(Q_OS_MACX)
+    // Init Initial Path
+    initialPath = unpackerDirPathInfo.exists() ? unpackerDirPathInfo.absoluteFilePath() : "/Applications";
+#else
+    // Init Initial Path
+    initialPath = unpackerDirPathInfo.exists() ? unpackerDirPathInfo.absoluteFilePath() : QDir::homePath();
+#endif
+
+    // Get Unpacker Tool File Path
+    QString filePath = QFileDialog::getOpenFileName(this, tr("Select Unpacker Tool"), initialPath);
+
+    // Set Unpacker Editor Text
+    ui->unpackerEditor->setText(filePath);
+
+    // ...
+
+}
+
+//==============================================================================
+// On Terminal Editor Text Changed Slot
+//==============================================================================
+void PreferencesDialog::on_terminalEditor_textChanged(const QString &arg1)
+{
+    // Set Terminal Path
+    setTerminalPath(arg1);
+}
+
+//==============================================================================
+// On Viewer Editor text Changed Slot
+//==============================================================================
+void PreferencesDialog::on_vieverEditor_textChanged(const QString &arg1)
+{
+    // Set Viewer Path
+    setViewerPath(arg1);
+}
+
+//==============================================================================
+// On Editor Editor Text Changed Slot
+//==============================================================================
+void PreferencesDialog::on_editorEditor_textChanged(const QString &arg1)
+{
+    // Set Editor Path
+    setEditorPath(arg1);
+}
+
+//==============================================================================
+// On Compare Tool Editor Text Changed Slot
+//==============================================================================
+void PreferencesDialog::on_compareEditor_textChanged(const QString &arg1)
+{
+    // Set Compare Tool Path
+    setComparePath(arg1);
+}
+
+//==============================================================================
+// On Packer Tool Editor Text Changed Slot
+//==============================================================================
+void PreferencesDialog::on_packerEditor_textChanged(const QString &arg1)
+{
+    // Set Packer Tool Path
+    setPackerPath(arg1);
+}
+
+//==============================================================================
+// On Unpacker Tool Editor Text Changed Slot
+//==============================================================================
+void PreferencesDialog::on_unpackerEditor_textChanged(const QString &arg1)
+{
+    // Set Unpacker Tool Path
+    setUnPackerPath(arg1);
 }
 
 //==============================================================================
@@ -1891,12 +2236,4 @@ PreferencesDialog::~PreferencesDialog()
 
     qDebug() << "PreferencesDialog::~PreferencesDialog";
 }
-
-
-
-
-
-
-
-
 

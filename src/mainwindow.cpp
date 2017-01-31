@@ -24,6 +24,7 @@
 #include "selectfilesdialog.h"
 #include "remotefileutilclient.h"
 #include "infodialog.h"
+#include "comparedialog.h"
 #include "settingscontroller.h"
 #include "filelistmodel.h"
 #include "utility.h"
@@ -93,6 +94,7 @@ MainWindow::MainWindow(QWidget* aParent)
     , helpWindow(NULL)
     , searchFileDialog(NULL)
     , selectFilesDialog(NULL)
+    , compareDialog(NULL)
     , viewSearchResult(false)
 
 {
@@ -366,7 +368,7 @@ void MainWindow::launchTerminal(const QString& aDirPath)
         return;
     }
 
-    qDebug() << "MainWindow::launchTerminal";
+    //qDebug() << "MainWindow::launchTerminal";
 
     // Get Terminal App
     QString terminalApp = settings ? settings->value(SETTINGS_KEY_APPS_TERMINAL, DEFAULT_SETTINGS_TERMINAL_PATH_MAC_OSX).toString() : "";
@@ -374,13 +376,14 @@ void MainWindow::launchTerminal(const QString& aDirPath)
     // Check Terminal App
     if (!terminalApp.isEmpty()) {
 
-        qDebug() << "MainWindow::launchTerminal - aDirPath: " << aDirPath;
-
+        //qDebug() << "MainWindow::launchTerminal - aDirPath: " << aDirPath;
 
 #if defined(Q_OS_MACX)
 
         // Set Command Line
-        QString cmdLine = QString(DEFAULT_EXEC_APP_SYSTEM_COMMAND_WITH_PARAM_MAC_OSX).arg(terminalApp).arg(aDirPath);
+        QString cmdLine = QString(DEFAULT_EXEC_APP_SYSTEM_COMMAND_WITH_2PARAM_MAC_OSX).arg(terminalApp).arg(aDirPath);
+
+        qDebug() << "MainWindow::launchTerminal - cmdLine: " << cmdLine;
 
         // Execute
         system(cmdLine.toLocal8Bit().data());
@@ -870,8 +873,7 @@ void MainWindow::launchSearch()
     qDebug() << "MainWindow::launchSearch";
 
     // Reset Modifier Keys
-    leftPanel->resetModifierKeys();
-    rightPanel->resetModifierKeys();
+    focusedPanel->resetModifierKeys();
 
     // Check Search Dialog
     if (!searchFileDialog) {
@@ -945,6 +947,9 @@ void MainWindow::launchDelete()
     if (!focusedPanel) {
         return;
     }
+
+    // Reset Modifier Keys
+    focusedPanel->resetModifierKeys();
 
     // Get Number Of Transfer Progress Dialogs
     int numTransferProgressDialogs = transferProgressDialogs.count();
@@ -1154,6 +1159,80 @@ void MainWindow::launchProperties()
 
 
     // ...
+}
+
+//==============================================================================
+// Launch File Compare Slot
+//==============================================================================
+void MainWindow::launchFileCompare()
+{
+    // Check Panels
+    if (leftPanel && rightPanel && !leftPanel->getGridMode() && !rightPanel->getGridMode()) {
+        //qDebug() << "MainWindow::launchFileCompare";
+
+        // Reset Modifier Keys
+        leftPanel->resetModifierKeys();
+        rightPanel->resetModifierKeys();
+
+        // Get Left File Info
+        QFileInfo leftFileInfo = leftPanel->getCurrFileInfo();
+        // Check Left File Info
+        if (leftFileInfo.fileName() == "..") {
+            return;
+        }
+
+        // Get Right File Info
+        QFileInfo rightFileInfo = rightPanel->getCurrFileInfo();
+        // Check Right File Info
+        if (rightFileInfo.fileName() == "..") {
+            return;
+        }
+
+        // Check Compare Dialog
+        if (!compareDialog) {
+            // Create Copare Dialog
+            compareDialog = new CompareDialog();
+        }
+
+        // Set Left File
+        compareDialog->setLeftFile(leftFileInfo.absoluteFilePath());
+        // Set Right File
+        compareDialog->setRightFile(rightFileInfo.absoluteFilePath());
+
+        // Launch File Compare Dialog
+        if (compareDialog->exec() && compareDialog->leftFileExists() && compareDialog->rightFileExists()) {
+
+            // Get Compare Tool App
+            QString compareApp = settings ? settings->value(SETTINGS_KEY_APPS_COMPARE, DEFAULT_SETTINGS_COMPARE_PATH).toString() : "";
+
+            // Check Terminal App
+            if (!compareApp.isEmpty()) {
+
+                //qDebug() << "MainWindow::launchTerminal - aDirPath: " << aDirPath;
+
+#if defined(Q_OS_MACX)
+                // Set Command Line
+                QString cmdLine = QString(DEFAULT_EXEC_APP_SYSTEM_COMMAND_WITH_3PARAM_MAC_OSX).arg(compareApp)
+                                                                                              .arg(compareDialog->getLeftFile())
+                                                                                              .arg(compareDialog->getRightFile());
+
+                qDebug() << "MainWindow::launchFileCompare - cmdLine: " << cmdLine;
+
+                // Execute
+                system(cmdLine.toLocal8Bit().data());
+
+#elif defined(Q_OS_UNIX)
+
+                // Launch File Compare Tool
+
+#else defined(Q_OS_WIN)
+
+                // Launch File Compare Tool
+
+#endif // Q_OS_WIN
+            }
+        }
+    }
 }
 
 //==============================================================================
@@ -2079,7 +2158,8 @@ void MainWindow::on_actionOptions_triggered()
 //==============================================================================
 void MainWindow::on_actionCompare_Files_triggered()
 {
-    // Compare Files
+    // Launch File Compare
+    launchFileCompare();
 }
 
 //==============================================================================
@@ -2111,7 +2191,11 @@ void MainWindow::on_actionSelect_None_triggered()
 //==============================================================================
 void MainWindow::on_actionTerminal_triggered()
 {
-    // Launch Terminal
+    // Check Focused Panel
+    if (focusedPanel) {
+        // Launch Terminal
+        launchTerminal(focusedPanel->getCurrentDir());
+    }
 }
 
 //==============================================================================
@@ -2458,6 +2542,13 @@ MainWindow::~MainWindow()
         // Delete Dialog
         delete selectFilesDialog;
         selectFilesDialog = NULL;
+    }
+
+    // Check Compare Dialog
+    if (compareDialog) {
+        // Delete Dialog
+        delete compareDialog;
+        compareDialog = NULL;
     }
 
     qDebug() << "MainWindow::~MainWindow";
